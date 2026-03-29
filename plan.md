@@ -14,7 +14,9 @@ Plan the starter-to-product conversion of this TanStack Start app into a Hacker 
 - Audit note: the generated starter routes still include `src/routes/about.tsx`, the `src/routes/demo/*` examples, and the tRPC API endpoint `src/routes/api.trpc.$.tsx`; these are product-irrelevant and can be removed once shell/navigation references are updated.
 - Audit note: `src/routes/__root.tsx` and `src/integrations/tanstack-query/root-provider.tsx` currently keep tRPC, WorkOS, and demo store devtools wired into the app shell, so the next shell-branding pass should preserve TanStack Query but plan to remove WorkOS/tRPC/store-demo wiring and the related starter-only dependencies if they are no longer needed elsewhere.
 - Shell branding now reads as HackerFeed, with root metadata/manifest updated and starter nav/footer links swapped to Hacker News destinations; the actual home route content is still starter-era and is the next major screen to replace.
-- `src/routes/index.tsx` is now a mobile-first HackerFeed shell with local preview data and tabbed ready/loading/error/empty state surfaces; the next data-layer step should replace the local `previewStories` and `feedStates` scaffolding rather than layering a second UI on top.
+- `src/routes/index.tsx` now reads live Hacker News feed data through `src/lib/hacker-news/queries.ts`, with route-level prefetching for the default `top` tab and real loading/error/empty states wired to TanStack Query.
+- The home route currently does lightweight story presentation inline (title/domain/age/summary fallbacks) to keep the data-layer pass small; the next step should extract that shaping into shared Hacker News item types and mapping utilities instead of growing more route-local helpers.
+- `bun --bun run build` still fails in SSR on the pre-existing `src/db.ts` import of `./generated/prisma/client.js`, so that issue remains outside this feed-data step.
 
 ## Assumptions
 
@@ -30,7 +32,7 @@ Plan the starter-to-product conversion of this TanStack Start app into a Hacker 
 - [x] Audit generated routes and starter/demo dependencies to identify what can be removed versus what should remain for core app infrastructure.
 - [x] Replace starter metadata and branding in `src/routes/__root.tsx`, `src/components/Header.tsx`, `src/components/Footer.tsx`, and `public/manifest.json` so the shell reflects the Hacker News reader instead of TanStack starter content.
 - [x] Redesign `src/routes/index.tsx` into the primary app screen with feed switching, list rendering, loading/error/empty states, and a mobile-first layout that works as the eventual PWA shell.
-- [ ] Add a feed-domain data layer, likely under `src/lib` or `src/features`, to fetch feed IDs and story details from the Hacker News API using TanStack Query with reusable query options and light normalization.
+- [x] Add a feed-domain data layer, likely under `src/lib` or `src/features`, to fetch feed IDs and story details from the Hacker News API using TanStack Query with reusable query options and light normalization.
 - [ ] Define shared item types and mapping utilities for Hacker News stories, including title, URL, score, author, time, comments count, and fallback handling for text/linkless posts.
 - [ ] Implement the three feed tabs (`top`, `new`, `best`) with sensible pagination or incremental loading so the UI is fast on mobile and does not fetch too many items up front.
 - [ ] Add a favorites subsystem with persistent client storage, toggle actions on each story card, and a dedicated favorites view or section accessible from the main navigation.
