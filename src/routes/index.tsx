@@ -1,110 +1,146 @@
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 
-export const Route = createFileRoute("/")({ component: App });
+import {
+	feedStoriesQueryOptions,
+	type HackerNewsFeedKey,
+	type HackerNewsStoryRecord,
+} from "#/lib/hacker-news/queries";
 
-type FeedKey = "top" | "new" | "best";
+const STORY_PREVIEW_LIMIT = 12;
+const RELATIVE_TIME_FORMATTER = new Intl.RelativeTimeFormat("en", {
+	numeric: "auto",
+});
 
-type PreviewStory = {
-	id: number;
-	rank: string;
+export const Route = createFileRoute("/")({
+	component: App,
+	loader: ({ context }) =>
+		context.queryClient.ensureQueryData(
+			feedStoriesQueryOptions("top", STORY_PREVIEW_LIMIT),
+		),
+});
+
+const feedTabs: Array<{
+	key: HackerNewsFeedKey;
+	label: string;
+	strap: string;
 	title: string;
-	domain: string;
-	points: number;
-	author: string;
-	age: string;
-	comments: number;
-	summary: string;
-	articleUrl: string;
-	discussionUrl: string;
-};
-
-const feedTabs: Array<{ key: FeedKey; label: string; strap: string }> = [
-	{ key: "top", label: "Top", strap: "What everyone is reading" },
-	{ key: "new", label: "New", strap: "Fresh links rolling in" },
-	{ key: "best", label: "Best", strap: "Long-tail standouts" },
-];
-
-const previewStories: Record<FeedKey, PreviewStory[]> = {
-	top: [
-		{
-			id: 1,
-			rank: "01",
-			title: "A calm reading shell for Hacker News on the go",
-			domain: "product-notes.dev",
-			points: 312,
-			author: "pg",
-			age: "12m ago",
-			comments: 84,
-			summary:
-				"A mobile-first layout that keeps the story list legible, action-first, and easy to resume after opening links.",
-			articleUrl: "https://news.ycombinator.com/",
-			discussionUrl: "https://news.ycombinator.com/item?id=1",
-		},
-		{
-			id: 2,
-			rank: "02",
-			title: "Designing fast feed readers with progressive story hydration",
-			domain: "latency.report",
-			points: 228,
-			author: "dang",
-			age: "26m ago",
-			comments: 41,
-			summary:
-				"The next pass adds TanStack Query-backed fetching, but the shell is already tuned for compact scanning and thumb reach.",
-			articleUrl: "https://github.com/HackerNews/API",
-			discussionUrl: "https://news.ycombinator.com/item?id=2",
-		},
-		{
-			id: 3,
-			rank: "03",
-			title: "Why touch-friendly metadata rows matter on dense content apps",
-			domain: "interface.fieldnotes",
-			points: 185,
-			author: "sama",
-			age: "44m ago",
-			comments: 19,
-			summary:
-				"Small interaction decisions shape whether a feed feels like a utility or a chore, especially on narrow screens.",
-			articleUrl: "https://tanstack.com/query/latest",
-			discussionUrl: "https://news.ycombinator.com/item?id=3",
-		},
-	],
-	new: [],
-	best: [],
-};
-
-const feedStates: Record<
-	FeedKey,
+	description: string;
+}> = [
 	{
-		title: string;
-		description: string;
-		status: "ready" | "loading" | "error";
-	}
-> = {
-	top: {
+		key: "top",
+		label: "Top",
+		strap: "What everyone is reading",
 		title: "Top stories",
 		description:
-			"A story-first list tuned for quick scanning and low-friction reading actions.",
-		status: "ready",
+			"Live Hacker News leaders with lightweight caching and quick retry.",
 	},
-	new: {
+	{
+		key: "new",
+		label: "New",
+		strap: "Fresh links rolling in",
 		title: "New stories",
 		description:
-			"This placeholder state reserves space for incremental loading without shifting the shell.",
-		status: "loading",
+			"Newest submissions, fetched on demand without a second screen.",
 	},
-	best: {
+	{
+		key: "best",
+		label: "Best",
+		strap: "Long-tail standouts",
 		title: "Best stories",
 		description:
-			"This placeholder error state gives the main screen a dedicated recovery surface.",
-		status: "error",
+			"High-signal Hacker News stories with the same mobile-first shell.",
 	},
-};
+];
+
+function getDiscussionUrl(storyId: number) {
+	return `https://news.ycombinator.com/item?id=${storyId}`;
+}
+
+function stripHtml(input: string | null) {
+	if (!input) {
+		return "";
+	}
+
+	return input
+		.replace(/<[^>]+>/g, " ")
+		.replace(/\s+/g, " ")
+		.trim();
+}
+
+function formatStoryAge(unixTime: number | null) {
+	if (!unixTime) {
+		return "Fresh";
+	}
+
+	const elapsedSeconds = unixTime - Math.floor(Date.now() / 1000);
+
+	if (Math.abs(elapsedSeconds) < 60) {
+		return "Just now";
+	}
+
+	const minutes = Math.round(elapsedSeconds / 60);
+	if (Math.abs(minutes) < 60) {
+		return RELATIVE_TIME_FORMATTER.format(minutes, "minute");
+	}
+
+	const hours = Math.round(minutes / 60);
+	if (Math.abs(hours) < 24) {
+		return RELATIVE_TIME_FORMATTER.format(hours, "hour");
+	}
+
+	const days = Math.round(hours / 24);
+	return RELATIVE_TIME_FORMATTER.format(days, "day");
+}
+
+function getStoryDomain(url: string | null) {
+	if (!url) {
+		return "news.ycombinator.com";
+	}
+
+	try {
+		return (
+			new URL(url).hostname.replace(/^www\./, "") || "news.ycombinator.com"
+		);
+	} catch {
+		return "news.ycombinator.com";
+	}
+}
+
+function getStorySummary(story: HackerNewsStoryRecord) {
+	const textPreview = stripHtml(story.text).slice(0, 160);
+
+	if (textPreview.length > 0) {
+		return textPreview;
+	}
+
+	if (story.url) {
+		return "Open the source article or jump straight into the Hacker News thread.";
+	}
+
+	return "This post lives entirely on Hacker News, so the discussion link is the primary reading path.";
+}
+
+function getStoryTitle(story: HackerNewsStoryRecord) {
+	return story.title?.trim() || "Untitled Hacker News story";
+}
 
 function App() {
-	const [activeFeed, setActiveFeed] = useState<FeedKey>("top");
-	const activeState = feedStates[activeFeed];
+	const [activeFeed, setActiveFeed] = useState<HackerNewsFeedKey>("top");
+	const activeFeedMeta =
+		feedTabs.find((feed) => feed.key === activeFeed) ?? feedTabs[0];
+	const activeFeedQuery = useQuery(
+		feedStoriesQueryOptions(activeFeed, STORY_PREVIEW_LIMIT),
+	);
+	const activeStories = activeFeedQuery.data?.stories ?? [];
+	const activeStatus = activeFeedQuery.isPending
+		? "loading"
+		: activeFeedQuery.isError
+			? "error"
+			: activeStories.length === 0
+				? "empty"
+				: "ready";
 
 	return (
 		<main className="page-wrap px-4 pb-10 pt-8 sm:pb-14 sm:pt-10">
@@ -119,9 +155,9 @@ function App() {
 							Scan Hacker News in one thumb.
 						</h1>
 						<p className="mb-0 mt-4 max-w-2xl text-sm leading-6 text-[var(--sea-ink-soft)] sm:text-base">
-							HackerFeed now opens as an app screen instead of a starter landing
-							page, with feed switching, touch-sized story cards, and stateful
-							panels ready for the upcoming data layer.
+							HackerFeed now opens as a live app screen instead of a starter
+							landing page, with TanStack Query-backed feeds, touch-sized story
+							cards, and shared loading, error, and empty states.
 						</p>
 					</div>
 
@@ -161,10 +197,10 @@ function App() {
 							<div>
 								<p className="island-kicker mb-2">Feeds</p>
 								<h2 className="m-0 text-xl font-semibold tracking-tight text-[var(--sea-ink)]">
-									{activeState.title}
+									{activeFeedMeta.title}
 								</h2>
 								<p className="m-0 mt-2 max-w-2xl text-sm leading-6 text-[var(--sea-ink-soft)]">
-									{activeState.description}
+									{activeFeedMeta.description}
 								</p>
 							</div>
 
@@ -192,23 +228,25 @@ function App() {
 						</div>
 
 						<div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold tracking-[0.12em] text-[var(--kicker)] uppercase">
-							<span>
-								{feedTabs.find((feed) => feed.key === activeFeed)?.strap}
-							</span>
+							<span>{activeFeedMeta.strap}</span>
 							<span className="text-[var(--sea-ink-soft)]">/</span>
 							<span>
-								{activeState.status === "ready"
-									? "List preview"
-									: activeState.status === "loading"
+								{activeStatus === "ready"
+									? activeFeedQuery.isFetching
+										? "Refreshing feed"
+										: "Live feed"
+									: activeStatus === "loading"
 										? "Loading surface"
-										: "Recovery surface"}
+										: activeStatus === "empty"
+											? "Empty surface"
+											: "Recovery surface"}
 							</span>
 						</div>
 					</div>
 
-					{activeState.status === "ready" ? (
+					{activeStatus === "ready" ? (
 						<div className="space-y-3">
-							{previewStories[activeFeed].map((story, index) => (
+							{activeStories.map((story, index) => (
 								<article
 									key={story.id}
 									className="island-shell rise-in rounded-[1.6rem] p-4 sm:p-5"
@@ -216,45 +254,45 @@ function App() {
 								>
 									<div className="flex items-start gap-3 sm:gap-4">
 										<div className="flex h-11 w-11 flex-none items-center justify-center rounded-2xl border border-[var(--chip-line)] bg-[var(--chip-bg)] text-sm font-bold tracking-[0.16em] text-[var(--kicker)]">
-											{story.rank}
+											{String(index + 1).padStart(2, "0")}
 										</div>
 
 										<div className="min-w-0 flex-1">
 											<div className="flex flex-wrap items-center gap-2 text-xs font-semibold tracking-[0.12em] text-[var(--kicker)] uppercase">
-												<span>{story.domain}</span>
+												<span>{getStoryDomain(story.url)}</span>
 												<span className="text-[var(--sea-ink-soft)]">/</span>
-												<span>{story.age}</span>
+												<span>{formatStoryAge(story.time)}</span>
 											</div>
 											<h3 className="m-0 mt-2 text-lg leading-tight font-semibold text-[var(--sea-ink)] sm:text-xl">
-												{story.title}
+												{getStoryTitle(story)}
 											</h3>
 											<p className="m-0 mt-3 text-sm leading-6 text-[var(--sea-ink-soft)]">
-												{story.summary}
+												{getStorySummary(story)}
 											</p>
 
 											<div className="mt-4 flex flex-wrap gap-2 text-sm text-[var(--sea-ink-soft)]">
 												<span className="rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5">
-													{story.points} points
+													{story.score} points
 												</span>
 												<span className="rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5">
-													by {story.author}
+													by {story.by ?? "unknown"}
 												</span>
 												<span className="rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5">
-													{story.comments} comments
+													{story.descendants} comments
 												</span>
 											</div>
 
 											<div className="mt-4 flex flex-wrap gap-2">
 												<a
-													href={story.articleUrl}
+													href={story.url ?? getDiscussionUrl(story.id)}
 													target="_blank"
 													rel="noreferrer"
 													className="rounded-full border border-[rgba(50,143,151,0.35)] bg-[rgba(79,184,178,0.14)] px-4 py-2 text-sm font-semibold text-[var(--lagoon-deep)] no-underline hover:-translate-y-0.5 hover:bg-[rgba(79,184,178,0.24)]"
 												>
-													Read article
+													{story.url ? "Read article" : "Open post"}
 												</a>
 												<a
-													href={story.discussionUrl}
+													href={getDiscussionUrl(story.id)}
 													target="_blank"
 													rel="noreferrer"
 													className="rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-4 py-2 text-sm font-semibold text-[var(--sea-ink)] no-underline hover:-translate-y-0.5"
@@ -269,7 +307,7 @@ function App() {
 						</div>
 					) : null}
 
-					{activeState.status === "loading" ? (
+					{activeStatus === "loading" ? (
 						<div className="space-y-3">
 							{[0, 1, 2].map((item) => (
 								<article
@@ -296,20 +334,43 @@ function App() {
 						</div>
 					) : null}
 
-					{activeState.status === "error" ? (
+					{activeStatus === "empty" ? (
 						<article className="island-shell rise-in rounded-[1.75rem] p-5 sm:p-6">
-							<p className="island-kicker mb-2">Feed unavailable</p>
+							<p className="island-kicker mb-2">Nothing here yet</p>
 							<h3 className="m-0 text-xl font-semibold tracking-tight text-[var(--sea-ink)]">
-								Couldn't refresh best stories.
+								No {activeFeedMeta.label.toLowerCase()} stories came back.
 							</h3>
 							<p className="m-0 mt-3 max-w-xl text-sm leading-6 text-[var(--sea-ink-soft)]">
-								The recovery panel already has space for retry messaging,
-								stale-cache fallbacks, and offline guidance once the real query
-								layer lands.
+								The feed query completed, but there were no story records to
+								show. A quick refresh should pick up new items as they land.
 							</p>
 							<div className="mt-5 flex flex-wrap gap-2">
 								<button
 									type="button"
+									onClick={() => activeFeedQuery.refetch()}
+									className="rounded-full border border-[rgba(50,143,151,0.35)] bg-[rgba(79,184,178,0.14)] px-4 py-2 text-sm font-semibold text-[var(--lagoon-deep)]"
+								>
+									Refresh feed
+								</button>
+							</div>
+						</article>
+					) : null}
+
+					{activeStatus === "error" ? (
+						<article className="island-shell rise-in rounded-[1.75rem] p-5 sm:p-6">
+							<p className="island-kicker mb-2">Feed unavailable</p>
+							<h3 className="m-0 text-xl font-semibold tracking-tight text-[var(--sea-ink)]">
+								Couldn't refresh {activeFeedMeta.title.toLowerCase()}.
+							</h3>
+							<p className="m-0 mt-3 max-w-xl text-sm leading-6 text-[var(--sea-ink-soft)]">
+								The live Hacker News request failed, but the recovery panel is
+								now wired to the real feed query so retry behavior can grow from
+								here.
+							</p>
+							<div className="mt-5 flex flex-wrap gap-2">
+								<button
+									type="button"
+									onClick={() => activeFeedQuery.refetch()}
 									className="rounded-full border border-[rgba(50,143,151,0.35)] bg-[rgba(79,184,178,0.14)] px-4 py-2 text-sm font-semibold text-[var(--lagoon-deep)]"
 								>
 									Retry feed
@@ -346,8 +407,9 @@ function App() {
 								actions stay easy to hit on mobile.
 							</p>
 							<p className="m-0">
-								The shell already reserves room for favorites, pagination, and a
-								swappable link-opening layer.
+								TanStack Query now owns feed caching, refetching, and request
+								state so the next passes can focus on story modeling and saved
+								items.
 							</p>
 						</div>
 					</section>
