@@ -1,24 +1,31 @@
-import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { useQueries, useQuery } from "@tanstack/react-query";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useStore } from "@tanstack/react-store";
 import { useState } from "react";
-
+import { StoryCard, StoryCardSkeleton } from "#/components/StoryCard";
+import { favoritesStore } from "#/lib/favorites-store";
 import {
-	feedStoriesQueryOptions,
+	feedStoryIdsQueryOptions,
 	type HackerNewsFeedKey,
-	type HackerNewsStoryRecord,
+	PAGE_SIZE,
+	storyItemQueryOptions,
 } from "#/lib/hacker-news/queries";
-
-const STORY_PREVIEW_LIMIT = 12;
-const RELATIVE_TIME_FORMATTER = new Intl.RelativeTimeFormat("en", {
-	numeric: "auto",
-});
 
 export const Route = createFileRoute("/")({
 	component: App,
-	loader: ({ context }) =>
-		context.queryClient.ensureQueryData(
-			feedStoriesQueryOptions("top", STORY_PREVIEW_LIMIT),
-		),
+	loader: async ({ context }) => {
+		// Prefetch the ID list, then warm the cache for each initial item in parallel.
+		const ids = await context.queryClient.ensureQueryData(
+			feedStoryIdsQueryOptions("top"),
+		);
+		await Promise.all(
+			ids
+				.slice(0, PAGE_SIZE)
+				.map((id) =>
+					context.queryClient.ensureQueryData(storyItemQueryOptions(id)),
+				),
+		);
+	},
 });
 
 const feedTabs: Array<{
@@ -54,93 +61,50 @@ const feedTabs: Array<{
 	},
 ];
 
-function getDiscussionUrl(storyId: number) {
-	return `https://news.ycombinator.com/item?id=${storyId}`;
-}
-
-function stripHtml(input: string | null) {
-	if (!input) {
-		return "";
-	}
-
-	return input
-		.replace(/<[^>]+>/g, " ")
-		.replace(/\s+/g, " ")
-		.trim();
-}
-
-function formatStoryAge(unixTime: number | null) {
-	if (!unixTime) {
-		return "Fresh";
-	}
-
-	const elapsedSeconds = unixTime - Math.floor(Date.now() / 1000);
-
-	if (Math.abs(elapsedSeconds) < 60) {
-		return "Just now";
-	}
-
-	const minutes = Math.round(elapsedSeconds / 60);
-	if (Math.abs(minutes) < 60) {
-		return RELATIVE_TIME_FORMATTER.format(minutes, "minute");
-	}
-
-	const hours = Math.round(minutes / 60);
-	if (Math.abs(hours) < 24) {
-		return RELATIVE_TIME_FORMATTER.format(hours, "hour");
-	}
-
-	const days = Math.round(hours / 24);
-	return RELATIVE_TIME_FORMATTER.format(days, "day");
-}
-
-function getStoryDomain(url: string | null) {
-	if (!url) {
-		return "news.ycombinator.com";
-	}
-
-	try {
-		return (
-			new URL(url).hostname.replace(/^www\./, "") || "news.ycombinator.com"
-		);
-	} catch {
-		return "news.ycombinator.com";
-	}
-}
-
-function getStorySummary(story: HackerNewsStoryRecord) {
-	const textPreview = stripHtml(story.text).slice(0, 160);
-
-	if (textPreview.length > 0) {
-		return textPreview;
-	}
-
-	if (story.url) {
-		return "Open the source article or jump straight into the Hacker News thread.";
-	}
-
-	return "This post lives entirely on Hacker News, so the discussion link is the primary reading path.";
-}
-
-function getStoryTitle(story: HackerNewsStoryRecord) {
-	return story.title?.trim() || "Untitled Hacker News story";
-}
-
 function App() {
 	const [activeFeed, setActiveFeed] = useState<HackerNewsFeedKey>("top");
+	// Track how many items are loaded per feed independently so switching tabs
+	// does not reset the loaded count on the previous tab.
+	const [loadedCounts, setLoadedCounts] = useState<
+		Record<HackerNewsFeedKey, number>
+	>({ top: PAGE_SIZE, new: PAGE_SIZE, best: PAGE_SIZE });
+
 	const activeFeedMeta =
 		feedTabs.find((feed) => feed.key === activeFeed) ?? feedTabs[0];
-	const activeFeedQuery = useQuery(
-		feedStoriesQueryOptions(activeFeed, STORY_PREVIEW_LIMIT),
-	);
-	const activeStories = activeFeedQuery.data?.stories ?? [];
-	const activeStatus = activeFeedQuery.isPending
+	const loadedCount = loadedCounts[activeFeed];
+
+	// Layer 1: fetch and cache the full ID list for the active feed.
+	const idsQuery = useQuery(feedStoryIdsQueryOptions(activeFeed));
+	const allIds = idsQuery.data ?? [];
+	const displayedIds = allIds.slice(0, loadedCount);
+	const hasMore = allIds.length > loadedCount;
+	const nextBatchSize = Math.min(allIds.length - loadedCount, PAGE_SIZE);
+
+	// Layer 2: fetch each displayed item individually.
+	// Items already in the TanStack Query cache (e.g. from the loader or a
+	// previous tab visit) are served instantly; new items load progressively.
+	const itemQueries = useQueries({
+		queries: displayedIds.map((id) => storyItemQueryOptions(id)),
+	});
+
+	const isAnyItemLoading = itemQueries.some((q) => q.isPending);
+
+	// Status is driven by the ID-list query; item-level loading is handled
+	// inline per card so content can appear progressively.
+	const activeStatus = idsQuery.isPending
 		? "loading"
-		: activeFeedQuery.isError
+		: idsQuery.isError
 			? "error"
-			: activeStories.length === 0
+			: allIds.length === 0
 				? "empty"
 				: "ready";
+
+	const loadMore = () => {
+		setLoadedCounts((prev) => ({
+			...prev,
+			[activeFeed]: prev[activeFeed] + PAGE_SIZE,
+		}));
+	};
 
 	return (
 		<main className="page-wrap px-4 pb-10 pt-8 sm:pb-14 sm:pt-10">
@@ -232,9 +196,11 @@ function App() {
 							<span className="text-[var(--sea-ink-soft)]">/</span>
 							<span>
 								{activeStatus === "ready"
-									? activeFeedQuery.isFetching
+									? idsQuery.isFetching
 										? "Refreshing feed"
-										: "Live feed"
+										: isAnyItemLoading
+											? "Loading stories"
+											: "Live feed"
 									: activeStatus === "loading"
 										? "Loading surface"
 										: activeStatus === "empty"
@@ -244,94 +210,61 @@ function App() {
 						</div>
 					</div>
 
-					{activeStatus === "ready" ? (
+					{/* ID list is still loading — show full-page skeleton */}
+					{activeStatus === "loading" ? (
 						<div className="space-y-3">
-							{activeStories.map((story, index) => (
-								<article
-									key={story.id}
-									className="island-shell rise-in rounded-[1.6rem] p-4 sm:p-5"
-									style={{ animationDelay: `${index * 80 + 120}ms` }}
-								>
-									<div className="flex items-start gap-3 sm:gap-4">
-										<div className="flex h-11 w-11 flex-none items-center justify-center rounded-2xl border border-[var(--chip-line)] bg-[var(--chip-bg)] text-sm font-bold tracking-[0.16em] text-[var(--kicker)]">
-											{String(index + 1).padStart(2, "0")}
-										</div>
-
-										<div className="min-w-0 flex-1">
-											<div className="flex flex-wrap items-center gap-2 text-xs font-semibold tracking-[0.12em] text-[var(--kicker)] uppercase">
-												<span>{getStoryDomain(story.url)}</span>
-												<span className="text-[var(--sea-ink-soft)]">/</span>
-												<span>{formatStoryAge(story.time)}</span>
-											</div>
-											<h3 className="m-0 mt-2 text-lg leading-tight font-semibold text-[var(--sea-ink)] sm:text-xl">
-												{getStoryTitle(story)}
-											</h3>
-											<p className="m-0 mt-3 text-sm leading-6 text-[var(--sea-ink-soft)]">
-												{getStorySummary(story)}
-											</p>
-
-											<div className="mt-4 flex flex-wrap gap-2 text-sm text-[var(--sea-ink-soft)]">
-												<span className="rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5">
-													{story.score} points
-												</span>
-												<span className="rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5">
-													by {story.by ?? "unknown"}
-												</span>
-												<span className="rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5">
-													{story.descendants} comments
-												</span>
-											</div>
-
-											<div className="mt-4 flex flex-wrap gap-2">
-												<a
-													href={story.url ?? getDiscussionUrl(story.id)}
-													target="_blank"
-													rel="noreferrer"
-													className="rounded-full border border-[rgba(50,143,151,0.35)] bg-[rgba(79,184,178,0.14)] px-4 py-2 text-sm font-semibold text-[var(--lagoon-deep)] no-underline hover:-translate-y-0.5 hover:bg-[rgba(79,184,178,0.24)]"
-												>
-													{story.url ? "Read article" : "Open post"}
-												</a>
-												<a
-													href={getDiscussionUrl(story.id)}
-													target="_blank"
-													rel="noreferrer"
-													className="rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-4 py-2 text-sm font-semibold text-[var(--sea-ink)] no-underline hover:-translate-y-0.5"
-												>
-													Open discussion
-												</a>
-											</div>
-										</div>
-									</div>
-								</article>
+							{Array.from({ length: PAGE_SIZE }, (_, i) => (
+								<StoryCardSkeleton key={`skeleton-${i}`} index={i} />
 							))}
 						</div>
 					) : null}
 
-					{activeStatus === "loading" ? (
-						<div className="space-y-3">
-							{[0, 1, 2].map((item) => (
-								<article
-									key={item}
-									className="island-shell rise-in rounded-[1.6rem] p-4 sm:p-5"
-									style={{ animationDelay: `${item * 70 + 100}ms` }}
-								>
-									<div className="animate-pulse space-y-4">
-										<div className="flex items-start gap-3 sm:gap-4">
-											<div className="h-11 w-11 rounded-2xl bg-[rgba(79,184,178,0.16)]" />
-											<div className="min-w-0 flex-1">
-												<div className="h-3 w-28 rounded-full bg-[rgba(79,184,178,0.16)]" />
-												<div className="mt-3 h-4 w-[88%] rounded-full bg-[rgba(23,58,64,0.12)]" />
-												<div className="mt-2 h-4 w-[74%] rounded-full bg-[rgba(23,58,64,0.08)]" />
-												<div className="mt-4 flex gap-2">
-													<div className="h-8 w-24 rounded-full bg-[rgba(79,184,178,0.14)]" />
-													<div className="h-8 w-28 rounded-full bg-[rgba(23,58,64,0.08)]" />
-												</div>
-											</div>
-										</div>
-									</div>
-								</article>
-							))}
-						</div>
+					{/* IDs are available — render stories progressively */}
+					{activeStatus === "ready" ? (
+						<>
+							<div className="space-y-3">
+								{displayedIds.map((storyId, positionIndex) => {
+									const query = itemQueries[positionIndex];
+
+									// Item is still fetching — show inline skeleton so already-loaded
+									// items above remain visible while new ones stream in.
+									if (!query || query.isPending) {
+										return (
+											<StoryCardSkeleton key={storyId} index={positionIndex} />
+										);
+									}
+
+									// Dead, deleted, or non-story items resolve to null — skip them.
+									const story = query.data;
+									if (!story) return null;
+
+									return (
+										<StoryCard
+											key={storyId}
+											story={story}
+											rank={positionIndex + 1}
+											animationDelay={positionIndex * 80 + 120}
+										/>
+									);
+								})}
+							</div>
+
+							{/* Load more — only shown when more IDs exist beyond the current window */}
+							{hasMore ? (
+								<div className="flex justify-center pt-2">
+									<button
+										type="button"
+										onClick={loadMore}
+										disabled={isAnyItemLoading}
+										className="rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-6 py-2.5 text-sm font-semibold text-[var(--sea-ink-soft)] transition-colors hover:text-[var(--sea-ink)] disabled:cursor-not-allowed disabled:opacity-50"
+									>
+										{isAnyItemLoading
+											? "Loading\u2026"
+											: `Load ${nextBatchSize} more`}
+									</button>
+								</div>
+							) : null}
+						</>
 					) : null}
 
 					{activeStatus === "empty" ? (
@@ -347,7 +280,7 @@ function App() {
 							<div className="mt-5 flex flex-wrap gap-2">
 								<button
 									type="button"
-									onClick={() => activeFeedQuery.refetch()}
+									onClick={() => idsQuery.refetch()}
 									className="rounded-full border border-[rgba(50,143,151,0.35)] bg-[rgba(79,184,178,0.14)] px-4 py-2 text-sm font-semibold text-[var(--lagoon-deep)]"
 								>
 									Refresh feed
@@ -370,7 +303,7 @@ function App() {
 							<div className="mt-5 flex flex-wrap gap-2">
 								<button
 									type="button"
-									onClick={() => activeFeedQuery.refetch()}
+									onClick={() => idsQuery.refetch()}
 									className="rounded-full border border-[rgba(50,143,151,0.35)] bg-[rgba(79,184,178,0.14)] px-4 py-2 text-sm font-semibold text-[var(--lagoon-deep)]"
 								>
 									Retry feed
@@ -407,36 +340,93 @@ function App() {
 								actions stay easy to hit on mobile.
 							</p>
 							<p className="m-0">
-								TanStack Query now owns feed caching, refetching, and request
-								state so the next passes can focus on story modeling and saved
-								items.
+								Hit the star on any story card to save it to your favorites.
+								Saves persist across sessions via <code>localStorage</code>.
 							</p>
 						</div>
 					</section>
 
-					<section
-						className="island-shell rise-in rounded-[1.75rem] p-5"
-						style={{ animationDelay: "220ms" }}
-					>
-						<div className="flex items-center justify-between gap-3">
-							<div>
-								<p className="island-kicker mb-2">Saved stories</p>
-								<h2 className="m-0 text-xl font-semibold tracking-tight text-[var(--sea-ink)]">
-									Empty state placeholder
-								</h2>
-							</div>
-							<span className="rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1 text-xs font-semibold tracking-[0.14em] text-[var(--kicker)] uppercase">
-								Next
-							</span>
-						</div>
-						<p className="m-0 mt-3 text-sm leading-6 text-[var(--sea-ink-soft)]">
-							Favorites are not wired yet, but the main screen now has a
-							dedicated empty surface where saved stories can land without
-							reshaping the layout.
-						</p>
-					</section>
+					<FavoritesSidebar />
 				</aside>
 			</section>
 		</main>
+	);
+}
+
+// ---------------------------------------------------------------------------
+// Favorites sidebar panel — shows up to 3 most-recent saves with a link to
+// the full favorites view when the list is non-empty.
+// ---------------------------------------------------------------------------
+
+function FavoritesSidebar() {
+	const favorites = useStore(favoritesStore, (state) =>
+		Array.from(state.items.values()).reverse(),
+	);
+	const count = favorites.length;
+	const preview = favorites.slice(0, 3);
+
+	return (
+		<section
+			className="island-shell rise-in rounded-[1.75rem] p-5"
+			style={{ animationDelay: "220ms" }}
+		>
+			<div className="flex items-center justify-between gap-3">
+				<div>
+					<p className="island-kicker mb-2">Saved stories</p>
+					<h2 className="m-0 text-xl font-semibold tracking-tight text-[var(--sea-ink)]">
+						{count === 0 ? "No saves yet" : `${count} saved`}
+					</h2>
+				</div>
+				{count > 0 ? (
+					<Link
+						to="/favorites"
+						className="rounded-full border border-[rgba(50,143,151,0.35)] bg-[rgba(79,184,178,0.14)] px-3 py-1 text-xs font-semibold tracking-[0.12em] text-[var(--lagoon-deep)] no-underline uppercase"
+					>
+						View all
+					</Link>
+				) : null}
+			</div>
+
+			{count === 0 ? (
+				<p className="m-0 mt-3 text-sm leading-6 text-[var(--sea-ink-soft)]">
+					Hit the star on any story card to save it here. Your saves persist
+					across sessions.
+				</p>
+			) : (
+				<ul className="mt-4 list-none m-0 p-0 space-y-3">
+					{preview.map((story) => (
+						<li key={story.id} className="flex items-start gap-2.5">
+							<span
+								aria-hidden="true"
+								className="mt-0.5 text-[var(--lagoon-deep)] text-sm"
+							>
+								★
+							</span>
+							<a
+								href={
+									story.url ??
+									`https://news.ycombinator.com/item?id=${story.id}`
+								}
+								target="_blank"
+								rel="noreferrer"
+								className="text-sm font-semibold leading-5 text-[var(--sea-ink)] no-underline hover:text-[var(--lagoon-deep)] line-clamp-2"
+							>
+								{story.title ?? "Untitled story"}
+							</a>
+						</li>
+					))}
+					{count > 3 ? (
+						<li>
+							<Link
+								to="/favorites"
+								className="text-sm font-semibold text-[var(--lagoon-deep)] no-underline hover:underline"
+							>
+								+{count - 3} more &rarr;
+							</Link>
+						</li>
+					) : null}
+				</ul>
+			)}
+		</section>
 	);
 }
