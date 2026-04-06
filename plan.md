@@ -16,7 +16,9 @@ Plan the starter-to-product conversion of this TanStack Start app into a Hacker 
 - Shell branding now reads as HackerFeed, with root metadata/manifest updated and starter nav/footer links swapped to Hacker News destinations; the actual home route content is still starter-era and is the next major screen to replace.
 - `src/routes/index.tsx` now reads live Hacker News feed data through `src/lib/hacker-news/queries.ts`, with route-level prefetching for the default `top` tab and real loading/error/empty states wired to TanStack Query.
 - The home route currently does lightweight story presentation inline (title/domain/age/summary fallbacks) to keep the data-layer pass small; the next step should extract that shaping into shared Hacker News item types and mapping utilities instead of growing more route-local helpers.
+- `src/routes/index.tsx` now imports all display helpers (`formatStoryAge`, `getStoryDomain`, `getStorySummary`, `getStoryTitle`, `getDiscussionUrl`, `stripHtml`) from `src/lib/hacker-news/utils.ts` — the inline helpers have been removed from the route file.
 - `bun --bun run build` still fails in SSR on the pre-existing `src/db.ts` import of `./generated/prisma/client.js`, so that issue remains outside this feed-data step.
+- Feed tab pagination now uses a two-layer query model: `feedStoryIdsQueryOptions(feed)` caches the full ID list (up to 500 IDs, 60 s staleTime) and `storyItemQueryOptions(id)` caches each story individually (300 s staleTime) via `useQueries`. The route loader warms both layers for the `top` feed on SSR. Per-feed `loadedCounts` state tracks how many items are shown per tab independently, starting at `PAGE_SIZE` (12) and incrementing by `PAGE_SIZE` on each "Load more" click. Stories appear progressively as individual item fetches resolve rather than waiting for a full `Promise.all`, and the "Load more" button is disabled while any item in the current window is still loading.
 
 ## Assumptions
 
@@ -33,8 +35,8 @@ Plan the starter-to-product conversion of this TanStack Start app into a Hacker 
 - [x] Replace starter metadata and branding in `src/routes/__root.tsx`, `src/components/Header.tsx`, `src/components/Footer.tsx`, and `public/manifest.json` so the shell reflects the Hacker News reader instead of TanStack starter content.
 - [x] Redesign `src/routes/index.tsx` into the primary app screen with feed switching, list rendering, loading/error/empty states, and a mobile-first layout that works as the eventual PWA shell.
 - [x] Add a feed-domain data layer, likely under `src/lib` or `src/features`, to fetch feed IDs and story details from the Hacker News API using TanStack Query with reusable query options and light normalization.
-- [ ] Define shared item types and mapping utilities for Hacker News stories, including title, URL, score, author, time, comments count, and fallback handling for text/linkless posts.
-- [ ] Implement the three feed tabs (`top`, `new`, `best`) with sensible pagination or incremental loading so the UI is fast on mobile and does not fetch too many items up front.
+- [x] Define shared item types and mapping utilities for Hacker News stories, including title, URL, score, author, time, comments count, and fallback handling for text/linkless posts.
+- [x] Implement the three feed tabs (`top`, `new`, `best`) with sensible pagination or incremental loading so the UI is fast on mobile and does not fetch too many items up front.
 - [ ] Add a favorites subsystem with persistent client storage, toggle actions on each story card, and a dedicated favorites view or section accessible from the main navigation.
 - [ ] Create a reusable story card/list item component with touch-friendly tap targets, metadata rows, a favorite control, and a primary open/read action.
 - [ ] Add an external-link handling utility that centralizes article opening behavior, uses the best possible web fallback now, and is structured so a later Capacitor/native bridge can replace it with in-app Safari / custom tabs behavior.
