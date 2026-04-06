@@ -10,6 +10,7 @@ import {
 	PAGE_SIZE,
 	storyItemQueryOptions,
 } from "#/lib/hacker-news/queries";
+import { getDiscussionUrl } from "#/lib/hacker-news/utils";
 
 export const Route = createFileRoute("/")({
 	component: App,
@@ -403,10 +404,7 @@ function FavoritesSidebar() {
 								★
 							</span>
 							<a
-								href={
-									story.url ??
-									`https://news.ycombinator.com/item?id=${story.id}`
-								}
+								href={story.url ?? getDiscussionUrl(story.id)}
 								target="_blank"
 								rel="noreferrer"
 								className="text-sm font-semibold leading-5 text-[var(--sea-ink)] no-underline hover:text-[var(--lagoon-deep)] line-clamp-2"

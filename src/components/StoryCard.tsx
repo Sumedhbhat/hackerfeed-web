@@ -130,12 +130,24 @@ export function StoryCard({ story, rank, animationDelay = 0 }: StoryCardProps) {
 						>
 							{isFav ? (
 								<>
-									<span aria-hidden="true">★</span>
+									<span
+										key="star-filled"
+										aria-hidden="true"
+										className="star-pop"
+									>
+										★
+									</span>
 									<span className="ml-1.5">Saved</span>
 								</>
 							) : (
 								<>
-									<span aria-hidden="true">☆</span>
+									<span
+										key="star-empty"
+										aria-hidden="true"
+										className="star-pop"
+									>
+										☆
+									</span>
 									<span className="ml-1.5">Save</span>
 								</>
 							)}

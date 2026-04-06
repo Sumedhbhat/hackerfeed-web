@@ -72,3 +72,7 @@ export function isFavorited(storyId: number): boolean {
 export function getFavorites(): HackerNewsStoryRecord[] {
 	return Array.from(favoritesStore.state.items.values()).reverse();
 }
+
+export function clearAllFavorites(): void {
+	favoritesStore.setState(() => ({ items: new Map() }));
+}
