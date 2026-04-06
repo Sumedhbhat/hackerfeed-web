@@ -1,0 +1,77 @@
+import type { HackerNewsStoryRecord } from "./queries";
+
+const RELATIVE_TIME_FORMATTER = new Intl.RelativeTimeFormat("en", {
+	numeric: "auto",
+});
+
+export function getDiscussionUrl(storyId: number): string {
+	return `https://news.ycombinator.com/item?id=${storyId}`;
+}
+
+export function stripHtml(input: string | null): string {
+	if (!input) {
+		return "";
+	}
+
+	return input
+		.replace(/<[^>]+>/g, " ")
+		.replace(/\s+/g, " ")
+		.trim();
+}
+
+export function formatStoryAge(unixTime: number | null): string {
+	if (!unixTime) {
+		return "Fresh";
+	}
+
+	const elapsedSeconds = unixTime - Math.floor(Date.now() / 1000);
+
+	if (Math.abs(elapsedSeconds) < 60) {
+		return "Just now";
+	}
+
+	const minutes = Math.round(elapsedSeconds / 60);
+	if (Math.abs(minutes) < 60) {
+		return RELATIVE_TIME_FORMATTER.format(minutes, "minute");
+	}
+
+	const hours = Math.round(minutes / 60);
+	if (Math.abs(hours) < 24) {
+		return RELATIVE_TIME_FORMATTER.format(hours, "hour");
+	}
+
+	const days = Math.round(hours / 24);
+	return RELATIVE_TIME_FORMATTER.format(days, "day");
+}
+
+export function getStoryDomain(url: string | null): string {
+	if (!url) {
+		return "news.ycombinator.com";
+	}
+
+	try {
+		return (
+			new URL(url).hostname.replace(/^www\./, "") || "news.ycombinator.com"
+		);
+	} catch {
+		return "news.ycombinator.com";
+	}
+}
+
+export function getStorySummary(story: HackerNewsStoryRecord): string {
+	const textPreview = stripHtml(story.text).slice(0, 160);
+
+	if (textPreview.length > 0) {
+		return textPreview;
+	}
+
+	if (story.url) {
+		return "Open the source article or jump straight into the Hacker News thread.";
+	}
+
+	return "This post lives entirely on Hacker News, so the discussion link is the primary reading path.";
+}
+
+export function getStoryTitle(story: HackerNewsStoryRecord): string {
+	return story.title?.trim() || "Untitled Hacker News story";
+}

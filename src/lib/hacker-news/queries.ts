@@ -3,6 +3,8 @@ import { queryOptions } from "@tanstack/react-query";
 const HACKER_NEWS_API_BASE_URL = "https://hacker-news.firebaseio.com/v0";
 const DEFAULT_FEED_STORY_LIMIT = 12;
 
+export const PAGE_SIZE = 12;
+
 export const hackerNewsFeedKeys = ["top", "new", "best"] as const;
 
 export type HackerNewsFeedKey = (typeof hackerNewsFeedKeys)[number];
