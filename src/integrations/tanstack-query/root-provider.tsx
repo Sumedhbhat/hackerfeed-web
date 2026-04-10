@@ -1,72 +1,38 @@
-import type { ReactNode } from 'react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import superjson from 'superjson'
-import { createTRPCClient, httpBatchStreamLink } from '@trpc/client'
-import { createTRPCOptionsProxy } from '@trpc/tanstack-react-query'
-
-import type { TRPCRouter } from '#/integrations/trpc/router'
-import { TRPCProvider } from '#/integrations/trpc/react'
-
-function getUrl() {
-  const base = (() => {
-    if (typeof window !== 'undefined') return ''
-    return `http://localhost:${process.env.PORT ?? 3000}`
-  })()
-  return `${base}/api/trpc`
-}
-
-export const trpcClient = createTRPCClient<TRPCRouter>({
-  links: [
-    httpBatchStreamLink({
-      transformer: superjson,
-      url: getUrl(),
-    }),
-  ],
-})
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { ReactNode } from "react";
 
 let context:
-  | {
-      queryClient: QueryClient
-      trpc: ReturnType<typeof createTRPCOptionsProxy<TRPCRouter>>
-    }
-  | undefined
+	| {
+			queryClient: QueryClient;
+	  }
+	| undefined;
 
 export function getContext() {
-  if (context) {
-    return context
-  }
+	if (context) {
+		return context;
+	}
 
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      dehydrate: { serializeData: superjson.serialize },
-      hydrate: { deserializeData: superjson.deserialize },
-    },
-  })
+	const queryClient = new QueryClient({
+		defaultOptions: {
+			queries: {
+				staleTime: 60_000,
+			},
+		},
+	});
 
-  const serverHelpers = createTRPCOptionsProxy({
-    client: trpcClient,
-    queryClient: queryClient,
-  })
-  context = {
-    queryClient,
-    trpc: serverHelpers,
-  }
+	context = { queryClient };
 
-  return context
+	return context;
 }
 
 export default function TanStackQueryProvider({
-  children,
+	children,
 }: {
-  children: ReactNode
+	children: ReactNode;
 }) {
-  const { queryClient } = getContext()
+	const { queryClient } = getContext();
 
-  return (
-    <QueryClientProvider client={queryClient}>
-      <TRPCProvider trpcClient={trpcClient} queryClient={queryClient}>
-        {children}
-      </TRPCProvider>
-    </QueryClientProvider>
-  )
+	return (
+		<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+	);
 }

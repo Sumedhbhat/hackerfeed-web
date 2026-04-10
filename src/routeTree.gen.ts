@@ -9,21 +9,9 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as AboutRouteImport } from './routes/about'
 import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as DemoWorkosRouteImport } from './routes/demo/workos'
-import { Route as DemoTrpcTodoRouteImport } from './routes/demo/trpc-todo'
-import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
-import { Route as DemoStoreRouteImport } from './routes/demo/store'
-import { Route as DemoPrismaRouteImport } from './routes/demo/prisma'
-import { Route as ApiTrpcSplatRouteImport } from './routes/api.trpc.$'
 
-const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const FavoritesRoute = FavoritesRouteImport.update({
   id: '/favorites',
   path: '/favorites',
@@ -34,128 +22,35 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DemoWorkosRoute = DemoWorkosRouteImport.update({
-  id: '/demo/workos',
-  path: '/demo/workos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DemoTrpcTodoRoute = DemoTrpcTodoRouteImport.update({
-  id: '/demo/trpc-todo',
-  path: '/demo/trpc-todo',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DemoTanstackQueryRoute = DemoTanstackQueryRouteImport.update({
-  id: '/demo/tanstack-query',
-  path: '/demo/tanstack-query',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DemoStoreRoute = DemoStoreRouteImport.update({
-  id: '/demo/store',
-  path: '/demo/store',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DemoPrismaRoute = DemoPrismaRouteImport.update({
-  id: '/demo/prisma',
-  path: '/demo/prisma',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiTrpcSplatRoute = ApiTrpcSplatRouteImport.update({
-  id: '/api/trpc/$',
-  path: '/api/trpc/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
   '/favorites': typeof FavoritesRoute
-  '/demo/prisma': typeof DemoPrismaRoute
-  '/demo/store': typeof DemoStoreRoute
-  '/demo/tanstack-query': typeof DemoTanstackQueryRoute
-  '/demo/trpc-todo': typeof DemoTrpcTodoRoute
-  '/demo/workos': typeof DemoWorkosRoute
-  '/api/trpc/$': typeof ApiTrpcSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
   '/favorites': typeof FavoritesRoute
-  '/demo/prisma': typeof DemoPrismaRoute
-  '/demo/store': typeof DemoStoreRoute
-  '/demo/tanstack-query': typeof DemoTanstackQueryRoute
-  '/demo/trpc-todo': typeof DemoTrpcTodoRoute
-  '/demo/workos': typeof DemoWorkosRoute
-  '/api/trpc/$': typeof ApiTrpcSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
   '/favorites': typeof FavoritesRoute
-  '/demo/prisma': typeof DemoPrismaRoute
-  '/demo/store': typeof DemoStoreRoute
-  '/demo/tanstack-query': typeof DemoTanstackQueryRoute
-  '/demo/trpc-todo': typeof DemoTrpcTodoRoute
-  '/demo/workos': typeof DemoWorkosRoute
-  '/api/trpc/$': typeof ApiTrpcSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/about'
-    | '/favorites'
-    | '/demo/prisma'
-    | '/demo/store'
-    | '/demo/tanstack-query'
-    | '/demo/trpc-todo'
-    | '/demo/workos'
-    | '/api/trpc/$'
+  fullPaths: '/' | '/favorites'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/about'
-    | '/favorites'
-    | '/demo/prisma'
-    | '/demo/store'
-    | '/demo/tanstack-query'
-    | '/demo/trpc-todo'
-    | '/demo/workos'
-    | '/api/trpc/$'
-  id:
-    | '__root__'
-    | '/'
-    | '/about'
-    | '/favorites'
-    | '/demo/prisma'
-    | '/demo/store'
-    | '/demo/tanstack-query'
-    | '/demo/trpc-todo'
-    | '/demo/workos'
-    | '/api/trpc/$'
+  to: '/' | '/favorites'
+  id: '__root__' | '/' | '/favorites'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AboutRoute: typeof AboutRoute
   FavoritesRoute: typeof FavoritesRoute
-  DemoPrismaRoute: typeof DemoPrismaRoute
-  DemoStoreRoute: typeof DemoStoreRoute
-  DemoTanstackQueryRoute: typeof DemoTanstackQueryRoute
-  DemoTrpcTodoRoute: typeof DemoTrpcTodoRoute
-  DemoWorkosRoute: typeof DemoWorkosRoute
-  ApiTrpcSplatRoute: typeof ApiTrpcSplatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/favorites': {
       id: '/favorites'
       path: '/favorites'
@@ -170,61 +65,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/demo/workos': {
-      id: '/demo/workos'
-      path: '/demo/workos'
-      fullPath: '/demo/workos'
-      preLoaderRoute: typeof DemoWorkosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/demo/trpc-todo': {
-      id: '/demo/trpc-todo'
-      path: '/demo/trpc-todo'
-      fullPath: '/demo/trpc-todo'
-      preLoaderRoute: typeof DemoTrpcTodoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/demo/tanstack-query': {
-      id: '/demo/tanstack-query'
-      path: '/demo/tanstack-query'
-      fullPath: '/demo/tanstack-query'
-      preLoaderRoute: typeof DemoTanstackQueryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/demo/store': {
-      id: '/demo/store'
-      path: '/demo/store'
-      fullPath: '/demo/store'
-      preLoaderRoute: typeof DemoStoreRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/demo/prisma': {
-      id: '/demo/prisma'
-      path: '/demo/prisma'
-      fullPath: '/demo/prisma'
-      preLoaderRoute: typeof DemoPrismaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/trpc/$': {
-      id: '/api/trpc/$'
-      path: '/api/trpc/$'
-      fullPath: '/api/trpc/$'
-      preLoaderRoute: typeof ApiTrpcSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AboutRoute: AboutRoute,
   FavoritesRoute: FavoritesRoute,
-  DemoPrismaRoute: DemoPrismaRoute,
-  DemoStoreRoute: DemoStoreRoute,
-  DemoTanstackQueryRoute: DemoTanstackQueryRoute,
-  DemoTrpcTodoRoute: DemoTrpcTodoRoute,
-  DemoWorkosRoute: DemoWorkosRoute,
-  ApiTrpcSplatRoute: ApiTrpcSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
