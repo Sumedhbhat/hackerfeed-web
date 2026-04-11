@@ -5,25 +5,25 @@ import { StoryCard } from "#/components/StoryCard";
 import { clearAllFavorites, favoritesStore } from "#/lib/favorites-store";
 
 export const Route = createFileRoute("/favorites")({
-  component: FavoritesPage,
+	component: FavoritesPage,
 });
 
 type SortOrder = "newest" | "oldest" | "score";
 
 function FavoritesPage() {
-  const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
+	const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
 
-  const allFavorites = useStore(favoritesStore, (state) =>
-    Array.from(state.items.values()),
-  );
+	const allFavorites = useStore(favoritesStore, (state) =>
+		Array.from(state.items.values()),
+	);
 
-  const favorites = [...allFavorites].sort((a, b) => {
-    if (sortOrder === "newest") return (b.time ?? 0) - (a.time ?? 0);
-    if (sortOrder === "oldest") return (a.time ?? 0) - (b.time ?? 0);
-    return (b.score ?? 0) - (a.score ?? 0);
-  });
+	const favorites = [...allFavorites].sort((a, b) => {
+		if (sortOrder === "newest") return (b.time ?? 0) - (a.time ?? 0);
+		if (sortOrder === "oldest") return (a.time ?? 0) - (b.time ?? 0);
+		return (b.score ?? 0) - (a.score ?? 0);
+	});
 
-  const count = favorites.length;
+	const count = favorites.length;
 
 	return (
 		<main className="px-4 pt-8 pb-14 sm:pt-10 page-wrap">
@@ -121,18 +121,18 @@ function FavoritesPage() {
 							</div>
 						</div>
 
-            <div className="space-y-3">
-              {favorites.map((story, i) => (
-                <StoryCard
-                  key={story.id}
-                  story={story}
-                  animationDelay={i * 50 + 60}
-                />
-              ))}
-            </div>
-          </>
-        )}
-      </section>
-    </main>
-  );
+						<div className="space-y-3">
+							{favorites.map((story, i) => (
+								<StoryCard
+									key={story.id}
+									story={story}
+									animationDelay={i * 50 + 60}
+								/>
+							))}
+						</div>
+					</>
+				)}
+			</section>
+		</main>
+	);
 }

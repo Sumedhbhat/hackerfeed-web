@@ -2,11 +2,11 @@ import { useStore } from "@tanstack/react-store";
 import { favoritesStore, toggleFavorite } from "#/lib/favorites-store";
 import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
 import {
-  formatStoryAge,
-  getDiscussionUrl,
-  getStoryDomain,
-  getStorySummary,
-  getStoryTitle,
+	formatStoryAge,
+	getDiscussionUrl,
+	getStoryDomain,
+	getStorySummary,
+	getStoryTitle,
 } from "#/lib/hacker-news/utils";
 import { openLink } from "#/lib/open-link";
 
@@ -17,18 +17,18 @@ export { StoryCardSkeleton } from "./StoryCardSkeleton";
 // ---------------------------------------------------------------------------
 
 type StoryCardProps = {
-  story: HackerNewsStoryRecord;
-  rank?: number;
-  animationDelay?: number;
+	story: HackerNewsStoryRecord;
+	rank?: number;
+	animationDelay?: number;
 };
 
 export function StoryCard({ story, rank, animationDelay }: StoryCardProps) {
-  const isFav = useStore(favoritesStore, (state) => state.items.has(story.id));
+	const isFav = useStore(favoritesStore, (state) => state.items.has(story.id));
 
-  const domain = getStoryDomain(story.url);
-  const age = formatStoryAge(story.time);
-  const title = getStoryTitle(story);
-  const summary = getStorySummary(story);
+	const domain = getStoryDomain(story.url);
+	const age = formatStoryAge(story.time);
+	const title = getStoryTitle(story);
+	const summary = getStorySummary(story);
 
 	return (
 		<article
