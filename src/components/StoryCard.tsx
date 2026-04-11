@@ -59,6 +59,7 @@ export function StoryCard({ story, rank, animationDelay }: StoryCardProps) {
           <h3
             className="m-0 mb-3 text-lg font-semibold leading-snug cursor-pointer sm:text-xl text-(--sea-ink)"
             onClick={() => openLink(story.url ?? getDiscussionUrl(story.id))}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') openLink(story.url ?? getDiscussionUrl(story.id)) }}
           >
             {title}
           </h3>

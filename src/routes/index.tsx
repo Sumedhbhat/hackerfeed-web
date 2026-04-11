@@ -9,6 +9,8 @@ import {
 	storyItemQueryOptions,
 } from "#/lib/hacker-news/queries";
 
+const SKELETON_KEYS = Array.from({ length: PAGE_SIZE }, (_, i) => `skeleton-${i}`);
+
 export const Route = createFileRoute("/")({
 	component: App,
 	loader: async ({ context }) => {
@@ -122,8 +124,8 @@ export function App() {
 				{/* Loading */}
 				{activeStatus === "loading" ? (
 					<div className="space-y-3">
-						{Array.from({ length: PAGE_SIZE }, (_, i) => (
-							<StoryCardSkeleton key={`skeleton-${i}`} index={i} />
+						{SKELETON_KEYS.map((key, i) => (
+							<StoryCardSkeleton key={key} index={i} />
 						))}
 					</div>
 				) : null}
