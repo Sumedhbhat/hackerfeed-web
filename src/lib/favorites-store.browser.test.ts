@@ -26,6 +26,7 @@ function makeStory(
 		by: "testuser",
 		descendants: 5,
 		id,
+		kids: [],
 		score: 42,
 		text: null,
 		time: 1_700_000_000 + id,

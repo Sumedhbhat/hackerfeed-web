@@ -125,7 +125,7 @@ pre code {
 }
 
 .page-wrap {
-  width: min(1000px, calc(100% - 2rem));
+  width: min(1000px, calc(100% - 1rem));
   margin-inline: auto;
 }
 

@@ -14,11 +14,18 @@ export default function Header() {
 					to="/"
 					className="flex flex-shrink-0 items-center gap-2.5 no-underline group"
 				>
+					{/* Logo icon — mobile only */}
+					<img
+						src="/logo192.png"
+						alt="HackerFeed"
+						className="block sm:hidden h-7 w-7 rounded-md"
+					/>
+					{/* Text logo — sm and up */}
 					<span
-						className="h-5 w-[1.5px] bg-(--lagoon) opacity-80 group-hover:opacity-100 transition-opacity"
+						className="hidden sm:block h-5 w-[1.5px] bg-(--lagoon) opacity-80 group-hover:opacity-100 transition-opacity"
 						aria-hidden="true"
 					/>
-					<span className="text-base font-semibold tracking-tight text-(--sea-ink)">
+					<span className="hidden sm:block text-base font-semibold tracking-tight text-(--sea-ink)">
 						HackerFeed
 					</span>
 				</Link>

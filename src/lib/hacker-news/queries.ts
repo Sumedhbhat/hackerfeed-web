@@ -13,6 +13,7 @@ export type HackerNewsStoryRecord = {
 	by: string | null;
 	descendants: number;
 	id: number;
+	kids: number[];
 	score: number;
 	text: string | null;
 	time: number | null;
@@ -21,12 +22,26 @@ export type HackerNewsStoryRecord = {
 	url: string | null;
 };
 
+export type HackerNewsCommentRecord = {
+	id: number;
+	by: string | null;
+	text: string | null;
+	time: number | null;
+	kids: number[];
+	parent: number;
+	type: "comment";
+	deleted: boolean;
+	dead: boolean;
+};
+
 type HackerNewsItemResponse = {
 	by?: string;
 	dead?: boolean;
 	deleted?: boolean;
 	descendants?: number;
 	id?: number;
+	kids?: number[];
+	parent?: number;
 	score?: number;
 	text?: string;
 	time?: number;
@@ -99,12 +114,43 @@ function normalizeStoryItem(
 		by: payload.by ?? null,
 		descendants: normalizedDescendants,
 		id: storyId,
+		kids: Array.isArray(payload.kids)
+			? payload.kids.filter((n) => Number.isInteger(n) && n > 0)
+			: [],
 		score: normalizedScore,
 		text: payload.text ?? null,
 		time: normalizedTime,
 		title: payload.title ?? null,
 		type: "story",
 		url: payload.url ?? null,
+	};
+}
+
+function normalizeCommentItem(
+	payload: HackerNewsItemResponse | null,
+): HackerNewsCommentRecord | null {
+	if (!payload || payload.type !== "comment") return null;
+
+	const id = payload.id;
+	if (typeof id !== "number" || !Number.isInteger(id) || id <= 0) return null;
+
+	const parent = payload.parent;
+	if (typeof parent !== "number" || !Number.isInteger(parent) || parent <= 0) {
+		return null;
+	}
+
+	return {
+		id,
+		by: payload.by ?? null,
+		text: payload.text ?? null,
+		time: typeof payload.time === "number" ? payload.time : null,
+		kids: Array.isArray(payload.kids)
+			? payload.kids.filter((n) => Number.isInteger(n) && n > 0)
+			: [],
+		parent,
+		type: "comment",
+		deleted: payload.deleted ?? false,
+		dead: payload.dead ?? false,
 	};
 }
 
@@ -163,6 +209,25 @@ export function storyItemQueryOptions(storyId: number) {
 	return queryOptions({
 		queryKey: ["hacker-news", "story", storyId],
 		queryFn: ({ signal }) => fetchStoryItem(storyId, signal),
+		staleTime: 300_000,
+	});
+}
+
+export async function fetchCommentItem(
+	commentId: number,
+	signal?: AbortSignal,
+): Promise<HackerNewsCommentRecord | null> {
+	const payload = await fetchJson<HackerNewsItemResponse | null>(
+		`/item/${commentId}.json`,
+		signal,
+	);
+	return normalizeCommentItem(payload);
+}
+
+export function commentItemQueryOptions(commentId: number) {
+	return queryOptions({
+		queryKey: ["hacker-news", "comment", commentId],
+		queryFn: ({ signal }) => fetchCommentItem(commentId, signal),
 		staleTime: 300_000,
 	});
 }

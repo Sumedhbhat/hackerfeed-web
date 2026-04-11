@@ -97,7 +97,7 @@ export function App() {
 	};
 
 	return (
-		<main className="page-wrap px-4 pb-14 pt-8 sm:pt-10">
+		<main className="page-wrap px-4 pb-10 pt-5 sm:pt-10 sm:pb-14">
 			<div className="space-y-6">
 				{/* Feed tabs — editorial underline style */}
 				<div className="flex items-center gap-6 border-b border-(--line)">

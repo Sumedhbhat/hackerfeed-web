@@ -20,6 +20,7 @@ function makeStory(
 		by: "testuser",
 		descendants: 10,
 		id: 12345,
+		kids: [],
 		score: 100,
 		text: null,
 		time: Math.floor(Date.now() / 1000) - 3600, // 1 hour ago
