@@ -25,6 +25,37 @@ vi.mock("#/lib/open-link", () => ({
 	openLink: vi.fn(),
 }));
 
+// Mock Link from @tanstack/react-router so tests don't need a full RouterProvider.
+vi.mock("@tanstack/react-router", async (importOriginal) => {
+	const actual =
+		await importOriginal<typeof import("@tanstack/react-router")>();
+	return {
+		...actual,
+		Link: ({
+			children,
+			to,
+			params,
+			className,
+		}: {
+			children: React.ReactNode;
+			to: string;
+			params?: Record<string, unknown>;
+			className?: string;
+		}) => (
+			<a
+				href={
+					params
+						? to.replace(/\$(\w+)/g, (_, k) => String(params[k] ?? ""))
+						: to
+				}
+				className={className}
+			>
+				{children}
+			</a>
+		),
+	};
+});
+
 // We import the mock AFTER vi.mock so vitest hoists it correctly.
 import { openLink } from "#/lib/open-link";
 
@@ -46,6 +77,7 @@ function makeStory(
 		type: "story",
 		url: "https://example.com/test-article",
 		...overrides,
+		kids: overrides.kids ?? [],
 	};
 }
 
@@ -164,12 +196,11 @@ describe("StoryCard link actions", () => {
 		);
 	});
 
-	it("'Discussion' always calls openLink with the HN discussion URL", () => {
+	it("'Discussion' renders a link to the internal discussion page", () => {
 		render(<StoryCard story={makeStory({ id: 99999 })} />);
-		fireEvent.click(screen.getByRole("button", { name: /^discussion$/i }));
-		expect(openLink).toHaveBeenCalledWith(
-			"https://news.ycombinator.com/item?id=99999",
-		);
+		const link = screen.getByRole("link", { name: /^discussion$/i });
+		expect(link).toBeDefined();
+		expect(link.getAttribute("href")).toContain("99999");
 	});
 });
 
