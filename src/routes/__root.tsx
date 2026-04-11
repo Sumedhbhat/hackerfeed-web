@@ -86,7 +86,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				<script src="/theme-init.js" />
 				<HeadContent />
 			</head>
-			<body className="font-sans antialiased [overflow-wrap:anywhere] selection:bg-[rgba(79,184,178,0.24)]">
+			<body className="font-sans antialiased wrap-anywhere selection:bg-[rgba(79,184,178,0.24)]">
 				<TanStackQueryProvider>
 					<Header />
 					{children}
