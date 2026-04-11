@@ -153,7 +153,9 @@ describe("localStorage persistence", () => {
 
 		const raw = localStorage.getItem("hackerfeed:favorites");
 		expect(raw).not.toBeNull();
-		const entries = JSON.parse(raw as string) as Array<[number, HackerNewsStoryRecord]>;
+		const entries = JSON.parse(raw as string) as Array<
+			[number, HackerNewsStoryRecord]
+		>;
 		expect(entries.some(([id]) => id === 40)).toBe(true);
 	});
 

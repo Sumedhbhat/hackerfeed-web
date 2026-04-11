@@ -9,7 +9,10 @@ import {
 	storyItemQueryOptions,
 } from "#/lib/hacker-news/queries";
 
-const SKELETON_KEYS = Array.from({ length: PAGE_SIZE }, (_, i) => `skeleton-${i}`);
+const SKELETON_KEYS = Array.from(
+	{ length: PAGE_SIZE },
+	(_, i) => `skeleton-${i}`,
+);
 
 export const Route = createFileRoute("/")({
 	component: App,
@@ -143,7 +146,10 @@ export function App() {
 								const inLoadingBatch = positionIndex >= committedCount;
 								if (inLoadingBatch && !allDisplayedSettled) {
 									return (
-										<StoryCardSkeleton key={`${activeFeed}-${storyId}`} index={positionIndex} />
+										<StoryCardSkeleton
+											key={`${activeFeed}-${storyId}`}
+											index={positionIndex}
+										/>
 									);
 								}
 
@@ -185,7 +191,8 @@ export function App() {
 							No {activeFeedMeta.label.toLowerCase()} stories found.
 						</h3>
 						<p className="m-0 mt-3 max-w-lg text-sm leading-relaxed text-(--sea-ink-soft)">
-							The feed came back empty. A quick refresh should pick up new items.
+							The feed came back empty. A quick refresh should pick up new
+							items.
 						</p>
 						<div className="mt-5">
 							<button
@@ -207,7 +214,8 @@ export function App() {
 							Couldn't load {activeFeedMeta.title.toLowerCase()}.
 						</h3>
 						<p className="m-0 mt-3 max-w-lg text-sm leading-relaxed text-(--sea-ink-soft)">
-							The Hacker News request failed. Check your connection and try again.
+							The Hacker News request failed. Check your connection and try
+							again.
 						</p>
 						<div className="mt-5 flex flex-wrap gap-4">
 							<button

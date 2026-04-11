@@ -50,7 +50,7 @@ export default function Header() {
 
 				{/* Right side */}
 				<div className="ml-auto flex items-center gap-2">
-<ThemeToggle />
+					<ThemeToggle />
 				</div>
 			</nav>
 		</header>

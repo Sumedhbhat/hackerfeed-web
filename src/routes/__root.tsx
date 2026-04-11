@@ -18,7 +18,6 @@ interface MyRouterContext {
 	queryClient: QueryClient;
 }
 
-
 export const Route = createRootRouteWithContext<MyRouterContext>()({
 	head: () => ({
 		meta: [
