@@ -225,10 +225,14 @@ describe("tab switching", () => {
 		fireEvent.click(screen.getByRole("button", { name: /^new$/i }));
 
 		expect(
-			screen.getByRole("button", { name: /^top$/i }).getAttribute("aria-pressed"),
+			screen
+				.getByRole("button", { name: /^top$/i })
+				.getAttribute("aria-pressed"),
 		).toBe("false");
 		expect(
-			screen.getByRole("button", { name: /^best$/i }).getAttribute("aria-pressed"),
+			screen
+				.getByRole("button", { name: /^best$/i })
+				.getAttribute("aria-pressed"),
 		).toBe("false");
 	});
 
@@ -238,10 +242,14 @@ describe("tab switching", () => {
 		fireEvent.click(screen.getByRole("button", { name: /^best$/i }));
 
 		expect(
-			screen.getByRole("button", { name: /^top$/i }).getAttribute("aria-pressed"),
+			screen
+				.getByRole("button", { name: /^top$/i })
+				.getAttribute("aria-pressed"),
 		).toBe("false");
 		expect(
-			screen.getByRole("button", { name: /^new$/i }).getAttribute("aria-pressed"),
+			screen
+				.getByRole("button", { name: /^new$/i })
+				.getAttribute("aria-pressed"),
 		).toBe("false");
 	});
 
@@ -252,7 +260,9 @@ describe("tab switching", () => {
 		fireEvent.click(screen.getByRole("button", { name: /^top$/i }));
 
 		expect(
-			screen.getByRole("button", { name: /^top$/i }).getAttribute("aria-pressed"),
+			screen
+				.getByRole("button", { name: /^top$/i })
+				.getAttribute("aria-pressed"),
 		).toBe("true");
 	});
 });
