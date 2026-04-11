@@ -219,30 +219,51 @@ describe("tab switching", () => {
 		).toBe("false");
 	});
 
-	it("feed header title updates when switching to 'New' tab", () => {
+	it("switching to 'New' deactivates other tabs", () => {
 		render(<FeedApp />);
 
 		fireEvent.click(screen.getByRole("button", { name: /^new$/i }));
 
-		// The feed meta title for "new" is "New stories"
-		expect(screen.getByText("New stories")).toBeDefined();
+		expect(
+			screen
+				.getByRole("button", { name: /^top$/i })
+				.getAttribute("aria-pressed"),
+		).toBe("false");
+		expect(
+			screen
+				.getByRole("button", { name: /^best$/i })
+				.getAttribute("aria-pressed"),
+		).toBe("false");
 	});
 
-	it("feed header title updates when switching to 'Best' tab", () => {
+	it("switching to 'Best' deactivates other tabs", () => {
 		render(<FeedApp />);
 
 		fireEvent.click(screen.getByRole("button", { name: /^best$/i }));
 
-		expect(screen.getByText("Best stories")).toBeDefined();
+		expect(
+			screen
+				.getByRole("button", { name: /^top$/i })
+				.getAttribute("aria-pressed"),
+		).toBe("false");
+		expect(
+			screen
+				.getByRole("button", { name: /^new$/i })
+				.getAttribute("aria-pressed"),
+		).toBe("false");
 	});
 
-	it("feed header title reverts when switching back to 'Top'", () => {
+	it("switching back to 'Top' reactivates it", () => {
 		render(<FeedApp />);
 
 		fireEvent.click(screen.getByRole("button", { name: /^new$/i }));
 		fireEvent.click(screen.getByRole("button", { name: /^top$/i }));
 
-		expect(screen.getByText("Top stories")).toBeDefined();
+		expect(
+			screen
+				.getByRole("button", { name: /^top$/i })
+				.getAttribute("aria-pressed"),
+		).toBe("true");
 	});
 });
 
@@ -276,7 +297,7 @@ describe("error state", () => {
 		render(<FeedApp />);
 
 		expect(screen.getByText(/feed unavailable/i)).toBeDefined();
-		expect(screen.getByRole("button", { name: /retry feed/i })).toBeDefined();
+		expect(screen.getByRole("button", { name: /retry/i })).toBeDefined();
 	});
 });
 

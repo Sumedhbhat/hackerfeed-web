@@ -92,12 +92,12 @@ describe("StoryCard rendering", () => {
 
 	it("renders the story author", () => {
 		render(<StoryCard story={makeStory()} />);
-		expect(screen.getByText(/by author42/i)).toBeDefined();
+		expect(screen.getByText(/author42/i)).toBeDefined();
 	});
 
 	it("renders the score", () => {
 		render(<StoryCard story={makeStory()} />);
-		expect(screen.getByText(/210 points/i)).toBeDefined();
+		expect(screen.getByText(/210 pts/i)).toBeDefined();
 	});
 
 	it("renders the comment count", () => {
@@ -117,9 +117,9 @@ describe("StoryCard rendering", () => {
 		expect(screen.getByText(/news\.ycombinator\.com/i)).toBeDefined();
 	});
 
-	it("shows 'unknown' for a null author", () => {
+	it("omits the author when by is null", () => {
 		render(<StoryCard story={makeStory({ by: null })} />);
-		expect(screen.getByText(/by unknown/i)).toBeDefined();
+		expect(screen.queryByText(/unknown/i)).toBeNull();
 	});
 
 	it("shows a rank badge when rank prop is provided", () => {
@@ -164,9 +164,9 @@ describe("StoryCard link actions", () => {
 		);
 	});
 
-	it("'Open discussion' always calls openLink with the HN discussion URL", () => {
+	it("'Discussion' always calls openLink with the HN discussion URL", () => {
 		render(<StoryCard story={makeStory({ id: 99999 })} />);
-		fireEvent.click(screen.getByRole("button", { name: /open discussion/i }));
+		fireEvent.click(screen.getByRole("button", { name: /^discussion$/i }));
 		expect(openLink).toHaveBeenCalledWith(
 			"https://news.ycombinator.com/item?id=99999",
 		);

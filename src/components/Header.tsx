@@ -7,7 +7,7 @@ export default function Header() {
 	const favCount = useStore(favoritesStore, (state) => state.items.size);
 
 	return (
-		<header className="sticky top-0 z-50 border-b border-[var(--line)] bg-[var(--header-bg)] backdrop-blur-md">
+		<header className="sticky top-0 z-50 border-b border-(--line) bg-(--header-bg) backdrop-blur-md">
 			<nav className="page-wrap flex items-center gap-8 py-3.5 px-4">
 				{/* Logo */}
 				<Link
@@ -15,10 +15,10 @@ export default function Header() {
 					className="flex flex-shrink-0 items-center gap-2.5 no-underline group"
 				>
 					<span
-						className="h-5 w-[1.5px] bg-[var(--lagoon)] opacity-80 group-hover:opacity-100 transition-opacity"
+						className="h-5 w-[1.5px] bg-(--lagoon) opacity-80 group-hover:opacity-100 transition-opacity"
 						aria-hidden="true"
 					/>
-					<span className="text-base font-semibold tracking-tight text-[var(--sea-ink)]">
+					<span className="text-base font-semibold tracking-tight text-(--sea-ink)">
 						HackerFeed
 					</span>
 				</Link>
@@ -41,7 +41,7 @@ export default function Header() {
 					>
 						Favorites
 						{favCount > 0 ? (
-							<span className="rounded-sm bg-[var(--chip-bg)] border border-[var(--chip-line)] px-1.5 py-px text-[0.6rem] font-semibold leading-none text-[var(--sea-ink-soft)] tabular-nums">
+							<span className="rounded-sm bg-(--chip-bg) border border-(--chip-line) px-1.5 py-px text-[0.6rem] font-semibold leading-none text-(--sea-ink-soft) tabular-nums">
 								{favCount}
 							</span>
 						) : null}
@@ -50,7 +50,7 @@ export default function Header() {
 
 				{/* Right side */}
 				<div className="ml-auto flex items-center gap-2">
-<ThemeToggle />
+					<ThemeToggle />
 				</div>
 			</nav>
 		</header>

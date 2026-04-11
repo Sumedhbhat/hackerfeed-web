@@ -9,6 +9,11 @@ import {
 	storyItemQueryOptions,
 } from "#/lib/hacker-news/queries";
 
+const SKELETON_KEYS = Array.from(
+	{ length: PAGE_SIZE },
+	(_, i) => `skeleton-${i}`,
+);
+
 export const Route = createFileRoute("/")({
 	component: App,
 	loader: async ({ context }) => {
@@ -95,7 +100,7 @@ export function App() {
 		<main className="page-wrap px-4 pb-14 pt-8 sm:pt-10">
 			<div className="space-y-6">
 				{/* Feed tabs — editorial underline style */}
-				<div className="flex items-center gap-6 border-b border-[var(--line)]">
+				<div className="flex items-center gap-6 border-b border-(--line)">
 					{feedTabs.map((feed) => {
 						const isActive = activeFeed === feed.key;
 						return (
@@ -106,13 +111,13 @@ export function App() {
 								aria-pressed={isActive}
 								className={`relative pb-3 text-sm font-medium transition-colors ${
 									isActive
-										? "text-[var(--sea-ink)]"
-										: "text-[var(--sea-ink-soft)] hover:text-[var(--sea-ink)]"
+										? "text-(--sea-ink)"
+										: "text-(--sea-ink-soft) hover:text-(--sea-ink)"
 								}`}
 							>
 								{feed.label}
 								{isActive ? (
-									<span className="absolute bottom-0 left-0 w-full h-[1.5px] bg-[var(--lagoon)]" />
+									<span className="absolute bottom-0 left-0 w-full h-[1.5px] bg-(--lagoon)" />
 								) : null}
 							</button>
 						);
@@ -122,8 +127,8 @@ export function App() {
 				{/* Loading */}
 				{activeStatus === "loading" ? (
 					<div className="space-y-3">
-						{Array.from({ length: PAGE_SIZE }, (_, i) => (
-							<StoryCardSkeleton key={`skeleton-${i}`} index={i} />
+						{SKELETON_KEYS.map((key, i) => (
+							<StoryCardSkeleton key={key} index={i} />
 						))}
 					</div>
 				) : null}
@@ -141,7 +146,10 @@ export function App() {
 								const inLoadingBatch = positionIndex >= committedCount;
 								if (inLoadingBatch && !allDisplayedSettled) {
 									return (
-										<StoryCardSkeleton key={`${activeFeed}-${storyId}`} index={positionIndex} />
+										<StoryCardSkeleton
+											key={`${activeFeed}-${storyId}`}
+											index={positionIndex}
+										/>
 									);
 								}
 
@@ -164,7 +172,7 @@ export function App() {
 									type="button"
 									onClick={loadMore}
 									disabled={isAnyItemLoading}
-									className="border border-[var(--chip-line)] rounded px-5 py-2 text-sm font-medium text-[var(--sea-ink-soft)] hover:text-[var(--sea-ink)] hover:border-[var(--sea-ink-soft)] disabled:cursor-not-allowed disabled:opacity-40 transition-colors"
+									className="border border-(--chip-line) rounded px-5 py-2 text-sm font-medium text-(--sea-ink-soft) hover:text-(--sea-ink) hover:border-(--sea-ink-soft) disabled:cursor-not-allowed disabled:opacity-40 transition-colors"
 								>
 									{isAnyItemLoading
 										? "Loading\u2026"
@@ -179,17 +187,18 @@ export function App() {
 				{activeStatus === "empty" ? (
 					<article className="island-shell rise-in rounded-lg p-6 sm:p-8">
 						<p className="island-kicker mb-3">Nothing here yet</p>
-						<h3 className="m-0 text-xl font-semibold tracking-tight text-[var(--sea-ink)]">
+						<h3 className="m-0 text-xl font-semibold tracking-tight text-(--sea-ink)">
 							No {activeFeedMeta.label.toLowerCase()} stories found.
 						</h3>
-						<p className="m-0 mt-3 max-w-lg text-sm leading-relaxed text-[var(--sea-ink-soft)]">
-							The feed came back empty. A quick refresh should pick up new items.
+						<p className="m-0 mt-3 max-w-lg text-sm leading-relaxed text-(--sea-ink-soft)">
+							The feed came back empty. A quick refresh should pick up new
+							items.
 						</p>
 						<div className="mt-5">
 							<button
 								type="button"
 								onClick={() => idsQuery.refetch()}
-								className="text-sm font-medium text-[var(--lagoon-deep)] hover:text-[var(--lagoon)] hover:underline underline-offset-2"
+								className="text-sm font-medium text-(--lagoon-deep) hover:text-(--lagoon) hover:underline underline-offset-2"
 							>
 								Refresh feed &rarr;
 							</button>
@@ -201,17 +210,18 @@ export function App() {
 				{activeStatus === "error" ? (
 					<article className="island-shell rise-in rounded-lg p-6 sm:p-8">
 						<p className="island-kicker mb-3">Feed unavailable</p>
-						<h3 className="m-0 text-xl font-semibold tracking-tight text-[var(--sea-ink)]">
+						<h3 className="m-0 text-xl font-semibold tracking-tight text-(--sea-ink)">
 							Couldn't load {activeFeedMeta.title.toLowerCase()}.
 						</h3>
-						<p className="m-0 mt-3 max-w-lg text-sm leading-relaxed text-[var(--sea-ink-soft)]">
-							The Hacker News request failed. Check your connection and try again.
+						<p className="m-0 mt-3 max-w-lg text-sm leading-relaxed text-(--sea-ink-soft)">
+							The Hacker News request failed. Check your connection and try
+							again.
 						</p>
 						<div className="mt-5 flex flex-wrap gap-4">
 							<button
 								type="button"
 								onClick={() => idsQuery.refetch()}
-								className="text-sm font-medium text-[var(--lagoon-deep)] hover:text-[var(--lagoon)] hover:underline underline-offset-2"
+								className="text-sm font-medium text-(--lagoon-deep) hover:text-(--lagoon) hover:underline underline-offset-2"
 							>
 								Retry &rarr;
 							</button>
@@ -219,7 +229,7 @@ export function App() {
 								href="https://github.com/HackerNews/API"
 								target="_blank"
 								rel="noreferrer"
-								className="text-sm text-[var(--sea-ink-soft)] hover:text-[var(--sea-ink)]"
+								className="text-sm text-(--sea-ink-soft) hover:text-(--sea-ink)"
 							>
 								API status
 							</a>
