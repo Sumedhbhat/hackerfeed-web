@@ -6,6 +6,7 @@ import {
 	Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { useEffect } from "react";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 
@@ -41,6 +42,18 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 				name: "theme-color",
 				content: "#f3faf5",
 			},
+			{
+				name: "apple-mobile-web-app-capable",
+				content: "yes",
+			},
+			{
+				name: "apple-mobile-web-app-status-bar-style",
+				content: "black-translucent",
+			},
+			{
+				name: "apple-mobile-web-app-title",
+				content: "HackerFeed",
+			},
 		],
 		links: [
 			{
@@ -51,12 +64,24 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 				rel: "manifest",
 				href: "/manifest.json",
 			},
+			{
+				rel: "apple-touch-icon",
+				href: "/logo192.png",
+			},
 		],
 	}),
 	shellComponent: RootDocument,
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+	useEffect(() => {
+		if ("serviceWorker" in navigator) {
+			navigator.serviceWorker
+				.register("/sw.js", { scope: "/" })
+				.catch((err) => console.warn("SW registration failed:", err));
+		}
+	}, []);
+
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<head>
