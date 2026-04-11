@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ItemStoryIdRouteImport } from './routes/item.$storyId'
 
 const FavoritesRoute = FavoritesRouteImport.update({
   id: '/favorites',
@@ -22,31 +23,40 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ItemStoryIdRoute = ItemStoryIdRouteImport.update({
+  id: '/item/$storyId',
+  path: '/item/$storyId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/favorites': typeof FavoritesRoute
+  '/item/$storyId': typeof ItemStoryIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/favorites': typeof FavoritesRoute
+  '/item/$storyId': typeof ItemStoryIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/favorites': typeof FavoritesRoute
+  '/item/$storyId': typeof ItemStoryIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/favorites'
+  fullPaths: '/' | '/favorites' | '/item/$storyId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/favorites'
-  id: '__root__' | '/' | '/favorites'
+  to: '/' | '/favorites' | '/item/$storyId'
+  id: '__root__' | '/' | '/favorites' | '/item/$storyId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   FavoritesRoute: typeof FavoritesRoute
+  ItemStoryIdRoute: typeof ItemStoryIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +75,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/item/$storyId': {
+      id: '/item/$storyId'
+      path: '/item/$storyId'
+      fullPath: '/item/$storyId'
+      preLoaderRoute: typeof ItemStoryIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   FavoritesRoute: FavoritesRoute,
+  ItemStoryIdRoute: ItemStoryIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
