@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { useStore } from "@tanstack/react-store";
 import { favoritesStore, toggleFavorite } from "#/lib/favorites-store";
 import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
@@ -96,13 +97,13 @@ export function StoryCard({ story, rank, animationDelay }: StoryCardProps) {
 							</span>
 						</button>
 
-						<button
-							type="button"
-							onClick={() => openLink(getDiscussionUrl(story.id))}
+						<Link
+							to="/item/$storyId"
+							params={{ storyId: story.id }}
 							className="text-sm text-(--sea-ink-soft) hover:text-(--sea-ink)"
 						>
 							Discussion
-						</button>
+						</Link>
 
 						<button
 							type="button"
@@ -140,5 +141,4 @@ export function StoryCard({ story, rank, animationDelay }: StoryCardProps) {
 			</div>
 		</article>
 	);
-
 }
