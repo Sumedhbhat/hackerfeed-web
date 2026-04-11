@@ -2,7 +2,7 @@ export default function Footer() {
 	const year = new Date().getFullYear();
 
 	return (
-		<footer className="px-4 pt-8 pb-12 site-footer text-(--sea-ink-soft)">
+		<footer className="px-4 pt-5 pb-8 sm:pt-8 sm:pb-12 site-footer text-(--sea-ink-soft)">
 			<div className="page-wrap">
 				<div className="flex flex-col gap-6 sm:flex-row sm:justify-between sm:items-end">
 					<div>

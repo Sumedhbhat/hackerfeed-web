@@ -32,7 +32,7 @@ export function StoryCard({ story, rank, animationDelay }: StoryCardProps) {
 
 	return (
 		<article
-			className="p-5 rounded-lg sm:p-6 island-shell rise-in group"
+			className="p-4 rounded-lg sm:p-6 island-shell rise-in group"
 			style={
 				animationDelay ? { animationDelay: `${animationDelay}ms` } : undefined
 			}
