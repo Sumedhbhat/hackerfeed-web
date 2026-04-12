@@ -1,5 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { Comment, CommentSkeleton } from "#/components/Comment";
+import { Suspense } from "react";
+import { ErrorBoundary } from "react-error-boundary";
+import { Comment } from "#/components/Comment";
 import { useStoryPage } from "#/hooks/useStoryPage";
 import {
 	commentQueryOptions,
@@ -52,9 +54,63 @@ export const Route = createFileRoute("/story/$storyId")({
 	),
 });
 
-function StoryPage() {
-	const { storyId } = Route.useParams();
-	const { story, commentQueries, allLoaded } = useStoryPage(storyId);
+// ---------------------------------------------------------------------------
+// StoryError — ErrorBoundary fallback
+// ---------------------------------------------------------------------------
+
+function StoryError() {
+	return (
+		<main className="page-wrap px-4 pt-6 pb-16 sm:pt-10">
+			<Link
+				to="/"
+				className="inline-block mb-6 text-sm text-(--sea-ink-soft) hover:text-(--sea-ink) transition-colors"
+			>
+				&larr; Feed
+			</Link>
+			<article className="island-shell rise-in rounded-lg p-6 sm:p-8">
+				<p className="island-kicker mb-3">Story unavailable</p>
+				<h1 className="m-0 text-xl font-semibold tracking-tight text-(--sea-ink)">
+					Couldn&apos;t load this story.
+				</h1>
+				<p className="m-0 mt-3 max-w-lg text-sm leading-relaxed text-(--sea-ink-soft)">
+					The Hacker News request failed. Check your connection and try again.
+				</p>
+			</article>
+		</main>
+	);
+}
+
+// ---------------------------------------------------------------------------
+// StoryContentSkeleton — Suspense fallback
+// ---------------------------------------------------------------------------
+
+function StoryContentSkeleton() {
+	return (
+		<main className="page-wrap px-4 pt-6 pb-16 sm:pt-10 animate-pulse">
+			<div className="inline-block mb-6 h-4 w-12 rounded bg-(--sand) opacity-60" />
+			<div className="island-shell rounded-lg p-5 sm:p-7 mb-8">
+				<div className="h-2.5 w-24 rounded-sm bg-(--sand) opacity-40 mb-3" />
+				<div className="h-6 w-3/4 rounded bg-(--sand) opacity-50 mb-4" />
+				<div className="h-3 w-32 rounded-sm bg-(--sand) opacity-30 mb-5" />
+				<div className="flex gap-4">
+					<div className="h-4 w-24 rounded bg-(--sand) opacity-40" />
+					<div className="h-4 w-20 rounded bg-(--sand) opacity-30" />
+				</div>
+			</div>
+		</main>
+	);
+}
+
+// ---------------------------------------------------------------------------
+// StoryContent — inner component that calls useSuspenseQuery hooks
+// ---------------------------------------------------------------------------
+
+type StoryContentProps = {
+	storyId: number;
+};
+
+function StoryContent({ storyId }: StoryContentProps) {
+	const { story, commentQueries } = useStoryPage(storyId);
 
 	if (!story) return null;
 
@@ -142,15 +198,29 @@ function StoryPage() {
 					<p className="text-sm text-(--sea-ink-soft)">No comments yet.</p>
 				) : (
 					<div className="space-y-1 divide-y divide-(--line)">
-						{!allLoaded && story.kids.map((id) => <CommentSkeleton key={id} />)}
-						{allLoaded &&
-							commentQueries.map((q) => {
-								if (!q.data) return null;
-								return <Comment key={q.data.id} comment={q.data} depth={0} />;
-							})}
+						{commentQueries.map((q) => {
+							if (!q.data) return null;
+							return <Comment key={q.data.id} comment={q.data} depth={0} />;
+						})}
 					</div>
 				)}
 			</section>
 		</main>
+	);
+}
+
+// ---------------------------------------------------------------------------
+// StoryPage — route component
+// ---------------------------------------------------------------------------
+
+function StoryPage() {
+	const { storyId } = Route.useParams();
+
+	return (
+		<ErrorBoundary fallback={<StoryError />}>
+			<Suspense fallback={<StoryContentSkeleton />}>
+				<StoryContent storyId={storyId} />
+			</Suspense>
+		</ErrorBoundary>
 	);
 }
