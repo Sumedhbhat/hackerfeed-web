@@ -1,4 +1,4 @@
-import { useQueries } from "@tanstack/react-query";
+import { useSuspenseQueries } from "@tanstack/react-query";
 import { useState } from "react";
 import {
 	commentQueryOptions,
@@ -24,7 +24,7 @@ export type UseCommentReturn = {
 	repliesOpen: boolean;
 	setRepliesOpen: (value: boolean | ((prev: boolean) => boolean)) => void;
 	childQueries: ReturnType<
-		typeof useQueries<ReturnType<typeof commentQueryOptions>[]>
+		typeof useSuspenseQueries<ReturnType<typeof commentQueryOptions>[]>
 	>;
 	age: string;
 	replyCount: number;
@@ -38,7 +38,7 @@ export function useComment(
 	const [collapsed, setCollapsed] = useState(false);
 	const [repliesOpen, setRepliesOpen] = useState(false);
 
-	const childQueries = useQueries({
+	const childQueries = useSuspenseQueries({
 		queries: repliesOpen
 			? comment.kids.map((id) => commentQueryOptions(id))
 			: [],

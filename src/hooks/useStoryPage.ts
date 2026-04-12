@@ -1,4 +1,4 @@
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useSuspenseQueries, useSuspenseQuery } from "@tanstack/react-query";
 import {
 	commentQueryOptions,
 	type HackerNewsStoryRecord,
@@ -6,21 +6,18 @@ import {
 } from "#/lib/hacker-news/queries";
 
 export type UseStoryPageReturn = {
-	story: HackerNewsStoryRecord | null | undefined;
+	story: HackerNewsStoryRecord | null;
 	commentQueries: ReturnType<
-		typeof useQueries<ReturnType<typeof commentQueryOptions>[]>
+		typeof useSuspenseQueries<ReturnType<typeof commentQueryOptions>[]>
 	>;
-	allLoaded: boolean;
 };
 
 export function useStoryPage(storyId: number): UseStoryPageReturn {
-	const { data: story } = useQuery(storyQueryOptions(storyId));
+	const { data: story } = useSuspenseQuery(storyQueryOptions(storyId));
 
-	const commentQueries = useQueries({
+	const commentQueries = useSuspenseQueries({
 		queries: (story?.kids ?? []).map((id) => commentQueryOptions(id)),
 	});
 
-	const allLoaded = commentQueries.every((q) => !q.isPending);
-
-	return { story, commentQueries, allLoaded };
+	return { story, commentQueries };
 }
