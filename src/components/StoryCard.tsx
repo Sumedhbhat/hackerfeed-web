@@ -76,7 +76,7 @@ export function StoryCard({ story, animationDelay }: StoryCardProps) {
 						</button>
 
 						<Link
-							to="/item/$storyId"
+							to="/story/$storyId"
 							params={{ storyId: story.id }}
 							className="text-sm text-(--sea-ink-soft) hover:text-(--sea-ink-soft)"
 						>

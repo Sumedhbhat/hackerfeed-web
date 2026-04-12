@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import { StoryCard, StoryCardSkeleton } from "#/components/StoryCard";
 import {
 	feedStoryIdsQueryOptions,
-	type HackerNewsFeedKey,
+	HackerNewsFeedKey,
 	PAGE_SIZE,
-	storyItemQueryOptions,
+	storyQueryOptions,
 } from "#/lib/hacker-news/queries";
 
 const SKELETON_KEYS = Array.from(
@@ -18,13 +18,13 @@ export const Route = createFileRoute("/")({
 	component: App,
 	loader: async ({ context }) => {
 		const ids = await context.queryClient.ensureQueryData(
-			feedStoryIdsQueryOptions("top"),
+			feedStoryIdsQueryOptions(HackerNewsFeedKey.Top),
 		);
 		await Promise.all(
 			ids
 				.slice(0, PAGE_SIZE)
 				.map((id) =>
-					context.queryClient.ensureQueryData(storyItemQueryOptions(id)),
+					context.queryClient.ensureQueryData(storyQueryOptions(id)),
 				),
 		);
 	},
@@ -35,20 +35,19 @@ const feedTabs: Array<{
 	label: string;
 	title: string;
 }> = [
-	{ key: "top", label: "Top", title: "Top stories" },
-	{ key: "new", label: "New", title: "New stories" },
-	{ key: "best", label: "Best", title: "Best stories" },
+	{ key: HackerNewsFeedKey.Top, label: "Top", title: "Top stories" },
+	{ key: HackerNewsFeedKey.New, label: "New", title: "New stories" },
+	{ key: HackerNewsFeedKey.Best, label: "Best", title: "Best stories" },
 ];
 
 export function App() {
-	const [activeFeed, setActiveFeed] = useState<HackerNewsFeedKey>("top");
+	const [activeFeed, setActiveFeed] = useState<HackerNewsFeedKey>(
+		HackerNewsFeedKey.Top,
+	);
 	const [loadedCounts, setLoadedCounts] = useState<
 		Record<HackerNewsFeedKey, number>
 	>({ top: PAGE_SIZE, new: PAGE_SIZE, best: PAGE_SIZE });
 
-	// Tracks how many items have been fully batch-committed (all settled together).
-	// Items below this index render as cards; items at or above render as skeletons
-	// until the whole current batch settles, then flip to cards all at once.
 	const [committedCounts, setCommittedCounts] = useState<
 		Record<HackerNewsFeedKey, number>
 	>({ top: 0, new: 0, best: 0 });
@@ -64,13 +63,13 @@ export function App() {
 	const hasMore = allIds.length > loadedCount;
 	const nextBatchSize = Math.min(allIds.length - loadedCount, PAGE_SIZE);
 
-	const itemQueries = useQueries({
-		queries: displayedIds.map((id) => storyItemQueryOptions(id)),
+	const storyQueries = useQueries({
+		queries: displayedIds.map((id) => storyQueryOptions(id)),
 	});
 
-	const isAnyItemLoading = itemQueries.some((q) => q.isPending);
+	const isAnyStoryLoading = storyQueries.some((q) => q.isPending);
 	const allDisplayedSettled =
-		itemQueries.length > 0 && itemQueries.every((q) => !q.isPending);
+		storyQueries.length > 0 && storyQueries.every((q) => !q.isPending);
 
 	useEffect(() => {
 		if (allDisplayedSettled && displayedIds.length > 0) {
@@ -138,7 +137,7 @@ export function App() {
 					<>
 						<div className="space-y-3">
 							{displayedIds.map((storyId, positionIndex) => {
-								const query = itemQueries[positionIndex];
+								const query = storyQueries[positionIndex];
 
 								// Items below committedCount were settled in a previous batch — always show as cards.
 								// Items at or above committedCount are in the current loading batch:
@@ -167,10 +166,10 @@ export function App() {
 								<button
 									type="button"
 									onClick={loadMore}
-									disabled={isAnyItemLoading}
+									disabled={isAnyStoryLoading}
 									className="border border-(--chip-line) rounded px-5 py-2 text-sm font-medium text-(--sea-ink-soft) hover:text-(--sea-ink) hover:border-(--sea-ink-soft) disabled:cursor-not-allowed disabled:opacity-40 transition-colors"
 								>
-									{isAnyItemLoading
+									{isAnyStoryLoading
 										? "Loading\u2026"
 										: `Load ${nextBatchSize} more`}
 								</button>

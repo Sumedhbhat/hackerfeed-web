@@ -2,8 +2,8 @@ import { useQueries, useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Comment, CommentSkeleton } from "#/components/Comment";
 import {
-	commentItemQueryOptions,
-	storyItemQueryOptions,
+	commentQueryOptions,
+	storyQueryOptions,
 } from "#/lib/hacker-news/queries";
 import {
 	formatStoryAge,
@@ -12,7 +12,7 @@ import {
 	getStoryTitle,
 } from "#/lib/hacker-news/utils";
 
-export const Route = createFileRoute("/item/$storyId")({
+export const Route = createFileRoute("/story/$storyId")({
 	params: {
 		parse: (raw) => ({ storyId: Number(raw.storyId) }),
 		stringify: (params) => ({ storyId: String(params.storyId) }),
@@ -21,7 +21,7 @@ export const Route = createFileRoute("/item/$storyId")({
 		const { storyId } = params;
 
 		const story = await context.queryClient.ensureQueryData(
-			storyItemQueryOptions(storyId),
+			storyQueryOptions(storyId),
 		);
 
 		if (!story) throw notFound();
@@ -29,13 +29,13 @@ export const Route = createFileRoute("/item/$storyId")({
 		// Warm top-level comments in parallel; don't let one failure block the page
 		await Promise.allSettled(
 			story.kids.map((id) =>
-				context.queryClient.ensureQueryData(commentItemQueryOptions(id)),
+				context.queryClient.ensureQueryData(commentQueryOptions(id)),
 			),
 		);
 
 		return story;
 	},
-	component: ItemPage,
+	component: StoryPage,
 	notFoundComponent: () => (
 		<main className="page-wrap px-4 pt-10 pb-14">
 			<p className="island-kicker mb-3">Not found</p>
@@ -52,12 +52,12 @@ export const Route = createFileRoute("/item/$storyId")({
 	),
 });
 
-function ItemPage() {
+function StoryPage() {
 	const { storyId } = Route.useParams();
-	const { data: story } = useQuery(storyItemQueryOptions(storyId));
+	const { data: story } = useQuery(storyQueryOptions(storyId));
 
 	const commentQueries = useQueries({
-		queries: (story?.kids ?? []).map((id) => commentItemQueryOptions(id)),
+		queries: (story?.kids ?? []).map((id) => commentQueryOptions(id)),
 	});
 
 	if (!story) return null;

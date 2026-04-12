@@ -5,9 +5,11 @@ const DEFAULT_FEED_STORY_LIMIT = 12;
 
 export const PAGE_SIZE = 12;
 
-export const hackerNewsFeedKeys = ["top", "new", "best"] as const;
-
-export type HackerNewsFeedKey = (typeof hackerNewsFeedKeys)[number];
+export enum HackerNewsFeedKey {
+	Top = "top",
+	New = "new",
+	Best = "best",
+}
 
 export type HackerNewsStoryRecord = {
 	by: string | null;
@@ -34,7 +36,7 @@ export type HackerNewsCommentRecord = {
 	dead: boolean;
 };
 
-type HackerNewsItemResponse = {
+type HackerNewsStoryResponse = {
 	by?: string;
 	dead?: boolean;
 	deleted?: boolean;
@@ -81,8 +83,8 @@ function normalizeStoryIds(payload: unknown): number[] {
 		.filter((value) => Number.isInteger(value) && value > 0);
 }
 
-function normalizeStoryItem(
-	payload: HackerNewsItemResponse | null,
+function normalizeStory(
+	payload: HackerNewsStoryResponse | null,
 ): HackerNewsStoryRecord | null {
 	if (!payload || payload.type !== "story" || payload.deleted || payload.dead) {
 		return null;
@@ -126,8 +128,8 @@ function normalizeStoryItem(
 	};
 }
 
-function normalizeCommentItem(
-	payload: HackerNewsItemResponse | null,
+function normalizeComment(
+	payload: HackerNewsStoryResponse | null,
 ): HackerNewsCommentRecord | null {
 	if (!payload || payload.type !== "comment") return null;
 
@@ -163,16 +165,16 @@ export async function fetchFeedStoryIds(
 	);
 }
 
-export async function fetchStoryItem(
+export async function fetchStory(
 	storyId: number,
 	signal?: AbortSignal,
 ): Promise<HackerNewsStoryRecord | null> {
-	const payload = await fetchJson<HackerNewsItemResponse | null>(
+	const payload = await fetchJson<HackerNewsStoryResponse | null>(
 		`/item/${storyId}.json`,
 		signal,
 	);
 
-	return normalizeStoryItem(payload);
+	return normalizeStory(payload);
 }
 
 export async function fetchFeedStories(
@@ -185,7 +187,7 @@ export async function fetchFeedStories(
 	const ids = await fetchFeedStoryIds(feed, signal);
 	const selectedIds = ids.slice(0, Math.max(limit, 0));
 	const stories = await Promise.all(
-		selectedIds.map((storyId) => fetchStoryItem(storyId, signal)),
+		selectedIds.map((storyId) => fetchStory(storyId, signal)),
 	);
 
 	return {
@@ -205,29 +207,29 @@ export function feedStoryIdsQueryOptions(feed: HackerNewsFeedKey) {
 	});
 }
 
-export function storyItemQueryOptions(storyId: number) {
+export function storyQueryOptions(storyId: number) {
 	return queryOptions({
 		queryKey: ["hacker-news", "story", storyId],
-		queryFn: ({ signal }) => fetchStoryItem(storyId, signal),
+		queryFn: ({ signal }) => fetchStory(storyId, signal),
 		staleTime: 300_000,
 	});
 }
 
-export async function fetchCommentItem(
+export async function fetchComment(
 	commentId: number,
 	signal?: AbortSignal,
 ): Promise<HackerNewsCommentRecord | null> {
-	const payload = await fetchJson<HackerNewsItemResponse | null>(
+	const payload = await fetchJson<HackerNewsStoryResponse | null>(
 		`/item/${commentId}.json`,
 		signal,
 	);
-	return normalizeCommentItem(payload);
+	return normalizeComment(payload);
 }
 
-export function commentItemQueryOptions(commentId: number) {
+export function commentQueryOptions(commentId: number) {
 	return queryOptions({
 		queryKey: ["hacker-news", "comment", commentId],
-		queryFn: ({ signal }) => fetchCommentItem(commentId, signal),
+		queryFn: ({ signal }) => fetchComment(commentId, signal),
 		staleTime: 300_000,
 	});
 }

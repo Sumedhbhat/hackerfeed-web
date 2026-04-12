@@ -1,7 +1,7 @@
 import { useQueries } from "@tanstack/react-query";
 import { useState } from "react";
 import {
-	commentItemQueryOptions,
+	commentQueryOptions,
 	type HackerNewsCommentRecord,
 } from "#/lib/hacker-news/queries";
 import { formatStoryAge } from "#/lib/hacker-news/utils";
@@ -51,7 +51,7 @@ export function Comment({ comment, depth = 0 }: CommentProps) {
 
 	const childQueries = useQueries({
 		queries: repliesOpen
-			? comment.kids.map((id) => commentItemQueryOptions(id))
+			? comment.kids.map((id) => commentQueryOptions(id))
 			: [],
 	});
 
