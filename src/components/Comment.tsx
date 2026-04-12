@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { useComment } from "#/hooks/useComment";
 import type { HackerNewsCommentRecord } from "#/lib/hacker-news/queries";
 
@@ -68,7 +69,7 @@ export function Comment({ comment, depth = 0 }: CommentProps) {
 						className="ml-auto text-xs text-(--sea-ink-soft) opacity-50 hover:opacity-100 transition-opacity"
 						aria-label={collapsed ? "Expand comment" : "Collapse comment"}
 					>
-						{collapsed ? "[+]" : "[–]"}
+						{collapsed ? "[+]" : "[\u2013]"}
 					</button>
 				)}
 			</div>
@@ -97,18 +98,30 @@ export function Comment({ comment, depth = 0 }: CommentProps) {
 						</button>
 					)}
 
-					{/* Nested replies */}
+					{/* Nested replies — wrapped in Suspense so parent comment isn't affected while loading */}
 					{repliesOpen && (
-						<div className="mt-3 space-y-0">
-							{childQueries.map((q, i) => {
-								if (q.isPending)
-									return <CommentSkeleton key={comment.kids[i]} />;
-								if (!q.data) return null;
-								return (
-									<Comment key={q.data.id} comment={q.data} depth={depth + 1} />
-								);
-							})}
-						</div>
+						<Suspense
+							fallback={
+								<div className="space-y-1">
+									{comment.kids.map((id) => (
+										<CommentSkeleton key={id} />
+									))}
+								</div>
+							}
+						>
+							<div className="mt-3 space-y-0">
+								{childQueries.map((q) => {
+									if (!q.data) return null;
+									return (
+										<Comment
+											key={q.data.id}
+											comment={q.data}
+											depth={depth + 1}
+										/>
+									);
+								})}
+							</div>
+						</Suspense>
 					)}
 				</>
 			)}

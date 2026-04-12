@@ -5,15 +5,17 @@ type UserOrNull = ReturnType<typeof useAuth>["user"];
 
 export const useUser = (): UserOrNull => {
 	const { user, isLoading, signIn } = useAuth();
-	const location = useEffectEvent(() => window.location);
+	const onUnauthenticated = useEffectEvent(() => {
+		signIn({
+			state: { returnTo: window.location.pathname },
+		});
+	});
 
 	useEffect(() => {
 		if (!isLoading && !user) {
-			signIn({
-				state: { returnTo: location().pathname },
-			});
+			onUnauthenticated();
 		}
-	}, [isLoading, user, signIn]);
+	}, [isLoading, user]);
 
 	return user;
 };

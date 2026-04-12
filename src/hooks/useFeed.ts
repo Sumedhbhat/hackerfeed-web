@@ -1,5 +1,5 @@
-import { useQueries, useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useSuspenseQueries, useSuspenseQuery } from "@tanstack/react-query";
+import { useState, useTransition } from "react";
 import {
 	feedStoryIdsQueryOptions,
 	HackerNewsFeedKey,
@@ -7,18 +7,16 @@ import {
 	storyQueryOptions,
 } from "#/lib/hacker-news/queries";
 
-export type FeedStatus = "loading" | "error" | "empty" | "ready";
+export type FeedStatus = "empty" | "ready";
 
 export type UseFeedReturn = {
 	activeFeed: HackerNewsFeedKey;
 	setActiveFeed: (feed: HackerNewsFeedKey) => void;
+	isPending: boolean;
 	displayedIds: number[];
 	storyQueries: ReturnType<
-		typeof useQueries<ReturnType<typeof storyQueryOptions>[]>
+		typeof useSuspenseQueries<ReturnType<typeof storyQueryOptions>[]>
 	>;
-	committedCount: number;
-	allDisplayedSettled: boolean;
-	isAnyStoryLoading: boolean;
 	hasMore: boolean;
 	nextBatchSize: number;
 	activeStatus: FeedStatus;
@@ -29,53 +27,41 @@ export type UseFeedReturn = {
 export function useFeed(
 	initialFeed: HackerNewsFeedKey = HackerNewsFeedKey.Top,
 ): UseFeedReturn {
-	const [activeFeed, setActiveFeed] = useState<HackerNewsFeedKey>(initialFeed);
+	const [activeFeed, setActiveFeedState] =
+		useState<HackerNewsFeedKey>(initialFeed);
 	const [loadedCounts, setLoadedCounts] = useState<
 		Record<HackerNewsFeedKey, number>
 	>({ top: PAGE_SIZE, new: PAGE_SIZE, best: PAGE_SIZE });
-	const [committedCounts, setCommittedCounts] = useState<
-		Record<HackerNewsFeedKey, number>
-	>({ top: 0, new: 0, best: 0 });
 
-	const committedCount = committedCounts[activeFeed];
+	const [isPending, startTransition] = useTransition();
+
 	const loadedCount = loadedCounts[activeFeed];
 
-	const idsQuery = useQuery(feedStoryIdsQueryOptions(activeFeed));
+	const idsQuery = useSuspenseQuery(feedStoryIdsQueryOptions(activeFeed));
 	const allIds = idsQuery.data ?? [];
 	const displayedIds = allIds.slice(0, loadedCount);
 	const hasMore = allIds.length > loadedCount;
 	const nextBatchSize = Math.min(allIds.length - loadedCount, PAGE_SIZE);
 
-	const storyQueries = useQueries({
+	const storyQueries = useSuspenseQueries({
 		queries: displayedIds.map((id) => storyQueryOptions(id)),
 	});
 
-	const isAnyStoryLoading = storyQueries.some((q) => q.isPending);
-	const allDisplayedSettled =
-		storyQueries.length > 0 && storyQueries.every((q) => !q.isPending);
+	const activeStatus: FeedStatus = allIds.length === 0 ? "empty" : "ready";
 
-	useEffect(() => {
-		if (allDisplayedSettled && displayedIds.length > 0) {
-			setCommittedCounts((prev) => ({
-				...prev,
-				[activeFeed]: displayedIds.length,
-			}));
-		}
-	}, [allDisplayedSettled, displayedIds.length, activeFeed]);
-
-	const activeStatus: FeedStatus = idsQuery.isPending
-		? "loading"
-		: idsQuery.isError
-			? "error"
-			: allIds.length === 0
-				? "empty"
-				: "ready";
+	const setActiveFeed = (feed: HackerNewsFeedKey) => {
+		startTransition(() => {
+			setActiveFeedState(feed);
+		});
+	};
 
 	const loadMore = () => {
-		setLoadedCounts((prev) => ({
-			...prev,
-			[activeFeed]: prev[activeFeed] + PAGE_SIZE,
-		}));
+		startTransition(() => {
+			setLoadedCounts((prev) => ({
+				...prev,
+				[activeFeed]: prev[activeFeed] + PAGE_SIZE,
+			}));
+		});
 	};
 
 	const refetch = () => {
@@ -85,11 +71,9 @@ export function useFeed(
 	return {
 		activeFeed,
 		setActiveFeed,
+		isPending,
 		displayedIds,
 		storyQueries,
-		committedCount,
-		allDisplayedSettled,
-		isAnyStoryLoading,
 		hasMore,
 		nextBatchSize,
 		activeStatus,
