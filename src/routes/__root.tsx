@@ -6,10 +6,12 @@ import {
 	Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { AuthKitProvider, useAuth } from "@workos-inc/authkit-react";
 import { useEffect } from "react";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
-
+import { env } from "../env";
+import { useUser } from "../hooks/useUser";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 import TanStackQueryProvider from "../integrations/tanstack-query/root-provider";
 import appCss from "../styles.css?url";
@@ -71,6 +73,25 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 	shellComponent: RootDocument,
 });
 
+function AuthGuard({ children }: { children: React.ReactNode }) {
+	const user = useUser();
+	const { isLoading } = useAuth();
+
+	if (isLoading) {
+		return (
+			<div className="flex min-h-[60vh] items-center justify-center">
+				<div className="h-8 w-8 animate-spin rounded-full border-2 border-(--chip-line) border-t-(--lagoon)" />
+			</div>
+		);
+	}
+
+	if (!user) {
+		return null;
+	}
+
+	return <>{children}</>;
+}
+
 function RootDocument({ children }: { children: React.ReactNode }) {
 	useEffect(() => {
 		if ("serviceWorker" in navigator) {
@@ -86,24 +107,32 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				<script src="/theme-init.js" />
 				<HeadContent />
 			</head>
-			<body className="font-sans antialiased [overflow-wrap:anywhere] selection:bg-[rgba(79,184,178,0.24)]">
-				<TanStackQueryProvider>
-					<Header />
-					{children}
-					<Footer />
-					<TanStackDevtools
-						config={{
-							position: "bottom-right",
-						}}
-						plugins={[
-							{
-								name: "Tanstack Router",
-								render: <TanStackRouterDevtoolsPanel />,
-							},
-							TanStackQueryDevtools,
-						]}
-					/>
-				</TanStackQueryProvider>
+			<body className="font-sans antialiased wrap-anywhere selection:bg-[rgba(79,184,178,0.24)]">
+				<AuthKitProvider
+					clientId={env.VITE_WORKOS_CLIENT_ID}
+					apiHostname={env.VITE_WORKOS_API_HOSTNAME}
+					redirectUri={env.VITE_WORKOS_REDIRECT_URI}
+				>
+					<TanStackQueryProvider>
+						<AuthGuard>
+							<Header />
+							{children}
+							<Footer />
+						</AuthGuard>
+						<TanStackDevtools
+							config={{
+								position: "bottom-right",
+							}}
+							plugins={[
+								{
+									name: "Tanstack Router",
+									render: <TanStackRouterDevtoolsPanel />,
+								},
+								TanStackQueryDevtools,
+							]}
+						/>
+					</TanStackQueryProvider>
+				</AuthKitProvider>
 				<Scripts />
 			</body>
 		</html>

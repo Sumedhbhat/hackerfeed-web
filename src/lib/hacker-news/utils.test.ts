@@ -4,7 +4,6 @@ import {
 	formatStoryAge,
 	getDiscussionUrl,
 	getStoryDomain,
-	getStorySummary,
 	getStoryTitle,
 	stripHtml,
 } from "#/lib/hacker-news/utils";
@@ -109,27 +108,6 @@ describe("getStoryTitle", () => {
 	it("returns fallback for empty title", () => {
 		const story = makeStory({ title: "   " });
 		expect(getStoryTitle(story)).toBe("Untitled Hacker News story");
-	});
-});
-
-// ---------------------------------------------------------------------------
-// getStorySummary
-// ---------------------------------------------------------------------------
-
-describe("getStorySummary", () => {
-	it("returns text preview when story has text", () => {
-		const story = makeStory({ text: "<p>Some story body text here.</p>" });
-		expect(getStorySummary(story)).toBe("Some story body text here.");
-	});
-
-	it("returns article fallback when no text but has URL", () => {
-		const story = makeStory({ text: null, url: "https://example.com" });
-		expect(getStorySummary(story)).toContain("article");
-	});
-
-	it("returns discussion fallback for URL-less posts", () => {
-		const story = makeStory({ text: null, url: null });
-		expect(getStorySummary(story)).toContain("Hacker News");
 	});
 });
 

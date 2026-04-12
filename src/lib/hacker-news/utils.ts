@@ -58,20 +58,6 @@ export function getStoryDomain(url: string | null): string {
 	}
 }
 
-export function getStorySummary(story: HackerNewsStoryRecord): string {
-	const textPreview = stripHtml(story.text).slice(0, 160);
-
-	if (textPreview.length > 0) {
-		return textPreview;
-	}
-
-	if (story.url) {
-		return "Open the source article or jump straight into the Hacker News thread.";
-	}
-
-	return "This post lives entirely on Hacker News, so the discussion link is the primary reading path.";
-}
-
 export function getStoryTitle(story: HackerNewsStoryRecord): string {
 	return story.title?.trim() || "Untitled Hacker News story";
 }
