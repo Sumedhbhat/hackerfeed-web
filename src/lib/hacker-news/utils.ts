@@ -49,7 +49,13 @@ export function getStoryDomain(url: string | null): string {
 		return "news.ycombinator.com";
 	}
 
-	return new URL(url).hostname.replace(/^www\./, "") || "news.ycombinator.com";
+	try {
+		return (
+			new URL(url).hostname.replace(/^www\./, "") || "news.ycombinator.com"
+		);
+	} catch {
+		return "news.ycombinator.com";
+	}
 }
 
 export function getStoryTitle(story: HackerNewsStoryRecord): string {
