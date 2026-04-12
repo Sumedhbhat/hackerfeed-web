@@ -11,7 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ItemStoryIdRouteImport } from './routes/item.$storyId'
+import { Route as StoryStoryIdRouteImport } from './routes/story.$storyId'
+import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 
 const FavoritesRoute = FavoritesRouteImport.update({
   id: '/favorites',
@@ -23,40 +24,49 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ItemStoryIdRoute = ItemStoryIdRouteImport.update({
-  id: '/item/$storyId',
-  path: '/item/$storyId',
+const StoryStoryIdRoute = StoryStoryIdRouteImport.update({
+  id: '/story/$storyId',
+  path: '/story/$storyId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/favorites': typeof FavoritesRoute
-  '/item/$storyId': typeof ItemStoryIdRoute
+  '/auth/callback': typeof AuthCallbackRoute
+  '/story/$storyId': typeof StoryStoryIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/favorites': typeof FavoritesRoute
-  '/item/$storyId': typeof ItemStoryIdRoute
+  '/auth/callback': typeof AuthCallbackRoute
+  '/story/$storyId': typeof StoryStoryIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/favorites': typeof FavoritesRoute
-  '/item/$storyId': typeof ItemStoryIdRoute
+  '/auth/callback': typeof AuthCallbackRoute
+  '/story/$storyId': typeof StoryStoryIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/favorites' | '/item/$storyId'
+  fullPaths: '/' | '/favorites' | '/auth/callback' | '/story/$storyId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/favorites' | '/item/$storyId'
-  id: '__root__' | '/' | '/favorites' | '/item/$storyId'
+  to: '/' | '/favorites' | '/auth/callback' | '/story/$storyId'
+  id: '__root__' | '/' | '/favorites' | '/auth/callback' | '/story/$storyId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   FavoritesRoute: typeof FavoritesRoute
-  ItemStoryIdRoute: typeof ItemStoryIdRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
+  StoryStoryIdRoute: typeof StoryStoryIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -75,11 +85,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/item/$storyId': {
-      id: '/item/$storyId'
-      path: '/item/$storyId'
-      fullPath: '/item/$storyId'
-      preLoaderRoute: typeof ItemStoryIdRouteImport
+    '/story/$storyId': {
+      id: '/story/$storyId'
+      path: '/story/$storyId'
+      fullPath: '/story/$storyId'
+      preLoaderRoute: typeof StoryStoryIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -88,7 +105,8 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   FavoritesRoute: FavoritesRoute,
-  ItemStoryIdRoute: ItemStoryIdRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
+  StoryStoryIdRoute: StoryStoryIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
