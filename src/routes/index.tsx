@@ -199,7 +199,7 @@ function FeedPane({ feed }: FeedPaneProps) {
 // App — root component
 // ---------------------------------------------------------------------------
 
-export function App() {
+function App() {
 	const [activeFeed, setActiveFeedState] = useState<HackerNewsFeedKey>(
 		HackerNewsFeedKey.Top,
 	);
