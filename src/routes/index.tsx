@@ -16,6 +16,7 @@ import {
 	PAGE_SIZE,
 	storyQueryOptions,
 } from "#/lib/hacker-news/queries";
+import { logger } from "#/lib/logger";
 
 const SKELETON_KEYS = Array.from(
 	{ length: PAGE_SIZE },
@@ -25,16 +26,25 @@ const SKELETON_KEYS = Array.from(
 export const Route = createFileRoute("/")({
 	component: App,
 	loader: async ({ context }) => {
-		const ids = await context.queryClient.ensureQueryData(
-			feedStoryIdsQueryOptions(HackerNewsFeedKey.Top),
-		);
-		await Promise.all(
-			ids
-				.slice(0, PAGE_SIZE)
-				.map((id) =>
-					context.queryClient.ensureQueryData(storyQueryOptions(id)),
-				),
-		);
+		try {
+			const ids = await context.queryClient.ensureQueryData(
+				feedStoryIdsQueryOptions(HackerNewsFeedKey.Top),
+			);
+			await Promise.all(
+				ids
+					.slice(0, PAGE_SIZE)
+					.map((id) =>
+						context.queryClient.ensureQueryData(storyQueryOptions(id)),
+					),
+			);
+		} catch (err) {
+			logger.error("Feed loader failed", {
+				feed: HackerNewsFeedKey.Top,
+				err: err instanceof Error ? err.message : String(err),
+				stack: err instanceof Error ? err.stack : undefined,
+			});
+			throw err;
+		}
 	},
 });
 
@@ -101,7 +111,6 @@ function FeedError({ feed, onRetry }: FeedErrorProps) {
 		</article>
 	);
 }
-
 // ---------------------------------------------------------------------------
 // FeedPane — one instance per Activity boundary
 // ---------------------------------------------------------------------------
@@ -190,7 +199,7 @@ function FeedPane({ feed }: FeedPaneProps) {
 // App — root component
 // ---------------------------------------------------------------------------
 
-export function App() {
+function App() {
 	const [activeFeed, setActiveFeedState] = useState<HackerNewsFeedKey>(
 		HackerNewsFeedKey.Top,
 	);
@@ -241,14 +250,9 @@ export function App() {
 						mode={activeFeed === feed.key ? "visible" : "hidden"}
 					>
 						<ErrorBoundary
-							fallback={
-								<FeedError
-									feed={feed}
-									onRetry={() => {
-										/* resetBoundary is handled by resetKeys */
-									}}
-								/>
-							}
+							fallbackRender={({ resetErrorBoundary }) => (
+								<FeedError feed={feed} onRetry={resetErrorBoundary} />
+							)}
 							resetKeys={[feed.key]}
 						>
 							<Suspense fallback={<FeedSkeletons />}>

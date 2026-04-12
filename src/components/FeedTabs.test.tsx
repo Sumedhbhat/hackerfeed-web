@@ -62,7 +62,9 @@ vi.mock("#/lib/open-link", () => ({ openLink: vi.fn() }));
 // Import the component under test AFTER mocks are registered.
 // ---------------------------------------------------------------------------
 
-import { App as FeedApp } from "#/routes/index";
+import { Route } from "#/routes/index";
+
+const FeedApp = Route.component as React.ComponentType;
 
 // ---------------------------------------------------------------------------
 // Mock data helpers

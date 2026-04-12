@@ -13,6 +13,7 @@ import {
 	getStoryDomain,
 	getStoryTitle,
 } from "#/lib/hacker-news/utils";
+import { logger } from "#/lib/logger";
 
 export const Route = createFileRoute("/story/$storyId")({
 	params: {
@@ -22,20 +23,39 @@ export const Route = createFileRoute("/story/$storyId")({
 	loader: async ({ context, params }) => {
 		const { storyId } = params;
 
-		const story = await context.queryClient.ensureQueryData(
-			storyQueryOptions(storyId),
-		);
+		try {
+			const story = await context.queryClient.ensureQueryData(
+				storyQueryOptions(storyId),
+			);
 
-		if (!story) throw notFound();
+			if (!story) throw notFound();
 
-		// Warm top-level comments in parallel; don't let one failure block the page
-		await Promise.allSettled(
-			story.kids.map((id) =>
-				context.queryClient.ensureQueryData(commentQueryOptions(id)),
-			),
-		);
+			// Warm top-level comments in parallel; don't let one failure block the page
+			await Promise.allSettled(
+				story.kids.map((id) =>
+					context.queryClient.ensureQueryData(commentQueryOptions(id)),
+				),
+			);
 
-		return story;
+			return story;
+		} catch (err) {
+			// notFound() errors are expected — don't log them as errors
+			const isNotFound =
+				err != null &&
+				typeof err === "object" &&
+				"isNotFound" in err &&
+				err.isNotFound === true;
+
+			if (!isNotFound) {
+				logger.error("Story loader failed", {
+					storyId,
+					err: err instanceof Error ? err.message : String(err),
+					stack: err instanceof Error ? err.stack : undefined,
+				});
+			}
+
+			throw err;
+		}
 	},
 	component: StoryPage,
 	notFoundComponent: () => (
