@@ -157,11 +157,7 @@ export function App() {
 								if (!story) return null;
 
 								return (
-									<StoryCard
-										key={`${activeFeed}-${storyId}`}
-										story={story}
-										rank={positionIndex + 1}
-									/>
+									<StoryCard key={`${activeFeed}-${storyId}`} story={story} />
 								);
 							})}
 						</div>

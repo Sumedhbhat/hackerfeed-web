@@ -6,7 +6,6 @@ import {
 	formatStoryAge,
 	getDiscussionUrl,
 	getStoryDomain,
-	getStorySummary,
 	getStoryTitle,
 } from "#/lib/hacker-news/utils";
 import { openLink } from "#/lib/open-link";
@@ -19,17 +18,15 @@ export { StoryCardSkeleton } from "./StoryCardSkeleton";
 
 type StoryCardProps = {
 	story: HackerNewsStoryRecord;
-	rank?: number;
 	animationDelay?: number;
 };
 
-export function StoryCard({ story, rank, animationDelay }: StoryCardProps) {
+export function StoryCard({ story, animationDelay }: StoryCardProps) {
 	const isFav = useStore(favoritesStore, (state) => state.items.has(story.id));
 
 	const domain = getStoryDomain(story.url);
 	const age = formatStoryAge(story.time);
 	const title = getStoryTitle(story);
-	const summary = getStorySummary(story);
 
 	return (
 		<article
@@ -39,15 +36,6 @@ export function StoryCard({ story, rank, animationDelay }: StoryCardProps) {
 			}
 		>
 			<div className="flex gap-5 sm:gap-6">
-				{/* Rank */}
-				{rank !== undefined ? (
-					<div className="hidden flex-none w-7 text-right sm:block pt-0.75">
-						<span className="text-xs font-medium tabular-nums select-none text-(--sea-ink-soft) opacity-35">
-							{String(rank).padStart(2, "0")}
-						</span>
-					</div>
-				) : null}
-
 				<div className="flex-1 min-w-0">
 					{/* Meta row */}
 					<div className="flex flex-wrap gap-1.5 items-center mb-2.5 font-semibold uppercase text-[0.65rem] tracking-[0.12em] text-(--kicker)">
@@ -68,13 +56,6 @@ export function StoryCard({ story, rank, animationDelay }: StoryCardProps) {
 						{title}
 					</h3>
 
-					{/* Summary */}
-					{summary ? (
-						<p className="m-0 mb-4 text-sm leading-relaxed text-(--sea-ink-soft) line-clamp-2">
-							{summary}
-						</p>
-					) : null}
-
 					{/* Stats */}
 					<p className="m-0 mb-4 text-xs opacity-70 text-(--sea-ink-soft)">
 						{story.score} pts
@@ -91,16 +72,13 @@ export function StoryCard({ story, rank, animationDelay }: StoryCardProps) {
 							onClick={() => openLink(story.url ?? getDiscussionUrl(story.id))}
 							className="text-sm font-medium hover:underline text-(--lagoon-deep) underline-offset-2 hover:text-(--lagoon)"
 						>
-							{story.url ? "Read article" : "Open post"}{" "}
-							<span aria-hidden="true" className="opacity-60">
-								&rarr;
-							</span>
+							{story.url ? "Read article" : "Open post"}
 						</button>
 
 						<Link
 							to="/item/$storyId"
 							params={{ storyId: story.id }}
-							className="text-sm text-(--sea-ink-soft) hover:text-(--sea-ink)"
+							className="text-sm text-(--sea-ink-soft) hover:text-(--sea-ink-soft)"
 						>
 							Discussion
 						</Link>

@@ -49,27 +49,7 @@ export function getStoryDomain(url: string | null): string {
 		return "news.ycombinator.com";
 	}
 
-	try {
-		return (
-			new URL(url).hostname.replace(/^www\./, "") || "news.ycombinator.com"
-		);
-	} catch {
-		return "news.ycombinator.com";
-	}
-}
-
-export function getStorySummary(story: HackerNewsStoryRecord): string {
-	const textPreview = stripHtml(story.text).slice(0, 160);
-
-	if (textPreview.length > 0) {
-		return textPreview;
-	}
-
-	if (story.url) {
-		return "Open the source article or jump straight into the Hacker News thread.";
-	}
-
-	return "This post lives entirely on Hacker News, so the discussion link is the primary reading path.";
+	return new URL(url).hostname.replace(/^www\./, "") || "news.ycombinator.com";
 }
 
 export function getStoryTitle(story: HackerNewsStoryRecord): string {
