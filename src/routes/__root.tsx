@@ -14,6 +14,7 @@ import { env } from "../env";
 import { useUser } from "../hooks/useUser";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 import TanStackQueryProvider from "../integrations/tanstack-query/root-provider";
+import { logger } from "../lib/logger";
 import appCss from "../styles.css?url";
 
 interface MyRouterContext {
@@ -70,8 +71,61 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 			},
 		],
 	}),
+	errorComponent: RootError,
 	shellComponent: RootDocument,
 });
+
+// ---------------------------------------------------------------------------
+// RootError — top-level error boundary shown when any loader throws
+// ---------------------------------------------------------------------------
+
+function RootError({ error }: { error: unknown }) {
+	const message =
+		error instanceof Error ? error.message : "An unexpected error occurred.";
+
+	logger.error("Root error boundary triggered", {
+		err: message,
+		stack: error instanceof Error ? error.stack : undefined,
+	});
+
+	return (
+		<main
+			style={{
+				fontFamily: "sans-serif",
+				padding: "2rem",
+				maxWidth: "36rem",
+				margin: "0 auto",
+			}}
+		>
+			<p
+				style={{
+					fontSize: "0.7rem",
+					fontWeight: 700,
+					letterSpacing: "0.1em",
+					textTransform: "uppercase",
+					opacity: 0.5,
+					marginBottom: "0.75rem",
+				}}
+			>
+				Something went wrong
+			</p>
+			<h1
+				style={{ fontSize: "1.25rem", fontWeight: 600, margin: "0 0 0.75rem" }}
+			>
+				HackerFeed couldn&apos;t load.
+			</h1>
+			<p style={{ fontSize: "0.875rem", opacity: 0.7, margin: "0 0 1.5rem" }}>
+				{message}
+			</p>
+			<a
+				href="/"
+				style={{ fontSize: "0.875rem", fontWeight: 500, color: "inherit" }}
+			>
+				Try reloading &rarr;
+			</a>
+		</main>
+	);
+}
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
 	const user = useUser();
@@ -99,6 +153,24 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				.register("/sw.js", { scope: "/" })
 				.catch((err) => console.warn("SW registration failed:", err));
 		}
+
+		function handleUnhandledRejection(event: PromiseRejectionEvent) {
+			logger.error("Unhandled promise rejection", {
+				err:
+					event.reason instanceof Error
+						? event.reason.message
+						: String(event.reason),
+				stack: event.reason instanceof Error ? event.reason.stack : undefined,
+			});
+		}
+
+		window.addEventListener("unhandledrejection", handleUnhandledRejection);
+		return () => {
+			window.removeEventListener(
+				"unhandledrejection",
+				handleUnhandledRejection,
+			);
+		};
 	}, []);
 
 	return (
