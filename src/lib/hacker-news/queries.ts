@@ -1,4 +1,5 @@
 import { queryOptions } from "@tanstack/react-query";
+import { logger } from "#/lib/logger";
 
 const HACKER_NEWS_API_BASE_URL = "https://hacker-news.firebaseio.com/v0";
 const DEFAULT_FEED_STORY_LIMIT = 12;
@@ -59,14 +60,36 @@ type FeedStoriesResult = {
 };
 
 async function fetchJson<T>(path: string, signal?: AbortSignal): Promise<T> {
-	const response = await fetch(`${HACKER_NEWS_API_BASE_URL}${path}`, {
-		headers: {
-			accept: "application/json",
-		},
-		signal,
-	});
+	const url = `${HACKER_NEWS_API_BASE_URL}${path}`;
+	let response: Response;
+
+	try {
+		response = await fetch(url, {
+			headers: {
+				accept: "application/json",
+			},
+			signal,
+		});
+	} catch (err) {
+		logger.error("HN API network error", {
+			url,
+			err: err instanceof Error ? err.message : String(err),
+		});
+		throw err;
+	}
 
 	if (!response.ok) {
+		let body = "";
+		try {
+			body = (await response.text()).slice(0, 500);
+		} catch {
+			// ignore body read failure
+		}
+		logger.error("HN API non-2xx response", {
+			url,
+			status: response.status,
+			body,
+		});
 		throw new Error(`Hacker News request failed with ${response.status}`);
 	}
 
@@ -186,16 +209,31 @@ export async function fetchFeedStories(
 ): Promise<FeedStoriesResult> {
 	const ids = await fetchFeedStoryIds(feed, signal);
 	const selectedIds = ids.slice(0, Math.max(limit, 0));
+
+	logger.info("HN feed story batch start", {
+		feed,
+		requested: selectedIds.length,
+		totalIds: ids.length,
+	});
+
 	const stories = await Promise.all(
 		selectedIds.map((storyId) => fetchStory(storyId, signal)),
 	);
 
+	const nonNull = stories.filter(
+		(story): story is HackerNewsStoryRecord => story !== null,
+	);
+
+	logger.info("HN feed story batch complete", {
+		feed,
+		requested: selectedIds.length,
+		returned: nonNull.length,
+	});
+
 	return {
 		feed,
 		ids: selectedIds,
-		stories: stories.filter(
-			(story): story is HackerNewsStoryRecord => story !== null,
-		),
+		stories: nonNull,
 	};
 }
 
