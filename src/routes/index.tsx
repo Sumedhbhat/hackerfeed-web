@@ -111,7 +111,6 @@ function FeedError({ feed, onRetry }: FeedErrorProps) {
 		</article>
 	);
 }
-
 // ---------------------------------------------------------------------------
 // FeedPane — one instance per Activity boundary
 // ---------------------------------------------------------------------------
@@ -251,14 +250,9 @@ export function App() {
 						mode={activeFeed === feed.key ? "visible" : "hidden"}
 					>
 						<ErrorBoundary
-							fallback={
-								<FeedError
-									feed={feed}
-									onRetry={() => {
-										/* resetBoundary is handled by resetKeys */
-									}}
-								/>
-							}
+							fallbackRender={({ resetErrorBoundary }) => (
+								<FeedError feed={feed} onRetry={resetErrorBoundary} />
+							)}
 							resetKeys={[feed.key]}
 						>
 							<Suspense fallback={<FeedSkeletons />}>
