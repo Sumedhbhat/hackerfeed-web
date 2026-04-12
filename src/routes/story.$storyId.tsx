@@ -1,6 +1,6 @@
-import { useQueries, useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Comment, CommentSkeleton } from "#/components/Comment";
+import { useStoryPage } from "#/hooks/useStoryPage";
 import {
 	commentQueryOptions,
 	storyQueryOptions,
@@ -54,18 +54,13 @@ export const Route = createFileRoute("/story/$storyId")({
 
 function StoryPage() {
 	const { storyId } = Route.useParams();
-	const { data: story } = useQuery(storyQueryOptions(storyId));
-
-	const commentQueries = useQueries({
-		queries: (story?.kids ?? []).map((id) => commentQueryOptions(id)),
-	});
+	const { story, commentQueries, allLoaded } = useStoryPage(storyId);
 
 	if (!story) return null;
 
 	const age = formatStoryAge(story.time);
 	const domain = getStoryDomain(story.url);
 	const title = getStoryTitle(story);
-	const allLoaded = commentQueries.every((q) => !q.isPending);
 
 	return (
 		<main className="page-wrap px-4 pt-6 pb-16 sm:pt-10">

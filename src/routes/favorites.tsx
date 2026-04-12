@@ -1,8 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useStore } from "@tanstack/react-store";
 import { useState } from "react";
 import { StoryCard } from "#/components/StoryCard";
-import { clearAllFavorites, favoritesStore } from "#/lib/favorites-store";
+import { useFavorites } from "#/hooks/useFavorites";
 
 export const Route = createFileRoute("/favorites")({
 	component: FavoritesPage,
@@ -12,18 +11,15 @@ type SortOrder = "newest" | "oldest" | "score";
 
 function FavoritesPage() {
 	const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
+	const { getFavorites, clearAllFavorites, count } = useFavorites();
 
-	const allFavorites = useStore(favoritesStore, (state) =>
-		Array.from(state.items.values()),
-	);
+	const allFavorites = getFavorites();
 
 	const favorites = [...allFavorites].sort((a, b) => {
 		if (sortOrder === "newest") return (b.time ?? 0) - (a.time ?? 0);
 		if (sortOrder === "oldest") return (a.time ?? 0) - (b.time ?? 0);
 		return (b.score ?? 0) - (a.score ?? 0);
 	});
-
-	const count = favorites.length;
 
 	return (
 		<main className="px-4 pt-8 pb-14 sm:pt-10 page-wrap">

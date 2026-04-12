@@ -1,10 +1,5 @@
-import { useQueries } from "@tanstack/react-query";
-import { useState } from "react";
-import {
-	commentQueryOptions,
-	type HackerNewsCommentRecord,
-} from "#/lib/hacker-news/queries";
-import { formatStoryAge } from "#/lib/hacker-news/utils";
+import { useComment } from "#/hooks/useComment";
+import type { HackerNewsCommentRecord } from "#/lib/hacker-news/queries";
 
 // ---------------------------------------------------------------------------
 // Comment skeleton
@@ -21,22 +16,6 @@ export function CommentSkeleton() {
 }
 
 // ---------------------------------------------------------------------------
-// Depth styling
-// ---------------------------------------------------------------------------
-
-const DEPTH_BORDERS = [
-	"",
-	"border-l-2 pl-4 border-(--lagoon)/60",
-	"border-l-2 pl-4 border-(--lagoon)/40",
-	"border-l-2 pl-4 border-(--lagoon)/25",
-	"border-l-2 pl-4 border-(--lagoon)/15",
-];
-
-function depthBorder(depth: number): string {
-	return DEPTH_BORDERS[Math.min(depth, DEPTH_BORDERS.length - 1)] ?? "";
-}
-
-// ---------------------------------------------------------------------------
 // Comment
 // ---------------------------------------------------------------------------
 
@@ -46,22 +25,21 @@ type CommentProps = {
 };
 
 export function Comment({ comment, depth = 0 }: CommentProps) {
-	const [collapsed, setCollapsed] = useState(false);
-	const [repliesOpen, setRepliesOpen] = useState(false);
-
-	const childQueries = useQueries({
-		queries: repliesOpen
-			? comment.kids.map((id) => commentQueryOptions(id))
-			: [],
-	});
-
-	const age = formatStoryAge(comment.time);
-	const replyCount = comment.kids.length;
+	const {
+		collapsed,
+		setCollapsed,
+		repliesOpen,
+		setRepliesOpen,
+		childQueries,
+		age,
+		replyCount,
+		borderClass,
+	} = useComment(comment, depth);
 
 	if (comment.deleted && replyCount === 0) return null;
 
 	return (
-		<div className={`${depthBorder(depth)} py-3`}>
+		<div className={`${borderClass} py-3`}>
 			{/* Header row: author + age + collapse toggle */}
 			<div className="flex items-center gap-2 mb-2">
 				{comment.deleted ? (
