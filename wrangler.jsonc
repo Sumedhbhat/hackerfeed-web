@@ -10,5 +10,16 @@
       "globs": ["sw.js"],
       "fallthrough": true
     }
-  ]
+  ],
+  "vars": {
+    // Optional: server-side base URL
+    "SERVER_URL": "",
+    // Optional: browser tab / page title
+    "VITE_APP_TITLE": "Hacker Feed",
+    // Optional: override WorkOS API hostname (e.g. for custom domains)
+    "VITE_WORKOS_API_HOSTNAME": "api.workos.com",
+    // Required: WorkOS redirect URI after auth
+    "VITE_WORKOS_REDIRECT_URI": "https://hackerfeed-web.kgqk4vdcfq.workers.dev/auth/callback"
+    // VITE_WORKOS_CLIENT_ID is a secret — set via: wrangler secret put VITE_WORKOS_CLIENT_ID
+  }
 }

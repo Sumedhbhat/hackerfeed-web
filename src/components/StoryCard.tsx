@@ -1,6 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useStore } from "@tanstack/react-store";
-import { favoritesStore, toggleFavorite } from "#/lib/favorites-store";
+import { useFavorites } from "#/hooks/useFavorites";
 import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
 import {
 	formatStoryAge,
@@ -22,7 +21,8 @@ type StoryCardProps = {
 };
 
 export function StoryCard({ story, animationDelay }: StoryCardProps) {
-	const isFav = useStore(favoritesStore, (state) => state.items.has(story.id));
+	const { isFavorited, toggleFavorite } = useFavorites();
+	const isFav = isFavorited(story.id);
 
 	const domain = getStoryDomain(story.url);
 	const age = formatStoryAge(story.time);

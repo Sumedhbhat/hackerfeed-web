@@ -1,7 +1,6 @@
-import { useQueries, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
 import { StoryCard, StoryCardSkeleton } from "#/components/StoryCard";
+import { useFeed } from "#/hooks/useFeed";
 import {
 	feedStoryIdsQueryOptions,
 	HackerNewsFeedKey,
@@ -41,59 +40,23 @@ const feedTabs: Array<{
 ];
 
 export function App() {
-	const [activeFeed, setActiveFeed] = useState<HackerNewsFeedKey>(
-		HackerNewsFeedKey.Top,
-	);
-	const [loadedCounts, setLoadedCounts] = useState<
-		Record<HackerNewsFeedKey, number>
-	>({ top: PAGE_SIZE, new: PAGE_SIZE, best: PAGE_SIZE });
-
-	const [committedCounts, setCommittedCounts] = useState<
-		Record<HackerNewsFeedKey, number>
-	>({ top: 0, new: 0, best: 0 });
-	const committedCount = committedCounts[activeFeed];
+	const {
+		activeFeed,
+		setActiveFeed,
+		displayedIds,
+		storyQueries,
+		committedCount,
+		allDisplayedSettled,
+		isAnyStoryLoading,
+		hasMore,
+		nextBatchSize,
+		activeStatus,
+		loadMore,
+		refetch,
+	} = useFeed(HackerNewsFeedKey.Top);
 
 	const activeFeedMeta =
 		feedTabs.find((feed) => feed.key === activeFeed) ?? feedTabs[0];
-	const loadedCount = loadedCounts[activeFeed];
-
-	const idsQuery = useQuery(feedStoryIdsQueryOptions(activeFeed));
-	const allIds = idsQuery.data ?? [];
-	const displayedIds = allIds.slice(0, loadedCount);
-	const hasMore = allIds.length > loadedCount;
-	const nextBatchSize = Math.min(allIds.length - loadedCount, PAGE_SIZE);
-
-	const storyQueries = useQueries({
-		queries: displayedIds.map((id) => storyQueryOptions(id)),
-	});
-
-	const isAnyStoryLoading = storyQueries.some((q) => q.isPending);
-	const allDisplayedSettled =
-		storyQueries.length > 0 && storyQueries.every((q) => !q.isPending);
-
-	useEffect(() => {
-		if (allDisplayedSettled && displayedIds.length > 0) {
-			setCommittedCounts((prev) => ({
-				...prev,
-				[activeFeed]: displayedIds.length,
-			}));
-		}
-	}, [allDisplayedSettled, displayedIds.length, activeFeed]);
-
-	const activeStatus = idsQuery.isPending
-		? "loading"
-		: idsQuery.isError
-			? "error"
-			: allIds.length === 0
-				? "empty"
-				: "ready";
-
-	const loadMore = () => {
-		setLoadedCounts((prev) => ({
-			...prev,
-			[activeFeed]: prev[activeFeed] + PAGE_SIZE,
-		}));
-	};
 
 	return (
 		<main className="page-wrap px-4 pb-10 pt-5 sm:pt-10 sm:pb-14">
@@ -192,7 +155,7 @@ export function App() {
 						<div className="mt-5">
 							<button
 								type="button"
-								onClick={() => idsQuery.refetch()}
+								onClick={refetch}
 								className="text-sm font-medium text-(--lagoon-deep) hover:text-(--lagoon) hover:underline underline-offset-2"
 							>
 								Refresh feed &rarr;
@@ -215,7 +178,7 @@ export function App() {
 						<div className="mt-5 flex flex-wrap gap-4">
 							<button
 								type="button"
-								onClick={() => idsQuery.refetch()}
+								onClick={refetch}
 								className="text-sm font-medium text-(--lagoon-deep) hover:text-(--lagoon) hover:underline underline-offset-2"
 							>
 								Retry &rarr;
