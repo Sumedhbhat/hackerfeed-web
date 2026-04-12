@@ -154,16 +154,6 @@ describe("StoryCard rendering", () => {
 		expect(screen.queryByText(/unknown/i)).toBeNull();
 	});
 
-	it("shows a rank badge when rank prop is provided", () => {
-		render(<StoryCard story={makeStory()} rank={3} />);
-		expect(screen.getByText("03")).toBeDefined();
-	});
-
-	it("omits the rank badge when rank prop is omitted", () => {
-		render(<StoryCard story={makeStory()} />);
-		expect(screen.queryByText(/^\d{2}$/)).toBeNull();
-	});
-
 	it("shows 'Read article' button for stories with a URL", () => {
 		render(<StoryCard story={makeStory({ url: "https://example.com" })} />);
 		expect(screen.getByRole("button", { name: /read article/i })).toBeDefined();

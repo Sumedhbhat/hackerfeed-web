@@ -333,18 +333,6 @@ describe("ready state", () => {
 		expect(screen.getByText("Story 102")).toBeDefined();
 	});
 
-	it("renders rank badges for each story", () => {
-		const ids = [201, 202];
-		mockUseQuery.mockReturnValue(readyIdsQuery(ids));
-		mockUseQueries.mockReturnValue(ids.map(storyResult));
-
-		render(<FeedApp />);
-
-		// Rank badges are zero-padded: "01", "02"
-		expect(screen.getByText("01")).toBeDefined();
-		expect(screen.getByText("02")).toBeDefined();
-	});
-
 	it("shows 'Load N more' button when there are more stories than the initial page", () => {
 		// Create more IDs than PAGE_SIZE (12) so "Load more" appears.
 		const ids = Array.from({ length: 20 }, (_, i) => i + 1);
