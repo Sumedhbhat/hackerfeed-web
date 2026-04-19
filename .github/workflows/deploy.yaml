@@ -26,6 +26,8 @@ jobs:
 
       - name: Build
         run: bun run build
+        env:
+          VITE_WORKOS_CLIENT_ID: ${{ secrets.VITE_WORKOS_CLIENT_ID }}
 
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
