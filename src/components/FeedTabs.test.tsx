@@ -58,6 +58,13 @@ vi.mock("@tanstack/react-query", async (importOriginal) => {
 // Mock openLink to prevent window.open calls.
 vi.mock("#/lib/open-link", () => ({ openLink: vi.fn() }));
 
+vi.mock("#/hooks/useAuthSession", () => ({
+	useAuthSession: () => ({
+		isLoading: false,
+		user: null,
+	}),
+}));
+
 // ---------------------------------------------------------------------------
 // Import the component under test AFTER mocks are registered.
 // ---------------------------------------------------------------------------

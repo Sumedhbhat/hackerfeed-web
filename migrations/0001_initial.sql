@@ -1,0 +1,27 @@
+CREATE TABLE IF NOT EXISTS app_users (
+	id TEXT PRIMARY KEY,
+	workosUserId TEXT NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS stories (
+	id TEXT PRIMARY KEY,
+	hnStoryId INTEGER NOT NULL UNIQUE,
+	title TEXT,
+	url TEXT,
+	text TEXT,
+	score INTEGER NOT NULL DEFAULT 0,
+	hnPostedAt TEXT,
+	authorUsername TEXT,
+	commentCount INTEGER NOT NULL DEFAULT 0,
+	commentIds TEXT NOT NULL DEFAULT '[]'
+);
+
+CREATE TABLE IF NOT EXISTS favorites (
+	id TEXT PRIMARY KEY,
+	appUserId TEXT NOT NULL,
+	storyId TEXT NOT NULL,
+	createdAt TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	FOREIGN KEY (appUserId) REFERENCES app_users (id) ON DELETE CASCADE,
+	FOREIGN KEY (storyId) REFERENCES stories (id) ON DELETE CASCADE,
+	UNIQUE (appUserId, storyId)
+);

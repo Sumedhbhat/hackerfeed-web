@@ -2,18 +2,20 @@ import { useSuspenseQueries, useSuspenseQuery } from "@tanstack/react-query";
 import { useState, useTransition } from "react";
 import {
 	feedStoryIdsQueryOptions,
-	HackerNewsFeedKey,
+	type HackerNewsFeedKey,
 	PAGE_SIZE,
 	storyQueryOptions,
 } from "#/lib/hacker-news/queries";
 
-export type FeedStatus = "empty" | "ready";
+export enum FeedStatus {
+	Empty = "empty",
+	Ready = "ready",
+}
 
 export type UseFeedReturn = {
-	activeFeed: HackerNewsFeedKey;
-	setActiveFeed: (feed: HackerNewsFeedKey) => void;
 	isPending: boolean;
 	displayedIds: number[];
+	nextBatchIds: number[];
 	storyQueries: ReturnType<
 		typeof useSuspenseQueries<ReturnType<typeof storyQueryOptions>[]>
 	>;
@@ -24,43 +26,27 @@ export type UseFeedReturn = {
 	refetch: () => void;
 };
 
-export function useFeed(
-	initialFeed: HackerNewsFeedKey = HackerNewsFeedKey.Top,
-): UseFeedReturn {
-	const [activeFeed, setActiveFeedState] =
-		useState<HackerNewsFeedKey>(initialFeed);
-	const [loadedCounts, setLoadedCounts] = useState<
-		Record<HackerNewsFeedKey, number>
-	>({ top: PAGE_SIZE, new: PAGE_SIZE, best: PAGE_SIZE });
-
+export function useFeed(feed: HackerNewsFeedKey): UseFeedReturn {
+	const [loadedCount, setLoadedCount] = useState(PAGE_SIZE);
 	const [isPending, startTransition] = useTransition();
 
-	const loadedCount = loadedCounts[activeFeed];
-
-	const idsQuery = useSuspenseQuery(feedStoryIdsQueryOptions(activeFeed));
+	const idsQuery = useSuspenseQuery(feedStoryIdsQueryOptions(feed));
 	const allIds = idsQuery.data ?? [];
 	const displayedIds = allIds.slice(0, loadedCount);
 	const hasMore = allIds.length > loadedCount;
 	const nextBatchSize = Math.min(allIds.length - loadedCount, PAGE_SIZE);
+	const nextBatchIds = allIds.slice(loadedCount, loadedCount + PAGE_SIZE);
 
 	const storyQueries = useSuspenseQueries({
 		queries: displayedIds.map((id) => storyQueryOptions(id)),
 	});
 
-	const activeStatus: FeedStatus = allIds.length === 0 ? "empty" : "ready";
-
-	const setActiveFeed = (feed: HackerNewsFeedKey) => {
-		startTransition(() => {
-			setActiveFeedState(feed);
-		});
-	};
+	const activeStatus: FeedStatus =
+		allIds.length === 0 ? FeedStatus.Empty : FeedStatus.Ready;
 
 	const loadMore = () => {
 		startTransition(() => {
-			setLoadedCounts((prev) => ({
-				...prev,
-				[activeFeed]: prev[activeFeed] + PAGE_SIZE,
-			}));
+			setLoadedCount((prev) => prev + PAGE_SIZE);
 		});
 	};
 
@@ -69,10 +55,9 @@ export function useFeed(
 	};
 
 	return {
-		activeFeed,
-		setActiveFeed,
 		isPending,
 		displayedIds,
+		nextBatchIds,
 		storyQueries,
 		hasMore,
 		nextBatchSize,

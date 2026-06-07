@@ -69,7 +69,7 @@ export function Comment({ comment, depth = 0 }: CommentProps) {
 						className="ml-auto text-xs text-(--sea-ink-soft) opacity-50 hover:opacity-100 transition-opacity"
 						aria-label={collapsed ? "Expand comment" : "Collapse comment"}
 					>
-						{collapsed ? "[+]" : "[\u2013]"}
+						{collapsed ? "[+]" : "[-]"}
 					</button>
 				)}
 			</div>

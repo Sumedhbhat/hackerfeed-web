@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { Star } from "lucide-react";
 import { useFavorites } from "#/hooks/useFavorites";
 import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
 import {
@@ -8,8 +9,6 @@ import {
 	getStoryTitle,
 } from "#/lib/hacker-news/utils";
 import { openLink } from "#/lib/open-link";
-
-export { StoryCardSkeleton } from "./StoryCardSkeleton";
 
 // ---------------------------------------------------------------------------
 // Story card
@@ -96,20 +95,23 @@ export function StoryCard({ story, animationDelay }: StoryCardProps) {
 						>
 							{isFav ? (
 								<>
-									<span
+									<Star
 										key="star-filled"
+										size={14}
+										fill="currentColor"
 										aria-hidden="true"
-										className="star-pop"
-									>
-										★
-									</span>{" "}
+										className="inline star-pop"
+									/>{" "}
 									Saved
 								</>
 							) : (
 								<>
-									<span key="star-empty" aria-hidden="true">
-										☆
-									</span>{" "}
+									<Star
+										key="star-empty"
+										size={14}
+										aria-hidden="true"
+										className="inline"
+									/>{" "}
 									Save
 								</>
 							)}

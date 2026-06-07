@@ -1,33 +1,43 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "hackerfeed-web",
-  "compatibility_date": "2025-09-02",
-  "compatibility_flags": ["nodejs_compat"],
-  "main": "@tanstack/react-start/server-entry",
-  "rules": [
-    {
-      "type": "Text",
-      "globs": ["sw.js"],
-      "fallthrough": true
-    }
-  ],
-  "observability": {
-    "enabled": true,
-    "head_sampling_rate": 1,
-    "traces": {
-      "enabled": true,
-      "head_sampling_rate": 1
-    }
-  },
-  "vars": {
-    // Optional: server-side base URL
-    "SERVER_URL": "",
-    // Optional: browser tab / page title
-    "VITE_APP_TITLE": "Hacker Feed",
-    // Optional: override WorkOS API hostname (e.g. for custom domains)
-    "VITE_WORKOS_API_HOSTNAME": "api.workos.com",
-    // Required: WorkOS redirect URI after auth
-    "VITE_WORKOS_REDIRECT_URI": "https://hackerfeed-web.kgqk4vdcfq.workers.dev/auth/callback"
-    // VITE_WORKOS_CLIENT_ID is a secret — set via: wrangler secret put VITE_WORKOS_CLIENT_ID
-  }
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "hackerfeed-web",
+	"compatibility_date": "2025-09-02",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"main": "@tanstack/react-start/server-entry",
+	"observability": {
+		"enabled": true,
+		"head_sampling_rate": 1,
+		"traces": {
+			"enabled": true,
+			"head_sampling_rate": 1
+		}
+	},
+	"vars": {
+		// Optional: server-side base URL
+		"SERVER_URL": "",
+		// Optional: browser tab / page title
+		"VITE_APP_TITLE": "Hacker Feed",
+		// Optional: override WorkOS API hostname (e.g. for custom domains)
+		"VITE_WORKOS_API_HOSTNAME": "api.workos.com",
+		// Required: WorkOS redirect URI after auth
+		"VITE_WORKOS_REDIRECT_URI": "https://hackerfeed-web.kgqk4vdcfq.workers.dev/auth/callback",
+		// Required: WorkOS access-token audience. Set via vars or secret before deploy.
+		// "WORKOS_JWT_AUDIENCE": "your-workos-jwt-audience"
+		// VITE_WORKOS_CLIENT_ID is a secret — set via: wrangler secret put VITE_WORKOS_CLIENT_ID
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "hackerfeed-web",
+			"database_id": "61e6cb7a-29b4-43b6-85af-e82d735a9ed8",
+			"migrations_dir": "migrations"
+		},
+		{
+			"binding": "hackerfeed",
+			"database_name": "hackerfeed",
+			"database_id": "61e6cb7a-29b4-43b6-85af-e82d735a9ed8"
+		}
+	]
 }

@@ -25,6 +25,20 @@ This project uses [Vitest](https://vitest.dev/) for testing. You can run the tes
 bun --bun run test
 ```
 
+## Backend Boundaries
+
+The backend currently lives inside the TanStack Start app, but it should remain separable from the React application so it can later move to an independent API service.
+
+Server-only modules live under `src/server/` and must not be imported by React UI, client hooks, or other browser code. This includes database access in `src/server/database/`, current-user resolution in `src/server/auth/`, user services and repositories in `src/server/users/`, favorites services and repositories in `src/server/favorites/`, and tRPC context, router, and handler modules in `src/server/trpc/`.
+
+React UI and hooks must communicate through the tRPC client. They must not import Prisma, `src/server/database/client.ts`, or repository modules directly. Shared schemas that are safe for both client and server imports live outside `src/server/`, such as `src/lib/favorites/schemas.ts`.
+
+tRPC is the current application boundary. Route handlers should adapt HTTP/tRPC requests to backend services; durable domain behavior belongs in services, and database details belong in repositories.
+
+To keep a future API-service split cheap, services and repositories should stay portable. Avoid dependencies on React, TanStack Router route modules, browser APIs, and TanStack Start UI concerns inside `src/server/` feature code. If the backend is extracted later, these modules should be movable with only boundary wiring changes.
+
+Story freshness is refresh-on-favorite for this rollout. Stale-on-read story refresh is intentionally deferred.
+
 ## Styling
 
 This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
@@ -53,6 +67,7 @@ bun --bun run check
 ## Setting up WorkOS
 
 - Set the `VITE_WORKOS_CLIENT_ID` in your `.env.local`.
+- Set `WORKOS_JWT_AUDIENCE` to the audience configured for WorkOS access tokens. The tRPC backend requires this value to validate bearer tokens.
 
 
 ## T3Env

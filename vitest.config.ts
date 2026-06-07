@@ -26,6 +26,7 @@ export default defineConfig({
 				test: {
 					name: "browser",
 					environment: "happy-dom",
+					setupFiles: ["./vitest.browser.setup.ts"],
 					include: [
 						"src/components/**/*.test.{ts,tsx}",
 						"src/**/*.browser.test.{ts,tsx}",
