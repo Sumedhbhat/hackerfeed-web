@@ -9,7 +9,6 @@ import {
 	importLocalFavoritesInputSchema,
 } from "#/lib/favorites/schemas";
 import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
-import { createFavoriteService } from "#/server/favorites/service";
 import type { TrpcContext } from "./context";
 
 type ListedFavorite = {
@@ -74,15 +73,21 @@ function mapListedFavoriteToStory({
 	};
 }
 
-export function createAppRouter(
-	favorites: FavoritesApiService = createFavoriteService(),
-) {
+async function getFavoritesApiService(favorites?: FavoritesApiService) {
+	if (favorites) return favorites;
+
+	const { createFavoriteService } = await import("#/server/favorites/service");
+	return createFavoriteService();
+}
+
+export function createAppRouter(favorites?: FavoritesApiService) {
 	return t.router({
 		favorites: t.router({
 			list: protectedProcedure
 				.output(favoriteStoriesOutputSchema)
 				.query(async ({ ctx }) => {
-					const favoritesList = await favorites.listFavorites(ctx.user);
+					const service = await getFavoritesApiService(favorites);
+					const favoritesList = await service.listFavorites(ctx.user);
 
 					return favoritesList.map(mapListedFavoriteToStory);
 				}),
@@ -91,7 +96,8 @@ export function createAppRouter(
 				.input(hackerNewsStorySchema)
 				.output(hackerNewsStorySchema)
 				.mutation(async ({ ctx, input }) => {
-					await favorites.addFavorite(ctx.user, input);
+					const service = await getFavoritesApiService(favorites);
+					await service.addFavorite(ctx.user, input);
 
 					return input;
 				}),
@@ -99,18 +105,21 @@ export function createAppRouter(
 			remove: protectedProcedure
 				.input(favoriteStoryIdInputSchema)
 				.mutation(async ({ ctx, input }) => {
-					await favorites.removeFavorite(ctx.user, input.hnStoryId);
+					const service = await getFavoritesApiService(favorites);
+					await service.removeFavorite(ctx.user, input.hnStoryId);
 				}),
 
 			clear: protectedProcedure.mutation(async ({ ctx }) => {
-				await favorites.clearFavorites(ctx.user);
+				const service = await getFavoritesApiService(favorites);
+				await service.clearFavorites(ctx.user);
 			}),
 
 			importLocal: protectedProcedure
 				.input(importLocalFavoritesInputSchema)
 				.output(favoriteStoriesOutputSchema)
 				.mutation(async ({ ctx, input }) => {
-					await favorites.importLocalFavorites(ctx.user, input.stories);
+					const service = await getFavoritesApiService(favorites);
+					await service.importLocalFavorites(ctx.user, input.stories);
 
 					return input.stories;
 				}),
@@ -118,6 +127,4 @@ export function createAppRouter(
 	});
 }
 
-export const appRouter = createAppRouter();
-
-export type AppRouter = typeof appRouter;
+export type AppRouter = ReturnType<typeof createAppRouter>;

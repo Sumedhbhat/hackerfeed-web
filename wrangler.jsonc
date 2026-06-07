@@ -19,6 +19,14 @@
 		"SERVER_URL": "",
 		// Optional: browser tab / page title
 		"VITE_APP_TITLE": "Hacker Feed",
+		// Optional: browser Sentry DSN. Safe to expose; keep blank to disable.
+		"VITE_SENTRY_DSN": "",
+		"VITE_SENTRY_ENVIRONMENT": "production",
+		"VITE_SENTRY_TRACES_SAMPLE_RATE": "0.1",
+		// Optional: server Sentry DSN. Prefer setting as a secret:
+		// wrangler secret put SENTRY_DSN
+		"SENTRY_ENVIRONMENT": "production",
+		"SENTRY_TRACES_SAMPLE_RATE": "0.1",
 		// Optional: override WorkOS API hostname (e.g. for custom domains)
 		"VITE_WORKOS_API_HOSTNAME": "api.workos.com",
 		// Required: WorkOS redirect URI after auth
