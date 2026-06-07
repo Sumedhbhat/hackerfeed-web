@@ -14,7 +14,14 @@ const config = defineConfig({
 		cloudflare({ viteEnvironment: { name: "ssr" } }),
 		tsconfigPaths({ projects: ["./tsconfig.json"] }),
 		tailwindcss(),
-		tanstackStart(),
+		tanstackStart({
+			client: {
+				entry: "client-entry.tsx",
+			},
+			server: {
+				entry: "server-entry.ts",
+			},
+		}),
 		viteReact({
 			babel: {
 				plugins: ["babel-plugin-react-compiler"],
