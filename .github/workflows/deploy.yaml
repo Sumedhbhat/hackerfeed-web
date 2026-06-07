@@ -1,13 +1,18 @@
 name: Deploy to Cloudflare
 
 on:
+  workflow_dispatch:
   push:
     branches: [master]
+
+concurrency:
+  group: cloudflare-production
+  cancel-in-progress: false
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: dev
+    environment: production
     steps:
       - uses: actions/checkout@v4
 
@@ -28,9 +33,23 @@ jobs:
         run: bun run build
         env:
           VITE_WORKOS_CLIENT_ID: ${{ secrets.VITE_WORKOS_CLIENT_ID }}
+          WORKOS_API_KEY: ${{ secrets.WORKOS_API_KEY }}
+          WORKOS_COOKIE_PASSWORD: ${{ secrets.WORKOS_COOKIE_PASSWORD }}
+          WORKOS_JWT_AUDIENCE: ${{ secrets.WORKOS_JWT_AUDIENCE }}
 
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy
+          preCommands: wrangler d1 migrations apply DB --remote
+          secrets: |
+            VITE_WORKOS_CLIENT_ID
+            WORKOS_API_KEY
+            WORKOS_COOKIE_PASSWORD
+        env:
+          VITE_WORKOS_CLIENT_ID: ${{ secrets.VITE_WORKOS_CLIENT_ID }}
+          WORKOS_API_KEY: ${{ secrets.WORKOS_API_KEY }}
+          WORKOS_COOKIE_PASSWORD: ${{ secrets.WORKOS_COOKIE_PASSWORD }}
+          WORKOS_JWT_AUDIENCE: ${{ secrets.WORKOS_JWT_AUDIENCE }}
