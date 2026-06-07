@@ -1,0 +1,123 @@
+import "@tanstack/react-start/server-only";
+
+import { initTRPC, TRPCError } from "@trpc/server";
+import superjson from "superjson";
+import {
+	favoriteStoriesOutputSchema,
+	favoriteStoryIdInputSchema,
+	hackerNewsStorySchema,
+	importLocalFavoritesInputSchema,
+} from "#/lib/favorites/schemas";
+import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
+import { createFavoriteService } from "#/server/favorites/service";
+import type { TrpcContext } from "./context";
+
+type ListedFavorite = {
+	story: {
+		hnStoryId: number;
+		title: string | null;
+		url: string | null;
+		text: string | null;
+		score: number;
+		hnPostedAt: Date | null;
+		authorUsername: string | null;
+		commentCount: number;
+		commentIds: number[];
+	};
+};
+
+type FavoritesApiService = {
+	listFavorites(user: TrpcContext["user"]): Promise<ListedFavorite[]>;
+	addFavorite(
+		user: TrpcContext["user"],
+		story: HackerNewsStoryRecord,
+	): Promise<unknown>;
+	importLocalFavorites(
+		user: TrpcContext["user"],
+		stories: HackerNewsStoryRecord[],
+	): Promise<unknown>;
+	removeFavorite(user: TrpcContext["user"], hnStoryId: number): Promise<void>;
+	clearFavorites(user: TrpcContext["user"]): Promise<void>;
+};
+
+const t = initTRPC.context<TrpcContext>().create({
+	transformer: superjson,
+});
+
+const protectedProcedure = t.procedure.use(({ ctx, next }) => {
+	if (!ctx.user) {
+		throw new TRPCError({
+			code: "UNAUTHORIZED",
+			message: "Authentication required",
+		});
+	}
+
+	return next({ ctx: { user: ctx.user } });
+});
+
+function mapListedFavoriteToStory({
+	story,
+}: ListedFavorite): HackerNewsStoryRecord {
+	return {
+		by: story.authorUsername,
+		descendants: story.commentCount,
+		id: story.hnStoryId,
+		kids: story.commentIds,
+		score: story.score,
+		text: story.text,
+		time: story.hnPostedAt
+			? Math.floor(story.hnPostedAt.getTime() / 1_000)
+			: null,
+		title: story.title,
+		type: "story",
+		url: story.url,
+	};
+}
+
+export function createAppRouter(
+	favorites: FavoritesApiService = createFavoriteService(),
+) {
+	return t.router({
+		favorites: t.router({
+			list: protectedProcedure
+				.output(favoriteStoriesOutputSchema)
+				.query(async ({ ctx }) => {
+					const favoritesList = await favorites.listFavorites(ctx.user);
+
+					return favoritesList.map(mapListedFavoriteToStory);
+				}),
+
+			add: protectedProcedure
+				.input(hackerNewsStorySchema)
+				.output(hackerNewsStorySchema)
+				.mutation(async ({ ctx, input }) => {
+					await favorites.addFavorite(ctx.user, input);
+
+					return input;
+				}),
+
+			remove: protectedProcedure
+				.input(favoriteStoryIdInputSchema)
+				.mutation(async ({ ctx, input }) => {
+					await favorites.removeFavorite(ctx.user, input.hnStoryId);
+				}),
+
+			clear: protectedProcedure.mutation(async ({ ctx }) => {
+				await favorites.clearFavorites(ctx.user);
+			}),
+
+			importLocal: protectedProcedure
+				.input(importLocalFavoritesInputSchema)
+				.output(favoriteStoriesOutputSchema)
+				.mutation(async ({ ctx, input }) => {
+					await favorites.importLocalFavorites(ctx.user, input.stories);
+
+					return input.stories;
+				}),
+		}),
+	});
+}
+
+export const appRouter = createAppRouter();
+
+export type AppRouter = typeof appRouter;
