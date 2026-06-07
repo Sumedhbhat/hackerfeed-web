@@ -131,12 +131,22 @@ function toSessionUser(user: {
 	email: string;
 	firstName?: string | null;
 	lastName?: string | null;
+	profilePictureUrl?: string | null;
+	imageUrl?: string | null;
+	avatarUrl?: string | null;
+	picture?: string | null;
 }): AuthSessionUser {
 	return {
 		id: user.id,
 		email: user.email,
 		firstName: user.firstName ?? null,
 		lastName: user.lastName ?? null,
+		profilePictureUrl:
+			user.profilePictureUrl ??
+			user.imageUrl ??
+			user.avatarUrl ??
+			user.picture ??
+			null,
 	};
 }
 
