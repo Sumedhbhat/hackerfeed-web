@@ -6,12 +6,11 @@ import {
 	Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-import { AuthKitProvider, useAuth } from "@workos-inc/authkit-react";
+import { ArrowRight } from "lucide-react";
 import { useEffect } from "react";
-import Footer from "../components/Footer";
-import Header from "../components/Header";
-import { env } from "../env";
-import { useUser } from "../hooks/useUser";
+import { Footer } from "../components/footer";
+import { Header } from "../components/header";
+import { useLocalFavoritesMigration } from "../hooks/useLocalFavoritesMigration";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 import TanStackQueryProvider from "../integrations/tanstack-query/root-provider";
 import { logger } from "../lib/logger";
@@ -121,33 +120,38 @@ function RootError({ error }: { error: unknown }) {
 				href="/"
 				style={{ fontSize: "0.875rem", fontWeight: 500, color: "inherit" }}
 			>
-				Try reloading &rarr;
+				Try reloading <ArrowRight size={14} aria-hidden="true" />
 			</a>
 		</main>
 	);
 }
 
-function AuthGuard({ children }: { children: React.ReactNode }) {
-	const user = useUser();
-	const { isLoading } = useAuth();
-
-	if (isLoading) {
-		return (
-			<div className="flex min-h-[60vh] items-center justify-center">
-				<div className="h-8 w-8 animate-spin rounded-full border-2 border-(--chip-line) border-t-(--lagoon)" />
-			</div>
-		);
-	}
-
-	if (!user) {
-		return null;
-	}
-
-	return <>{children}</>;
-}
-
 function RootDocument({ children }: { children: React.ReactNode }) {
 	useEffect(() => {
+		if (import.meta.env.DEV) {
+			navigator.serviceWorker
+				?.getRegistrations()
+				.then((registrations) =>
+					Promise.all(
+						registrations.map((registration) => registration.unregister()),
+					),
+				)
+				.catch((err) => console.warn("SW cleanup failed:", err));
+
+			window.caches
+				?.keys()
+				.then((cacheNames) =>
+					Promise.all(
+						cacheNames
+							.filter((cacheName) => cacheName.startsWith("hf-"))
+							.map((cacheName) => caches.delete(cacheName)),
+					),
+				)
+				.catch((err) => console.warn("SW cache cleanup failed:", err));
+
+			return;
+		}
+
 		if ("serviceWorker" in navigator) {
 			navigator.serviceWorker
 				.register("/sw.js", { scope: "/" })
@@ -180,33 +184,32 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				<HeadContent />
 			</head>
 			<body className="font-sans antialiased wrap-anywhere selection:bg-[rgba(79,184,178,0.24)]">
-				<AuthKitProvider
-					clientId={env.VITE_WORKOS_CLIENT_ID}
-					apiHostname={env.VITE_WORKOS_API_HOSTNAME}
-					redirectUri={env.VITE_WORKOS_REDIRECT_URI}
-				>
-					<TanStackQueryProvider>
-						<AuthGuard>
-							<Header />
-							{children}
-							<Footer />
-						</AuthGuard>
-						<TanStackDevtools
-							config={{
-								position: "bottom-right",
-							}}
-							plugins={[
-								{
-									name: "Tanstack Router",
-									render: <TanStackRouterDevtoolsPanel />,
-								},
-								TanStackQueryDevtools,
-							]}
-						/>
-					</TanStackQueryProvider>
-				</AuthKitProvider>
+				<TanStackQueryProvider>
+					<LocalFavoritesMigration />
+					<Header />
+					{children}
+					<Footer />
+					<TanStackDevtools
+						config={{
+							position: "bottom-right",
+						}}
+						plugins={[
+							{
+								name: "Tanstack Router",
+								render: <TanStackRouterDevtoolsPanel />,
+							},
+							TanStackQueryDevtools,
+						]}
+					/>
+				</TanStackQueryProvider>
 				<Scripts />
 			</body>
 		</html>
 	);
+}
+
+function LocalFavoritesMigration() {
+	useLocalFavoritesMigration();
+
+	return null;
 }

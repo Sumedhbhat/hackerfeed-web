@@ -17,6 +17,7 @@
     "db:migrate": "dotenv -e .env.local -- prisma migrate dev",
     "db:studio": "dotenv -e .env.local -- prisma studio",
     "db:seed": "dotenv -e .env.local -- prisma db seed",
+    "solve:issues": "node scripts/solve-issues.mjs",
     "format": "biome format",
     "lint": "biome lint",
     "check": "biome check"
@@ -41,6 +42,8 @@
     "@trpc/server": "^11.11.0",
     "@trpc/tanstack-react-query": "^11.11.0",
     "@workos-inc/authkit-react": "^0.16.0",
+    "@workos-inc/node": "^10.0.0",
+    "jose": "^6.2.3",
     "lucide-react": "^0.545.0",
     "prisma": "^7.4.2",
     "react": "^19.2.0",

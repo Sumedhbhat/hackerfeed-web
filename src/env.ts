@@ -1,9 +1,17 @@
 import { createEnv } from "@t3-oss/env-core";
 import { z } from "zod";
 
+const runtimeEnv =
+	typeof process === "undefined"
+		? import.meta.env
+		: { ...import.meta.env, ...process.env };
+
 export const env = createEnv({
 	server: {
 		SERVER_URL: z.url().optional(),
+		WORKOS_API_KEY: z.string().min(1),
+		WORKOS_COOKIE_PASSWORD: z.string().min(32),
+		WORKOS_JWT_AUDIENCE: z.string().min(1).optional(),
 	},
 
 	/**
@@ -23,7 +31,7 @@ export const env = createEnv({
 	 * What object holds the environment variables at runtime. This is usually
 	 * `process.env` or `import.meta.env`.
 	 */
-	runtimeEnv: import.meta.env,
+	runtimeEnv,
 
 	/**
 	 * By default, this library will feed the environment variables directly to

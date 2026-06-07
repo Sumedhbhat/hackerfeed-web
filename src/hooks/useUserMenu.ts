@@ -1,5 +1,5 @@
-import { useAuth } from "@workos-inc/authkit-react";
 import { useEffect, useRef, useState } from "react";
+import { signOut, useAuthSession } from "./useAuthSession";
 
 function getInitials(
 	firstName: string | null,
@@ -16,15 +16,15 @@ export type UseUserMenuReturn = {
 	open: boolean;
 	setOpen: (value: boolean | ((prev: boolean) => boolean)) => void;
 	containerRef: React.RefObject<HTMLDivElement>;
-	user: ReturnType<typeof useAuth>["user"];
+	user: ReturnType<typeof useAuthSession>["user"];
 	isLoading: boolean;
-	signOut: ReturnType<typeof useAuth>["signOut"];
+	signOut: () => void;
 	initials: string;
 	displayName: string;
 };
 
 export function useUserMenu(): UseUserMenuReturn {
-	const { user, isLoading, signOut } = useAuth();
+	const { user, isLoading } = useAuthSession();
 	const [open, setOpen] = useState(false);
 	const containerRef = useRef<HTMLDivElement>(null);
 
