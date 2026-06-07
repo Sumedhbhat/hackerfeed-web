@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Suspense } from "react";
-import { ErrorBoundary } from "react-error-boundary";
-import { Comment } from "#/components/Comment";
+import { Comment } from "#/components/comment";
 import { useStoryPage } from "#/hooks/useStoryPage";
 import {
 	commentQueryOptions,
@@ -58,6 +58,7 @@ export const Route = createFileRoute("/story/$storyId")({
 		}
 	},
 	component: StoryPage,
+	errorComponent: StoryError,
 	notFoundComponent: () => (
 		<main className="page-wrap px-4 pt-10 pb-14">
 			<p className="island-kicker mb-3">Not found</p>
@@ -68,7 +69,7 @@ export const Route = createFileRoute("/story/$storyId")({
 				to="/"
 				className="text-sm font-medium text-(--lagoon-deep) hover:text-(--lagoon) hover:underline underline-offset-2"
 			>
-				&larr; Back to feed
+				<ArrowLeft size={14} aria-hidden="true" /> Back to feed
 			</Link>
 		</main>
 	),
@@ -85,7 +86,7 @@ function StoryError() {
 				to="/"
 				className="inline-block mb-6 text-sm text-(--sea-ink-soft) hover:text-(--sea-ink) transition-colors"
 			>
-				&larr; Feed
+				<ArrowLeft size={14} aria-hidden="true" /> Feed
 			</Link>
 			<article className="island-shell rise-in rounded-lg p-6 sm:p-8">
 				<p className="island-kicker mb-3">Story unavailable</p>
@@ -145,7 +146,7 @@ function StoryContent({ storyId }: StoryContentProps) {
 				to="/"
 				className="inline-block mb-6 text-sm text-(--sea-ink-soft) hover:text-(--sea-ink) transition-colors"
 			>
-				&larr; Feed
+				<ArrowLeft size={14} aria-hidden="true" /> Feed
 			</Link>
 
 			{/* Story header */}
@@ -190,9 +191,11 @@ function StoryContent({ storyId }: StoryContentProps) {
 							className="text-sm font-medium text-(--lagoon-deep) hover:text-(--lagoon) hover:underline underline-offset-2"
 						>
 							Read article{" "}
-							<span aria-hidden="true" className="opacity-60">
-								&rarr;
-							</span>
+							<ArrowRight
+								size={14}
+								aria-hidden="true"
+								className="inline opacity-60"
+							/>
 						</a>
 					)}
 					<a
@@ -237,10 +240,8 @@ function StoryPage() {
 	const { storyId } = Route.useParams();
 
 	return (
-		<ErrorBoundary fallback={<StoryError />}>
-			<Suspense fallback={<StoryContentSkeleton />}>
-				<StoryContent storyId={storyId} />
-			</Suspense>
-		</ErrorBoundary>
+		<Suspense fallback={<StoryContentSkeleton />}>
+			<StoryContent storyId={storyId} />
+		</Suspense>
 	);
 }

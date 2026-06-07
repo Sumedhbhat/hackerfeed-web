@@ -11,11 +11,29 @@
  *  - Favorite toggle updates aria-pressed and aria-label
  *  - Favorite toggle integrates with favoritesStore
  */
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import {
+	cleanup,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { StoryCard, StoryCardSkeleton } from "#/components/StoryCard";
+import { StoryCard, StoryCardSkeleton } from "#/components/story-card";
 import { clearAllFavorites, isFavorited } from "#/lib/favorites-store";
 import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
+
+const authMock = vi.hoisted(() => ({
+	isLoading: false,
+	user: null as { id: string } | null,
+}));
+
+const trpcMock = vi.hoisted(() => ({
+	add: vi.fn(),
+	clear: vi.fn(),
+	list: vi.fn(),
+	remove: vi.fn(),
+}));
 
 // ---------------------------------------------------------------------------
 // Mock openLink so tests don't actually open browser windows
@@ -23,6 +41,24 @@ import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
 
 vi.mock("#/lib/open-link", () => ({
 	openLink: vi.fn(),
+}));
+
+vi.mock("#/hooks/useAuthSession", () => ({
+	useAuthSession: () => ({
+		isLoading: authMock.isLoading,
+		user: authMock.user,
+	}),
+}));
+
+vi.mock("#/lib/trpc/client", () => ({
+	createTrpcClient: vi.fn(() => ({
+		favorites: {
+			add: { mutate: trpcMock.add },
+			clear: { mutate: trpcMock.clear },
+			list: { query: trpcMock.list },
+			remove: { mutate: trpcMock.remove },
+		},
+	})),
 }));
 
 // Mock Link from @tanstack/react-router so tests don't need a full RouterProvider.
@@ -86,6 +122,12 @@ function makeStory(
 // ---------------------------------------------------------------------------
 
 beforeEach(() => {
+	authMock.isLoading = false;
+	authMock.user = null;
+	trpcMock.add.mockResolvedValue(undefined);
+	trpcMock.clear.mockResolvedValue(undefined);
+	trpcMock.list.mockResolvedValue([]);
+	trpcMock.remove.mockResolvedValue(undefined);
 	localStorage.clear();
 	clearAllFavorites();
 	vi.clearAllMocks();
@@ -93,6 +135,8 @@ beforeEach(() => {
 
 afterEach(() => {
 	cleanup();
+	authMock.isLoading = false;
+	authMock.user = null;
 	localStorage.clear();
 	clearAllFavorites();
 });
@@ -257,5 +301,51 @@ describe("StoryCard favorite toggle", () => {
 	it("shows 'Save' text when not favorited", () => {
 		render(<StoryCard story={makeStory()} />);
 		expect(screen.getByText("Save")).toBeDefined();
+	});
+
+	it("reflects backend favorite state for authenticated users", async () => {
+		const story = makeStory({ id: 901 });
+		authMock.user = { id: "workos-story-card-backend-state" };
+		trpcMock.list.mockResolvedValue([story]);
+
+		render(<StoryCard story={story} />);
+
+		await waitFor(() => {
+			expect(
+				screen.getByRole("button", { name: /remove from favorites/i }),
+			).toBeDefined();
+		});
+	});
+
+	it("saves through the backend for authenticated users", async () => {
+		const story = makeStory({ id: 902 });
+		authMock.user = { id: "workos-story-card-add" };
+		trpcMock.list.mockResolvedValue([]);
+
+		render(<StoryCard story={story} />);
+		await waitFor(() => expect(trpcMock.list).toHaveBeenCalled());
+
+		fireEvent.click(screen.getByRole("button", { name: /save to favorites/i }));
+
+		expect(trpcMock.add).toHaveBeenCalledWith(story);
+	});
+
+	it("removes through the backend for authenticated users", async () => {
+		const story = makeStory({ id: 903 });
+		authMock.user = { id: "workos-story-card-remove" };
+		trpcMock.list.mockResolvedValue([story]);
+
+		render(<StoryCard story={story} />);
+		await waitFor(() => {
+			expect(
+				screen.getByRole("button", { name: /remove from favorites/i }),
+			).toBeDefined();
+		});
+
+		fireEvent.click(
+			screen.getByRole("button", { name: /remove from favorites/i }),
+		);
+
+		expect(trpcMock.remove).toHaveBeenCalledWith({ hnStoryId: 903 });
 	});
 });
