@@ -29,6 +29,8 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
+  if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') return;
+
   // HN Firebase API: network-only (real-time data, never cache)
   if (url.hostname === 'hacker-news.firebaseio.com') return;
 
@@ -36,7 +38,7 @@ self.addEventListener('fetch', (event) => {
   // Safe because Vite outputs content-hashed filenames
   const isStaticAsset =
     url.pathname.startsWith('/assets/') ||
-    /\.(js|css|png|ico|svg|woff2|webp|jpg|jpeg)$/.test(url.pathname);
+    /\.(png|ico|svg|woff2|webp|jpg|jpeg)$/.test(url.pathname);
 
   if (isStaticAsset) {
     event.respondWith(

@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Agent behavior
+
+Before writing, reviewing, or refactoring code, load and follow the `karpathy-guidelines` skill. If the skill is not available in the current agent runtime, follow its core principles: make surgical changes, prefer the simplest correct solution, surface assumptions, avoid speculative abstractions, and verify the result with the narrowest relevant check.
+
 ## Commands
 
 ```bash
