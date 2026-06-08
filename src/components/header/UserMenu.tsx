@@ -1,4 +1,5 @@
-import { LogOut } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { LogOut, User } from "lucide-react";
 import { useState } from "react";
 import { useUserMenu } from "#/hooks/useUserMenu";
 
@@ -49,7 +50,17 @@ export default function UserMenu() {
 		);
 	}
 
-	if (!user) return null;
+	if (!user) {
+		return (
+			<Link
+				to="/profile"
+				aria-label="Profile"
+				className="flex h-8 w-8 items-center justify-center rounded-full border border-(--chip-line) bg-(--chip-bg) text-(--sea-ink) no-underline hover:bg-(--link-bg-hover) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--lagoon)"
+			>
+				<User size={16} aria-hidden="true" />
+			</Link>
+		);
+	}
 
 	return (
 		<div ref={containerRef} className="relative">
@@ -87,6 +98,14 @@ export default function UserMenu() {
 					</div>
 
 					<div className="p-1.5">
+						<Link
+							to="/profile"
+							onClick={() => setOpen(false)}
+							className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left text-sm font-medium text-(--sea-ink) no-underline hover:bg-(--chip-bg) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--lagoon)"
+						>
+							<User size={15} aria-hidden="true" />
+							Profile
+						</Link>
 						<button
 							type="button"
 							onClick={() => signOut()}
