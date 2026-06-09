@@ -66,8 +66,9 @@ bun --bun run check
 
 ## Setting up WorkOS
 
-- Set the `VITE_WORKOS_CLIENT_ID` in your `.env.local`.
-- Set `WORKOS_JWT_AUDIENCE` to the audience configured for WorkOS access tokens. The tRPC backend requires this value to validate bearer tokens.
+- Set `VITE_WORKOS_CLIENT_ID` in `.env.local`.
+- Set `WORKOS_API_KEY`, `WORKOS_COOKIE_PASSWORD`, and `WORKOS_JWT_AUDIENCE` in `.dev.vars` for local Cloudflare/Vite dev.
+- In GitHub Actions, set the same names as environment secrets so the deploy workflow can upload them as Cloudflare Worker secrets.
 
 
 ## T3Env
