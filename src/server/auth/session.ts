@@ -3,6 +3,7 @@ import "@tanstack/react-start/server-only";
 import { WorkOS } from "@workos-inc/node";
 import { env } from "#/env";
 import type { AuthSessionUser } from "#/lib/auth/session-user";
+import { logger } from "#/lib/logger";
 import type { AuthenticatedWorkosUser } from "./current-user";
 
 const SESSION_COOKIE = "hackerfeed_session";
@@ -131,12 +132,22 @@ function toSessionUser(user: {
 	email: string;
 	firstName?: string | null;
 	lastName?: string | null;
+	profilePictureUrl?: string | null;
+	imageUrl?: string | null;
+	avatarUrl?: string | null;
+	picture?: string | null;
 }): AuthSessionUser {
 	return {
 		id: user.id,
 		email: user.email,
 		firstName: user.firstName ?? null,
 		lastName: user.lastName ?? null,
+		profilePictureUrl:
+			user.profilePictureUrl ??
+			user.imageUrl ??
+			user.avatarUrl ??
+			user.picture ??
+			null,
 	};
 }
 
@@ -147,18 +158,35 @@ function setSessionCookie(sealedSession: string, request: Request): string {
 	});
 }
 
+function getAuthErrorLocation(reason: string): string {
+	return `/auth/error?reason=${encodeURIComponent(reason)}`;
+}
+
 export async function createSignInResponse(
 	request: Request,
 ): Promise<Response> {
 	const url = new URL(request.url);
 	const returnTo = normalizeReturnTo(url.searchParams.get("returnTo"));
-	const authorization = await workos.userManagement.getAuthorizationUrlWithPKCE(
-		{
+	let authorization: Awaited<
+		ReturnType<typeof workos.userManagement.getAuthorizationUrlWithPKCE>
+	>;
+
+	try {
+		authorization = await workos.userManagement.getAuthorizationUrlWithPKCE({
 			clientId: env.VITE_WORKOS_CLIENT_ID,
 			provider: "authkit",
 			redirectUri: getRedirectUri(request),
-		},
-	);
+		});
+	} catch (error) {
+		logger.error("WorkOS sign-in URL creation failed", {
+			err: error instanceof Error ? error.message : String(error),
+		});
+		return new Response(null, {
+			headers: { Location: getAuthErrorLocation("start_failed") },
+			status: 302,
+		});
+	}
+
 	const flow: AuthFlowCookie = {
 		codeVerifier: authorization.codeVerifier,
 		returnTo,
@@ -193,22 +221,34 @@ export async function createAuthCallbackResponse(
 	headers.append("Set-Cookie", clearCookie(AUTH_FLOW_COOKIE, request));
 
 	if (!code || !state || !flow || flow.state !== state) {
-		headers.set("Location", "/auth/sign-in");
+		headers.set("Location", getAuthErrorLocation("expired"));
 		return new Response(null, { headers, status: 302 });
 	}
 
-	const auth = await workos.userManagement.authenticateWithCode({
-		clientId: env.VITE_WORKOS_CLIENT_ID,
-		code,
-		codeVerifier: flow.codeVerifier,
-		session: {
-			cookiePassword: env.WORKOS_COOKIE_PASSWORD,
-			sealSession: true,
-		},
-	});
+	let auth: Awaited<
+		ReturnType<typeof workos.userManagement.authenticateWithCode>
+	>;
+
+	try {
+		auth = await workos.userManagement.authenticateWithCode({
+			clientId: env.VITE_WORKOS_CLIENT_ID,
+			code,
+			codeVerifier: flow.codeVerifier,
+			session: {
+				cookiePassword: env.WORKOS_COOKIE_PASSWORD,
+				sealSession: true,
+			},
+		});
+	} catch (error) {
+		logger.error("WorkOS callback exchange failed", {
+			err: error instanceof Error ? error.message : String(error),
+		});
+		headers.set("Location", getAuthErrorLocation("exchange_failed"));
+		return new Response(null, { headers, status: 302 });
+	}
 
 	if (!auth.sealedSession) {
-		headers.set("Location", "/auth/sign-in");
+		headers.set("Location", getAuthErrorLocation("no_session"));
 		return new Response(null, { headers, status: 302 });
 	}
 

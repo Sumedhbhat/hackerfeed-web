@@ -3,6 +3,7 @@ import type { QueryClient } from "@tanstack/react-query";
 import {
 	createRootRouteWithContext,
 	HeadContent,
+	redirect,
 	Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
@@ -14,6 +15,7 @@ import { useLocalFavoritesMigration } from "../hooks/useLocalFavoritesMigration"
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 import TanStackQueryProvider from "../integrations/tanstack-query/root-provider";
 import { logger } from "../lib/logger";
+import { getRequiredSessionUser } from "../server/auth/require-session";
 import appCss from "../styles.css?url";
 
 interface MyRouterContext {
@@ -21,6 +23,22 @@ interface MyRouterContext {
 }
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
+	beforeLoad: async ({ location }) => {
+		if (isPublicPath(location.pathname)) {
+			return;
+		}
+
+		const user = await getRequiredSessionUser();
+
+		if (!user) {
+			throw redirect({
+				to: "/auth/sign-in",
+				search: {
+					returnTo: location.href,
+				},
+			});
+		}
+	},
 	head: () => ({
 		meta: [
 			{
@@ -73,6 +91,24 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 	errorComponent: RootError,
 	shellComponent: RootDocument,
 });
+
+function isPublicPath(pathname: string) {
+	return (
+		pathname === "/auth/sign-in" ||
+		pathname === "/auth/callback" ||
+		pathname === "/auth/error" ||
+		pathname === "/auth/sign-out" ||
+		pathname.startsWith("/api/") ||
+		pathname.startsWith("/assets/") ||
+		pathname === "/favicon.ico" ||
+		pathname === "/manifest.json" ||
+		pathname === "/robots.txt" ||
+		pathname === "/sw.js" ||
+		pathname === "/theme-init.js" ||
+		pathname === "/logo192.png" ||
+		pathname === "/logo512.png"
+	);
+}
 
 // ---------------------------------------------------------------------------
 // RootError — top-level error boundary shown when any loader throws

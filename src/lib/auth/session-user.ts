@@ -3,4 +3,5 @@ export type AuthSessionUser = {
 	email: string;
 	firstName: string | null;
 	lastName: string | null;
+	profilePictureUrl: string | null;
 };
