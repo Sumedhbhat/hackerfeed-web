@@ -19,7 +19,7 @@
 		"SERVER_URL": "",
 		// Optional: browser tab / page title
 		"VITE_APP_TITLE": "Hacker Feed",
-		// Optional: browser Sentry DSN. Safe to expose; keep blank to disable.
+		// Optional: browser Sentry DSN. Keep blank to disable.
 		"VITE_SENTRY_DSN": "",
 		"VITE_SENTRY_ENVIRONMENT": "production",
 		"VITE_SENTRY_TRACES_SAMPLE_RATE": "0.1",
