@@ -21,9 +21,6 @@ const config = defineConfig({
 			client: {
 				entry: "client-entry.tsx",
 			},
-			server: {
-				entry: "server-entry.ts",
-			},
 		}),
 		viteReact({
 			babel: {
