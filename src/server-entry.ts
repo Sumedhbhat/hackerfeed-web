@@ -3,8 +3,13 @@ import {
 	createStartHandler,
 	defaultStreamHandler,
 } from "@tanstack/react-start/server";
+import {
+	type D1DatabaseBinding,
+	setD1Database,
+} from "#/server/database/client";
 
 type WorkerEnv = {
+	DB: D1DatabaseBinding;
 	SENTRY_DSN?: string;
 	SENTRY_ENVIRONMENT?: string;
 	SENTRY_TRACES_SAMPLE_RATE?: string;
@@ -116,7 +121,9 @@ function renderServerErrorPage(errorId: string) {
 </html>`;
 }
 
-async function handleFetch(request: Request) {
+async function handleFetch(request: Request, env: WorkerEnv) {
+	setD1Database(env.DB);
+
 	try {
 		return await startFetch(request);
 	} catch (error) {
