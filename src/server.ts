@@ -1,8 +1,11 @@
 import * as Sentry from "@sentry/cloudflare";
+import type { Register } from "@tanstack/react-router";
 import {
 	createStartHandler,
 	defaultStreamHandler,
+	type RequestHandler,
 } from "@tanstack/react-start/server";
+import { createServerEntry } from "@tanstack/react-start/server-entry";
 import {
 	type D1DatabaseBinding,
 	setD1Database,
@@ -161,18 +164,17 @@ async function handleFetch(request: Request, env: WorkerEnv) {
 	}
 }
 
-export default Sentry.withSentry(
-	(env: WorkerEnv) => {
-		if (!env.SENTRY_DSN) return undefined;
+const serverEntry = createServerEntry({
+	fetch: handleFetch as unknown as RequestHandler<Register>,
+});
 
-		return {
-			dsn: env.SENTRY_DSN,
-			environment: env.SENTRY_ENVIRONMENT ?? "production",
-			tracesSampleRate: getSentrySampleRate(env.SENTRY_TRACES_SAMPLE_RATE, 0.1),
-			sendDefaultPii: false,
-		};
-	},
-	{
-		fetch: handleFetch,
-	},
-);
+export default Sentry.withSentry((env: WorkerEnv) => {
+	if (!env.SENTRY_DSN) return undefined;
+
+	return {
+		dsn: env.SENTRY_DSN,
+		environment: env.SENTRY_ENVIRONMENT ?? "production",
+		tracesSampleRate: getSentrySampleRate(env.SENTRY_TRACES_SAMPLE_RATE, 0.1),
+		sendDefaultPii: false,
+	};
+}, serverEntry);
