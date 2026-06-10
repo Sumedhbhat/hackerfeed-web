@@ -41,11 +41,6 @@
 			"database_name": "hackerfeed-web",
 			"database_id": "61e6cb7a-29b4-43b6-85af-e82d735a9ed8",
 			"migrations_dir": "migrations"
-		},
-		{
-			"binding": "hackerfeed",
-			"database_name": "hackerfeed",
-			"database_id": "61e6cb7a-29b4-43b6-85af-e82d735a9ed8"
 		}
 	]
 }
