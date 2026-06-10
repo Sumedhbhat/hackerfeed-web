@@ -17,7 +17,7 @@ type AuthFlowCookie = {
 	state: string;
 };
 
-type CurrentSession =
+export type CurrentSession =
 	| {
 			user: AuthenticatedWorkosUser;
 			sessionUser: AuthSessionUser;

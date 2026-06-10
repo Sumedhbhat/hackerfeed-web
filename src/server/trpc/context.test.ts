@@ -8,26 +8,63 @@ function createRequest(headers: HeadersInit = {}) {
 describe("createTrpcContextFromRequest", () => {
 	it("returns an unauthenticated context when the auth header is missing", async () => {
 		await expect(
-			createTrpcContextFromRequest(createRequest()),
+			createTrpcContextFromRequest(createRequest(), {
+				getSession: vi.fn(async () => ({ user: null, sessionUser: null })),
+			}),
 		).resolves.toEqual({
 			user: null,
 		});
+	});
+
+	it("authenticates browser requests with the WorkOS session cookie", async () => {
+		const getSession = vi.fn(async () => ({
+			sessionUser: {
+				id: "cookie-workos-user",
+				email: "user@example.com",
+				firstName: null,
+				lastName: null,
+				profilePictureUrl: null,
+			},
+			user: { workosUserId: "cookie-workos-user" },
+		}));
+
+		const request = createRequest({
+			Cookie: "hackerfeed_session=sealed-session",
+		});
+
+		await expect(
+			createTrpcContextFromRequest(request, { getSession }),
+		).resolves.toEqual({
+			user: { workosUserId: "cookie-workos-user" },
+		});
+		expect(getSession).toHaveBeenCalledWith(request);
 	});
 
 	it("authenticates valid bearer tokens with the injected verifier", async () => {
 		const verifyAccessToken = vi.fn(async () => ({
 			workosUserId: "verified-workos-user",
 		}));
+		const getSession = vi.fn(async () => ({
+			user: { workosUserId: "cookie-workos-user" },
+			sessionUser: {
+				id: "cookie-workos-user",
+				email: "user@example.com",
+				firstName: null,
+				lastName: null,
+				profilePictureUrl: null,
+			},
+		}));
 
 		await expect(
 			createTrpcContextFromRequest(
 				createRequest({ Authorization: "Bearer token-123" }),
-				{ verifyAccessToken },
+				{ getSession, verifyAccessToken },
 			),
 		).resolves.toEqual({
 			user: { workosUserId: "verified-workos-user" },
 		});
 		expect(verifyAccessToken).toHaveBeenCalledWith("token-123");
+		expect(getSession).not.toHaveBeenCalled();
 	});
 
 	it("returns an unauthenticated context when verification fails", async () => {
@@ -45,6 +82,9 @@ describe("createTrpcContextFromRequest", () => {
 		await expect(
 			createTrpcContextFromRequest(
 				createRequest({ "x-workos-user-id": "spoofed-user" }),
+				{
+					getSession: vi.fn(async () => ({ user: null, sessionUser: null })),
+				},
 			),
 		).resolves.toEqual({
 			user: null,
