@@ -9,6 +9,9 @@ import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 const config = defineConfig({
+	build: {
+		sourcemap: false,
+	},
 	plugins: [
 		devtools(),
 		cloudflare({ viteEnvironment: { name: "ssr" } }),
