@@ -19,8 +19,8 @@
 		"SERVER_URL": "",
 		// Optional: browser tab / page title
 		"VITE_APP_TITLE": "Hacker Feed",
-		// Optional: browser Sentry DSN. Keep blank to disable.
-		"VITE_SENTRY_DSN": "",
+		// Optional: browser Sentry DSN. Set as a secret:
+		// wrangler secret put VITE_SENTRY_DSN
 		"VITE_SENTRY_ENVIRONMENT": "production",
 		"VITE_SENTRY_TRACES_SAMPLE_RATE": "0.1",
 		// Optional: server Sentry DSN. Prefer setting as a secret:
