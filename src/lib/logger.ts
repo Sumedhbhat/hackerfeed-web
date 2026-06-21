@@ -29,6 +29,8 @@ function emit(level: LogLevel, message: string, ctx?: LogContext): void {
 		console.error(line);
 	} else if (level === "warn") {
 		console.warn(line);
+	} else if (level === "debug") {
+		console.debug(line);
 	} else {
 		console.log(line);
 	}

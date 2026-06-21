@@ -126,7 +126,9 @@ function renderServerErrorPage(errorId: string) {
 }
 
 async function handleFetch(request: Request, env: WorkerEnv) {
-	setDatabaseContext(createDatabaseContext(env.DB));
+	setDatabaseContext(
+		createDatabaseContext(Sentry.instrumentD1WithSentry(env.DB)),
+	);
 
 	try {
 		return await startFetch(request);
@@ -177,6 +179,10 @@ export default Sentry.withSentry(
 			dsn: env.SENTRY_DSN,
 			environment: env.SENTRY_ENVIRONMENT ?? "production",
 			tracesSampleRate: getSentrySampleRate(env.SENTRY_TRACES_SAMPLE_RATE, 0.1),
+			enableLogs: true,
+			integrations: [
+				Sentry.consoleLoggingIntegration({ levels: ["warn", "error"] }),
+			],
 			sendDefaultPii: false,
 		};
 	},

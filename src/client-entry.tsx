@@ -13,8 +13,12 @@ if (sentryDsn) {
 		tracesSampleRate: Number(
 			import.meta.env.VITE_SENTRY_TRACES_SAMPLE_RATE ?? "0.1",
 		),
+		enableLogs: true,
 		sendDefaultPii: false,
-		integrations: [Sentry.browserTracingIntegration()],
+		integrations: [
+			Sentry.browserTracingIntegration(),
+			Sentry.consoleLoggingIntegration({ levels: ["warn", "error"] }),
+		],
 	});
 }
 

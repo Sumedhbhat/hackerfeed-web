@@ -1,5 +1,6 @@
 import "@tanstack/react-start/server-only";
 
+import * as Sentry from "@sentry/cloudflare";
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import {
@@ -44,7 +45,9 @@ const t = initTRPC.context<TrpcContext>().create({
 	transformer: superjson,
 });
 
-const protectedProcedure = t.procedure.use(({ ctx, next }) => {
+const tracedProcedure = t.procedure.use(Sentry.trpcMiddleware());
+
+const protectedProcedure = tracedProcedure.use(({ ctx, next }) => {
 	if (!ctx.user) {
 		throw new TRPCError({
 			code: "UNAUTHORIZED",
