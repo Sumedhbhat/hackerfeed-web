@@ -39,6 +39,18 @@ To keep a future API-service split cheap, services and repositories should stay 
 
 Story freshness is refresh-on-favorite for this rollout. Stale-on-read story refresh is intentionally deferred.
 
+## Observability
+
+Sentry tracing and structured logs are enabled in both the browser and the
+Cloudflare Worker. Incoming requests, outgoing HTTP calls, tRPC procedures, and
+D1 queries are recorded as spans in the same trace. Application `logger` calls
+are attached to the active trace so the events leading to an error can be
+inspected alongside it.
+
+Sentry ingests warning and error logs. Trace volume is controlled by
+`SENTRY_TRACES_SAMPLE_RATE` and `VITE_SENTRY_TRACES_SAMPLE_RATE`; both default to
+`0.1`, while error events are captured independently of trace sampling.
+
 ## Database
 
 Persistent app data uses Cloudflare D1 through the `DB` binding in `wrangler.jsonc`.

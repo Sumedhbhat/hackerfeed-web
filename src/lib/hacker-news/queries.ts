@@ -1,4 +1,5 @@
 import { queryOptions } from "@tanstack/react-query";
+import { http } from "#/lib/http/client";
 import { logger } from "#/lib/logger";
 
 const HACKER_NEWS_API_BASE_URL = "https://hacker-news.firebaseio.com/v0";
@@ -64,7 +65,7 @@ async function fetchJson<T>(path: string, signal?: AbortSignal): Promise<T> {
 	let response: Response;
 
 	try {
-		response = await fetch(url, {
+		response = await http.get(url, {
 			headers: {
 				accept: "application/json",
 			},

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { AuthSessionUser } from "#/lib/auth/session-user";
+import { http } from "#/lib/http/client";
 import { logger } from "#/lib/logger";
 
 type AuthSessionState = {
@@ -23,7 +24,7 @@ function setAuthSessionState(nextState: AuthSessionState) {
 
 async function loadAuthSession() {
 	try {
-		const response = await fetch("/api/auth/me", {
+		const response = await http.get("/api/auth/me", {
 			credentials: "same-origin",
 		});
 

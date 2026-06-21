@@ -22,6 +22,13 @@ export const env = createEnv({
 
 	client: {
 		VITE_APP_TITLE: z.string().min(1).optional(),
+		VITE_SENTRY_DSN: z.url().optional(),
+		VITE_SENTRY_ENVIRONMENT: z.string().min(1).optional(),
+		VITE_SENTRY_TRACES_SAMPLE_RATE: z.coerce
+			.number()
+			.min(0)
+			.max(1)
+			.default(0.1),
 		VITE_WORKOS_CLIENT_ID: z.string().min(1),
 		VITE_WORKOS_API_HOSTNAME: z.string().optional(),
 		VITE_WORKOS_REDIRECT_URI: z.url(),
