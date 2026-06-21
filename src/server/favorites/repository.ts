@@ -116,19 +116,16 @@ export function createFavoriteRepository(database: DatabaseContext) {
 		async upsertStoryFromHackerNews(story: HackerNewsStoryRecord) {
 			const mappedStory = mapHackerNewsStory(story);
 
-			await database
+			const [sharedStory] = await database
 				.insert(storiesTable)
 				.values({ id: crypto.randomUUID(), ...mappedStory })
 				.onConflictDoUpdate({
 					target: storiesTable.hnStoryId,
 					set: mappedStory,
 				})
-				.run();
+				.returning()
+				.all();
 
-			const sharedStory = await getStoryByHnStoryId(
-				database,
-				mappedStory.hnStoryId,
-			);
 			if (!sharedStory) {
 				throw new Error("D1 story upsert failed");
 			}
