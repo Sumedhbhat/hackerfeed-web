@@ -118,7 +118,7 @@ export function createFavoriteRepository(database: DatabaseContext) {
 
 			const [sharedStory] = await database
 				.insert(storiesTable)
-				.values({ id: crypto.randomUUID(), ...mappedStory })
+				.values(mappedStory)
 				.onConflictDoUpdate({
 					target: storiesTable.hnStoryId,
 					set: mappedStory,
@@ -138,7 +138,7 @@ export function createFavoriteRepository(database: DatabaseContext) {
 
 			await database
 				.insert(storiesTable)
-				.values({ id: crypto.randomUUID(), ...mappedStory })
+				.values(mappedStory)
 				.onConflictDoNothing({ target: storiesTable.hnStoryId })
 				.run();
 
@@ -156,7 +156,7 @@ export function createFavoriteRepository(database: DatabaseContext) {
 		async createFavoriteIfMissing(appUserId: string, storyId: string) {
 			await database
 				.insert(favoritesTable)
-				.values({ id: crypto.randomUUID(), appUserId, storyId })
+				.values({ appUserId, storyId })
 				.onConflictDoNothing({
 					target: [favoritesTable.appUserId, favoritesTable.storyId],
 				})

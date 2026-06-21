@@ -1,5 +1,5 @@
+import * as Sentry from "@sentry/react";
 import { Activity, Suspense, useState, useTransition } from "react";
-import { ErrorBoundary } from "react-error-boundary";
 import { FeedError } from "#/components/feed/FeedError";
 import { FeedPane } from "#/components/feed/FeedPane";
 import { FeedSkeletons } from "#/components/feed/FeedSkeletons";
@@ -54,16 +54,15 @@ export function FeedApp() {
 						key={feed.key}
 						mode={activeFeed === feed.key ? "visible" : "hidden"}
 					>
-						<ErrorBoundary
-							fallbackRender={({ resetErrorBoundary }) => (
-								<FeedError feed={feed} onRetry={resetErrorBoundary} />
+						<Sentry.ErrorBoundary
+							fallback={({ resetError }) => (
+								<FeedError feed={feed} onRetry={resetError} />
 							)}
-							resetKeys={[feed.key]}
 						>
 							<Suspense fallback={<FeedSkeletons />}>
 								<FeedPane feed={feed.key} />
 							</Suspense>
-						</ErrorBoundary>
+						</Sentry.ErrorBoundary>
 					</Activity>
 				))}
 			</div>

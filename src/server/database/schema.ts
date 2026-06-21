@@ -8,13 +8,18 @@ import {
 	unique,
 } from "drizzle-orm/sqlite-core";
 
+const uuidPrimaryKey = () =>
+	text()
+		.primaryKey()
+		.$defaultFn(() => crypto.randomUUID());
+
 export const appUsers = sqliteTable("app_users", {
-	id: text().primaryKey(),
+	id: uuidPrimaryKey(),
 	workosUserId: text().notNull().unique(),
 });
 
 export const stories = sqliteTable("stories", {
-	id: text().primaryKey(),
+	id: uuidPrimaryKey(),
 	hnStoryId: integer().notNull().unique(),
 	title: text(),
 	url: text(),
@@ -29,7 +34,7 @@ export const stories = sqliteTable("stories", {
 export const favorites = sqliteTable(
 	"favorites",
 	{
-		id: text().primaryKey(),
+		id: uuidPrimaryKey(),
 		appUserId: text()
 			.notNull()
 			.references(() => appUsers.id, { onDelete: "cascade" }),
@@ -42,7 +47,7 @@ export const favorites = sqliteTable(
 );
 
 export const hfOrganizations = sqliteTable("hf_organizations", {
-	id: text().primaryKey(),
+	id: uuidPrimaryKey(),
 	hfOrganizationId: text().notNull().unique(),
 	name: text().notNull(),
 	fullname: text(),
@@ -51,7 +56,7 @@ export const hfOrganizations = sqliteTable("hf_organizations", {
 });
 
 export const hfPapers = sqliteTable("hf_papers", {
-	id: text().primaryKey(),
+	id: uuidPrimaryKey(),
 	arxivId: text().notNull().unique(),
 	organizationId: text().references(() => hfOrganizations.id),
 	title: text().notNull(),
@@ -70,7 +75,7 @@ export const hfPapers = sqliteTable("hf_papers", {
 });
 
 export const hfAuthors = sqliteTable("hf_authors", {
-	id: text().primaryKey(),
+	id: uuidPrimaryKey(),
 	hfAuthorId: text().notNull().unique(),
 	name: text().notNull(),
 	hidden: integer({ mode: "boolean" }).notNull().default(false),
@@ -87,7 +92,7 @@ export const hfAuthors = sqliteTable("hf_authors", {
 export const hfPaperAuthors = sqliteTable(
 	"hf_paper_authors",
 	{
-		id: text().primaryKey(),
+		id: uuidPrimaryKey(),
 		paperId: text()
 			.notNull()
 			.references(() => hfPapers.id, { onDelete: "cascade" }),
@@ -108,7 +113,7 @@ export const hfPaperAuthors = sqliteTable(
 export const hfPaperKeywords = sqliteTable(
 	"hf_paper_keywords",
 	{
-		id: text().primaryKey(),
+		id: uuidPrimaryKey(),
 		paperId: text()
 			.notNull()
 			.references(() => hfPapers.id, { onDelete: "cascade" }),
@@ -132,7 +137,7 @@ export const hfPaperKeywords = sqliteTable(
 export const hfDailyPaperEntries = sqliteTable(
 	"hf_daily_paper_entries",
 	{
-		id: text().primaryKey(),
+		id: uuidPrimaryKey(),
 		editionDate: text().notNull(),
 		paperId: text()
 			.notNull()
@@ -160,7 +165,7 @@ export const hfDailyPaperEntries = sqliteTable(
 export const hfIngestionRuns = sqliteTable(
 	"hf_ingestion_runs",
 	{
-		id: text().primaryKey(),
+		id: uuidPrimaryKey(),
 		editionDate: text().notNull(),
 		status: text({
 			enum: ["running", "success", "failed"],

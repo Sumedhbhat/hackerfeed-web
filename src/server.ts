@@ -11,6 +11,7 @@ import {
 	type D1DatabaseBinding,
 	setDatabaseContext,
 } from "#/server/database/client";
+import { runHuggingFaceDailyPapersIngestion } from "#/server/huggingface-papers/ingestion";
 
 type WorkerEnv = {
 	DB: D1DatabaseBinding;
@@ -20,6 +21,7 @@ type WorkerEnv = {
 };
 
 const startFetch = createStartHandler(defaultStreamHandler);
+const traceIdsByError = new WeakMap<object, string>();
 
 function getSentrySampleRate(value: string | undefined, fallback: number) {
 	if (!value) return fallback;
@@ -43,15 +45,34 @@ function getErrorMessage(error: unknown) {
 	return error instanceof Error ? error.message : String(error);
 }
 
-function logServerError(request: Request, error: unknown, errorId: string) {
+function getErrorKey(error: unknown): object | undefined {
+	return (typeof error === "object" && error !== null) ||
+		typeof error === "function"
+		? error
+		: undefined;
+}
+
+function getActiveSentryTraceId(): string | undefined {
+	const span = Sentry.getActiveSpan();
+	if (!span) return undefined;
+
+	const traceId = Sentry.spanToJSON(span).trace_id;
+	return /^[a-f0-9]{32}$/.test(traceId) ? traceId : undefined;
+}
+
+function logServerError(
+	request: Request,
+	error: unknown,
+	traceId: string | undefined,
+) {
 	const url = new URL(request.url);
 	const entry = {
 		level: "error",
 		message: "Unhandled server request error",
 		ts: new Date().toISOString(),
-		errorId,
 		method: request.method,
 		pathname: url.pathname,
+		traceId,
 		err: getErrorMessage(error),
 		stack: error instanceof Error ? error.stack : undefined,
 	};
@@ -59,7 +80,11 @@ function logServerError(request: Request, error: unknown, errorId: string) {
 	console.error(JSON.stringify(entry));
 }
 
-function renderServerErrorPage(errorId: string) {
+function renderServerErrorPage(traceId: string | undefined) {
+	const traceReference = traceId
+		? `<p>Trace ID: <code>${traceId}</code></p>`
+		: "";
+
 	return `<!doctype html>
 <html lang="en">
 	<head>
@@ -118,73 +143,102 @@ function renderServerErrorPage(errorId: string) {
 		<main>
 			<p class="kicker">Server error</p>
 			<h1>HackerFeed could not load.</h1>
-			<p>The request failed before the app could render. The error has been logged with reference <code>${errorId}</code>.</p>
+			<p>The request failed before the app could render. The error has been logged automatically.</p>
+			${traceReference}
 			<p><a href="/">Try loading the feed again</a></p>
 		</main>
 	</body>
 </html>`;
 }
 
-async function handleFetch(request: Request, env: WorkerEnv) {
-	setDatabaseContext(
-		createDatabaseContext(Sentry.instrumentD1WithSentry(env.DB)),
-	);
+function createWorkerDatabaseContext(env: WorkerEnv) {
+	return createDatabaseContext(Sentry.instrumentD1WithSentry(env.DB));
+}
+
+async function handleAppFetch(request: Request, env: WorkerEnv) {
+	setDatabaseContext(createWorkerDatabaseContext(env));
 
 	try {
 		return await startFetch(request);
 	} catch (error) {
-		const errorId = crypto.randomUUID();
-
-		Sentry.withScope((scope) => {
-			const url = new URL(request.url);
-			scope.setTag("error_id", errorId);
-			scope.setTag("request_path", url.pathname);
-			scope.setContext("request", {
-				method: request.method,
-				url: request.url,
-			});
-			Sentry.captureException(error);
-		});
-		logServerError(request, error, errorId);
-
-		if (wantsJson(request)) {
-			return Response.json(
-				{
-					error: "Internal Server Error",
-					message: "HackerFeed could not process this request.",
-					errorId,
-				},
-				{ status: 500 },
-			);
+		const errorKey = getErrorKey(error);
+		const traceId = getActiveSentryTraceId();
+		if (errorKey && traceId) {
+			traceIdsByError.set(errorKey, traceId);
 		}
-
-		return new Response(renderServerErrorPage(errorId), {
-			status: 500,
-			headers: {
-				"content-type": "text/html; charset=utf-8",
-			},
-		});
+		throw error;
 	}
 }
 
 const serverEntry = createServerEntry({
-	fetch: handleFetch as unknown as RequestHandler<Register>,
+	fetch: handleAppFetch as unknown as RequestHandler<Register>,
 });
 
-export default Sentry.withSentry(
-	(env: WorkerEnv) => {
-		if (!env.SENTRY_DSN) return undefined;
-
-		return {
-			dsn: env.SENTRY_DSN,
-			environment: env.SENTRY_ENVIRONMENT ?? "production",
-			tracesSampleRate: getSentrySampleRate(env.SENTRY_TRACES_SAMPLE_RATE, 0.1),
-			enableLogs: true,
-			integrations: [
-				Sentry.consoleLoggingIntegration({ levels: ["warn", "error"] }),
-			],
-			sendDefaultPii: false,
-		};
+const worker = {
+	...serverEntry,
+	scheduled(
+		_controller: ScheduledController,
+		env: WorkerEnv,
+		context: ExecutionContext,
+	) {
+		const database = createWorkerDatabaseContext(env);
+		const ingestion = runHuggingFaceDailyPapersIngestion(database);
+		context.waitUntil(ingestion);
+		return ingestion;
 	},
-	serverEntry as unknown as ExportedHandler<WorkerEnv>,
-);
+} as unknown as ExportedHandler<WorkerEnv>;
+
+const instrumentedWorker = Sentry.withSentry((env: WorkerEnv) => {
+	if (!env.SENTRY_DSN) return undefined;
+
+	return {
+		dsn: env.SENTRY_DSN,
+		environment: env.SENTRY_ENVIRONMENT ?? "production",
+		tracesSampleRate: getSentrySampleRate(env.SENTRY_TRACES_SAMPLE_RATE, 0.1),
+		enableLogs: true,
+		integrations: [
+			Sentry.consoleLoggingIntegration({ levels: ["warn", "error"] }),
+		],
+		sendDefaultPii: false,
+	};
+}, worker);
+
+const instrumentedFetch =
+	instrumentedWorker.fetch as ExportedHandlerFetchHandler<WorkerEnv>;
+
+export default {
+	...instrumentedWorker,
+	async fetch(request, env, context) {
+		try {
+			return await instrumentedFetch(request, env, context);
+		} catch (error) {
+			const errorKey = getErrorKey(error);
+			const traceId = errorKey ? traceIdsByError.get(errorKey) : undefined;
+			if (errorKey) {
+				traceIdsByError.delete(errorKey);
+			}
+			logServerError(request, error, traceId);
+			const traceHeaders = new Headers();
+			if (traceId) {
+				traceHeaders.set("x-sentry-trace-id", traceId);
+			}
+
+			if (wantsJson(request)) {
+				return Response.json(
+					{
+						error: "Internal Server Error",
+						message: "HackerFeed could not process this request.",
+						traceId: traceId ?? null,
+					},
+					{ status: 500, headers: traceHeaders },
+				);
+			}
+
+			traceHeaders.set("content-type", "text/html; charset=utf-8");
+			return new Response(renderServerErrorPage(traceId), {
+				status: 500,
+				headers: traceHeaders,
+			});
+		}
+	},
+} satisfies ExportedHandler<WorkerEnv>;
