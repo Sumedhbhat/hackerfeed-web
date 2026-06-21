@@ -1,4 +1,5 @@
 import "@tanstack/react-start/server-only";
+import { http } from "#/lib/http/client";
 import type { HuggingFaceDailyPaper } from "./schema";
 import { validateHuggingFaceDailyPapersResponse } from "./schema";
 
@@ -27,7 +28,6 @@ export async function fetchHuggingFaceDailyPapersEdition(
 		throw new Error(`Invalid Hugging Face edition date: ${editionDate}`);
 	}
 
-	const fetchImpl = options.fetch ?? fetch;
 	const sleepImpl = options.sleep ?? sleep;
 	const url = new URL(DAILY_PAPERS_URL);
 	url.searchParams.set("date", editionDate);
@@ -37,7 +37,8 @@ export async function fetchHuggingFaceDailyPapersEdition(
 	for (let attempt = 0; attempt < 3; attempt += 1) {
 		let response: Response;
 		try {
-			response = await fetchImpl(url, {
+			response = await http.get(url, {
+				fetch: options.fetch,
 				headers: {
 					Accept: "application/json",
 					"User-Agent": "hackerfeed-web/1.0",

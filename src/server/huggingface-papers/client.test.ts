@@ -19,13 +19,14 @@ describe("fetchHuggingFaceDailyPapersEdition", () => {
 		).resolves.toEqual([]);
 
 		expect(fetchMock).toHaveBeenCalledOnce();
-		const [url, init] = fetchMock.mock.calls[0];
-		expect(String(url)).toBe(
+		const [request] = fetchMock.mock.calls[0];
+		expect(request).toBeInstanceOf(Request);
+		expect((request as Request).url).toBe(
 			"https://huggingface.co/api/daily_papers?date=2026-06-19&limit=100&sort=publishedAt",
 		);
-		expect(init?.headers).toEqual({
-			Accept: "application/json",
-			"User-Agent": "hackerfeed-web/1.0",
+		expect(Object.fromEntries((request as Request).headers)).toMatchObject({
+			accept: "application/json",
+			"user-agent": "hackerfeed-web/1.0",
 		});
 	});
 
