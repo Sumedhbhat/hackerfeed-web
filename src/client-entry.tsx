@@ -2,17 +2,15 @@ import * as Sentry from "@sentry/react";
 import { StartClient } from "@tanstack/react-start/client";
 import { StrictMode, startTransition } from "react";
 import { hydrateRoot } from "react-dom/client";
+import { env } from "#/env";
 
-const sentryDsn = import.meta.env.VITE_SENTRY_DSN;
+const sentryDsn = env.VITE_SENTRY_DSN;
 
 if (sentryDsn) {
 	Sentry.init({
 		dsn: sentryDsn,
-		environment:
-			import.meta.env.VITE_SENTRY_ENVIRONMENT ?? import.meta.env.MODE,
-		tracesSampleRate: Number(
-			import.meta.env.VITE_SENTRY_TRACES_SAMPLE_RATE ?? "0.1",
-		),
+		environment: env.VITE_SENTRY_ENVIRONMENT,
+		tracesSampleRate: env.VITE_SENTRY_TRACES_SAMPLE_RATE,
 		enableLogs: true,
 		sendDefaultPii: false,
 		integrations: [
