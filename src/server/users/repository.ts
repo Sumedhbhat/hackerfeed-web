@@ -32,7 +32,7 @@ export function createUserRepository(database: DatabaseContext) {
 
 			await database
 				.insert(appUsers)
-				.values({ id: crypto.randomUUID(), workosUserId })
+				.values({ workosUserId })
 				.onConflictDoNothing({ target: appUsers.workosUserId })
 				.run();
 

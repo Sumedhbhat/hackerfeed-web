@@ -6,6 +6,9 @@
 		"nodejs_compat"
 	],
 	"main": "src/server.ts",
+	"triggers": {
+		"crons": ["30 23 * * *"]
+	},
 	"observability": {
 		"enabled": true,
 		"head_sampling_rate": 1,

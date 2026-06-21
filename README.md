@@ -69,6 +69,11 @@ bun run db:migrate:local
 bun run db:migrate:remote
 ```
 
+The same Worker runs Hugging Face Daily Papers ingestion from the Cloudflare cron
+`30 23 * * *` (23:30 UTC / 05:00 Asia/Kolkata). Deploying `wrangler.jsonc`
+registers the production trigger; there is intentionally no HTTP ingestion route.
+Apply the D1 migrations before deploying a Worker version that enables ingestion.
+
 The Worker creates one typed `DatabaseContext` from its D1 binding. tRPC contexts,
 services, and repositories receive that Drizzle context; they must not access
 `env.DB` directly. Use Drizzle's `sql` API through the context when a query cannot

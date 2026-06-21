@@ -288,6 +288,27 @@ describe("empty state", () => {
 });
 
 // ---------------------------------------------------------------------------
+// Feed states — error
+// ---------------------------------------------------------------------------
+
+describe("error state", () => {
+	it("renders the reporting boundary fallback when a feed query throws", () => {
+		const consoleError = vi
+			.spyOn(console, "error")
+			.mockImplementation(() => undefined);
+		mockUseSuspenseQuery.mockImplementation(() => {
+			throw new Error("feed unavailable");
+		});
+
+		render(<FeedApp />, { wrapper: Wrapper });
+
+		expect(screen.getByText("Feed unavailable")).toBeDefined();
+		expect(screen.getByRole("button", { name: /retry/i })).toBeDefined();
+		consoleError.mockRestore();
+	});
+});
+
+// ---------------------------------------------------------------------------
 // Feed states — ready (stories visible)
 // ---------------------------------------------------------------------------
 
