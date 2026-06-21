@@ -86,4 +86,29 @@ describe("validateHuggingFaceDailyPapersResponse", () => {
 		).toThrow();
 		expect(() => validateHuggingFaceDailyPapersResponse({})).toThrow();
 	});
+
+	it("rejects keywords that collide after normalization", () => {
+		expect(() =>
+			validateHuggingFaceDailyPapersResponse([
+				{
+					...validEntry,
+					paper: {
+						...validEntry.paper,
+						ai_keywords: ["AI Agents", "  ai   agents "],
+					},
+				},
+			]),
+		).toThrow();
+	});
+
+	it("rejects blank normalized keywords", () => {
+		expect(() =>
+			validateHuggingFaceDailyPapersResponse([
+				{
+					...validEntry,
+					paper: { ...validEntry.paper, ai_keywords: [" \t\n "] },
+				},
+			]),
+		).toThrow();
+	});
 });

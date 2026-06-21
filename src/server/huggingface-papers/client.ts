@@ -5,6 +5,7 @@ import { validateHuggingFaceDailyPapersResponse } from "./schema";
 
 const DAILY_PAPERS_URL = "https://huggingface.co/api/daily_papers";
 const RETRY_DELAYS_MS = [1_000, 3_000] as const;
+const MAX_RETRY_DELAY_MS = 30_000;
 const editionDatePattern = /^\d{4}-\d{2}-\d{2}$/;
 
 type FetchOptions = {
@@ -20,11 +21,39 @@ function isRetryableStatus(status: number): boolean {
 	return status === 429 || status >= 500;
 }
 
+function isValidEditionDate(value: string): boolean {
+	if (!editionDatePattern.test(value)) {
+		return false;
+	}
+
+	const date = new Date(`${value}T00:00:00.000Z`);
+	return (
+		!Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value
+	);
+}
+
+function retryDelay(response: Response, fallbackMilliseconds: number): number {
+	const retryAfter = response.headers.get("Retry-After");
+	if (retryAfter === null) {
+		return fallbackMilliseconds;
+	}
+
+	const seconds = /^\d+$/.test(retryAfter) ? Number(retryAfter) : null;
+	const requestedMilliseconds =
+		seconds === null ? Date.parse(retryAfter) - Date.now() : seconds * 1_000;
+
+	if (!Number.isFinite(requestedMilliseconds) || requestedMilliseconds < 0) {
+		return fallbackMilliseconds;
+	}
+
+	return Math.min(requestedMilliseconds, MAX_RETRY_DELAY_MS);
+}
+
 export async function fetchHuggingFaceDailyPapersEdition(
 	editionDate: string,
 	options: FetchOptions = {},
 ): Promise<HuggingFaceDailyPaper[]> {
-	if (!editionDatePattern.test(editionDate)) {
+	if (!isValidEditionDate(editionDate)) {
 		throw new Error(`Invalid Hugging Face edition date: ${editionDate}`);
 	}
 
@@ -62,7 +91,7 @@ export async function fetchHuggingFaceDailyPapersEdition(
 			);
 		}
 
-		await sleepImpl(RETRY_DELAYS_MS[attempt]);
+		await sleepImpl(retryDelay(response, RETRY_DELAYS_MS[attempt]));
 	}
 
 	throw new Error("Hugging Face Daily Papers retry loop exhausted");

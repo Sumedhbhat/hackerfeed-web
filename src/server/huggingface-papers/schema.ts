@@ -6,6 +6,32 @@ export function normalizeKeyword(keyword: string): string {
 
 const nullableString = z.string().nullish();
 const dateTime = z.iso.datetime();
+const keywordArraySchema = z
+	.array(z.string())
+	.superRefine((keywords, context) => {
+		const normalizedKeywords = new Set<string>();
+
+		for (const [index, keyword] of keywords.entries()) {
+			const normalized = normalizeKeyword(keyword);
+			if (normalized.length === 0) {
+				context.addIssue({
+					code: "custom",
+					message: "Keyword must not be blank after normalization",
+					path: [index],
+				});
+				continue;
+			}
+
+			if (normalizedKeywords.has(normalized)) {
+				context.addIssue({
+					code: "custom",
+					message: "Keywords must be unique after normalization",
+					path: [index],
+				});
+			}
+			normalizedKeywords.add(normalized);
+		}
+	});
 
 const organizationSchema = z.object({
 	_id: z.string().min(1),
@@ -31,7 +57,7 @@ const authorSchema = z.object({
 });
 
 const paperSchema = z.object({
-	ai_keywords: z.array(z.string()).optional().default([]),
+	ai_keywords: keywordArraySchema.optional().default([]),
 	ai_summary: nullableString,
 	ai_summary_model: nullableString,
 	authors: z.array(authorSchema),
