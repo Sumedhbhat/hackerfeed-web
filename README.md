@@ -42,11 +42,25 @@ Story freshness is refresh-on-favorite for this rollout. Stale-on-read story ref
 ## Database
 
 Persistent app data uses Cloudflare D1 through the `DB` binding in `wrangler.jsonc`.
+Database tables are defined in `src/server/database/schema.ts`; Drizzle Kit
+generates SQL migrations, and Wrangler applies them.
 
 ```bash
+# After changing wrangler.jsonc bindings or variables
+bun run cf:typegen
+
+# After changing the Drizzle schema
+bun run db:generate --name descriptive_migration_name
+
+# Apply generated migrations
 bun run db:migrate:local
 bun run db:migrate:remote
 ```
+
+The Worker creates one typed `DatabaseContext` from its D1 binding. tRPC contexts,
+services, and repositories receive that Drizzle context; they must not access
+`env.DB` directly. Use Drizzle's `sql` API through the context when a query cannot
+be expressed clearly with the query builder.
 
 ## Styling
 

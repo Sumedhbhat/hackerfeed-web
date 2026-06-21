@@ -1,35 +1,28 @@
 import "@tanstack/react-start/server-only";
 
-type D1Value = ArrayBuffer | boolean | null | number | string;
+import { drizzle } from "drizzle-orm/d1";
+import * as schema from "./schema";
 
-type D1Result<T> = {
-	results?: T[];
-	success: boolean;
-};
+export type D1DatabaseBinding = Env["DB"];
 
-type D1PreparedStatement = {
-	all<T = unknown>(): Promise<D1Result<T>>;
-	bind(...values: D1Value[]): D1PreparedStatement;
-	first<T = unknown>(): Promise<T | null>;
-	run(): Promise<D1Result<unknown>>;
-};
-
-export type D1DatabaseBinding = {
-	prepare(query: string): D1PreparedStatement;
-};
-
-const globalForD1 = globalThis as typeof globalThis & {
-	hackerfeedD1?: D1DatabaseBinding;
-};
-
-export function setD1Database(database: D1DatabaseBinding): void {
-	globalForD1.hackerfeedD1 = database;
+export function createDatabaseContext(binding: D1DatabaseBinding) {
+	return drizzle(binding, { schema });
 }
 
-export function getD1Database(): D1DatabaseBinding {
-	if (!globalForD1.hackerfeedD1) {
-		throw new Error("Cloudflare D1 binding DB is not available");
+export type DatabaseContext = ReturnType<typeof createDatabaseContext>;
+
+const globalForDatabase = globalThis as typeof globalThis & {
+	hackerfeedDatabase?: DatabaseContext;
+};
+
+export function setDatabaseContext(database: DatabaseContext): void {
+	globalForDatabase.hackerfeedDatabase = database;
+}
+
+export function getDatabaseContext(): DatabaseContext {
+	if (!globalForDatabase.hackerfeedDatabase) {
+		throw new Error("HackerFeed database context is not available");
 	}
 
-	return globalForD1.hackerfeedD1;
+	return globalForDatabase.hackerfeedDatabase;
 }

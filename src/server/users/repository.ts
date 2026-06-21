@@ -1,23 +1,24 @@
 import "@tanstack/react-start/server-only";
 
-import { type D1DatabaseBinding, getD1Database } from "../database/client";
-
-type AppUserRecord = {
-	id: string;
-	workosUserId: string;
-};
+import { eq } from "drizzle-orm";
+import type { DatabaseContext } from "../database/client";
+import { appUsers } from "../database/schema";
 
 async function getAppUserByWorkosUserId(
-	database: D1DatabaseBinding,
+	database: DatabaseContext,
 	workosUserId: string,
 ) {
-	return database
-		.prepare("SELECT id, workosUserId FROM app_users WHERE workosUserId = ?")
-		.bind(workosUserId)
-		.first<AppUserRecord>();
+	const [appUser] = await database
+		.select()
+		.from(appUsers)
+		.where(eq(appUsers.workosUserId, workosUserId))
+		.limit(1)
+		.all();
+
+	return appUser;
 }
 
-export function createUserRepository(database = getD1Database()) {
+export function createUserRepository(database: DatabaseContext) {
 	return {
 		async getOrCreateByWorkosUserId(workosUserId: string) {
 			const existingUser = await getAppUserByWorkosUserId(
@@ -29,12 +30,10 @@ export function createUserRepository(database = getD1Database()) {
 				return existingUser;
 			}
 
-			const id = crypto.randomUUID();
 			await database
-				.prepare(
-					"INSERT OR IGNORE INTO app_users (id, workosUserId) VALUES (?, ?)",
-				)
-				.bind(id, workosUserId)
+				.insert(appUsers)
+				.values({ id: crypto.randomUUID(), workosUserId })
+				.onConflictDoNothing({ target: appUsers.workosUserId })
 				.run();
 
 			const appUser = await getAppUserByWorkosUserId(database, workosUserId);

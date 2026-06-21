@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
+import type { DatabaseContext } from "#/server/database/client";
 import { createTrpcContextFromRequest } from "./context";
+
+const database = {} as DatabaseContext;
 
 function createRequest(headers: HeadersInit = {}) {
 	return new Request("https://example.com/api/trpc", { headers });
@@ -8,10 +11,11 @@ function createRequest(headers: HeadersInit = {}) {
 describe("createTrpcContextFromRequest", () => {
 	it("returns an unauthenticated context when the auth header is missing", async () => {
 		await expect(
-			createTrpcContextFromRequest(createRequest(), {
+			createTrpcContextFromRequest(createRequest(), database, {
 				getSession: vi.fn(async () => ({ user: null, sessionUser: null })),
 			}),
 		).resolves.toEqual({
+			database,
 			user: null,
 		});
 	});
@@ -33,8 +37,9 @@ describe("createTrpcContextFromRequest", () => {
 		});
 
 		await expect(
-			createTrpcContextFromRequest(request, { getSession }),
+			createTrpcContextFromRequest(request, database, { getSession }),
 		).resolves.toEqual({
+			database,
 			user: { workosUserId: "cookie-workos-user" },
 		});
 		expect(getSession).toHaveBeenCalledWith(request);
@@ -58,9 +63,11 @@ describe("createTrpcContextFromRequest", () => {
 		await expect(
 			createTrpcContextFromRequest(
 				createRequest({ Authorization: "Bearer token-123" }),
+				database,
 				{ getSession, verifyAccessToken },
 			),
 		).resolves.toEqual({
+			database,
 			user: { workosUserId: "verified-workos-user" },
 		});
 		expect(verifyAccessToken).toHaveBeenCalledWith("token-123");
@@ -71,9 +78,11 @@ describe("createTrpcContextFromRequest", () => {
 		await expect(
 			createTrpcContextFromRequest(
 				createRequest({ Authorization: "Bearer token-123" }),
+				database,
 				{ verifyAccessToken: vi.fn(async () => null) },
 			),
 		).resolves.toEqual({
+			database,
 			user: null,
 		});
 	});
@@ -82,11 +91,13 @@ describe("createTrpcContextFromRequest", () => {
 		await expect(
 			createTrpcContextFromRequest(
 				createRequest({ "x-workos-user-id": "spoofed-user" }),
+				database,
 				{
 					getSession: vi.fn(async () => ({ user: null, sessionUser: null })),
 				},
 			),
 		).resolves.toEqual({
+			database,
 			user: null,
 		});
 	});
@@ -98,6 +109,7 @@ describe("createTrpcContextFromRequest", () => {
 					Authorization: "Bearer token-123",
 					"x-workos-user-id": "spoofed-user",
 				}),
+				database,
 				{
 					verifyAccessToken: vi.fn(async () => ({
 						workosUserId: "verified-workos-user",
@@ -105,6 +117,7 @@ describe("createTrpcContextFromRequest", () => {
 				},
 			),
 		).resolves.toEqual({
+			database,
 			user: { workosUserId: "verified-workos-user" },
 		});
 	});
