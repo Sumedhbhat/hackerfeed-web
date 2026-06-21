@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { describe, expect, it } from "vitest";
 import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
+import type { DatabaseContext } from "#/server/database/client";
 import { createTrpcContext } from "./context";
 import { createAppRouter } from "./router";
 
@@ -21,6 +22,7 @@ function createStory(overrides: Partial<HackerNewsStoryRecord> = {}) {
 }
 
 function createHarness() {
+	const database = {} as DatabaseContext;
 	const calls: Array<
 		| { name: "list"; user: unknown }
 		| { name: "add"; user: unknown; story: HackerNewsStoryRecord }
@@ -72,10 +74,13 @@ function createHarness() {
 
 	const router = createAppRouter(favorites);
 	const caller = router.createCaller(
-		createTrpcContext({ user: { workosUserId: "workos-user-1" } }),
+		createTrpcContext({
+			database,
+			user: { workosUserId: "workos-user-1" },
+		}),
 	);
 
-	return { caller, calls, router };
+	return { caller, calls, database, router };
 }
 
 describe("favorites tRPC router", () => {
@@ -139,8 +144,8 @@ describe("favorites tRPC router", () => {
 	});
 
 	it("rejects unauthorized calls consistently", async () => {
-		const { router } = createHarness();
-		const caller = router.createCaller(createTrpcContext());
+		const { database, router } = createHarness();
+		const caller = router.createCaller(createTrpcContext({ database }));
 
 		await expect(caller.favorites.list()).rejects.toMatchObject({
 			code: "UNAUTHORIZED",

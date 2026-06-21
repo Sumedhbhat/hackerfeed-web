@@ -7,8 +7,9 @@ import {
 } from "@tanstack/react-start/server";
 import { createServerEntry } from "@tanstack/react-start/server-entry";
 import {
+	createDatabaseContext,
 	type D1DatabaseBinding,
-	setD1Database,
+	setDatabaseContext,
 } from "#/server/database/client";
 
 type WorkerEnv = {
@@ -125,7 +126,7 @@ function renderServerErrorPage(errorId: string) {
 }
 
 async function handleFetch(request: Request, env: WorkerEnv) {
-	setD1Database(env.DB);
+	setDatabaseContext(createDatabaseContext(env.DB));
 
 	try {
 		return await startFetch(request);
@@ -168,13 +169,16 @@ const serverEntry = createServerEntry({
 	fetch: handleFetch as unknown as RequestHandler<Register>,
 });
 
-export default Sentry.withSentry((env: WorkerEnv) => {
-	if (!env.SENTRY_DSN) return undefined;
+export default Sentry.withSentry(
+	(env: WorkerEnv) => {
+		if (!env.SENTRY_DSN) return undefined;
 
-	return {
-		dsn: env.SENTRY_DSN,
-		environment: env.SENTRY_ENVIRONMENT ?? "production",
-		tracesSampleRate: getSentrySampleRate(env.SENTRY_TRACES_SAMPLE_RATE, 0.1),
-		sendDefaultPii: false,
-	};
-}, serverEntry);
+		return {
+			dsn: env.SENTRY_DSN,
+			environment: env.SENTRY_ENVIRONMENT ?? "production",
+			tracesSampleRate: getSentrySampleRate(env.SENTRY_TRACES_SAMPLE_RATE, 0.1),
+			sendDefaultPii: false,
+		};
+	},
+	serverEntry as unknown as ExportedHandler<WorkerEnv>,
+);

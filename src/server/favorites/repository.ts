@@ -1,39 +1,15 @@
 import "@tanstack/react-start/server-only";
 
+import { and, desc, eq, inArray } from "drizzle-orm";
 import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
-import { type D1DatabaseBinding, getD1Database } from "../database/client";
+import type { DatabaseContext } from "../database/client";
+import {
+	favorites as favoritesTable,
+	stories as storiesTable,
+} from "../database/schema";
 
-type StoryRow = {
-	id: string;
-	hnStoryId: number;
-	title: string | null;
-	url: string | null;
-	text: string | null;
-	score: number;
-	hnPostedAt: string | null;
-	authorUsername: string | null;
-	commentCount: number;
-	commentIds: string | null;
-};
-
-type FavoriteRow = {
-	id: string;
-	appUserId: string;
-	storyId: string;
-	createdAt: string;
-};
-
-type ListedFavoriteRow = FavoriteRow & {
-	storyHnStoryId: number;
-	storyTitle: string | null;
-	storyUrl: string | null;
-	storyText: string | null;
-	storyScore: number;
-	storyHnPostedAt: string | null;
-	storyAuthorUsername: string | null;
-	storyCommentCount: number;
-	storyCommentIds: string | null;
-};
+type StoryRow = typeof storiesTable.$inferSelect;
+type FavoriteRow = typeof favoritesTable.$inferSelect;
 
 type StoryRecord = {
 	id: string;
@@ -74,9 +50,7 @@ function mapHackerNewsStory(story: HackerNewsStoryRecord) {
 }
 
 function parseCommentIds(value: string | null): number[] {
-	if (!value) {
-		return [];
-	}
+	if (!value) return [];
 
 	try {
 		const parsed = JSON.parse(value);
@@ -90,109 +64,68 @@ function parseCommentIds(value: string | null): number[] {
 
 function mapStoryRow(row: StoryRow): StoryRecord {
 	return {
-		id: row.id,
-		hnStoryId: row.hnStoryId,
-		title: row.title,
-		url: row.url,
-		text: row.text,
-		score: row.score,
+		...row,
 		hnPostedAt: row.hnPostedAt ? new Date(row.hnPostedAt) : null,
-		authorUsername: row.authorUsername,
-		commentCount: row.commentCount,
 		commentIds: parseCommentIds(row.commentIds),
 	};
 }
 
 function mapFavoriteRow(row: FavoriteRow): FavoriteRecord {
 	return {
-		id: row.id,
-		appUserId: row.appUserId,
-		storyId: row.storyId,
+		...row,
 		createdAt: new Date(row.createdAt),
 	};
 }
 
 async function getStoryByHnStoryId(
-	database: D1DatabaseBinding,
+	database: DatabaseContext,
 	hnStoryId: number,
 ) {
-	return database
-		.prepare(
-			`SELECT id, hnStoryId, title, url, text, score, hnPostedAt,
-				authorUsername, commentCount, commentIds
-			FROM stories
-			WHERE hnStoryId = ?`,
-		)
-		.bind(hnStoryId)
-		.first<StoryRow>();
+	const [story] = await database
+		.select()
+		.from(storiesTable)
+		.where(eq(storiesTable.hnStoryId, hnStoryId))
+		.limit(1)
+		.all();
+
+	return story;
 }
 
 async function getFavorite(
-	database: D1DatabaseBinding,
+	database: DatabaseContext,
 	appUserId: string,
 	storyId: string,
 ) {
-	return database
-		.prepare(
-			`SELECT id, appUserId, storyId, createdAt
-			FROM favorites
-			WHERE appUserId = ? AND storyId = ?`,
+	const [favorite] = await database
+		.select()
+		.from(favoritesTable)
+		.where(
+			and(
+				eq(favoritesTable.appUserId, appUserId),
+				eq(favoritesTable.storyId, storyId),
+			),
 		)
-		.bind(appUserId, storyId)
-		.first<FavoriteRow>();
+		.limit(1)
+		.all();
+
+	return favorite;
 }
 
-export function createFavoriteRepository(database = getD1Database()) {
+export function createFavoriteRepository(database: DatabaseContext) {
 	return {
 		async upsertStoryFromHackerNews(story: HackerNewsStoryRecord) {
 			const mappedStory = mapHackerNewsStory(story);
-			const id = crypto.randomUUID();
 
-			await database
-				.prepare(
-					`INSERT OR IGNORE INTO stories (
-						id, hnStoryId, title, url, text, score, hnPostedAt,
-						authorUsername, commentCount, commentIds
-					) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-				)
-				.bind(
-					id,
-					mappedStory.hnStoryId,
-					mappedStory.title,
-					mappedStory.url,
-					mappedStory.text,
-					mappedStory.score,
-					mappedStory.hnPostedAt,
-					mappedStory.authorUsername,
-					mappedStory.commentCount,
-					mappedStory.commentIds,
-				)
-				.run();
+			const [sharedStory] = await database
+				.insert(storiesTable)
+				.values({ id: crypto.randomUUID(), ...mappedStory })
+				.onConflictDoUpdate({
+					target: storiesTable.hnStoryId,
+					set: mappedStory,
+				})
+				.returning()
+				.all();
 
-			await database
-				.prepare(
-					`UPDATE stories
-					SET title = ?, url = ?, text = ?, score = ?, hnPostedAt = ?,
-						authorUsername = ?, commentCount = ?, commentIds = ?
-					WHERE hnStoryId = ?`,
-				)
-				.bind(
-					mappedStory.title,
-					mappedStory.url,
-					mappedStory.text,
-					mappedStory.score,
-					mappedStory.hnPostedAt,
-					mappedStory.authorUsername,
-					mappedStory.commentCount,
-					mappedStory.commentIds,
-					mappedStory.hnStoryId,
-				)
-				.run();
-
-			const sharedStory = await getStoryByHnStoryId(
-				database,
-				mappedStory.hnStoryId,
-			);
 			if (!sharedStory) {
 				throw new Error("D1 story upsert failed");
 			}
@@ -202,27 +135,11 @@ export function createFavoriteRepository(database = getD1Database()) {
 
 		async createStoryFromHackerNewsIfMissing(story: HackerNewsStoryRecord) {
 			const mappedStory = mapHackerNewsStory(story);
-			const id = crypto.randomUUID();
 
 			await database
-				.prepare(
-					`INSERT OR IGNORE INTO stories (
-						id, hnStoryId, title, url, text, score, hnPostedAt,
-						authorUsername, commentCount, commentIds
-					) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-				)
-				.bind(
-					id,
-					mappedStory.hnStoryId,
-					mappedStory.title,
-					mappedStory.url,
-					mappedStory.text,
-					mappedStory.score,
-					mappedStory.hnPostedAt,
-					mappedStory.authorUsername,
-					mappedStory.commentCount,
-					mappedStory.commentIds,
-				)
+				.insert(storiesTable)
+				.values({ id: crypto.randomUUID(), ...mappedStory })
+				.onConflictDoNothing({ target: storiesTable.hnStoryId })
 				.run();
 
 			const sharedStory = await getStoryByHnStoryId(
@@ -237,13 +154,12 @@ export function createFavoriteRepository(database = getD1Database()) {
 		},
 
 		async createFavoriteIfMissing(appUserId: string, storyId: string) {
-			const id = crypto.randomUUID();
-
 			await database
-				.prepare(
-					"INSERT OR IGNORE INTO favorites (id, appUserId, storyId) VALUES (?, ?, ?)",
-				)
-				.bind(id, appUserId, storyId)
+				.insert(favoritesTable)
+				.values({ id: crypto.randomUUID(), appUserId, storyId })
+				.onConflictDoNothing({
+					target: [favoritesTable.appUserId, favoritesTable.storyId],
+				})
 				.run();
 
 			const favorite = await getFavorite(database, appUserId, storyId);
@@ -255,65 +171,45 @@ export function createFavoriteRepository(database = getD1Database()) {
 		},
 
 		removeFavorite(appUserId: string, hnStoryId: number) {
+			const storyIds = database
+				.select({ id: storiesTable.id })
+				.from(storiesTable)
+				.where(eq(storiesTable.hnStoryId, hnStoryId));
+
 			return database
-				.prepare(
-					`DELETE FROM favorites
-					WHERE appUserId = ?
-						AND storyId IN (SELECT id FROM stories WHERE hnStoryId = ?)`,
+				.delete(favoritesTable)
+				.where(
+					and(
+						eq(favoritesTable.appUserId, appUserId),
+						inArray(favoritesTable.storyId, storyIds),
+					),
 				)
-				.bind(appUserId, hnStoryId)
 				.run();
 		},
 
 		clearFavorites(appUserId: string) {
 			return database
-				.prepare("DELETE FROM favorites WHERE appUserId = ?")
-				.bind(appUserId)
+				.delete(favoritesTable)
+				.where(eq(favoritesTable.appUserId, appUserId))
 				.run();
 		},
 
 		async listFavorites(appUserId: string) {
 			const rows = await database
-				.prepare(
-					`SELECT
-						f.id,
-						f.appUserId,
-						f.storyId,
-						f.createdAt,
-						s.hnStoryId AS storyHnStoryId,
-						s.title AS storyTitle,
-						s.url AS storyUrl,
-						s.text AS storyText,
-						s.score AS storyScore,
-						s.hnPostedAt AS storyHnPostedAt,
-						s.authorUsername AS storyAuthorUsername,
-						s.commentCount AS storyCommentCount,
-						s.commentIds AS storyCommentIds
-					FROM favorites f
-					INNER JOIN stories s ON s.id = f.storyId
-					WHERE f.appUserId = ?
-					ORDER BY f.createdAt DESC`,
-				)
-				.bind(appUserId)
-				.all<ListedFavoriteRow>();
+				.select({
+					favorite: favoritesTable,
+					story: storiesTable,
+				})
+				.from(favoritesTable)
+				.innerJoin(storiesTable, eq(storiesTable.id, favoritesTable.storyId))
+				.where(eq(favoritesTable.appUserId, appUserId))
+				.orderBy(desc(favoritesTable.createdAt))
+				.all();
 
-			return (rows.results ?? []).map(
+			return rows.map(
 				(row): ListedFavoriteRecord => ({
-					...mapFavoriteRow(row),
-					story: {
-						id: row.storyId,
-						hnStoryId: row.storyHnStoryId,
-						title: row.storyTitle,
-						url: row.storyUrl,
-						text: row.storyText,
-						score: row.storyScore,
-						hnPostedAt: row.storyHnPostedAt
-							? new Date(row.storyHnPostedAt)
-							: null,
-						authorUsername: row.storyAuthorUsername,
-						commentCount: row.storyCommentCount,
-						commentIds: parseCommentIds(row.storyCommentIds),
-					},
+					...mapFavoriteRow(row.favorite),
+					story: mapStoryRow(row.story),
 				}),
 			);
 		},

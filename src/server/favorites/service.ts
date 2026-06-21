@@ -5,11 +5,9 @@ import {
 	type AuthenticatedWorkosUser,
 	resolveCurrentWorkosUser,
 } from "../auth/current-user";
-import { createUserService, type UserService } from "../users/service";
-import {
-	createFavoriteRepository,
-	type FavoriteRepository,
-} from "./repository";
+import type { DatabaseContext } from "../database/client";
+import { createUserServiceFromDatabase } from "../users/service";
+import { createFavoriteRepository } from "./repository";
 
 type CurrentUserInput = Parameters<typeof resolveCurrentWorkosUser>[0];
 type FavoriteServiceRepository<TFavorite, TListedFavorites> = {
@@ -52,19 +50,9 @@ export function createFavoriteService<TFavorite, TListedFavorites>(
 	favorites: FavoriteServiceRepository<TFavorite, TListedFavorites>,
 	users: UserServiceDependency,
 ): FavoriteServiceMethods<TFavorite, TListedFavorites>;
-export function createFavoriteService(): FavoriteServiceMethods<
-	Awaited<ReturnType<FavoriteRepository["createFavoriteIfMissing"]>>,
-	Awaited<ReturnType<FavoriteRepository["listFavorites"]>>
->;
 export function createFavoriteService<TFavorite, TListedFavorites>(
-	favorites: FavoriteServiceRepository<
-		TFavorite,
-		TListedFavorites
-	> = createFavoriteRepository() as unknown as FavoriteServiceRepository<
-		TFavorite,
-		TListedFavorites
-	>,
-	users: UserServiceDependency = createUserService() as UserService,
+	favorites: FavoriteServiceRepository<TFavorite, TListedFavorites>,
+	users: UserServiceDependency,
 ): FavoriteServiceMethods<TFavorite, TListedFavorites> {
 	async function getAppUser(user: CurrentUserInput) {
 		const identity: AuthenticatedWorkosUser = resolveCurrentWorkosUser(user);
@@ -116,6 +104,13 @@ export function createFavoriteService<TFavorite, TListedFavorites>(
 			await favorites.clearFavorites(appUser.id);
 		},
 	};
+}
+
+export function createFavoriteServiceFromDatabase(database: DatabaseContext) {
+	return createFavoriteService(
+		createFavoriteRepository(database),
+		createUserServiceFromDatabase(database),
+	);
 }
 
 export type FavoriteService = ReturnType<typeof createFavoriteService>;

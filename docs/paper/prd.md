@@ -20,7 +20,6 @@ HackerFeed should ingest Hugging Face Daily Papers once per day into Cloudflare 
 - No admin HTTP endpoint for ingestion.
 - No secret-triggered manual inject route.
 - No Prisma.
-- No Drizzle or ORM migration in this feature.
 - No raw Hugging Face JSON persistence.
 - No pagination beyond the first `limit=100` response.
 - No derived daily keyword stats table in v1.
@@ -378,6 +377,10 @@ No date library should be added.
 
 ## Open Implementation Notes
 
-- The D1 binding type may need to be extended to include `batch()` for transaction-style ingestion writes.
+- The shared database client uses Cloudflare's official D1 binding type, including
+  `batch()` for transaction-style ingestion writes.
 - The D1 schema uses text timestamps because existing migrations use text timestamp fields.
-- Use raw D1 SQL repositories for this feature to match the current codebase.
+- Define the schema and generate migrations with Drizzle. Wrangler remains
+  responsible for applying the generated SQL migrations to D1.
+- Backend repositories receive the shared Drizzle `DatabaseContext`. Only the
+  Worker composition boundary accesses the raw D1 binding.

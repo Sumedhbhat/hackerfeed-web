@@ -130,11 +130,15 @@ No. Prisma was removed from the current repo.
 
 ### Are we using Drizzle?
 
-No. The current repo uses raw D1 SQL through `database.prepare(...).bind(...).run()`.
+Yes. Drizzle defines the database schema, generates SQL migrations, and provides
+the query API for backend repositories. The Worker converts its D1 binding into a
+typed Drizzle context before passing it through tRPC and service boundaries.
 
 ### Should this feature introduce Drizzle?
 
-No. Use the existing raw D1 repository pattern for this feature. A Drizzle or ORM migration can happen later as a separate refactor.
+Yes. Use Drizzle for the Hugging Face schema and repository work. Wrangler still
+applies the generated migrations so local and production migration execution
+remain consistent with the existing deployment workflow.
 
 ### Should the job use `ctx.waitUntil(...)`?
 

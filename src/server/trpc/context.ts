@@ -6,8 +6,10 @@ import {
 	getBearerToken,
 	verifyWorkosAccessToken,
 } from "#/server/auth/workos-access-token";
+import type { DatabaseContext } from "#/server/database/client";
 
 export type TrpcContext = {
+	database: DatabaseContext;
 	user: AuthenticatedWorkosUser | null;
 };
 
@@ -21,15 +23,18 @@ async function getCurrentSessionFromRequest(
 }
 
 export function createTrpcContext({
+	database,
 	user = null,
 }: {
+	database: DatabaseContext;
 	user?: AuthenticatedWorkosUser | null;
-} = {}): TrpcContext {
-	return { user };
+}): TrpcContext {
+	return { database, user };
 }
 
 export async function createTrpcContextFromRequest(
 	request: Request,
+	database: DatabaseContext,
 	{
 		getSession = getCurrentSessionFromRequest,
 		verifyAccessToken = verifyWorkosAccessToken,
@@ -44,10 +49,11 @@ export async function createTrpcContextFromRequest(
 
 	if (!token) {
 		const session = await getSession(request);
-		return createTrpcContext({ user: session.user });
+		return createTrpcContext({ database, user: session.user });
 	}
 
 	return createTrpcContext({
+		database,
 		user: await verifyAccessToken(token),
 	});
 }
