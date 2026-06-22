@@ -13,6 +13,7 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as StoryStoryIdRouteImport } from './routes/story.$storyId'
+import { Route as AuthSignedOutRouteImport } from './routes/auth.signed-out'
 import { Route as AuthSignOutRouteImport } from './routes/auth.sign-out'
 import { Route as AuthSignInRouteImport } from './routes/auth.sign-in'
 import { Route as AuthErrorRouteImport } from './routes/auth.error'
@@ -38,6 +39,11 @@ const IndexRoute = IndexRouteImport.update({
 const StoryStoryIdRoute = StoryStoryIdRouteImport.update({
   id: '/story/$storyId',
   path: '/story/$storyId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthSignedOutRoute = AuthSignedOutRouteImport.update({
+  id: '/auth/signed-out',
+  path: '/auth/signed-out',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthSignOutRoute = AuthSignOutRouteImport.update({
@@ -79,6 +85,7 @@ export interface FileRoutesByFullPath {
   '/auth/error': typeof AuthErrorRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-out': typeof AuthSignOutRoute
+  '/auth/signed-out': typeof AuthSignedOutRoute
   '/story/$storyId': typeof StoryStoryIdRoute
   '/api/auth/me': typeof ApiAuthMeRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
@@ -91,6 +98,7 @@ export interface FileRoutesByTo {
   '/auth/error': typeof AuthErrorRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-out': typeof AuthSignOutRoute
+  '/auth/signed-out': typeof AuthSignedOutRoute
   '/story/$storyId': typeof StoryStoryIdRoute
   '/api/auth/me': typeof ApiAuthMeRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
@@ -104,6 +112,7 @@ export interface FileRoutesById {
   '/auth/error': typeof AuthErrorRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-out': typeof AuthSignOutRoute
+  '/auth/signed-out': typeof AuthSignedOutRoute
   '/story/$storyId': typeof StoryStoryIdRoute
   '/api/auth/me': typeof ApiAuthMeRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
@@ -118,6 +127,7 @@ export interface FileRouteTypes {
     | '/auth/error'
     | '/auth/sign-in'
     | '/auth/sign-out'
+    | '/auth/signed-out'
     | '/story/$storyId'
     | '/api/auth/me'
     | '/api/trpc/$'
@@ -130,6 +140,7 @@ export interface FileRouteTypes {
     | '/auth/error'
     | '/auth/sign-in'
     | '/auth/sign-out'
+    | '/auth/signed-out'
     | '/story/$storyId'
     | '/api/auth/me'
     | '/api/trpc/$'
@@ -142,6 +153,7 @@ export interface FileRouteTypes {
     | '/auth/error'
     | '/auth/sign-in'
     | '/auth/sign-out'
+    | '/auth/signed-out'
     | '/story/$storyId'
     | '/api/auth/me'
     | '/api/trpc/$'
@@ -155,6 +167,7 @@ export interface RootRouteChildren {
   AuthErrorRoute: typeof AuthErrorRoute
   AuthSignInRoute: typeof AuthSignInRoute
   AuthSignOutRoute: typeof AuthSignOutRoute
+  AuthSignedOutRoute: typeof AuthSignedOutRoute
   StoryStoryIdRoute: typeof StoryStoryIdRoute
   ApiAuthMeRoute: typeof ApiAuthMeRoute
   ApiTrpcSplatRoute: typeof ApiTrpcSplatRoute
@@ -188,6 +201,13 @@ declare module '@tanstack/react-router' {
       path: '/story/$storyId'
       fullPath: '/story/$storyId'
       preLoaderRoute: typeof StoryStoryIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/signed-out': {
+      id: '/auth/signed-out'
+      path: '/auth/signed-out'
+      fullPath: '/auth/signed-out'
+      preLoaderRoute: typeof AuthSignedOutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/sign-out': {
@@ -243,6 +263,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthErrorRoute: AuthErrorRoute,
   AuthSignInRoute: AuthSignInRoute,
   AuthSignOutRoute: AuthSignOutRoute,
+  AuthSignedOutRoute: AuthSignedOutRoute,
   StoryStoryIdRoute: StoryStoryIdRoute,
   ApiAuthMeRoute: ApiAuthMeRoute,
   ApiTrpcSplatRoute: ApiTrpcSplatRoute,

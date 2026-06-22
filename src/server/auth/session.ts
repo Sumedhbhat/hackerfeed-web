@@ -319,6 +319,7 @@ export async function createSessionJsonResponse(
 export async function createSignOutResponse(
 	request: Request,
 ): Promise<Response> {
+	const signedOutLocation = "/auth/signed-out";
 	const sealedSession = getRequestCookie(request, SESSION_COOKIE);
 	const headers = new Headers();
 
@@ -332,7 +333,9 @@ export async function createSignOutResponse(
 			});
 			headers.set(
 				"Location",
-				await session.getLogoutUrl({ returnTo: getOrigin(request) }),
+				await session.getLogoutUrl({
+					returnTo: `${getOrigin(request)}${signedOutLocation}`,
+				}),
 			);
 
 			return new Response(null, { headers, status: 302 });
@@ -341,7 +344,7 @@ export async function createSignOutResponse(
 		}
 	}
 
-	headers.set("Location", "/");
+	headers.set("Location", signedOutLocation);
 
 	return new Response(null, { headers, status: 302 });
 }

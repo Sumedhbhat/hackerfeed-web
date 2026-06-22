@@ -97,6 +97,7 @@ function isPublicPath(pathname: string) {
 		pathname === "/auth/sign-in" ||
 		pathname === "/auth/callback" ||
 		pathname === "/auth/error" ||
+		pathname === "/auth/signed-out" ||
 		pathname === "/auth/sign-out" ||
 		pathname.startsWith("/api/") ||
 		pathname.startsWith("/assets/") ||
