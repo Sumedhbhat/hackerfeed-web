@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { AlertCircle, RotateCw } from "lucide-react";
 
 const authErrorCopy = {
@@ -53,17 +53,17 @@ function AuthErrorPage() {
 				<div className="mt-6 flex flex-wrap gap-3">
 					<a
 						href="/auth/sign-in?returnTo=/"
-						className="inline-flex items-center gap-2 rounded-md bg-(--lagoon) px-3 py-2 text-sm font-semibold text-white no-underline hover:bg-(--lagoon-deep) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--lagoon)"
+						className="auth-primary-action inline-flex items-center gap-2 rounded-md bg-(--lagoon) px-3 py-2 text-sm font-semibold no-underline hover:bg-(--lagoon-deep) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--lagoon)"
 					>
 						<RotateCw size={15} aria-hidden="true" />
 						Try again
 					</a>
-					<Link
-						to="/auth/sign-out"
+					<a
+						href="/auth/sign-out"
 						className="inline-flex rounded-md border border-(--chip-line) px-3 py-2 text-sm font-semibold text-(--sea-ink) no-underline hover:bg-(--chip-bg) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--lagoon)"
 					>
 						Clear session
-					</Link>
+					</a>
 				</div>
 			</section>
 		</main>
