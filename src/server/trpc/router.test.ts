@@ -71,8 +71,17 @@ function createHarness() {
 			calls.push({ name: "importLocal", user, stories });
 		},
 	};
+	const papers = {
+		async getEdition(editionDate?: string) {
+			return {
+				editionDate: editionDate ?? "2026-06-20",
+				papers: [],
+				popularKeywords: [],
+			};
+		},
+	};
 
-	const router = createAppRouter(favorites);
+	const router = createAppRouter(favorites, papers);
 	const caller = router.createCaller(
 		createTrpcContext({
 			database,
@@ -153,5 +162,25 @@ describe("favorites tRPC router", () => {
 		await expect(caller.favorites.add(createStory())).rejects.toBeInstanceOf(
 			TRPCError,
 		);
+	});
+});
+
+describe("papers tRPC router", () => {
+	it("serves the latest successful paper edition", async () => {
+		const { caller } = createHarness();
+
+		await expect(caller.papers.edition({})).resolves.toEqual({
+			editionDate: "2026-06-20",
+			papers: [],
+			popularKeywords: [],
+		});
+	});
+
+	it("accepts a selected edition date", async () => {
+		const { caller } = createHarness();
+
+		await expect(
+			caller.papers.edition({ editionDate: "2026-06-18" }),
+		).resolves.toMatchObject({ editionDate: "2026-06-18" });
 	});
 });

@@ -10,7 +10,13 @@ import {
 	importLocalFavoritesInputSchema,
 } from "#/lib/favorites/schemas";
 import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
+import {
+	type PaperEdition,
+	paperEditionInputSchema,
+	paperEditionOutputSchema,
+} from "#/lib/papers/schemas";
 import { createFavoriteServiceFromDatabase } from "#/server/favorites/service";
+import { createHuggingFacePaperFeedServiceFromDatabase } from "#/server/huggingface-papers/feed";
 import type { TrpcContext } from "./context";
 
 type ListedFavorite = {
@@ -39,6 +45,10 @@ type FavoritesApiService = {
 	): Promise<unknown>;
 	removeFavorite(user: TrpcContext["user"], hnStoryId: number): Promise<void>;
 	clearFavorites(user: TrpcContext["user"]): Promise<void>;
+};
+
+type PapersApiService = {
+	getEdition(editionDate?: string): Promise<PaperEdition>;
 };
 
 const t = initTRPC.context<TrpcContext>().create({
@@ -86,7 +96,19 @@ function getFavoritesApiService(
 	return createFavoriteServiceFromDatabase(database);
 }
 
-export function createAppRouter(favorites?: FavoritesApiService) {
+function getPapersApiService(
+	database: TrpcContext["database"],
+	papers?: PapersApiService,
+) {
+	if (papers) return papers;
+
+	return createHuggingFacePaperFeedServiceFromDatabase(database);
+}
+
+export function createAppRouter(
+	favorites?: FavoritesApiService,
+	papers?: PapersApiService,
+) {
 	return t.router({
 		favorites: t.router({
 			list: protectedProcedure
@@ -128,6 +150,15 @@ export function createAppRouter(favorites?: FavoritesApiService) {
 					await service.importLocalFavorites(ctx.user, input.stories);
 
 					return input.stories;
+				}),
+		}),
+		papers: t.router({
+			edition: protectedProcedure
+				.input(paperEditionInputSchema)
+				.output(paperEditionOutputSchema)
+				.query(async ({ ctx, input }) => {
+					const service = getPapersApiService(ctx.database, papers);
+					return service.getEdition(input.editionDate);
 				}),
 		}),
 	});
