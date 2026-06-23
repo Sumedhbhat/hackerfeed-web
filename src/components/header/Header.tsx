@@ -8,7 +8,7 @@ export default function Header() {
 
 	return (
 		<header className="sticky top-0 z-50 border-b border-(--line) bg-(--header-bg) backdrop-blur-md">
-			<nav className="page-wrap flex items-center gap-8 py-3.5 px-4">
+			<nav className="page-wrap flex items-center gap-3 py-3.5 px-4 sm:gap-8">
 				{/* Logo */}
 				<Link
 					to="/"
@@ -31,13 +31,20 @@ export default function Header() {
 				</Link>
 
 				{/* Nav links */}
-				<div className="flex items-center gap-5 text-sm">
+				<div className="flex items-center gap-3 text-xs sm:gap-5 sm:text-sm">
 					<Link
 						to="/"
 						className="nav-link"
 						activeProps={{ className: "nav-link is-active" }}
 					>
 						Feed
+					</Link>
+					<Link
+						to="/papers"
+						className="nav-link"
+						activeProps={{ className: "nav-link is-active" }}
+					>
+						Papers
 					</Link>
 					<Link
 						to="/favorites"

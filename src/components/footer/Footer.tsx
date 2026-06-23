@@ -10,7 +10,7 @@ export default function Footer() {
 							HackerFeed
 						</p>
 						<p className="m-0 max-w-sm text-sm leading-relaxed">
-							A clean reader for top, new, and best Hacker News stories.
+							A clean reader for Hacker News stories and daily research papers.
 						</p>
 					</div>
 
