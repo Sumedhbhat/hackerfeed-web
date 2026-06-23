@@ -439,6 +439,20 @@ a {
   color: var(--lagoon);
 }
 
+.papers-external-links .papers-chat-link {
+  padding: 0.33rem 0.55rem;
+  border: 1px solid color-mix(in srgb, var(--lagoon) 24%, var(--line));
+  border-radius: 0.35rem;
+  background: color-mix(in srgb, var(--lagoon) 8%, var(--surface-strong));
+  color: var(--sea-ink);
+}
+
+.papers-external-links .papers-chat-link:hover {
+  border-color: var(--lagoon);
+  background: color-mix(in srgb, var(--lagoon) 14%, var(--surface-strong));
+  color: var(--lagoon-deep);
+}
+
 .papers-row {
   box-sizing: border-box;
   padding: 1rem;

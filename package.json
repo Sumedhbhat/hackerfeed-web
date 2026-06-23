@@ -16,6 +16,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate:local": "wrangler d1 migrations apply DB --local",
     "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
+    "papers:codex-chat": "node scripts/codex-paper-chat.mjs",
     "solve:issues": "node scripts/solve-issues.mjs",
     "format": "biome format",
     "lint": "biome lint",
@@ -54,6 +55,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.5",
+    "@openai/codex-sdk": "0.142.0",
     "@tailwindcss/typography": "^0.5.16",
     "@tanstack/devtools-event-client": "latest",
     "@tanstack/devtools-vite": "^0.8.0",
