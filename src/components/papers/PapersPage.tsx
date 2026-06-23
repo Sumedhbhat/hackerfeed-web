@@ -1,5 +1,4 @@
 import {
-	ArrowUpRight,
 	BookOpen,
 	CalendarDays,
 	Code2,
@@ -90,9 +89,9 @@ function PaperSummary({
 					onClick={() => setShowAbstract((value) => !value)}
 				>
 					{showAbstract ? (
-						<Sparkles size={13} aria-hidden="true" />
+						<Sparkles size={14} aria-hidden="true" />
 					) : (
-						<BookOpen size={13} aria-hidden="true" />
+						<BookOpen size={14} aria-hidden="true" />
 					)}
 					{showAbstract ? "Show AI summary" : "Show abstract"}
 				</button>
@@ -105,15 +104,15 @@ function PaperSignals({ paper }: { paper: PaperFeedPaper }) {
 	return (
 		<div className="papers-signals">
 			<span>
-				<ThumbsUp size={13} aria-hidden="true" /> {paper.upvotes}
+				<ThumbsUp size={14} aria-hidden="true" /> {paper.upvotes}
 			</span>
 			<span>
-				<CalendarDays size={13} aria-hidden="true" />{" "}
+				<CalendarDays size={14} aria-hidden="true" />{" "}
 				{formatPaperDate(paper.paperPublishedAt)}
 			</span>
 			{paper.githubRepo ? (
 				<span>
-					<Code2 size={13} aria-hidden="true" /> Code
+					<Code2 size={14} aria-hidden="true" /> Code
 				</span>
 			) : null}
 		</div>
@@ -127,76 +126,50 @@ function ExternalPaperLinks({
 	paper: PaperFeedPaper;
 	compact?: boolean;
 }) {
+	const hasSecondaryLinks = paper.projectPage || paper.githubRepo;
+
+	if (!hasSecondaryLinks) return null;
+
 	return (
 		<div className={`papers-external-links${compact ? " is-compact" : ""}`}>
-			<a href={paper.paperUrl} target="_blank" rel="noreferrer">
-				Paper <ArrowUpRight size={15} aria-hidden="true" />
-			</a>
 			{paper.projectPage ? (
 				<a href={paper.projectPage} target="_blank" rel="noreferrer">
-					Project <ExternalLink size={13} aria-hidden="true" />
+					Project <ExternalLink size={14} aria-hidden="true" />
 				</a>
 			) : null}
 			{paper.githubRepo ? (
 				<a href={paper.githubRepo} target="_blank" rel="noreferrer">
-					Code <ExternalLink size={13} aria-hidden="true" />
+					Code <ExternalLink size={14} aria-hidden="true" />
 				</a>
 			) : null}
 		</div>
 	);
 }
 
-function LeadPaper({ paper }: { paper: PaperFeedPaper }) {
-	return (
-		<article className="papers-lead rise-in">
-			<div className="papers-lead-copy">
-				<p className="papers-section-label">Featured paper</p>
-				<h1>{paper.title}</h1>
-				<p className="papers-authors">{formatAuthors(paper.authors)}</p>
-				<PaperSummary paper={paper} />
-				<footer className="papers-lead-footer">
-					<PaperSignals paper={paper} />
-					<ExternalPaperLinks paper={paper} />
-				</footer>
-			</div>
-			<div className="papers-lead-art" aria-hidden="true">
-				<div className="papers-orbit papers-orbit-one" />
-				<div className="papers-orbit papers-orbit-two" />
-				<div className="papers-cube">
-					<i />
-					<i />
-					<i />
-				</div>
-				<span>
-					latent
-					<br />
-					space
-				</span>
-			</div>
-		</article>
-	);
-}
-
 function PaperRow({ paper, index }: { paper: PaperFeedPaper; index: number }) {
 	return (
 		<article
-			className="papers-row rise-in"
+			className="papers-card papers-row rise-in"
 			style={{ animationDelay: `${Math.min(index * 35, 210)}ms` }}
 		>
-			<div className="papers-row-copy">
-				<h2>{paper.title}</h2>
-				<p className="papers-authors">{formatAuthors(paper.authors)}</p>
-				<PaperSummary paper={paper} compact />
-			</div>
-			<aside className="papers-row-aside">
+			<h2>
+				<a href={paper.paperUrl} target="_blank" rel="noreferrer">
+					{paper.title}
+				</a>
+			</h2>
+			<p className="papers-authors">{formatAuthors(paper.authors)}</p>
+			<PaperSummary paper={paper} compact />
+			<footer className="papers-row-footer">
 				<PaperSignals paper={paper} />
-				<div className="papers-keyword-stack">
-					{paper.keywords.slice(0, 3).map((keyword) => (
-						<span key={keyword}>{keyword}</span>
-					))}
-				</div>
 				<ExternalPaperLinks paper={paper} compact />
-			</aside>
+				{paper.keywords.length > 0 ? (
+					<ul className="papers-keyword-strip" aria-label="Paper keywords">
+						{paper.keywords.map((keyword) => (
+							<li key={keyword}>{keyword}</li>
+						))}
+					</ul>
+				) : null}
+			</footer>
 		</article>
 	);
 }
@@ -216,7 +189,6 @@ export function PapersFeed({
 		[edition.papers, filters.topic, query],
 	);
 	const visiblePapers = filteredPapers.slice(0, visibleCount);
-	const [leadPaper, ...paperRows] = visiblePapers;
 	const selectedDate = filters.date ?? edition.editionDate ?? "";
 
 	return (
@@ -224,7 +196,7 @@ export function PapersFeed({
 			<div className="papers-shell">
 				<section className="papers-toolbar" aria-label="Find a paper edition">
 					<label className="papers-search">
-						<Search size={15} aria-hidden="true" />
+						<Search size={16} aria-hidden="true" />
 						<input
 							type="search"
 							value={filters.query ?? ""}
@@ -239,7 +211,7 @@ export function PapersFeed({
 						/>
 					</label>
 					<label className="papers-date">
-						<CalendarDays size={14} aria-hidden="true" />
+						<CalendarDays size={16} aria-hidden="true" />
 						<input
 							type="date"
 							value={selectedDate}
@@ -277,11 +249,10 @@ export function PapersFeed({
 					))}
 				</nav>
 
-				{leadPaper ? (
+				{visiblePapers.length > 0 ? (
 					<>
-						<LeadPaper paper={leadPaper} />
-						<section aria-label="More papers">
-							{paperRows.map((paper, index) => (
+						<section className="papers-list" aria-label="Papers">
+							{visiblePapers.map((paper, index) => (
 								<PaperRow paper={paper} index={index} key={paper.arxivId} />
 							))}
 						</section>

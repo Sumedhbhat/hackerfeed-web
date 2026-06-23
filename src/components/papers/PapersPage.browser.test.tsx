@@ -77,6 +77,20 @@ describe("PapersFeed", () => {
 		expect(screen.queryByText("01")).toBeNull();
 	});
 
+	it("links paper titles directly to the paper URL", () => {
+		render(
+			<PapersFeed edition={edition} filters={{}} onFiltersChange={vi.fn()} />,
+		);
+
+		const titleLink = screen.getByRole("link", { name: "Reasoning Paper" });
+
+		expect(titleLink.getAttribute("href")).toBe(
+			"https://huggingface.co/papers/2606.00001",
+		);
+		expect(titleLink.getAttribute("target")).toBe("_blank");
+		expect(screen.queryByRole("link", { name: /^Paper$/ })).toBeNull();
+	});
+
 	it("changes the selected edition date", () => {
 		const onFiltersChange = vi.fn();
 		render(
