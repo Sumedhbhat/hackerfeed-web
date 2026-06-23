@@ -91,6 +91,28 @@ describe("PapersFeed", () => {
 		expect(screen.queryByRole("link", { name: /^Paper$/ })).toBeNull();
 	});
 
+	it("opens ChatGPT with paper discussion context", () => {
+		render(
+			<PapersFeed edition={edition} filters={{}} onFiltersChange={vi.fn()} />,
+		);
+
+		const discussLink = screen.getByRole("link", {
+			name: "Discuss Reasoning Paper in ChatGPT",
+		});
+		const chatUrl = new URL(discussLink.getAttribute("href") ?? "");
+		const prompt = chatUrl.searchParams.get("q") ?? "";
+
+		expect(chatUrl.origin).toBe("https://chatgpt.com");
+		expect(discussLink.getAttribute("target")).toBe("_blank");
+		expect(prompt).toContain("I want to discuss this research paper");
+		expect(prompt).toContain("Title: Reasoning Paper");
+		expect(prompt).toContain(
+			"Paper URL: https://huggingface.co/papers/2606.00001",
+		);
+		expect(prompt).toContain("Summary: The AI summary.");
+		expect(prompt).toContain("Abstract: The original abstract.");
+	});
+
 	it("changes the selected edition date", () => {
 		const onFiltersChange = vi.fn();
 		render(

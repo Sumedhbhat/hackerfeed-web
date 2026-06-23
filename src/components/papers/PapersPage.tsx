@@ -3,6 +3,7 @@ import {
 	CalendarDays,
 	Code2,
 	ExternalLink,
+	MessageCircle,
 	RefreshCw,
 	Search,
 	Sparkles,
@@ -28,6 +29,7 @@ type PapersFeedProps = PapersPageProps & {
 };
 
 const INITIAL_PAPER_COUNT = 10;
+const CHATGPT_URL = "https://chatgpt.com/";
 
 function formatAuthors(authors: string[]): string {
 	if (authors.length === 0) return "Authors unavailable";
@@ -65,6 +67,28 @@ function matchesFilters(
 		.toLocaleLowerCase();
 
 	return searchable.includes(query.toLocaleLowerCase());
+}
+
+function buildChatGptPaperDiscussionUrl(paper: PaperFeedPaper): string {
+	const prompt = [
+		"I want to discuss this research paper and decide what to do with it.",
+		"",
+		`Title: ${paper.title}`,
+		`Paper URL: ${paper.paperUrl}`,
+		paper.authors.length > 0 ? `Authors: ${paper.authors.join(", ")}` : null,
+		paper.keywords.length > 0 ? `Keywords: ${paper.keywords.join(", ")}` : null,
+		`Summary: ${paper.summary}`,
+		paper.abstract ? `Abstract: ${paper.abstract}` : null,
+		paper.projectPage ? `Project page: ${paper.projectPage}` : null,
+		paper.githubRepo ? `Code: ${paper.githubRepo}` : null,
+		"",
+		"Please help me understand the core idea, why it matters, and whether there is a useful product, engineering, or writing follow-up for HackerFeed.",
+	].filter(Boolean);
+
+	const url = new URL(CHATGPT_URL);
+	url.searchParams.set("q", prompt.join("\n"));
+
+	return url.toString();
 }
 
 function PaperSummary({
@@ -126,12 +150,18 @@ function ExternalPaperLinks({
 	paper: PaperFeedPaper;
 	compact?: boolean;
 }) {
-	const hasSecondaryLinks = paper.projectPage || paper.githubRepo;
-
-	if (!hasSecondaryLinks) return null;
-
 	return (
 		<div className={`papers-external-links${compact ? " is-compact" : ""}`}>
+			<a
+				className="papers-chat-link"
+				href={buildChatGptPaperDiscussionUrl(paper)}
+				target="_blank"
+				rel="noreferrer"
+				aria-label={`Discuss ${paper.title} in ChatGPT`}
+			>
+				<MessageCircle size={14} aria-hidden="true" />
+				Discuss
+			</a>
 			{paper.projectPage ? (
 				<a href={paper.projectPage} target="_blank" rel="noreferrer">
 					Project <ExternalLink size={14} aria-hidden="true" />
