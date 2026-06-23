@@ -72,13 +72,8 @@ function matchesFilters(
 function buildChatGptPaperDiscussionUrl(paper: PaperFeedPaper): string {
   const prompt = [
     "I want to discuss this research paper and understand it completely.",
-    "",
     `Title: ${paper.title}`,
     `Paper URL: ${paper.paperUrl}`,
-    paper.authors.length > 0 ? `Authors: ${paper.authors.join(", ")}` : null,
-    paper.keywords.length > 0 ? `Keywords: ${paper.keywords.join(", ")}` : null,
-    `Summary: ${paper.summary}`,
-    paper.abstract ? `Abstract: ${paper.abstract}` : null,
     paper.projectPage ? `Project page: ${paper.projectPage}` : null,
     paper.githubRepo ? `Code: ${paper.githubRepo}` : null,
     "",
