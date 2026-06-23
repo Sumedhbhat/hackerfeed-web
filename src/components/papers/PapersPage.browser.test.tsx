@@ -109,8 +109,15 @@ describe("PapersFeed", () => {
 		expect(prompt).toContain(
 			"Paper URL: https://huggingface.co/papers/2606.00001",
 		);
-		expect(prompt).toContain("Summary: The AI summary.");
-		expect(prompt).toContain("Abstract: The original abstract.");
+		expect(prompt).toContain("Code: https://github.com/example/reasoning");
+		expect(prompt).toContain(
+			"Please help me understand the core idea, why it matters, and where its useful.",
+		);
+		expect(prompt).toContain(
+			"I will be asking you a huge series of questions about this paper and want them answered.",
+		);
+		expect(prompt).not.toContain("Summary: The AI summary.");
+		expect(prompt).not.toContain("Abstract: The original abstract.");
 	});
 
 	it("changes the selected edition date", () => {
