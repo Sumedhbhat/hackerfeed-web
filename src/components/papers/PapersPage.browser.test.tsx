@@ -3,6 +3,12 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { PaperEdition } from "#/lib/papers/schemas";
 import { PapersFeed } from "./PapersPage";
 
+const emptyEdition: PaperEdition = {
+	editionDate: "2026-06-22",
+	popularKeywords: [],
+	papers: [],
+};
+
 const edition: PaperEdition = {
 	editionDate: "2026-06-21",
 	popularKeywords: [
@@ -129,6 +135,30 @@ describe("PapersFeed", () => {
 				onFiltersChange={onFiltersChange}
 			/>,
 		);
+
+		fireEvent.change(screen.getByLabelText("Choose edition date"), {
+			target: { value: "2026-06-18" },
+		});
+
+		expect(onFiltersChange).toHaveBeenCalledWith({
+			date: "2026-06-18",
+			topic: undefined,
+		});
+	});
+
+	it("keeps the edition date picker active when an edition has no papers", () => {
+		const onFiltersChange = vi.fn();
+		render(
+			<PapersFeed
+				edition={emptyEdition}
+				filters={{}}
+				onFiltersChange={onFiltersChange}
+			/>,
+		);
+
+		expect(
+			screen.getByText("No papers are available for this edition."),
+		).toBeTruthy();
 
 		fireEvent.change(screen.getByLabelText("Choose edition date"), {
 			target: { value: "2026-06-18" },
