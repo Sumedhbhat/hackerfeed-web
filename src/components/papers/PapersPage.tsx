@@ -216,6 +216,15 @@ export function PapersFeed({
 	);
 	const visiblePapers = filteredPapers.slice(0, visibleCount);
 	const selectedDate = filters.date ?? edition.editionDate ?? "";
+	const hasPapers = edition.papers.length > 0;
+	const hasActiveFilters = Boolean(query || filters.topic);
+	const emptyMessage = hasPapers
+		? "No papers match these filters."
+		: filters.date
+			? "No successful paper edition exists for this date."
+			: selectedDate
+				? "No papers are available for this edition."
+				: "No paper editions have been ingested yet.";
 
 	return (
 		<main className="papers-page">
@@ -297,13 +306,23 @@ export function PapersFeed({
 					</>
 				) : (
 					<section className="papers-state">
-						<p>No papers match these filters.</p>
-						<button
-							type="button"
-							onClick={() => onFiltersChange({ date: filters.date })}
-						>
-							Clear search and topic
-						</button>
+						<p>{emptyMessage}</p>
+						{hasPapers && hasActiveFilters ? (
+							<button
+								type="button"
+								onClick={() => onFiltersChange({ date: filters.date })}
+							>
+								Clear search and topic
+							</button>
+						) : null}
+						{!hasPapers && filters.date ? (
+							<button
+								type="button"
+								onClick={() => onFiltersChange({ ...filters, date: undefined })}
+							>
+								View latest edition
+							</button>
+						) : null}
 					</section>
 				)}
 			</div>
@@ -337,28 +356,6 @@ export function PapersPage({ filters, onFiltersChange }: PapersPageProps) {
 					<button type="button" onClick={() => edition.refetch()}>
 						<RefreshCw size={14} aria-hidden="true" /> Try again
 					</button>
-				</section>
-			</main>
-		);
-	}
-
-	if (!edition.data.editionDate || edition.data.papers.length === 0) {
-		return (
-			<main className="papers-page">
-				<section className="papers-shell papers-state">
-					<p>
-						{filters.date
-							? "No successful paper edition exists for this date."
-							: "No paper editions have been ingested yet."}
-					</p>
-					{filters.date ? (
-						<button
-							type="button"
-							onClick={() => onFiltersChange({ ...filters, date: undefined })}
-						>
-							View latest edition
-						</button>
-					) : null}
 				</section>
 			</main>
 		);
