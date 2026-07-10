@@ -7,6 +7,7 @@ import {
 	type HuggingFacePaperFeedRepository,
 	type PaperFeedRecord,
 } from "./feed-repository";
+import { projectPaperPresentation } from "./paper-presentation";
 
 function getPopularKeywords(papers: PaperFeedRecord[]): PopularPaperKeyword[] {
 	const keywords = new Map<string, PopularPaperKeyword>();
@@ -50,20 +51,13 @@ export function createHuggingFacePaperFeedService(
 			return {
 				editionDate,
 				papers: papers.map((paper) => ({
-					abstract:
-						paper.aiSummary !== null && paper.aiSummary !== paper.summary
-							? paper.summary
-							: null,
+					...projectPaperPresentation(paper),
 					arxivId: paper.arxivId,
 					authors: paper.authors,
 					entryPublishedAt: paper.entryPublishedAt,
-					githubRepo: paper.githubRepo,
 					keywords: paper.keywords,
 					paperPublishedAt: paper.paperPublishedAt,
-					paperUrl: `https://huggingface.co/papers/${paper.arxivId}`,
-					projectPage: paper.projectPage,
 					rank: paper.rank,
-					summary: paper.aiSummary ?? paper.summary,
 					title: paper.title,
 					upvotes: paper.upvotes,
 				})),

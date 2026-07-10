@@ -104,4 +104,21 @@ describe("Hugging Face paper feed service", () => {
 			summary: "Original abstract",
 		});
 	});
+
+	it("omits invalid and non-HTTPS upstream links", async () => {
+		const repository = createRepository("2026-06-20", [
+			paper({
+				githubRepo: "javascript:alert(1)",
+				projectPage: "http://example.com/project",
+			}),
+		]);
+		const service = createHuggingFacePaperFeedService(repository);
+
+		const result = await service.getEdition();
+
+		expect(result.papers[0]).toMatchObject({
+			githubRepo: null,
+			projectPage: null,
+		});
+	});
 });

@@ -11,12 +11,24 @@ import {
 } from "#/lib/favorites/schemas";
 import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
 import {
+	type PaperFavoritesListInput,
+	type PaperFavoritesListOutput,
+	paperFavoriteInputSchema,
+	paperFavoritesListInputSchema,
+	paperFavoritesListOutputSchema,
+} from "#/lib/paper-favorites/schemas";
+import {
 	type PaperEdition,
 	paperEditionInputSchema,
 	paperEditionOutputSchema,
 } from "#/lib/papers/schemas";
 import { createFavoriteServiceFromDatabase } from "#/server/favorites/service";
 import { createHuggingFacePaperFeedServiceFromDatabase } from "#/server/huggingface-papers/feed";
+import {
+	createPaperFavoriteServiceFromDatabase,
+	InvalidPaperFavoriteCursorError,
+	PaperNotFoundError,
+} from "#/server/paper-favorites/service";
 import type { TrpcContext } from "./context";
 
 type ListedFavorite = {
@@ -49,6 +61,16 @@ type FavoritesApiService = {
 
 type PapersApiService = {
 	getEdition(editionDate?: string): Promise<PaperEdition>;
+};
+
+type PaperFavoritesApiService = {
+	listFavorites(
+		user: TrpcContext["user"],
+		input: PaperFavoritesListInput,
+	): Promise<PaperFavoritesListOutput>;
+	addFavorite(user: TrpcContext["user"], arxivId: string): Promise<void>;
+	removeFavorite(user: TrpcContext["user"], arxivId: string): Promise<void>;
+	clearFavorites(user: TrpcContext["user"]): Promise<void>;
 };
 
 const t = initTRPC.context<TrpcContext>().create({
@@ -105,9 +127,31 @@ function getPapersApiService(
 	return createHuggingFacePaperFeedServiceFromDatabase(database);
 }
 
+function getPaperFavoritesApiService(
+	database: TrpcContext["database"],
+	paperFavorites?: PaperFavoritesApiService,
+) {
+	if (paperFavorites) return paperFavorites;
+
+	return createPaperFavoriteServiceFromDatabase(database);
+}
+
+function mapPaperFavoriteError(error: unknown): never {
+	if (error instanceof PaperNotFoundError) {
+		throw new TRPCError({ code: "NOT_FOUND", message: error.message });
+	}
+
+	if (error instanceof InvalidPaperFavoriteCursorError) {
+		throw new TRPCError({ code: "BAD_REQUEST", message: error.message });
+	}
+
+	throw error;
+}
+
 export function createAppRouter(
 	favorites?: FavoritesApiService,
 	papers?: PapersApiService,
+	paperFavorites?: PaperFavoritesApiService,
 ) {
 	return t.router({
 		favorites: t.router({
@@ -160,6 +204,58 @@ export function createAppRouter(
 					const service = getPapersApiService(ctx.database, papers);
 					return service.getEdition(input.editionDate);
 				}),
+		}),
+		paperFavorites: t.router({
+			list: protectedProcedure
+				.input(paperFavoritesListInputSchema)
+				.output(paperFavoritesListOutputSchema)
+				.query(async ({ ctx, input }) => {
+					const service = getPaperFavoritesApiService(
+						ctx.database,
+						paperFavorites,
+					);
+
+					try {
+						return await service.listFavorites(ctx.user, input);
+					} catch (error) {
+						return mapPaperFavoriteError(error);
+					}
+				}),
+
+			add: protectedProcedure
+				.input(paperFavoriteInputSchema)
+				.output(paperFavoriteInputSchema)
+				.mutation(async ({ ctx, input }) => {
+					const service = getPaperFavoritesApiService(
+						ctx.database,
+						paperFavorites,
+					);
+
+					try {
+						await service.addFavorite(ctx.user, input.arxivId);
+						return input;
+					} catch (error) {
+						return mapPaperFavoriteError(error);
+					}
+				}),
+
+			remove: protectedProcedure
+				.input(paperFavoriteInputSchema)
+				.mutation(async ({ ctx, input }) => {
+					const service = getPaperFavoritesApiService(
+						ctx.database,
+						paperFavorites,
+					);
+					await service.removeFavorite(ctx.user, input.arxivId);
+				}),
+
+			clear: protectedProcedure.mutation(async ({ ctx }) => {
+				const service = getPaperFavoritesApiService(
+					ctx.database,
+					paperFavorites,
+				);
+				await service.clearFavorites(ctx.user);
+			}),
 		}),
 	});
 }
