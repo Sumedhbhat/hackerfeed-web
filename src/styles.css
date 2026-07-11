@@ -354,6 +354,32 @@ a {
   transition: border-color 180ms ease, box-shadow 180ms ease;
 }
 
+.favorites-tabs {
+	display: flex;
+	gap: 1.5rem;
+	margin-bottom: 1.5rem;
+	border-bottom: 1px solid var(--line);
+}
+
+.favorites-tabs button {
+	margin-bottom: -1px;
+	padding: 0.65rem 0.1rem;
+	border-bottom: 2px solid transparent;
+	color: var(--sea-ink-soft);
+	font-size: 0.875rem;
+	font-weight: 600;
+}
+
+.favorites-tabs button[aria-selected="true"] {
+	border-bottom-color: var(--lagoon);
+	color: var(--sea-ink);
+}
+
+.favorites-tabs button:focus-visible {
+	outline: 2px solid var(--lagoon);
+	outline-offset: 3px;
+}
+
 .papers-card:hover {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }

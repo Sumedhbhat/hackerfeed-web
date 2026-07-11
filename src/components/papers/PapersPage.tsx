@@ -15,6 +15,11 @@ import { usePaperEdition } from "#/hooks/usePaperEdition";
 import { usePaperFavorites } from "#/hooks/usePaperFavorites";
 import type { PaperEdition, PaperFeedPaper } from "#/lib/papers/schemas";
 
+export type PaperPresentation = Omit<
+	PaperFeedPaper,
+	"entryPublishedAt" | "rank"
+>;
+
 type PaperFilters = {
 	date?: string;
 	query?: string;
@@ -71,7 +76,7 @@ function matchesFilters(
 	return searchable.includes(query.toLocaleLowerCase());
 }
 
-function buildChatGptPaperDiscussionUrl(paper: PaperFeedPaper): string {
+function buildChatGptPaperDiscussionUrl(paper: PaperPresentation): string {
 	const prompt = [
 		"I want to discuss this research paper and understand it completely.",
 		`Title: ${paper.title}`,
@@ -93,7 +98,7 @@ function PaperSummary({
 	paper,
 	compact = false,
 }: {
-	paper: PaperFeedPaper;
+	paper: PaperPresentation;
 	compact?: boolean;
 }) {
 	const [showAbstract, setShowAbstract] = useState(false);
@@ -122,7 +127,7 @@ function PaperSummary({
 	);
 }
 
-function PaperSignals({ paper }: { paper: PaperFeedPaper }) {
+function PaperSignals({ paper }: { paper: PaperPresentation }) {
 	return (
 		<div className="papers-signals">
 			<span>
@@ -145,7 +150,7 @@ function ExternalPaperLinks({
 	paper,
 	compact = false,
 }: {
-	paper: PaperFeedPaper;
+	paper: PaperPresentation;
 	compact?: boolean;
 }) {
 	return (
@@ -180,10 +185,10 @@ type PaperRowProps = {
 	isFavorited: boolean;
 	isPending: boolean;
 	onToggleFavorite: () => void;
-	paper: PaperFeedPaper;
+	paper: PaperPresentation;
 };
 
-function PaperRow({
+export function PaperRow({
 	canFavorite,
 	index,
 	isFavorited: saved,

@@ -10,6 +10,7 @@ const trpcMock = vi.hoisted(() => ({
 	add: vi.fn(),
 	list: vi.fn(),
 	remove: vi.fn(),
+	clear: vi.fn(),
 }));
 
 vi.mock("#/hooks/useAuthSession", () => ({
@@ -22,6 +23,7 @@ vi.mock("#/lib/trpc/client", () => ({
 			add: { mutate: trpcMock.add },
 			list: { query: trpcMock.list },
 			remove: { mutate: trpcMock.remove },
+			clear: { mutate: trpcMock.clear },
 		},
 	}),
 }));
@@ -86,6 +88,13 @@ function Probe({ second = false }: { second?: boolean }) {
 				{favorites.isFavorited(paper.arxivId) ? "remove" : "add"}
 			</button>
 			<button
+				disabled={!favorites.canClear}
+				type="button"
+				onClick={favorites.clearAll}
+			>
+				clear papers
+			</button>
+			<button
 				type="button"
 				disabled={favorites.isPending(secondPaper.arxivId)}
 				onClick={() => favorites.toggleFavorite(secondPaper)}
@@ -103,6 +112,7 @@ beforeEach(() => {
 	trpcMock.add.mockResolvedValue(undefined);
 	trpcMock.list.mockResolvedValue({ items: [], nextCursor: null });
 	trpcMock.remove.mockResolvedValue(undefined);
+	trpcMock.clear.mockResolvedValue(undefined);
 });
 
 afterEach(() => {
@@ -502,5 +512,87 @@ describe("usePaperFavorites", () => {
 				"Test Paper",
 			),
 		);
+	});
+
+	it("optimistically clears all papers and rolls back exact metadata and order on failure", async () => {
+		const original = saved({
+			abstract: "Exact abstract",
+			savedAt: "2026-01-02T00:00:00.000Z",
+		});
+		const older = saved({
+			arxivId: secondPaper.arxivId,
+			title: secondPaper.title,
+			savedAt: "2026-01-01T00:00:00.000Z",
+		});
+		const clear = deferred<void>();
+		trpcMock.list.mockResolvedValue({
+			items: [original, older],
+			nextCursor: null,
+		});
+		trpcMock.clear.mockReturnValue(clear.promise);
+		render(<Probe />);
+		await waitFor(() =>
+			expect(screen.getByTestId("items").textContent).toContain(
+				"Exact abstract",
+			),
+		);
+
+		fireEvent.click(screen.getByRole("button", { name: "clear papers" }));
+		await waitFor(() =>
+			expect(screen.getByTestId("items").textContent).toBe("[]"),
+		);
+		expect(
+			screen.getByRole<HTMLButtonElement>("button", { name: "clear papers" })
+				.disabled,
+		).toBe(true);
+		clear.reject(new Error("clear failed"));
+
+		await screen.findByText(
+			"Could not clear favorites. Refresh saved favorites, then try again.",
+		);
+		expect(JSON.parse(screen.getByTestId("items").textContent ?? "[]")).toEqual(
+			[original, older],
+		);
+	});
+
+	it("refuses to clear while a paper toggle is pending without diverging the cache", async () => {
+		const original = saved();
+		const remove = deferred<void>();
+		trpcMock.list.mockResolvedValue({ items: [original], nextCursor: null });
+		trpcMock.remove.mockReturnValue(remove.promise);
+		render(<Probe />);
+		await screen.findByText(/Test Paper/);
+
+		fireEvent.click(screen.getByRole("button", { name: "remove" }));
+		await waitFor(() =>
+			expect(screen.getByTestId("items").textContent).toBe("[]"),
+		);
+		const clearButton = screen.getByRole<HTMLButtonElement>("button", {
+			name: "clear papers",
+		});
+		expect(clearButton.disabled).toBe(true);
+		fireEvent.click(clearButton);
+		expect(trpcMock.clear).not.toHaveBeenCalled();
+
+		remove.reject(new Error("remove failed"));
+		await screen.findByText(/Could not update favorite/);
+		expect(JSON.parse(screen.getByTestId("items").textContent ?? "[]")).toEqual(
+			[original],
+		);
+		expect(trpcMock.clear).not.toHaveBeenCalled();
+	});
+
+	it("shares one paper load across multiple consumers", async () => {
+		trpcMock.list.mockResolvedValue({ items: [saved()], nextCursor: null });
+		render(
+			<>
+				<Probe />
+				<Probe second />
+			</>,
+		);
+		await waitFor(() =>
+			expect(screen.getByTestId("second").textContent).toContain("1"),
+		);
+		expect(trpcMock.list).toHaveBeenCalledTimes(1);
 	});
 });

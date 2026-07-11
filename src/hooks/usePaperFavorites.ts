@@ -13,10 +13,11 @@ import { useAuthSession } from "./useAuthSession";
 const PAGE_LIMIT = 50;
 const QUERY_ROOT = ["paperFavorites"] as const;
 const MUTATION_KEY = ["paperFavorites", "toggle"] as const;
+const CLEAR_MUTATION_KEY = ["paperFavorites", "clear"] as const;
 
 type FavoritesData = SavedPaper[];
 type MutationVariables = {
-	paper: PaperFeedPaper;
+	paper: PaperFeedPaper | SavedPaper;
 	remove: boolean;
 	epoch: number;
 };
@@ -81,11 +82,15 @@ export type UsePaperFavoritesReturn = {
 	count: number;
 	savedPapers: SavedPaper[];
 	canFavorite: boolean;
+	canClear: boolean;
 	error: string | null;
 	isFavorited: (arxivId: string) => boolean;
 	isPending: (arxivId: string) => boolean;
+	isClearPending: boolean;
+	isLoading: boolean;
+	clearAll: () => void;
 	refresh: () => void;
-	toggleFavorite: (paper: PaperFeedPaper) => void;
+	toggleFavorite: (paper: PaperFeedPaper | SavedPaper) => void;
 };
 
 export function usePaperFavorites(): UsePaperFavoritesReturn {
@@ -177,6 +182,30 @@ export function usePaperFavorites(): UsePaperFavoritesReturn {
 		},
 	});
 
+	const clearMutation = useMutation({
+		mutationKey: CLEAR_MUTATION_KEY,
+		mutationFn: async ({ epoch }: { epoch: number }) => {
+			if (epoch !== auth.epoch) return;
+			await createTrpcClient().paperFavorites.clear.mutate();
+		},
+		onMutate: async () => {
+			await queryClient.cancelQueries({ queryKey, exact: true });
+			const previous = queryClient.getQueryData<FavoritesData>(queryKey) ?? [];
+			queryClient.setQueryData<FavoritesData>(queryKey, []);
+			return { previous };
+		},
+		onError: (_error, variables, context) => {
+			if (variables.epoch !== auth.epoch || authTransitioning) return;
+			queryClient.setQueryData<FavoritesData>(
+				queryKey,
+				context?.previous ?? [],
+			);
+			setMutationError(
+				"Could not clear favorites. Refresh saved favorites, then try again.",
+			);
+		},
+	});
+
 	const mutationStates = useMutationState({
 		filters: { mutationKey: MUTATION_KEY },
 	});
@@ -203,8 +232,14 @@ export function usePaperFavorites(): UsePaperFavoritesReturn {
 		void queryClient.resetQueries({ queryKey, exact: true });
 	}
 
-	function toggleFavorite(paper: PaperFeedPaper) {
-		if (!auth.userId || authTransitioning || pending.has(paper.arxivId)) return;
+	function toggleFavorite(paper: PaperFeedPaper | SavedPaper) {
+		if (
+			!auth.userId ||
+			authTransitioning ||
+			clearMutation.isPending ||
+			pending.has(paper.arxivId)
+		)
+			return;
 		setMutationError(null);
 		mutation.mutate({
 			paper,
@@ -213,15 +248,37 @@ export function usePaperFavorites(): UsePaperFavoritesReturn {
 		});
 	}
 
+	function clearAll() {
+		if (
+			!auth.userId ||
+			authTransitioning ||
+			clearMutation.isPending ||
+			pending.size > 0 ||
+			savedPapers.length === 0
+		)
+			return;
+		setMutationError(null);
+		clearMutation.mutate({ epoch: auth.epoch });
+	}
+
 	return {
 		count: savedPapers.length,
 		savedPapers,
 		canFavorite: Boolean(auth.userId) && !authTransitioning,
+		canClear:
+			Boolean(auth.userId) &&
+			!authTransitioning &&
+			!clearMutation.isPending &&
+			pending.size === 0 &&
+			savedPapers.length > 0,
+		clearAll,
 		error: favorites.error
 			? "Could not load favorites. Try again."
 			: mutationError,
 		isFavorited: (arxivId) => favoriteIds.has(arxivId),
 		isPending: (arxivId) => pending.has(arxivId),
+		isClearPending: clearMutation.isPending,
+		isLoading: favorites.isLoading,
 		refresh,
 		toggleFavorite,
 	};
