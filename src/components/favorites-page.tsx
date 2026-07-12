@@ -66,47 +66,7 @@ export function FavoritesPage({
 	}
 
 	return (
-		<main className="px-4 pt-8 pb-14 sm:pt-10 page-wrap">
-			<section className="pb-6 mb-6 border-b rise-in border-(--line)">
-				<p className="mb-4 island-kicker">Collection</p>
-				<div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-end">
-					<h1 className="m-0 text-4xl font-semibold tracking-tight leading-tight sm:text-5xl text-(--sea-ink)">
-						Favorites.
-					</h1>
-					{activeCount > 0 && (isStories || user) ? (
-						<button
-							type="button"
-							onClick={confirmClear}
-							disabled={!isStories && !papers.canClear}
-							className="py-1.5 px-4 text-sm font-medium rounded border transition-colors border-(--chip-line) text-(--sea-ink-soft) hover:text-(--sea-ink) hover:border-(--sea-ink-soft)"
-						>
-							{!isStories && papers.isClearPending
-								? "Clearing..."
-								: `Clear ${isStories ? "stories" : "papers"}`}
-						</button>
-					) : null}
-				</div>
-				<p className="m-0 mt-4 text-sm leading-relaxed text-(--sea-ink-soft)">
-					{activeCount > 0 ? (
-						<>
-							<span className="font-medium text-(--sea-ink)">
-								{activeCount}{" "}
-								{isStories
-									? activeCount === 1
-										? "story"
-										: "stories"
-									: activeCount === 1
-										? "paper"
-										: "papers"}
-							</span>{" "}
-							saved in this collection.
-						</>
-					) : (
-						"Saved items from HackerFeed, kept together in one collection."
-					)}
-				</p>
-			</section>
-
+		<main className="px-4 pt-6 pb-14 page-wrap">
 			<div className="favorites-tabs" role="tablist" aria-label="Favorite type">
 				{(["stories", "papers"] as const).map((type) => (
 					<button
@@ -154,27 +114,39 @@ export function FavoritesPage({
 					/>
 				) : (
 					<>
-						<div className="flex flex-wrap gap-3 items-center mb-6 rise-in">
-							<span className="island-kicker">Sort by</span>
-							<div className="flex gap-1">
-								{(
-									[
-										["newest", "Newest"],
-										["oldest", "Oldest"],
-										["score", isStories ? "Top score" : "Upvotes"],
-									] as const
-								).map(([key, label]) => (
-									<button
-										key={key}
-										type="button"
-										onClick={() => setSortOrder(key)}
-										aria-pressed={sortOrder === key}
-										className={`rounded px-3 py-1 text-xs font-medium transition-colors ${sortOrder === key ? "bg-(--chip-bg) text-(--sea-ink) border border-(--chip-line)" : "text-(--sea-ink-soft) hover:text-(--sea-ink)"}`}
-									>
-										{label}
-									</button>
-								))}
+						<div className="flex flex-wrap gap-3 justify-between items-center mb-6 rise-in">
+							<div className="flex gap-3 items-center">
+								<span className="island-kicker">Sort by</span>
+								<div className="flex gap-1">
+									{(
+										[
+											["newest", "Newest"],
+											["oldest", "Oldest"],
+											["score", isStories ? "Top score" : "Upvotes"],
+										] as const
+									).map(([key, label]) => (
+										<button
+											key={key}
+											type="button"
+											onClick={() => setSortOrder(key)}
+											aria-pressed={sortOrder === key}
+											className={`rounded px-3 py-1 text-xs font-medium transition-colors ${sortOrder === key ? "bg-(--chip-bg) text-(--sea-ink) border border-(--chip-line)" : "text-(--sea-ink-soft) hover:text-(--sea-ink)"}`}
+										>
+											{label}
+										</button>
+									))}
+								</div>
 							</div>
+							<button
+								type="button"
+								onClick={confirmClear}
+								disabled={!isStories && !papers.canClear}
+								className="py-1.5 px-4 text-sm font-medium rounded border transition-colors border-(--chip-line) text-(--sea-ink-soft) hover:text-(--sea-ink) hover:border-(--sea-ink-soft) disabled:cursor-wait disabled:opacity-55"
+							>
+								{!isStories && papers.isClearPending
+									? "Clearing..."
+									: `Clear ${isStories ? "stories" : "papers"}`}
+							</button>
 						</div>
 						{papers.error && !isStories ? (
 							<output className="papers-favorites-error">

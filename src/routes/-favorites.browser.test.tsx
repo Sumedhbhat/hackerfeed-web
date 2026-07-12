@@ -146,7 +146,6 @@ describe("FavoritesPage backend source of truth", () => {
 			expect(screen.getByText("Database newest saved")).toBeDefined();
 		});
 
-		expect(screen.getByText(/2 stories/i)).toBeDefined();
 		expect(screen.getByText("Database oldest saved")).toBeDefined();
 		expect(
 			screen
@@ -169,7 +168,7 @@ describe("FavoritesPage backend source of truth", () => {
 		});
 
 		expect(screen.queryByText("Local saved story")).toBeNull();
-		expect(screen.getByText(/1 story/i)).toBeDefined();
+		expect(screen.queryByText(/saved in this collection/i)).toBeNull();
 	});
 });
 
