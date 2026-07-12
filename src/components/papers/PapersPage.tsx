@@ -215,7 +215,11 @@ export function PaperRow({
 					{canFavorite ? (
 						<button
 							type="button"
-							className={`papers-favorite${saved ? " is-favorited" : ""}`}
+							className={`text-sm transition-colors disabled:cursor-wait disabled:opacity-55 ${
+								saved
+									? "font-medium text-(--kicker)"
+									: "text-(--sea-ink-soft) hover:text-(--sea-ink)"
+							}`}
 							aria-label={
 								saved
 									? `Remove ${paper.title} from favorites`
@@ -230,8 +234,9 @@ export function PaperRow({
 								size={14}
 								fill={saved ? "currentColor" : "none"}
 								aria-hidden="true"
-								className={saved ? "star-pop" : undefined}
-							/>
+								className={`inline${saved ? " star-pop" : ""}`}
+							/>{" "}
+							{saved ? "Saved" : "Save"}
 						</button>
 					) : null}
 				</div>

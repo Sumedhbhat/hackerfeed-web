@@ -527,36 +527,6 @@ a {
   min-width: 0;
 }
 
-.papers-favorite {
-  display: inline-grid;
-  flex: 0 0 1.75rem;
-  width: 1.75rem;
-  height: 1.75rem;
-  padding: 0;
-  place-items: center;
-  border: 1px solid color-mix(in srgb, var(--sea-ink) 16%, transparent);
-  border-radius: 6px;
-  color: var(--sea-ink-soft);
-  background: transparent;
-  transition: color 150ms ease, border-color 150ms ease, background 150ms ease;
-}
-
-.papers-favorite:hover:not(:disabled),
-.papers-favorite:focus-visible {
-  color: var(--sea-ink);
-  border-color: color-mix(in srgb, var(--sea-ink) 35%, transparent);
-  background: color-mix(in srgb, var(--lagoon) 7%, transparent);
-}
-
-.papers-favorite.is-favorited {
-  color: var(--kicker);
-}
-
-.papers-favorite:disabled {
-  cursor: wait;
-  opacity: 0.55;
-}
-
 .papers-favorites-error {
   display: flex;
   align-items: center;

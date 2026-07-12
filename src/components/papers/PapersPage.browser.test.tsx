@@ -141,12 +141,14 @@ describe("PapersFeed", () => {
 			name: "Save Reasoning Paper to favorites",
 		});
 		expect(save.getAttribute("aria-pressed")).toBe("false");
+		expect(save.textContent).toContain("Save");
 		fireEvent.click(save);
 
 		const remove = await screen.findByRole("button", {
 			name: "Remove Reasoning Paper from favorites",
 		});
 		expect(remove.getAttribute("aria-pressed")).toBe("true");
+		expect(remove.textContent).toContain("Saved");
 		expect(trpcMock.add).toHaveBeenCalledWith({ arxivId: "2606.00001" });
 		expect(screen.getByRole("link", { name: "Reasoning Paper" })).toBeTruthy();
 		expect(
