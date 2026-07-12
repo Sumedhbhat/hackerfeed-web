@@ -7,11 +7,18 @@ import {
 	RefreshCw,
 	Search,
 	Sparkles,
+	Star,
 	ThumbsUp,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { usePaperEdition } from "#/hooks/usePaperEdition";
+import { usePaperFavorites } from "#/hooks/usePaperFavorites";
 import type { PaperEdition, PaperFeedPaper } from "#/lib/papers/schemas";
+
+export type PaperPresentation = Omit<
+	PaperFeedPaper,
+	"entryPublishedAt" | "rank"
+>;
 
 type PaperFilters = {
 	date?: string;
@@ -69,7 +76,7 @@ function matchesFilters(
 	return searchable.includes(query.toLocaleLowerCase());
 }
 
-function buildChatGptPaperDiscussionUrl(paper: PaperFeedPaper): string {
+function buildChatGptPaperDiscussionUrl(paper: PaperPresentation): string {
 	const prompt = [
 		"I want to discuss this research paper and understand it completely.",
 		`Title: ${paper.title}`,
@@ -91,7 +98,7 @@ function PaperSummary({
 	paper,
 	compact = false,
 }: {
-	paper: PaperFeedPaper;
+	paper: PaperPresentation;
 	compact?: boolean;
 }) {
 	const [showAbstract, setShowAbstract] = useState(false);
@@ -120,7 +127,7 @@ function PaperSummary({
 	);
 }
 
-function PaperSignals({ paper }: { paper: PaperFeedPaper }) {
+function PaperSignals({ paper }: { paper: PaperPresentation }) {
 	return (
 		<div className="papers-signals">
 			<span>
@@ -143,7 +150,7 @@ function ExternalPaperLinks({
 	paper,
 	compact = false,
 }: {
-	paper: PaperFeedPaper;
+	paper: PaperPresentation;
 	compact?: boolean;
 }) {
 	return (
@@ -172,7 +179,23 @@ function ExternalPaperLinks({
 	);
 }
 
-function PaperRow({ paper, index }: { paper: PaperFeedPaper; index: number }) {
+type PaperRowProps = {
+	canFavorite: boolean;
+	index: number;
+	isFavorited: boolean;
+	isPending: boolean;
+	onToggleFavorite: () => void;
+	paper: PaperPresentation;
+};
+
+export function PaperRow({
+	canFavorite,
+	index,
+	isFavorited: saved,
+	isPending: pending,
+	onToggleFavorite,
+	paper,
+}: PaperRowProps) {
 	return (
 		<article
 			className="papers-card papers-row rise-in"
@@ -187,7 +210,36 @@ function PaperRow({ paper, index }: { paper: PaperFeedPaper; index: number }) {
 			<PaperSummary paper={paper} compact />
 			<footer className="papers-row-footer">
 				<PaperSignals paper={paper} />
-				<ExternalPaperLinks paper={paper} compact />
+				<div className="papers-row-actions">
+					<ExternalPaperLinks paper={paper} compact />
+					{canFavorite ? (
+						<button
+							type="button"
+							className={`text-sm transition-colors disabled:cursor-wait disabled:opacity-55 ${
+								saved
+									? "font-medium text-(--kicker)"
+									: "text-(--sea-ink-soft) hover:text-(--sea-ink)"
+							}`}
+							aria-label={
+								saved
+									? `Remove ${paper.title} from favorites`
+									: `Save ${paper.title} to favorites`
+							}
+							aria-pressed={saved}
+							title={saved ? "Remove from favorites" : "Save to favorites"}
+							disabled={pending}
+							onClick={onToggleFavorite}
+						>
+							<Star
+								size={14}
+								fill={saved ? "currentColor" : "none"}
+								aria-hidden="true"
+								className={`inline${saved ? " star-pop" : ""}`}
+							/>{" "}
+							{saved ? "Saved" : "Save"}
+						</button>
+					) : null}
+				</div>
 				{paper.keywords.length > 0 ? (
 					<ul className="papers-keyword-strip" aria-label="Paper keywords">
 						{paper.keywords.map((keyword) => (
@@ -205,6 +257,7 @@ export function PapersFeed({
 	filters,
 	onFiltersChange,
 }: PapersFeedProps) {
+	const favorites = usePaperFavorites();
 	const [visibleCount, setVisibleCount] = useState(INITIAL_PAPER_COUNT);
 	const query = filters.query?.trim() ?? "";
 	const filteredPapers = useMemo(
@@ -283,12 +336,33 @@ export function PapersFeed({
 						</button>
 					))}
 				</nav>
+				{favorites.error ? (
+					<output className="papers-favorites-error">
+						<span>{favorites.error}</span>
+						<button
+							type="button"
+							onClick={favorites.refresh}
+							aria-label="Refresh saved favorites"
+							title="Refresh saved favorites"
+						>
+							<RefreshCw size={14} aria-hidden="true" />
+						</button>
+					</output>
+				) : null}
 
 				{visiblePapers.length > 0 ? (
 					<>
 						<section className="papers-list" aria-label="Papers">
 							{visiblePapers.map((paper, index) => (
-								<PaperRow paper={paper} index={index} key={paper.arxivId} />
+								<PaperRow
+									canFavorite={favorites.canFavorite}
+									index={index}
+									isFavorited={favorites.isFavorited(paper.arxivId)}
+									isPending={favorites.isPending(paper.arxivId)}
+									key={paper.arxivId}
+									onToggleFavorite={() => favorites.toggleFavorite(paper)}
+									paper={paper}
+								/>
 							))}
 						</section>
 						{visibleCount < filteredPapers.length ? (

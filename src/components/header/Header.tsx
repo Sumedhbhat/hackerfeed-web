@@ -1,10 +1,15 @@
 import { Link } from "@tanstack/react-router";
+import { useAuthSession } from "#/hooks/useAuthSession";
 import { useFavorites } from "#/hooks/useFavorites";
+import { usePaperFavorites } from "#/hooks/usePaperFavorites";
 import ThemeToggle from "./ThemeToggle";
 import UserMenu from "./UserMenu";
 
 export default function Header() {
 	const { count: favCount } = useFavorites();
+	const { user } = useAuthSession();
+	const { count: paperCount } = usePaperFavorites();
+	const totalCount = favCount + (user ? paperCount : 0);
 
 	return (
 		<header className="sticky top-0 z-50 border-b border-(--line) bg-(--header-bg) backdrop-blur-md">
@@ -54,9 +59,9 @@ export default function Header() {
 						}}
 					>
 						Favorites
-						{favCount > 0 ? (
+						{totalCount > 0 ? (
 							<span className="rounded-sm bg-(--chip-bg) border border-(--chip-line) px-1.5 py-px text-[0.6rem] font-semibold leading-none text-(--sea-ink-soft) tabular-nums">
-								{favCount}
+								{totalCount}
 							</span>
 						) : null}
 					</Link>

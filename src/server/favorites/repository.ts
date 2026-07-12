@@ -203,7 +203,7 @@ export function createFavoriteRepository(database: DatabaseContext) {
 				.from(favoritesTable)
 				.innerJoin(storiesTable, eq(storiesTable.id, favoritesTable.storyId))
 				.where(eq(favoritesTable.appUserId, appUserId))
-				.orderBy(desc(favoritesTable.createdAt))
+				.orderBy(desc(favoritesTable.createdAt), desc(favoritesTable.id))
 				.all();
 
 			return rows.map(

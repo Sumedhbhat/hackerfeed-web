@@ -1,15 +1,13 @@
 import "@tanstack/react-start/server-only";
 
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import type { DatabaseContext } from "#/server/database/client";
 import {
-	hfAuthors,
 	hfDailyPaperEntries,
 	hfIngestionRuns,
-	hfPaperAuthors,
-	hfPaperKeywords,
 	hfPapers,
 } from "#/server/database/schema";
+import { loadPaperMetadata } from "./paper-metadata";
 
 export type PaperFeedRecord = {
 	rank: number;
@@ -73,46 +71,10 @@ export function createHuggingFacePaperFeedRepository(
 			if (paperRows.length === 0) return [];
 
 			const paperIds = paperRows.map((paper) => paper.paperId);
-			const [authorRows, keywordRows] = await Promise.all([
-				database
-					.select({
-						paperId: hfPaperAuthors.paperId,
-						name: hfAuthors.name,
-						position: hfPaperAuthors.position,
-					})
-					.from(hfPaperAuthors)
-					.innerJoin(hfAuthors, eq(hfPaperAuthors.authorId, hfAuthors.id))
-					.where(
-						and(
-							inArray(hfPaperAuthors.paperId, paperIds),
-							eq(hfAuthors.hidden, false),
-						),
-					)
-					.orderBy(hfPaperAuthors.paperId, hfPaperAuthors.position),
-				database
-					.select({
-						paperId: hfPaperKeywords.paperId,
-						keyword: hfPaperKeywords.keywordNormalized,
-						position: hfPaperKeywords.position,
-					})
-					.from(hfPaperKeywords)
-					.where(inArray(hfPaperKeywords.paperId, paperIds))
-					.orderBy(hfPaperKeywords.paperId, hfPaperKeywords.position),
-			]);
-
-			const authorsByPaper = new Map<string, string[]>();
-			for (const author of authorRows) {
-				const authors = authorsByPaper.get(author.paperId) ?? [];
-				authors.push(author.name);
-				authorsByPaper.set(author.paperId, authors);
-			}
-
-			const keywordsByPaper = new Map<string, string[]>();
-			for (const keyword of keywordRows) {
-				const keywords = keywordsByPaper.get(keyword.paperId) ?? [];
-				keywords.push(keyword.keyword);
-				keywordsByPaper.set(keyword.paperId, keywords);
-			}
+			const { authorsByPaper, keywordsByPaper } = await loadPaperMetadata(
+				database,
+				paperIds,
+			);
 
 			return paperRows.map(({ paperId, ...paper }) => ({
 				...paper,

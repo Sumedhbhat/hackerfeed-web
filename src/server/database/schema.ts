@@ -43,7 +43,14 @@ export const favorites = sqliteTable(
 			.references(() => stories.id, { onDelete: "cascade" }),
 		createdAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
 	},
-	(table) => [unique().on(table.appUserId, table.storyId)],
+	(table) => [
+		unique().on(table.appUserId, table.storyId),
+		index("favorites_app_user_id_created_at_id_idx").on(
+			table.appUserId,
+			table.createdAt,
+			table.id,
+		),
+	],
 );
 
 export const hfOrganizations = sqliteTable("hf_organizations", {
@@ -73,6 +80,29 @@ export const hfPapers = sqliteTable("hf_papers", {
 	createdAt: text().notNull(),
 	updatedAt: text().notNull(),
 });
+
+export const paperFavorites = sqliteTable(
+	"paper_favorites",
+	{
+		id: uuidPrimaryKey(),
+		appUserId: text()
+			.notNull()
+			.references(() => appUsers.id, { onDelete: "cascade" }),
+		paperId: text()
+			.notNull()
+			.references(() => hfPapers.id, { onDelete: "cascade" }),
+		createdAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
+	},
+	(table) => [
+		unique().on(table.appUserId, table.paperId),
+		index("paper_favorites_app_user_id_created_at_id_idx").on(
+			table.appUserId,
+			table.createdAt,
+			table.id,
+		),
+		index("paper_favorites_paper_id_idx").on(table.paperId),
+	],
+);
 
 export const hfAuthors = sqliteTable("hf_authors", {
 	id: uuidPrimaryKey(),
