@@ -95,6 +95,23 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.app-shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.app-content > main {
+  flex: 1;
+}
+
 a {
   color: var(--lagoon-deep);
   text-decoration-color: rgba(168, 74, 30, 0.35);
