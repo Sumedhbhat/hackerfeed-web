@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HackerFeed · Story and Paper View Activity Plan</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f3f7f4;
+      --surface: #ffffff;
+      --surface-soft: #eef6f1;
+      --ink: #18322d;
+      --muted: #597069;
+      --line: #cddbd5;
+      --accent: #087f5b;
+      --accent-strong: #056044;
+      --accent-soft: #d9f3e8;
+      --warning: #8a5b00;
+      --warning-soft: #fff4d6;
+      --shadow: 0 16px 40px rgba(24, 50, 45, 0.08);
+      --radius: 18px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 8% -5%, rgba(8, 127, 91, 0.14), transparent 30rem),
+        var(--bg);
+      color: var(--ink);
+      line-height: 1.6;
+    }
+
+    a { color: var(--accent-strong); }
+    a:focus-visible, summary:focus-visible { outline: 3px solid #ffbf47; outline-offset: 3px; }
+
+    .wrap {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    header { padding: 72px 0 42px; }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--accent-strong);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      max-width: 850px;
+      margin: 0;
+      font-size: clamp(2.3rem, 6vw, 4.8rem);
+      line-height: 1.02;
+      letter-spacing: -0.055em;
+    }
+
+    .lede {
+      max-width: 760px;
+      margin: 24px 0 0;
+      color: var(--muted);
+      font-size: clamp(1.02rem, 2vw, 1.25rem);
+    }
+
+    .status-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 28px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.76);
+      color: var(--muted);
+      font-size: 0.86rem;
+      font-weight: 700;
+    }
+
+    .pill::before {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      content: "";
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border-block: 1px solid var(--line);
+      background: rgba(243, 247, 244, 0.93);
+      backdrop-filter: blur(14px);
+    }
+
+    nav .wrap {
+      display: flex;
+      gap: 22px;
+      overflow-x: auto;
+      padding-block: 13px;
+      scrollbar-width: none;
+    }
+
+    nav a {
+      flex: none;
+      color: var(--muted);
+      font-size: 0.86rem;
+      font-weight: 750;
+      text-decoration: none;
+    }
+
+    nav a:hover { color: var(--accent-strong); }
+
+    main { padding: 28px 0 80px; }
+
+    section {
+      scroll-margin-top: 74px;
+      margin-top: 62px;
+    }
+
+    h2 {
+      margin: 0 0 8px;
+      font-size: clamp(1.65rem, 3vw, 2.35rem);
+      letter-spacing: -0.035em;
+    }
+
+    h3 { margin: 0 0 10px; font-size: 1.08rem; }
+    p { margin: 0 0 14px; }
+    .section-intro { max-width: 760px; color: var(--muted); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      margin-top: 24px;
+    }
+
+    .card {
+      padding: 23px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .card p:last-child, .card ul:last-child { margin-bottom: 0; }
+
+    .accent-card {
+      border-color: #9bd6c1;
+      background: linear-gradient(145deg, var(--surface), var(--accent-soft));
+    }
+
+    .decision-list, .plain-list, .check-list {
+      margin: 18px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .decision-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .decision-list li, .check-list li {
+      position: relative;
+      padding: 14px 14px 14px 42px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: var(--surface);
+    }
+
+    .decision-list li::before, .check-list li::before {
+      position: absolute;
+      top: 13px;
+      left: 14px;
+      display: grid;
+      width: 20px;
+      height: 20px;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--accent-soft);
+      color: var(--accent-strong);
+      content: "✓";
+      font-size: 0.78rem;
+      font-weight: 900;
+    }
+
+    .plain-list { padding-left: 19px; list-style: disc; }
+    .plain-list li { margin: 8px 0; }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .flow-step {
+      position: relative;
+      min-height: 138px;
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: var(--surface);
+    }
+
+    .flow-step:not(:last-child)::after {
+      position: absolute;
+      top: 50%;
+      right: -18px;
+      z-index: 2;
+      width: 24px;
+      height: 24px;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      background: var(--surface-soft);
+      color: var(--accent-strong);
+      content: "→";
+      text-align: center;
+      line-height: 21px;
+    }
+
+    .step-number {
+      color: var(--accent-strong);
+      font-size: 0.76rem;
+      font-weight: 850;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .flow-step strong { display: block; margin: 8px 0 5px; }
+    .flow-step p { color: var(--muted); font-size: 0.9rem; }
+
+    .table-wrap {
+      margin-top: 18px;
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--surface);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+
+    th, td {
+      padding: 13px 15px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--surface-soft);
+      color: var(--accent-strong);
+      font-size: 0.76rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+    code { color: #075940; font-size: 0.9em; }
+
+    .note {
+      margin-top: 18px;
+      padding: 16px 18px;
+      border-left: 4px solid var(--accent);
+      border-radius: 0 12px 12px 0;
+      background: var(--accent-soft);
+    }
+
+    .warning {
+      border-left-color: #d28b00;
+      background: var(--warning-soft);
+      color: #624300;
+    }
+
+    .timeline {
+      margin: 24px 0 0;
+      padding: 0;
+      counter-reset: phase;
+      list-style: none;
+    }
+
+    .timeline li {
+      position: relative;
+      margin-left: 18px;
+      padding: 0 0 26px 42px;
+      border-left: 2px solid var(--line);
+      counter-increment: phase;
+    }
+
+    .timeline li:last-child { border-left-color: transparent; }
+
+    .timeline li::before {
+      position: absolute;
+      top: -2px;
+      left: -17px;
+      display: grid;
+      width: 32px;
+      height: 32px;
+      place-items: center;
+      border: 3px solid var(--bg);
+      border-radius: 50%;
+      background: var(--accent);
+      color: white;
+      content: counter(phase);
+      font-size: 0.8rem;
+      font-weight: 900;
+    }
+
+    .timeline strong { display: block; margin-bottom: 3px; }
+    .timeline span { color: var(--muted); }
+
+    details {
+      margin-top: 12px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: var(--surface);
+    }
+
+    summary {
+      cursor: pointer;
+      padding: 15px 18px;
+      color: var(--ink);
+      font-weight: 780;
+    }
+
+    details > div { padding: 0 18px 16px; color: var(--muted); }
+
+    footer {
+      padding: 24px 0 48px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    @media (max-width: 800px) {
+      header { padding-top: 48px; }
+      .grid, .decision-list { grid-template-columns: 1fr; }
+      .flow { grid-template-columns: 1fr; }
+      .flow-step { min-height: auto; }
+      .flow-step:not(:last-child)::after {
+        top: auto;
+        right: 50%;
+        bottom: -19px;
+        transform: translateX(50%);
+        content: "↓";
+      }
+    }
+
+    @media print {
+      :root { --bg: white; --shadow: none; }
+      body { background: white; }
+      nav { display: none; }
+      header { padding-top: 24px; }
+      section { break-inside: avoid; margin-top: 34px; }
+      .card, .flow-step, .table-wrap, details { box-shadow: none; }
+      details > div { display: block; }
+    }
+  </style>
+</head>
+<body>
+  <header class="wrap">
+    <p class="eyebrow">HackerFeed · Implementation plan</p>
+    <h1>Story and paper view activity</h1>
+    <p class="lede">Record deliberate content-opening clicks from signed-in users as durable D1 rows—without delaying navigation, collecting anonymous activity, or building reporting before it is needed.</p>
+    <div class="status-row" aria-label="Plan status">
+      <span class="pill">Proposed</span>
+      <span class="pill">Storage only</span>
+      <span class="pill">No implementation yet</span>
+    </div>
+  </header>
+
+  <nav aria-label="Plan sections">
+    <div class="wrap">
+      <a href="#outcome">Outcome</a>
+      <a href="#scope">Scope</a>
+      <a href="#model">Data model</a>
+      <a href="#flows">Write flows</a>
+      <a href="#sequence">Sequence</a>
+      <a href="#verification">Verification</a>
+      <a href="#deferred">Deferred</a>
+    </div>
+  </nav>
+
+  <main class="wrap">
+    <section id="outcome">
+      <p class="eyebrow">Desired outcome</p>
+      <h2>One row for every intentional open</h2>
+      <p class="section-intro">A view is an explicit click on the primary story or paper link. The resulting activity is durable, append-only, and associated with the authenticated app user and stored content.</p>
+      <div class="grid">
+        <article class="card accent-card">
+          <h3>What gets recorded</h3>
+          <p>Story title clicks, primary <strong>Read article/Open post</strong> actions, and paper-title clicks from signed-in users.</p>
+        </article>
+        <article class="card">
+          <h3>What never changes</h3>
+          <p>The article or paper opens immediately. Tracking is background work and cannot block, delay, cancel, or replace navigation.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="scope">
+      <p class="eyebrow">Resolved decisions</p>
+      <h2>Small, deliberate scope</h2>
+      <ul class="decision-list">
+        <li>Signed-in users only; no anonymous tracking.</li>
+        <li>Every qualifying click inserts a new view row.</li>
+        <li>Views are retained indefinitely with no cleanup job.</li>
+        <li>Favorites are excluded and remain represented by existing data.</li>
+        <li>No routes, trace IDs, request IDs, email, or session metadata.</li>
+        <li>No dashboards, reports, admin pages, or read APIs in this phase.</li>
+        <li>No period start/end columns and no history tables.</li>
+        <li>No cascading deletion of referenced users or content.</li>
+      </ul>
+      <div class="note warning"><strong>Not a view:</strong> card rendering, feed prefetching, scrolling, feed loading, abstract expansion, Discuss, Project, Code, or favorite actions.</div>
+    </section>
+
+    <section id="model">
+      <p class="eyebrow">Data model</p>
+      <h2>Two tables with real foreign keys</h2>
+      <p class="section-intro">Separate tables avoid a polymorphic content reference and let D1 enforce the connection to either a story or paper.</p>
+      <div class="grid">
+        <article class="card">
+          <h3><code>story_views</code></h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Column</th><th>Purpose</th></tr></thead>
+              <tbody>
+                <tr><td><code>id</code></td><td>Generated automatically by the table's <code>uuidPrimaryKey()</code> default</td></tr>
+                <tr><td><code>appUserId</code></td><td>Foreign key to <code>app_users.id</code></td></tr>
+                <tr><td><code>storyId</code></td><td>Foreign key to <code>stories.id</code></td></tr>
+                <tr><td><code>viewedAt</code></td><td>Database-generated UTC click timestamp</td></tr>
+                <tr><td><code>lastUpdatedDate</code></td><td>Database-generated UTC audit timestamp</td></tr>
+                <tr><td><code>lastUpdatedBy</code></td><td>Plain-text internal user ID; not a foreign key</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+        <article class="card">
+          <h3><code>paper_views</code></h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Column</th><th>Purpose</th></tr></thead>
+              <tbody>
+                <tr><td><code>id</code></td><td>Generated automatically by the table's <code>uuidPrimaryKey()</code> default</td></tr>
+                <tr><td><code>appUserId</code></td><td>Foreign key to <code>app_users.id</code></td></tr>
+                <tr><td><code>paperId</code></td><td>Foreign key to <code>hf_papers.id</code></td></tr>
+                <tr><td><code>viewedAt</code></td><td>Database-generated UTC click timestamp</td></tr>
+                <tr><td><code>lastUpdatedDate</code></td><td>Database-generated UTC audit timestamp</td></tr>
+                <tr><td><code>lastUpdatedBy</code></td><td>Plain-text internal user ID; not a foreign key</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </div>
+      <div class="note"><strong>Identity rule:</strong> the server derives <code>appUserId</code> and <code>lastUpdatedBy</code> from the authenticated session. The browser cannot supply or override either value.</div>
+      <div class="note"><strong>Indexes:</strong> index each table by user and time, and by content and time. Do not add a user/content uniqueness constraint because repeat clicks are separate views.</div>
+    </section>
+
+    <section id="flows">
+      <p class="eyebrow">Runtime behavior</p>
+      <h2>Open first; track in the background</h2>
+      <div class="flow" aria-label="Browser click flow">
+        <article class="flow-step"><span class="step-number">Step 1</span><strong>User clicks</strong><p>A qualifying primary story or paper control is activated.</p></article>
+        <article class="flow-step"><span class="step-number">Step 2</span><strong>Dispatch once</strong><p>An authenticated mutation starts without awaiting or automatic retry.</p></article>
+        <article class="flow-step"><span class="step-number">Step 3</span><strong>Insert view</strong><p>The insert omits the ID; the primary-key default generates it automatically.</p></article>
+        <article class="flow-step"><span class="step-number">Step 4</span><strong>Open content</strong><p>External navigation runs immediately and independently.</p></article>
+      </div>
+
+      <div class="grid">
+        <article class="card">
+          <h3>Story write</h3>
+          <ol>
+            <li>Resolve the authenticated app user.</li>
+            <li>Upsert the validated Hacker News story using existing persistence behavior.</li>
+            <li>Resolve its local <code>stories.id</code>.</li>
+            <li>Insert <code>story_views</code> in the same transaction.</li>
+          </ol>
+          <p>The insert omits <code>id</code>, allowing <code>uuidPrimaryKey()</code> to generate it automatically.</p>
+        </article>
+        <article class="card">
+          <h3>Paper write</h3>
+          <ol>
+            <li>Resolve the authenticated app user.</li>
+            <li>Find the existing paper by stable arXiv ID.</li>
+            <li>Insert <code>paper_views</code>.</li>
+          </ol>
+          <p>A missing paper fails tracking silently and never creates an incomplete paper or blocks the external link.</p>
+        </article>
+      </div>
+
+      <div class="note"><strong>Failure contract:</strong> send one best-effort write with no automatic retry, show no tracking error in the UI, and preserve synchronous popup creation for story links.</div>
+    </section>
+
+    <section id="sequence">
+      <p class="eyebrow">Implementation sequence</p>
+      <h2>Build from storage to click wiring</h2>
+      <ol class="timeline">
+        <li><strong>Schema and migration</strong><span>Add both Drizzle tables, restrictive foreign keys, database timestamp defaults, and future-friendly indexes.</span></li>
+        <li><strong>Repositories</strong><span>Insert story and paper views without supplying IDs, allowing the primary-key defaults to generate them.</span></li>
+        <li><strong>Service boundary</strong><span>Resolve the authenticated app user, reuse story persistence, resolve papers, and own transaction behavior.</span></li>
+        <li><strong>Write-only mutations</strong><span>Add validated authenticated tRPC mutations; add no list or reporting procedure.</span></li>
+        <li><strong>Browser helper</strong><span>Dispatch once without awaiting or retrying, and suppress tracking errors.</span></li>
+        <li><strong>Click wiring</strong><span>Attach tracking only to story titles/primary actions and paper titles.</span></li>
+        <li><strong>Focused verification</strong><span>Cover schema, transactions, authentication, backend IDs, click qualification, and navigation independence.</span></li>
+      </ol>
+    </section>
+
+    <section id="verification">
+      <p class="eyebrow">Success criteria</p>
+      <h2>Done means behavior—not just rows</h2>
+      <ul class="check-list">
+        <li>Signed-out clicks open content and write nothing.</li>
+        <li>Each signed-in qualifying click creates exactly one corresponding view row.</li>
+        <li>An absent story and its view are saved atomically.</li>
+        <li>A paper view references the already-ingested paper.</li>
+        <li>Two deliberate clicks create two rows.</li>
+        <li>A failed write is not retried automatically or exposed in the UI.</li>
+        <li>Non-qualifying rendering and secondary actions create no views.</li>
+        <li>Network or server failures never disrupt external navigation.</li>
+        <li>User identity is always derived server-side.</li>
+        <li>Referenced users and content cannot be cascade-deleted.</li>
+      </ul>
+    </section>
+
+    <section id="deferred">
+      <p class="eyebrow">Explicitly deferred</p>
+      <h2>Useful later, intentionally absent now</h2>
+      <details open><summary>Reporting and monitoring</summary><div>Reading stored activity, active-user definitions, admin interfaces, reports, aggregation, dashboards, and analytics exports.</div></details>
+      <details><summary>Observability integrations</summary><div>Grafana, Sentry, OpenTelemetry, traces, request IDs, and correlation identifiers.</div></details>
+      <details><summary>Other activity</summary><div>Favorites, favorite history, anonymous activity, routes, abstract expansion, and secondary-link clicks.</div></details>
+      <details><summary>Lifecycle policy</summary><div>Retention limits, cleanup, archival, partitioning, and privacy-driven deletion or anonymization.</div></details>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">HackerFeed view activity · Proposed storage-only implementation plan</div>
+  </footer>
+</body>
+</html>
