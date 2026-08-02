@@ -22,6 +22,7 @@ import {
 	paperEditionInputSchema,
 	paperEditionOutputSchema,
 } from "#/lib/papers/schemas";
+import { paperViewInputSchema } from "#/lib/view-activity/schemas";
 import { createFavoriteServiceFromDatabase } from "#/server/favorites/service";
 import { createHuggingFacePaperFeedServiceFromDatabase } from "#/server/huggingface-papers/feed";
 import {
@@ -29,6 +30,10 @@ import {
 	InvalidPaperFavoriteCursorError,
 	PaperNotFoundError,
 } from "#/server/paper-favorites/service";
+import {
+	createViewActivityServiceFromDatabase,
+	ViewedPaperNotFoundError,
+} from "#/server/view-activity/service";
 import type { TrpcContext } from "./context";
 
 type ListedFavorite = {
@@ -71,6 +76,14 @@ type PaperFavoritesApiService = {
 	addFavorite(user: TrpcContext["user"], arxivId: string): Promise<void>;
 	removeFavorite(user: TrpcContext["user"], arxivId: string): Promise<void>;
 	clearFavorites(user: TrpcContext["user"]): Promise<void>;
+};
+
+type ViewActivityApiService = {
+	recordStoryView(
+		user: TrpcContext["user"],
+		story: HackerNewsStoryRecord,
+	): Promise<void>;
+	recordPaperView(user: TrpcContext["user"], arxivId: string): Promise<void>;
 };
 
 const t = initTRPC.context<TrpcContext>().create({
@@ -136,6 +149,15 @@ function getPaperFavoritesApiService(
 	return createPaperFavoriteServiceFromDatabase(database);
 }
 
+function getViewActivityApiService(
+	database: TrpcContext["database"],
+	viewActivity?: ViewActivityApiService,
+) {
+	if (viewActivity) return viewActivity;
+
+	return createViewActivityServiceFromDatabase(database);
+}
+
 function mapPaperFavoriteError(error: unknown): never {
 	if (error instanceof PaperNotFoundError) {
 		throw new TRPCError({ code: "NOT_FOUND", message: error.message });
@@ -148,10 +170,19 @@ function mapPaperFavoriteError(error: unknown): never {
 	throw error;
 }
 
+function mapViewActivityError(error: unknown): never {
+	if (error instanceof ViewedPaperNotFoundError) {
+		throw new TRPCError({ code: "NOT_FOUND", message: error.message });
+	}
+
+	throw error;
+}
+
 export function createAppRouter(
 	favorites?: FavoritesApiService,
 	papers?: PapersApiService,
 	paperFavorites?: PaperFavoritesApiService,
+	viewActivity?: ViewActivityApiService,
 ) {
 	return t.router({
 		favorites: t.router({
@@ -256,6 +287,26 @@ export function createAppRouter(
 				);
 				await service.clearFavorites(ctx.user);
 			}),
+		}),
+		views: t.router({
+			story: protectedProcedure
+				.input(hackerNewsStorySchema)
+				.mutation(async ({ ctx, input }) => {
+					const service = getViewActivityApiService(ctx.database, viewActivity);
+					await service.recordStoryView(ctx.user, input);
+				}),
+
+			paper: protectedProcedure
+				.input(paperViewInputSchema)
+				.mutation(async ({ ctx, input }) => {
+					const service = getViewActivityApiService(ctx.database, viewActivity);
+
+					try {
+						await service.recordPaperView(ctx.user, input.arxivId);
+					} catch (error) {
+						return mapViewActivityError(error);
+					}
+				}),
 		}),
 	});
 }

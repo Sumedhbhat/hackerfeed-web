@@ -53,6 +53,34 @@ export const favorites = sqliteTable(
 	],
 );
 
+export const storyViews = sqliteTable(
+	"story_views",
+	{
+		id: uuidPrimaryKey(),
+		appUserId: text()
+			.notNull()
+			.references(() => appUsers.id, { onDelete: "restrict" }),
+		storyId: text()
+			.notNull()
+			.references(() => stories.id, { onDelete: "restrict" }),
+		viewedAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
+		lastUpdatedDate: text().notNull().default(sql`CURRENT_TIMESTAMP`),
+		lastUpdatedBy: text().notNull(),
+	},
+	(table) => [
+		index("story_views_app_user_id_viewed_at_id_idx").on(
+			table.appUserId,
+			table.viewedAt,
+			table.id,
+		),
+		index("story_views_story_id_viewed_at_id_idx").on(
+			table.storyId,
+			table.viewedAt,
+			table.id,
+		),
+	],
+);
+
 export const hfOrganizations = sqliteTable("hf_organizations", {
 	id: uuidPrimaryKey(),
 	hfOrganizationId: text().notNull().unique(),
@@ -101,6 +129,34 @@ export const paperFavorites = sqliteTable(
 			table.id,
 		),
 		index("paper_favorites_paper_id_idx").on(table.paperId),
+	],
+);
+
+export const paperViews = sqliteTable(
+	"paper_views",
+	{
+		id: uuidPrimaryKey(),
+		appUserId: text()
+			.notNull()
+			.references(() => appUsers.id, { onDelete: "restrict" }),
+		paperId: text()
+			.notNull()
+			.references(() => hfPapers.id, { onDelete: "restrict" }),
+		viewedAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
+		lastUpdatedDate: text().notNull().default(sql`CURRENT_TIMESTAMP`),
+		lastUpdatedBy: text().notNull(),
+	},
+	(table) => [
+		index("paper_views_app_user_id_viewed_at_id_idx").on(
+			table.appUserId,
+			table.viewedAt,
+			table.id,
+		),
+		index("paper_views_paper_id_viewed_at_id_idx").on(
+			table.paperId,
+			table.viewedAt,
+			table.id,
+		),
 	],
 );
 

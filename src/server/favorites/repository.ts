@@ -7,6 +7,7 @@ import {
 	favorites as favoritesTable,
 	stories as storiesTable,
 } from "../database/schema";
+import { mapHackerNewsStory } from "../stories/persistence";
 
 type StoryRow = typeof storiesTable.$inferSelect;
 type FavoriteRow = typeof favoritesTable.$inferSelect;
@@ -34,20 +35,6 @@ type FavoriteRecord = {
 type ListedFavoriteRecord = FavoriteRecord & {
 	story: StoryRecord;
 };
-
-function mapHackerNewsStory(story: HackerNewsStoryRecord) {
-	return {
-		hnStoryId: story.id,
-		title: story.title,
-		url: story.url,
-		text: story.text,
-		score: story.score,
-		hnPostedAt: story.time ? new Date(story.time * 1000).toISOString() : null,
-		authorUsername: story.by,
-		commentCount: story.descendants,
-		commentIds: JSON.stringify(story.kids ?? []),
-	};
-}
 
 function parseCommentIds(value: string | null): number[] {
 	if (!value) return [];
