@@ -13,6 +13,7 @@ import {
 import { useMemo, useState } from "react";
 import { usePaperEdition } from "#/hooks/usePaperEdition";
 import { usePaperFavorites } from "#/hooks/usePaperFavorites";
+import { useViewActivity } from "#/hooks/useViewActivity";
 import type { PaperEdition, PaperFeedPaper } from "#/lib/papers/schemas";
 
 export type PaperPresentation = Omit<
@@ -185,6 +186,7 @@ type PaperRowProps = {
 	isFavorited: boolean;
 	isPending: boolean;
 	onToggleFavorite: () => void;
+	onView: () => void;
 	paper: PaperPresentation;
 };
 
@@ -194,6 +196,7 @@ export function PaperRow({
 	isFavorited: saved,
 	isPending: pending,
 	onToggleFavorite,
+	onView,
 	paper,
 }: PaperRowProps) {
 	return (
@@ -202,7 +205,12 @@ export function PaperRow({
 			style={{ animationDelay: `${Math.min(index * 35, 210)}ms` }}
 		>
 			<h2>
-				<a href={paper.paperUrl} target="_blank" rel="noreferrer">
+				<a
+					href={paper.paperUrl}
+					target="_blank"
+					rel="noreferrer"
+					onClick={onView}
+				>
 					{paper.title}
 				</a>
 			</h2>
@@ -258,6 +266,7 @@ export function PapersFeed({
 	onFiltersChange,
 }: PapersFeedProps) {
 	const favorites = usePaperFavorites();
+	const { recordPaperView } = useViewActivity();
 	const [visibleCount, setVisibleCount] = useState(INITIAL_PAPER_COUNT);
 	const query = filters.query?.trim() ?? "";
 	const filteredPapers = useMemo(
@@ -361,6 +370,7 @@ export function PapersFeed({
 									isPending={favorites.isPending(paper.arxivId)}
 									key={paper.arxivId}
 									onToggleFavorite={() => favorites.toggleFavorite(paper)}
+									onView={() => recordPaperView(paper.arxivId)}
 									paper={paper}
 								/>
 							))}

@@ -15,6 +15,13 @@
       "when": 1783707258316,
       "tag": "20260710181418_minor_night_thrasher",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1785695793369,
+      "tag": "20260802183633_view_activity",
+      "breakpoints": true
     }
   ]
 }

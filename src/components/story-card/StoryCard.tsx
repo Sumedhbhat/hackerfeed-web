@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Star } from "lucide-react";
 import { useFavorites } from "#/hooks/useFavorites";
+import { useViewActivity } from "#/hooks/useViewActivity";
 import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
 import {
 	formatStoryAge,
@@ -21,11 +22,18 @@ type StoryCardProps = {
 
 export function StoryCard({ story, animationDelay }: StoryCardProps) {
 	const { isFavorited, toggleFavorite } = useFavorites();
+	const { recordStoryView } = useViewActivity();
 	const isFav = isFavorited(story.id);
 
 	const domain = getStoryDomain(story.url);
 	const age = formatStoryAge(story.time);
 	const title = getStoryTitle(story);
+	const storyUrl = story.url ?? getDiscussionUrl(story.id);
+
+	function openStory() {
+		recordStoryView(story);
+		openLink(storyUrl);
+	}
 
 	return (
 		<article
@@ -46,10 +54,9 @@ export function StoryCard({ story, animationDelay }: StoryCardProps) {
 					{/* Title */}
 					<h3
 						className="m-0 mb-3 text-lg font-semibold leading-snug cursor-pointer sm:text-xl text-(--sea-ink)"
-						onClick={() => openLink(story.url ?? getDiscussionUrl(story.id))}
+						onClick={openStory}
 						onKeyDown={(e) => {
-							if (e.key === "Enter" || e.key === " ")
-								openLink(story.url ?? getDiscussionUrl(story.id));
+							if (e.key === "Enter" || e.key === " ") openStory();
 						}}
 					>
 						{title}
@@ -68,7 +75,7 @@ export function StoryCard({ story, animationDelay }: StoryCardProps) {
 					<div className="flex flex-wrap gap-4 items-center">
 						<button
 							type="button"
-							onClick={() => openLink(story.url ?? getDiscussionUrl(story.id))}
+							onClick={openStory}
 							className="text-sm font-medium hover:underline text-(--lagoon-deep) underline-offset-2 hover:text-(--lagoon)"
 						>
 							{story.url ? "Read article" : "Open post"}

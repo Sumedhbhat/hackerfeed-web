@@ -9,12 +9,13 @@ const trpcMock = vi.hoisted(() => ({
 	add: vi.fn(),
 	list: vi.fn(),
 	remove: vi.fn(),
+	viewPaper: vi.fn(),
 }));
 
 vi.mock("#/hooks/useAuthSession", () => ({
 	useAuthSession: () => ({
 		isLoading: false,
-		user: { id: authMock.userId },
+		user: authMock.userId ? { id: authMock.userId } : null,
 	}),
 }));
 
@@ -24,6 +25,9 @@ vi.mock("#/lib/trpc/client", () => ({
 			add: { mutate: trpcMock.add },
 			list: { query: trpcMock.list },
 			remove: { mutate: trpcMock.remove },
+		},
+		views: {
+			paper: { mutate: trpcMock.viewPaper },
 		},
 	}),
 }));
@@ -79,6 +83,7 @@ beforeEach(() => {
 	trpcMock.add.mockResolvedValue(undefined);
 	trpcMock.list.mockResolvedValue({ items: [], nextCursor: null });
 	trpcMock.remove.mockResolvedValue(undefined);
+	trpcMock.viewPaper.mockResolvedValue(undefined);
 });
 
 afterEach(() => {
@@ -130,6 +135,43 @@ describe("PapersFeed", () => {
 		);
 		expect(titleLink.getAttribute("target")).toBe("_blank");
 		expect(screen.queryByRole("link", { name: /^Paper$/ })).toBeNull();
+	});
+
+	it("records only signed-in paper-title clicks", () => {
+		render(
+			<PapersFeed edition={edition} filters={{}} onFiltersChange={vi.fn()} />,
+		);
+
+		fireEvent.click(screen.getByRole("link", { name: "Reasoning Paper" }));
+
+		expect(trpcMock.viewPaper).toHaveBeenCalledWith({ arxivId: "2606.00001" });
+	});
+
+	it("does not record signed-out paper-title clicks", () => {
+		authMock.userId = "";
+		render(
+			<PapersFeed edition={edition} filters={{}} onFiltersChange={vi.fn()} />,
+		);
+
+		fireEvent.click(screen.getByRole("link", { name: "Reasoning Paper" }));
+
+		expect(trpcMock.viewPaper).not.toHaveBeenCalled();
+	});
+
+	it("leaves the paper link usable when background tracking fails", () => {
+		trpcMock.viewPaper.mockRejectedValueOnce(new Error("offline"));
+		render(
+			<PapersFeed edition={edition} filters={{}} onFiltersChange={vi.fn()} />,
+		);
+		const titleLink = screen.getByRole("link", { name: "Reasoning Paper" });
+
+		fireEvent.click(titleLink);
+
+		expect(trpcMock.viewPaper).toHaveBeenCalledTimes(1);
+		expect(titleLink.getAttribute("href")).toBe(
+			"https://huggingface.co/papers/2606.00001",
+		);
+		expect(titleLink.getAttribute("target")).toBe("_blank");
 	});
 
 	it("renders and toggles a compact paper favorite action without changing links", async () => {

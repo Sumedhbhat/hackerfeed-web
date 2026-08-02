@@ -33,6 +33,7 @@ const trpcMock = vi.hoisted(() => ({
 	clear: vi.fn(),
 	list: vi.fn(),
 	remove: vi.fn(),
+	viewStory: vi.fn(),
 }));
 
 // ---------------------------------------------------------------------------
@@ -57,6 +58,9 @@ vi.mock("#/lib/trpc/client", () => ({
 			clear: { mutate: trpcMock.clear },
 			list: { query: trpcMock.list },
 			remove: { mutate: trpcMock.remove },
+		},
+		views: {
+			story: { mutate: trpcMock.viewStory },
 		},
 	})),
 }));
@@ -128,6 +132,7 @@ beforeEach(() => {
 	trpcMock.clear.mockResolvedValue(undefined);
 	trpcMock.list.mockResolvedValue([]);
 	trpcMock.remove.mockResolvedValue(undefined);
+	trpcMock.viewStory.mockResolvedValue(undefined);
 	localStorage.clear();
 	clearAllFavorites();
 	vi.clearAllMocks();
@@ -235,6 +240,39 @@ describe("StoryCard link actions", () => {
 		const link = screen.getByRole("link", { name: /^discussion$/i });
 		expect(link).toBeDefined();
 		expect(link.getAttribute("href")).toContain("99999");
+	});
+
+	it("records signed-in title and primary-action clicks as separate views", () => {
+		authMock.user = { id: "workos-story-viewer" };
+		const story = makeStory();
+		render(<StoryCard story={story} />);
+
+		fireEvent.click(screen.getByRole("heading", { name: story.title ?? "" }));
+		fireEvent.click(screen.getByRole("button", { name: /read article/i }));
+
+		expect(trpcMock.viewStory).toHaveBeenCalledTimes(2);
+		expect(trpcMock.viewStory).toHaveBeenNthCalledWith(1, story);
+		expect(openLink).toHaveBeenCalledTimes(2);
+	});
+
+	it("opens the story when background tracking fails", () => {
+		authMock.user = { id: "workos-story-viewer" };
+		trpcMock.viewStory.mockRejectedValueOnce(new Error("offline"));
+		render(<StoryCard story={makeStory()} />);
+
+		fireEvent.click(screen.getByRole("button", { name: /read article/i }));
+
+		expect(trpcMock.viewStory).toHaveBeenCalledTimes(1);
+		expect(openLink).toHaveBeenCalledWith("https://example.com/test-article");
+	});
+
+	it("does not record signed-out story clicks", () => {
+		render(<StoryCard story={makeStory()} />);
+
+		fireEvent.click(screen.getByRole("button", { name: /read article/i }));
+
+		expect(trpcMock.viewStory).not.toHaveBeenCalled();
+		expect(openLink).toHaveBeenCalledTimes(1);
 	});
 });
 

@@ -6,6 +6,7 @@ import { StoryCard } from "#/components/story-card";
 import { useAuthSession } from "#/hooks/useAuthSession";
 import { useFavorites } from "#/hooks/useFavorites";
 import { usePaperFavorites } from "#/hooks/usePaperFavorites";
+import { useViewActivity } from "#/hooks/useViewActivity";
 import type { FavoritesType } from "#/routes/favorites";
 
 type SortOrder = "newest" | "oldest" | "score";
@@ -23,6 +24,7 @@ export function FavoritesPage({
 	const { user } = useAuthSession();
 	const stories = useFavorites();
 	const papers = usePaperFavorites();
+	const { recordPaperView } = useViewActivity();
 	const isStories = activeType === "stories";
 	const activeCount = isStories ? stories.count : papers.count;
 	const sortedStories = useMemo(() => {
@@ -184,6 +186,7 @@ export function FavoritesPage({
 												papers.isPending(paper.arxivId) || papers.isClearPending
 											}
 											onToggleFavorite={() => papers.toggleFavorite(paper)}
+											onView={() => recordPaperView(paper.arxivId)}
 										/>
 									))}
 						</section>
