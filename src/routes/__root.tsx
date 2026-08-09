@@ -3,12 +3,13 @@ import type { QueryClient } from "@tanstack/react-query";
 import {
 	createRootRouteWithContext,
 	HeadContent,
+	Outlet,
 	redirect,
 	Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-import { ArrowRight } from "lucide-react";
 import { useEffect } from "react";
+import { FatalErrorView } from "../components/fatal-error-view";
 import { Footer } from "../components/footer";
 import { Header } from "../components/header";
 import { useLocalFavoritesMigration } from "../hooks/useLocalFavoritesMigration";
@@ -88,6 +89,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 			},
 		],
 	}),
+	component: AppLayout,
 	errorComponent: RootError,
 	shellComponent: RootDocument,
 });
@@ -116,54 +118,15 @@ function isPublicPath(pathname: string) {
 // ---------------------------------------------------------------------------
 
 function RootError({ error }: { error: unknown }) {
-	const message =
-		error instanceof Error ? error.message : "An unexpected error occurred.";
-
 	logger.error("Root error boundary triggered", {
-		err: message,
+		err: error instanceof Error ? error.message : String(error),
 		stack: error instanceof Error ? error.stack : undefined,
 	});
 
-	return (
-		<main
-			style={{
-				fontFamily: "sans-serif",
-				padding: "2rem",
-				maxWidth: "36rem",
-				margin: "0 auto",
-			}}
-		>
-			<p
-				style={{
-					fontSize: "0.7rem",
-					fontWeight: 700,
-					letterSpacing: "0.1em",
-					textTransform: "uppercase",
-					opacity: 0.5,
-					marginBottom: "0.75rem",
-				}}
-			>
-				Something went wrong
-			</p>
-			<h1
-				style={{ fontSize: "1.25rem", fontWeight: 600, margin: "0 0 0.75rem" }}
-			>
-				HackerFeed couldn&apos;t load.
-			</h1>
-			<p style={{ fontSize: "0.875rem", opacity: 0.7, margin: "0 0 1.5rem" }}>
-				{message}
-			</p>
-			<a
-				href="/"
-				style={{ fontSize: "0.875rem", fontWeight: 500, color: "inherit" }}
-			>
-				Try reloading <ArrowRight size={14} aria-hidden="true" />
-			</a>
-		</main>
-	);
+	return <FatalErrorView />;
 }
 
-function RootDocument({ children }: { children: React.ReactNode }) {
+function AppLayout() {
 	useEffect(() => {
 		if (import.meta.env.DEV) {
 			navigator.serviceWorker
@@ -215,32 +178,40 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 	}, []);
 
 	return (
+		<TanStackQueryProvider>
+			<div className="app-shell">
+				<LocalFavoritesMigration />
+				<Header />
+				<div className="app-content">
+					<Outlet />
+				</div>
+				<Footer />
+			</div>
+			<TanStackDevtools
+				config={{
+					position: "bottom-right",
+				}}
+				plugins={[
+					{
+						name: "Tanstack Router",
+						render: <TanStackRouterDevtoolsPanel />,
+					},
+					TanStackQueryDevtools,
+				]}
+			/>
+		</TanStackQueryProvider>
+	);
+}
+
+function RootDocument({ children }: { children: React.ReactNode }) {
+	return (
 		<html lang="en" suppressHydrationWarning>
 			<head>
 				<script src="/theme-init.js" />
 				<HeadContent />
 			</head>
 			<body className="font-sans antialiased wrap-anywhere selection:bg-[rgba(79,184,178,0.24)]">
-				<TanStackQueryProvider>
-					<div className="app-shell">
-						<LocalFavoritesMigration />
-						<Header />
-						<div className="app-content">{children}</div>
-						<Footer />
-					</div>
-					<TanStackDevtools
-						config={{
-							position: "bottom-right",
-						}}
-						plugins={[
-							{
-								name: "Tanstack Router",
-								render: <TanStackRouterDevtoolsPanel />,
-							},
-							TanStackQueryDevtools,
-						]}
-					/>
-				</TanStackQueryProvider>
+				{children}
 				<Scripts />
 			</body>
 		</html>
