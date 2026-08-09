@@ -20,18 +20,20 @@ let observerCallback: MockObserverCallback | null = null;
 const mockDisconnect = vi.fn();
 const mockObserve = vi.fn();
 
-// biome-ignore lint/complexity/useArrowFunction: Vitest 4 requires constructor mocks to use a function or class.
-const MockIntersectionObserver = vi.fn(function (
-	callback: MockObserverCallback,
-	_options?: IntersectionObserverInit,
-) {
-	observerCallback = callback;
-	return {
-		observe: mockObserve,
-		disconnect: mockDisconnect,
-		unobserve: vi.fn(),
-	};
-});
+const MockIntersectionObserver = vi.fn(
+	class MockIntersectionObserver {
+		observe = mockObserve;
+		disconnect = mockDisconnect;
+		unobserve = vi.fn();
+
+		constructor(
+			callback: MockObserverCallback,
+			_options?: IntersectionObserverInit,
+		) {
+			observerCallback = callback;
+		}
+	},
+);
 
 beforeEach(() => {
 	observerCallback = null;
