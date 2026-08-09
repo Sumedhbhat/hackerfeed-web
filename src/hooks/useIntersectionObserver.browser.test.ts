@@ -21,13 +21,17 @@ const mockDisconnect = vi.fn();
 const mockObserve = vi.fn();
 
 const MockIntersectionObserver = vi.fn(
-	(callback: MockObserverCallback, _options?: IntersectionObserverInit) => {
-		observerCallback = callback;
-		return {
-			observe: mockObserve,
-			disconnect: mockDisconnect,
-			unobserve: vi.fn(),
-		};
+	class MockIntersectionObserver {
+		observe = mockObserve;
+		disconnect = mockDisconnect;
+		unobserve = vi.fn();
+
+		constructor(
+			callback: MockObserverCallback,
+			_options?: IntersectionObserverInit,
+		) {
+			observerCallback = callback;
+		}
 	},
 );
 

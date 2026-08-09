@@ -120,7 +120,7 @@ function getRedirectUri(request: Request): string {
 }
 
 function normalizeReturnTo(value: string | null): string {
-	if (!value || !value.startsWith("/") || value.startsWith("//")) {
+	if (!value?.startsWith("/") || value.startsWith("//")) {
 		return "/";
 	}
 

@@ -110,7 +110,7 @@ function normalizeStoryIds(payload: unknown): number[] {
 function normalizeStory(
 	payload: HackerNewsStoryResponse | null,
 ): HackerNewsStoryRecord | null {
-	if (!payload || payload.type !== "story" || payload.deleted || payload.dead) {
+	if (payload?.type !== "story" || payload.deleted || payload.dead) {
 		return null;
 	}
 
@@ -155,7 +155,7 @@ function normalizeStory(
 function normalizeComment(
 	payload: HackerNewsStoryResponse | null,
 ): HackerNewsCommentRecord | null {
-	if (!payload || payload.type !== "comment") return null;
+	if (payload?.type !== "comment") return null;
 
 	const id = payload.id;
 	if (typeof id !== "number" || !Number.isInteger(id) || id <= 0) return null;
