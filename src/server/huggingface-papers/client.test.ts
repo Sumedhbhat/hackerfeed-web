@@ -34,24 +34,25 @@ describe("fetchHuggingFaceDailyPapersEdition", () => {
 		});
 	});
 
-	it.each([
-		429, 500, 503,
-	])("retries status %s with 1s and 3s backoff", async (status) => {
-		const fetchMock = vi
-			.fn<typeof fetch>()
-			.mockResolvedValueOnce(jsonResponse({}, status))
-			.mockResolvedValueOnce(jsonResponse({}, status))
-			.mockResolvedValueOnce(jsonResponse([]));
-		const sleepMock = vi.fn(async () => undefined);
+	it.each([429, 500, 503])(
+		"retries status %s with 1s and 3s backoff",
+		async (status) => {
+			const fetchMock = vi
+				.fn<typeof fetch>()
+				.mockResolvedValueOnce(jsonResponse({}, status))
+				.mockResolvedValueOnce(jsonResponse({}, status))
+				.mockResolvedValueOnce(jsonResponse([]));
+			const sleepMock = vi.fn(async () => undefined);
 
-		await fetchHuggingFaceDailyPapersEdition(editionDate, {
-			fetch: fetchMock,
-			sleep: sleepMock,
-		});
+			await fetchHuggingFaceDailyPapersEdition(editionDate, {
+				fetch: fetchMock,
+				sleep: sleepMock,
+			});
 
-		expect(fetchMock).toHaveBeenCalledTimes(3);
-		expect(sleepMock.mock.calls).toEqual([[1_000], [3_000]]);
-	});
+			expect(fetchMock).toHaveBeenCalledTimes(3);
+			expect(sleepMock.mock.calls).toEqual([[1_000], [3_000]]);
+		},
+	);
 
 	it("retries network errors", async () => {
 		const fetchMock = vi
@@ -85,18 +86,17 @@ describe("fetchHuggingFaceDailyPapersEdition", () => {
 		expect(sleepMock).not.toHaveBeenCalled();
 	});
 
-	it.each([
-		"2026-02-29",
-		"2026-04-31",
-		"2026-13-01",
-	])("rejects invalid calendar date %s before requesting", async (invalidDate) => {
-		const fetchMock = vi.fn<typeof fetch>();
+	it.each(["2026-02-29", "2026-04-31", "2026-13-01"])(
+		"rejects invalid calendar date %s before requesting",
+		async (invalidDate) => {
+			const fetchMock = vi.fn<typeof fetch>();
 
-		await expect(
-			fetchHuggingFaceDailyPapersEdition(invalidDate, { fetch: fetchMock }),
-		).rejects.toThrow(`Invalid Hugging Face edition date: ${invalidDate}`);
-		expect(fetchMock).not.toHaveBeenCalled();
-	});
+			await expect(
+				fetchHuggingFaceDailyPapersEdition(invalidDate, { fetch: fetchMock }),
+			).rejects.toThrow(`Invalid Hugging Face edition date: ${invalidDate}`);
+			expect(fetchMock).not.toHaveBeenCalled();
+		},
+	);
 
 	it("honors a bounded Retry-After delay", async () => {
 		const fetchMock = vi

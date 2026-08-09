@@ -20,13 +20,12 @@ const paper = {
 };
 
 describe("paper schemas", () => {
-	it.each([
-		"2607.00001",
-		"2607.00001v2",
-		"hep-th/9901001",
-	])("accepts the supported arXiv ID form %s", (arxivId) => {
-		expect(arxivIdSchema.safeParse(arxivId).success).toBe(true);
-	});
+	it.each(["2607.00001", "2607.00001v2", "hep-th/9901001"])(
+		"accepts the supported arXiv ID form %s",
+		(arxivId) => {
+			expect(arxivIdSchema.safeParse(arxivId).success).toBe(true);
+		},
+	);
 
 	it("derives edition papers from the common presentation schema", () => {
 		expect(paperPresentationSchema.safeParse(paper).success).toBe(true);

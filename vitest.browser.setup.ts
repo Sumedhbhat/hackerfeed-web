@@ -33,6 +33,12 @@ Object.defineProperty(window, "localStorage", {
 	value: localStorageMock,
 });
 
+Object.defineProperty(window, "confirm", {
+	configurable: true,
+	value: () => false,
+	writable: true,
+});
+
 beforeEach(() => {
 	storage.clear();
 });
