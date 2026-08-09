@@ -7,11 +7,9 @@ updates:
       interval: "daily"
       timezone: "Asia/Kolkata"
     open-pull-requests-limit: 10
+    cooldown:
+      default-days: 14
     groups:
-      security-updates:
-        applies-to: "security-updates"
-        patterns:
-          - "*"
       routine-updates:
         applies-to: "version-updates"
         patterns:
