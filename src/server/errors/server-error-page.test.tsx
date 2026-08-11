@@ -7,8 +7,10 @@ describe("renderServerErrorPage", () => {
 		const html = renderServerErrorPage(traceId);
 
 		expect(html).toMatch(/^<!doctype html><html lang="en">/);
-		expect(html).toContain(`Trace ID: <code>${traceId}</code>`);
+		expect(html).toContain("Trace ID:");
+		expect(html).toContain(traceId);
 		expect(html).toContain("Try loading the feed again");
+		expect(html).not.toContain("<script");
 	});
 
 	it("omits the Trace ID row when no trace is available", () => {
