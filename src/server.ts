@@ -12,7 +12,7 @@ import {
 	setDatabaseContext,
 } from "#/server/database/client";
 import { renderServerErrorPage } from "#/server/errors/server-error-page";
-import { runHuggingFaceDailyPapersIngestion } from "#/server/huggingface-papers/ingestion";
+import { dispatchScheduledIngestion } from "#/server/scheduled-ingestion";
 
 type WorkerEnv = {
 	DB: D1DatabaseBinding;
@@ -107,12 +107,17 @@ const serverEntry = createServerEntry({
 const worker = {
 	...serverEntry,
 	scheduled(
-		_controller: ScheduledController,
+		controller: ScheduledController,
 		env: WorkerEnv,
 		context: ExecutionContext,
 	) {
 		const database = createWorkerDatabaseContext(env);
-		const ingestion = runHuggingFaceDailyPapersIngestion(database);
+		const ingestion = dispatchScheduledIngestion(
+			controller.cron,
+			controller.scheduledTime,
+			database,
+		);
+		if (!ingestion) return;
 		context.waitUntil(ingestion);
 		return ingestion;
 	},
