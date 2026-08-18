@@ -43,7 +43,7 @@
     "@workos-inc/authkit-react": "^0.16.2",
     "@workos-inc/node": "^10.9.0",
     "drizzle-orm": "^0.45.2",
-    "jose": "^6.2.7",
+    "jose": "^6.2.8",
     "ky": "^2.0.2",
     "lucide-react": "^1.28.0",
     "react": "^19.2.8",
