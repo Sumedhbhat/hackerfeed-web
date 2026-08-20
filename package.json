@@ -22,7 +22,7 @@
     "check": "biome check"
   },
   "dependencies": {
-    "@cloudflare/vite-plugin": "^1.50.0",
+    "@cloudflare/vite-plugin": "^1.51.0",
     "@sentry/cloudflare": "^10.69.0",
     "@sentry/react": "^10.69.0",
     "@t3-oss/env-core": "^0.13.10",
@@ -35,7 +35,7 @@
     "@tanstack/react-router-ssr-query": "latest",
     "@tanstack/react-start": "latest",
     "@tanstack/react-store": "latest",
-    "@tanstack/router-plugin": "^1.168.23",
+    "@tanstack/router-plugin": "^1.168.25",
     "@tanstack/store": "latest",
     "@trpc/client": "^11.18.0",
     "@trpc/server": "^11.18.0",
@@ -43,7 +43,7 @@
     "@workos-inc/authkit-react": "^0.16.2",
     "@workos-inc/node": "^10.9.0",
     "drizzle-orm": "^0.45.2",
-    "jose": "^6.2.7",
+    "jose": "^6.2.8",
     "ky": "^2.0.2",
     "lucide-react": "^1.28.0",
     "react": "^19.2.8",
@@ -53,7 +53,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.6",
+    "@biomejs/biome": "2.5.7",
     "@tailwindcss/typography": "^0.5.20",
     "@tanstack/devtools-event-client": "latest",
     "@tanstack/devtools-vite": "^0.8.3",
@@ -66,11 +66,11 @@
     "babel-plugin-react-compiler": "^1.0.0",
     "drizzle-kit": "^0.31.10",
     "happy-dom": "^20.11.1",
-    "tsx": "^4.23.5",
+    "tsx": "^4.23.8",
     "typescript": "^7.0.2",
     "vite": "^8.2.0",
     "vitest": "^4.1.10",
-    "wrangler": "^4.118.0"
+    "wrangler": "^4.119.0"
   },
   "overrides": {
     "js-yaml": "4.3.1",
