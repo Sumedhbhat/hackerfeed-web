@@ -87,10 +87,45 @@ function reportResults(overrideCount, redundantOverrides) {
   process.exit(1);
 }
 
+async function writePackageJson(packageJson) {
+  await writeFile("package.json", `${JSON.stringify(packageJson, null, 2)}\n`);
+}
+
+function refreshProjectLockfile() {
+  const result = Bun.spawnSync(
+    ["bun", "install", "--lockfile-only", "--ignore-scripts"],
+    { stdout: "inherit", stderr: "inherit" },
+  );
+
+  if (!result.success) {
+    throw new Error("Could not refresh bun.lock after pruning overrides.");
+  }
+}
+
+async function pruneOverrides(packageJson, redundantOverrides) {
+  const prunedPackageJson = redundantOverrides.reduce(
+    removeOverride,
+    packageJson,
+  );
+
+  await writePackageJson(prunedPackageJson);
+  refreshProjectLockfile();
+
+  console.log(
+    `Pruned security overrides: ${redundantOverrides.join(", ")}.`,
+  );
+}
+
 async function main() {
   const packageJson = await loadPackageJson();
   const overrideCount = Object.keys(packageJson.overrides ?? {}).length;
   const redundantOverrides = await findRedundantOverrides(packageJson);
+  const shouldWrite = process.argv.includes("--write");
+
+  if (shouldWrite && redundantOverrides.length > 0) {
+    await pruneOverrides(packageJson, redundantOverrides);
+    return;
+  }
 
   reportResults(overrideCount, redundantOverrides);
 }
