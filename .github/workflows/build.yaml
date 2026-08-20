@@ -23,6 +23,9 @@ jobs:
       - name: Audit dependencies
         run: bun run security:audit
 
+      - name: Check security overrides
+        run: bun run security:overrides
+
       - name: Run lint
         run: bun run check
 

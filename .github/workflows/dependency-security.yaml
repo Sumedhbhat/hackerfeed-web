@@ -30,3 +30,6 @@ jobs:
 
       - name: Audit high and critical vulnerabilities
         run: bun run security:audit
+
+      - name: Check for redundant security overrides
+        run: bun run security:overrides
