@@ -115,6 +115,25 @@ Planning docs for this feature live in `docs/paper/`:
 - `docs/paper/issue.md`
 - `docs/paper/questions.md`
 
+## Hacker News Ingestion
+
+The Worker also snapshots the first 15 entries from the Hacker News `top`,
+`new`, and `best` feeds into D1 every UTC hour:
+
+```text
+0 * * * *  # Start of every UTC hour
+```
+
+Story IDs shared by multiple feeds are fetched once. Each run records its audit
+status, updates the canonical `stories` row, preserves changed story states as
+temporal versions, and upserts that hour's feed ranks. The initial limit of 15
+per feed keeps the worst case within the Workers Free external-subrequest limit;
+it can be raised after confirming the deployed account uses Workers Paid.
+
+Apply D1 migrations before deploying the hourly trigger. There is no public
+HTTP ingestion route. The implementation plan and data-model rationale live in
+`docs/hacker-news-ingestion/README.md`.
+
 ## Backend Boundaries
 
 The backend currently lives inside the TanStack Start app, but it should remain
@@ -123,8 +142,8 @@ service.
 
 Server-only modules live under `src/server/` and must not be imported by React
 UI, client hooks, or browser code. This includes database access, auth session
-resolution, user and favorites services, Hugging Face Papers ingestion, and
-tRPC context/router/handler modules.
+resolution, user and favorites services, Hacker News ingestion, Hugging Face
+Papers ingestion, and tRPC context/router/handler modules.
 
 React UI and hooks communicate with backend behavior through the tRPC client.
 Shared schemas that are safe for both client and server imports live outside

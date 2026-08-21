@@ -6,6 +6,7 @@ import {
 	sqliteTable,
 	text,
 	unique,
+	uniqueIndex,
 } from "drizzle-orm/sqlite-core";
 
 const uuidPrimaryKey = () =>
@@ -29,7 +30,156 @@ export const stories = sqliteTable("stories", {
 	authorUsername: text(),
 	commentCount: integer().notNull().default(0),
 	commentIds: text().notNull().default("[]"),
+	availabilityStatus: text({ enum: ["active", "dead", "deleted"] })
+		.notNull()
+		.default("active"),
+	firstIngestedAt: text(),
+	lastIngestedAt: text(),
 });
+
+export const hnIngestionRuns = sqliteTable(
+	"hn_ingestion_runs",
+	{
+		id: uuidPrimaryKey(),
+		observedHour: text().notNull(),
+		status: text({ enum: ["running", "success", "failed"] }).notNull(),
+		startedAt: text().notNull(),
+		finishedAt: text(),
+		sourceBaseUrl: text().notNull(),
+		perFeedLimit: integer().notNull(),
+		topIdCount: integer(),
+		newIdCount: integer(),
+		bestIdCount: integer(),
+		uniqueSelectedCount: integer(),
+		fetchedCount: integer(),
+		persistedStoryCount: integer(),
+		insertedVersionCount: integer(),
+		persistedFeedObservationCount: integer(),
+		skippedCount: integer(),
+		errorMessage: text(),
+		createdAt: text().notNull(),
+		updatedAt: text().notNull(),
+	},
+	(table) => [
+		index("hn_ingestion_runs_observed_hour_idx").on(table.observedHour),
+		check(
+			"hn_ingestion_runs_status_check",
+			sql`${table.status} in ('running', 'success', 'failed')`,
+		),
+		check(
+			"hn_ingestion_runs_per_feed_limit_check",
+			sql`${table.perFeedLimit} >= 1`,
+		),
+	],
+);
+
+export const hnStoryVersions = sqliteTable(
+	"hn_story_versions",
+	{
+		id: uuidPrimaryKey(),
+		ingestionRunId: text()
+			.notNull()
+			.references(() => hnIngestionRuns.id),
+		storyId: text()
+			.notNull()
+			.references(() => stories.id, { onDelete: "cascade" }),
+		availabilityStatus: text({ enum: ["active", "dead", "deleted"] }).notNull(),
+		title: text(),
+		url: text(),
+		text: text(),
+		score: integer().notNull(),
+		hnPostedAt: text(),
+		authorUsername: text(),
+		commentCount: integer().notNull(),
+		commentIds: text().notNull(),
+		validFrom: text().notNull(),
+		validTo: text(),
+		recordedAt: text().notNull(),
+	},
+	(table) => [
+		unique().on(table.storyId, table.validFrom),
+		uniqueIndex("hn_story_versions_one_open_per_story_idx")
+			.on(table.storyId)
+			.where(sql`${table.validTo} is null`),
+		index("hn_story_versions_story_id_valid_from_idx").on(
+			table.storyId,
+			table.validFrom,
+		),
+		index("hn_story_versions_valid_from_idx").on(table.validFrom),
+		index("hn_story_versions_valid_to_idx").on(table.validTo),
+		check(
+			"hn_story_versions_status_check",
+			sql`${table.availabilityStatus} in ('active', 'dead', 'deleted')`,
+		),
+		check(
+			"hn_story_versions_valid_range_check",
+			sql`${table.validTo} is null or ${table.validTo} > ${table.validFrom}`,
+		),
+	],
+);
+
+export const hnStoryFeedObservations = sqliteTable(
+	"hn_story_feed_observations",
+	{
+		id: uuidPrimaryKey(),
+		ingestionRunId: text()
+			.notNull()
+			.references(() => hnIngestionRuns.id),
+		storyId: text()
+			.notNull()
+			.references(() => stories.id, { onDelete: "cascade" }),
+		storyVersionId: text()
+			.notNull()
+			.references(() => hnStoryVersions.id, { onDelete: "restrict" }),
+		observedHour: text().notNull(),
+		topRank: integer(),
+		newRank: integer(),
+		bestRank: integer(),
+		createdAt: text().notNull(),
+		updatedAt: text().notNull(),
+	},
+	(table) => [
+		unique().on(table.observedHour, table.storyId),
+		index("hn_story_feed_observations_observed_hour_idx").on(
+			table.observedHour,
+		),
+		index("hn_story_feed_observations_story_id_observed_hour_idx").on(
+			table.storyId,
+			table.observedHour,
+		),
+		index("hn_story_feed_observations_story_version_id_idx").on(
+			table.storyVersionId,
+		),
+		index("hn_story_feed_observations_observed_hour_top_rank_idx").on(
+			table.observedHour,
+			table.topRank,
+		),
+		index("hn_story_feed_observations_observed_hour_new_rank_idx").on(
+			table.observedHour,
+			table.newRank,
+		),
+		index("hn_story_feed_observations_observed_hour_best_rank_idx").on(
+			table.observedHour,
+			table.bestRank,
+		),
+		check(
+			"hn_story_feed_observations_top_rank_check",
+			sql`${table.topRank} is null or ${table.topRank} >= 1`,
+		),
+		check(
+			"hn_story_feed_observations_new_rank_check",
+			sql`${table.newRank} is null or ${table.newRank} >= 1`,
+		),
+		check(
+			"hn_story_feed_observations_best_rank_check",
+			sql`${table.bestRank} is null or ${table.bestRank} >= 1`,
+		),
+		check(
+			"hn_story_feed_observations_has_rank_check",
+			sql`${table.topRank} is not null or ${table.newRank} is not null or ${table.bestRank} is not null`,
+		),
+	],
+);
 
 export const favorites = sqliteTable(
 	"favorites",

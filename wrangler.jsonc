@@ -7,7 +7,7 @@
 	],
 	"main": "src/server.ts",
 	"triggers": {
-		"crons": ["30 23 * * *"]
+		"crons": ["0 * * * *", "30 23 * * *"]
 	},
 	"observability": {
 		"enabled": true,
