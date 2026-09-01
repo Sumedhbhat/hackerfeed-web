@@ -72,7 +72,7 @@ jobs:
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add package.json bun.lock
           git -c commit.gpgSign=false -c core.hooksPath=/dev/null \
-            commit -m "chore(deps): prune redundant security overrides"
+            commit -m "chore(deps): prune redundant security overrides [dependabot skip]"
 
       - name: Push cleanup to Dependabot branch
         if: steps.cleanup.outputs.changed == 'true'
