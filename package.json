@@ -23,7 +23,7 @@
     "check": "biome check"
   },
   "dependencies": {
-    "@cloudflare/vite-plugin": "^1.62.3",
+    "@cloudflare/vite-plugin": "^1.64.0",
     "@sentry/cloudflare": "^10.69.0",
     "@sentry/react": "^10.69.0",
     "@t3-oss/env-core": "^0.13.10",
@@ -71,10 +71,7 @@
     "typescript": "^7.0.2",
     "vite": "^8.3.1",
     "vitest": "^4.1.10",
-    "wrangler": "^4.145.0"
-  },
-  "overrides": {
-    "undici": "7.29.0"
+    "wrangler": "^4.151.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
