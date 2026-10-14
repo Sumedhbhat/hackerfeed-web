@@ -242,6 +242,21 @@ describe("StoryCard link actions", () => {
 		expect(link.getAttribute("href")).toContain("99999");
 	});
 
+	it("'Discuss' links to ChatGPT with the article in the prompt", () => {
+		render(
+			<StoryCard
+				story={makeStory({ url: "https://article.example.com/post" })}
+			/>,
+		);
+		const link = screen.getByRole("link", { name: /in chatgpt$/i });
+		const url = new URL(link.getAttribute("href") ?? "");
+		expect(url.origin).toBe("https://chatgpt.com");
+		expect(url.searchParams.get("q")).toContain(
+			"https://article.example.com/post",
+		);
+		expect(link.getAttribute("target")).toBe("_blank");
+	});
+
 	it("records signed-in title and primary-action clicks as separate views", () => {
 		authMock.user = { id: "workos-story-viewer" };
 		const story = makeStory();
