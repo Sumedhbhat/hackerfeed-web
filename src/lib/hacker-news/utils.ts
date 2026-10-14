@@ -8,6 +8,25 @@ export function getDiscussionUrl(storyId: number): string {
 	return `https://news.ycombinator.com/item?id=${storyId}`;
 }
 
+export function buildChatGptStoryDiscussionUrl(
+	story: HackerNewsStoryRecord,
+): string {
+	const prompt = [
+		"I want to discuss this article and understand it completely.",
+		`Title: ${getStoryTitle(story)}`,
+		story.url ? `Article URL: ${story.url}` : null,
+		`Hacker News discussion: ${getDiscussionUrl(story.id)}`,
+		"",
+		"Please help me understand the core ideas, why they matter, and where they're useful.",
+		"I will be asking you a series of questions about this article and want them answered.",
+	].filter((line) => line !== null);
+
+	const url = new URL("https://chatgpt.com/");
+	url.searchParams.set("q", prompt.join("\n"));
+
+	return url.toString();
+}
+
 export function stripHtml(input: string | null): string {
 	if (!input) {
 		return "";

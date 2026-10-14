@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, MessageCircle } from "lucide-react";
 import { Suspense } from "react";
 import { Comment } from "#/components/comment";
 import { useStoryPage } from "#/hooks/useStoryPage";
@@ -8,6 +8,7 @@ import {
 	storyQueryOptions,
 } from "#/lib/hacker-news/queries";
 import {
+	buildChatGptStoryDiscussionUrl,
 	formatStoryAge,
 	getDiscussionUrl,
 	getStoryDomain,
@@ -205,6 +206,16 @@ function StoryContent({ storyId }: StoryContentProps) {
 						className="text-sm text-(--sea-ink-soft) hover:text-(--sea-ink) transition-colors"
 					>
 						View on HN
+					</a>
+					<a
+						href={buildChatGptStoryDiscussionUrl(story)}
+						target="_blank"
+						rel="noopener noreferrer"
+						aria-label={`Discuss ${title} in ChatGPT`}
+						className="text-sm text-(--sea-ink-soft) hover:text-(--sea-ink) transition-colors"
+					>
+						<MessageCircle size={14} aria-hidden="true" className="inline" />{" "}
+						Discuss
 					</a>
 				</div>
 			</article>
