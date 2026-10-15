@@ -39,9 +39,10 @@ jobs:
           WORKOS_COOKIE_PASSWORD: ${{ secrets.WORKOS_COOKIE_PASSWORD }}
           WORKOS_JWT_AUDIENCE: ${{ secrets.WORKOS_JWT_AUDIENCE }}
 
-      # Each PR gets its own D1 database. Every wrangler command after the build
-      # reads dist/server/wrangler.json, so rebinding DB there keeps preview
-      # code and the PR's migrations away from production data.
+      # Each PR gets its own D1 database, bound as DB in the generated
+      # dist/server/wrangler.json. Every wrangler command below passes that
+      # file with --config: `d1 migrations` ignores the build's config redirect
+      # and would otherwise read wrangler.jsonc, i.e. the production database.
       - name: Prepare preview database
         run: |
           config=dist/server/wrangler.json
@@ -67,7 +68,15 @@ jobs:
           mv "$config.tmp" "$config"
           echo "PROD_DB_ID=$prod_db_id" >> "$GITHUB_ENV"
 
-          bunx wrangler d1 migrations apply DB --remote
+          bunx wrangler d1 migrations apply DB --remote --config "$config"
+
+          expected=$(find migrations -maxdepth 1 -name '*.sql' | wc -l)
+          applied=$(bunx wrangler d1 execute "$db_name" --remote --json \
+            --command "SELECT COUNT(*) AS n FROM d1_migrations" | jq -r '.[0].results[0].n')
+          if [ "$applied" != "$expected" ]; then
+            echo "Preview database has ${applied} migrations applied, expected ${expected}" >&2
+            exit 1
+          fi
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -77,7 +86,7 @@ jobs:
       # aliases it to a stable per-PR URL.
       - name: Upload preview version
         run: |
-          bunx wrangler versions upload --preview-alias "pr-${PR_NUMBER}" --message "PR #${PR_NUMBER} @ ${HEAD_SHA}"
+          bunx wrangler versions upload --config dist/server/wrangler.json --preview-alias "pr-${PR_NUMBER}" --message "PR #${PR_NUMBER} @ ${HEAD_SHA}"
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
@@ -88,7 +97,7 @@ jobs:
       - name: Verify preview is not bound to production database
         run: |
           version_id=$(jq -r 'select(.type == "version-upload") | .version_id' "$WRANGLER_OUTPUT_FILE_PATH" | tail -n1)
-          bound_db_id=$(bunx wrangler versions view "$version_id" --json \
+          bound_db_id=$(bunx wrangler versions view "$version_id" --json --config dist/server/wrangler.json \
             | jq -r '.resources.bindings[] | select(.type == "d1" and .name == "DB") | .id')
           if [ -z "$bound_db_id" ] || [ "$bound_db_id" = "$PROD_DB_ID" ]; then
             echo "Preview version ${version_id} is bound to '${bound_db_id}', not an isolated database" >&2
