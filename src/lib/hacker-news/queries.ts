@@ -1,58 +1,26 @@
 import { queryOptions } from "@tanstack/react-query";
 import { http } from "#/lib/http/client";
 import { logger } from "#/lib/logger";
+import {
+	type HackerNewsCommentRecord,
+	type HackerNewsFeedKey,
+	type HackerNewsItemResponse,
+	type HackerNewsStoryRecord,
+	normalizeHackerNewsComment,
+	normalizeHackerNewsStory,
+	normalizeHackerNewsStoryIds,
+} from "./schemas";
+
+export {
+	type HackerNewsCommentRecord,
+	HackerNewsFeedKey,
+	type HackerNewsStoryRecord,
+} from "./schemas";
 
 const HACKER_NEWS_API_BASE_URL = "https://hacker-news.firebaseio.com/v0";
 const DEFAULT_FEED_STORY_LIMIT = 12;
 
 export const PAGE_SIZE = 12;
-
-export enum HackerNewsFeedKey {
-	Top = "top",
-	New = "new",
-	Best = "best",
-}
-
-export type HackerNewsStoryRecord = {
-	by: string | null;
-	descendants: number;
-	id: number;
-	kids: number[];
-	score: number;
-	text: string | null;
-	time: number | null;
-	title: string | null;
-	type: "story";
-	url: string | null;
-};
-
-export type HackerNewsCommentRecord = {
-	id: number;
-	by: string | null;
-	text: string | null;
-	time: number | null;
-	kids: number[];
-	parent: number;
-	type: "comment";
-	deleted: boolean;
-	dead: boolean;
-};
-
-type HackerNewsStoryResponse = {
-	by?: string;
-	dead?: boolean;
-	deleted?: boolean;
-	descendants?: number;
-	id?: number;
-	kids?: number[];
-	parent?: number;
-	score?: number;
-	text?: string;
-	time?: number;
-	title?: string;
-	type?: string;
-	url?: string;
-};
 
 type FeedStoriesResult = {
 	feed: HackerNewsFeedKey;
@@ -97,94 +65,11 @@ async function fetchJson<T>(path: string, signal?: AbortSignal): Promise<T> {
 	return response.json() as Promise<T>;
 }
 
-function normalizeStoryIds(payload: unknown): number[] {
-	if (!Array.isArray(payload)) {
-		return [];
-	}
-
-	return [...new Set(payload)]
-		.map((value) => Number(value))
-		.filter((value) => Number.isInteger(value) && value > 0);
-}
-
-function normalizeStory(
-	payload: HackerNewsStoryResponse | null,
-): HackerNewsStoryRecord | null {
-	if (payload?.type !== "story" || payload.deleted || payload.dead) {
-		return null;
-	}
-
-	const storyId = payload.id;
-	const descendants = payload.descendants;
-	const score = payload.score;
-	const time = payload.time;
-
-	if (
-		typeof storyId !== "number" ||
-		!Number.isInteger(storyId) ||
-		storyId <= 0
-	) {
-		return null;
-	}
-
-	const normalizedDescendants =
-		typeof descendants === "number" && Number.isInteger(descendants)
-			? descendants
-			: 0;
-	const normalizedScore =
-		typeof score === "number" && Number.isInteger(score) ? score : 0;
-	const normalizedTime =
-		typeof time === "number" && Number.isInteger(time) ? time : null;
-
-	return {
-		by: payload.by ?? null,
-		descendants: normalizedDescendants,
-		id: storyId,
-		kids: Array.isArray(payload.kids)
-			? payload.kids.filter((n) => Number.isInteger(n) && n > 0)
-			: [],
-		score: normalizedScore,
-		text: payload.text ?? null,
-		time: normalizedTime,
-		title: payload.title ?? null,
-		type: "story",
-		url: payload.url ?? null,
-	};
-}
-
-function normalizeComment(
-	payload: HackerNewsStoryResponse | null,
-): HackerNewsCommentRecord | null {
-	if (payload?.type !== "comment") return null;
-
-	const id = payload.id;
-	if (typeof id !== "number" || !Number.isInteger(id) || id <= 0) return null;
-
-	const parent = payload.parent;
-	if (typeof parent !== "number" || !Number.isInteger(parent) || parent <= 0) {
-		return null;
-	}
-
-	return {
-		id,
-		by: payload.by ?? null,
-		text: payload.text ?? null,
-		time: typeof payload.time === "number" ? payload.time : null,
-		kids: Array.isArray(payload.kids)
-			? payload.kids.filter((n) => Number.isInteger(n) && n > 0)
-			: [],
-		parent,
-		type: "comment",
-		deleted: payload.deleted ?? false,
-		dead: payload.dead ?? false,
-	};
-}
-
 export async function fetchFeedStoryIds(
 	feed: HackerNewsFeedKey,
 	signal?: AbortSignal,
 ): Promise<number[]> {
-	return normalizeStoryIds(
+	return normalizeHackerNewsStoryIds(
 		await fetchJson<unknown>(`/${feed}stories.json`, signal),
 	);
 }
@@ -193,12 +78,12 @@ export async function fetchStory(
 	storyId: number,
 	signal?: AbortSignal,
 ): Promise<HackerNewsStoryRecord | null> {
-	const payload = await fetchJson<HackerNewsStoryResponse | null>(
+	const payload = await fetchJson<HackerNewsItemResponse | null>(
 		`/item/${storyId}.json`,
 		signal,
 	);
 
-	return normalizeStory(payload);
+	return normalizeHackerNewsStory(payload);
 }
 
 export async function fetchFeedStories(
@@ -258,11 +143,11 @@ export async function fetchComment(
 	commentId: number,
 	signal?: AbortSignal,
 ): Promise<HackerNewsCommentRecord | null> {
-	const payload = await fetchJson<HackerNewsStoryResponse | null>(
+	const payload = await fetchJson<HackerNewsItemResponse | null>(
 		`/item/${commentId}.json`,
 		signal,
 	);
-	return normalizeComment(payload);
+	return normalizeHackerNewsComment(payload);
 }
 
 export function commentQueryOptions(commentId: number) {
