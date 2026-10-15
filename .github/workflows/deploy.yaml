@@ -44,26 +44,28 @@ jobs:
           WORKOS_COOKIE_PASSWORD: ${{ secrets.WORKOS_COOKIE_PASSWORD }}
           WORKOS_JWT_AUDIENCE: ${{ secrets.WORKOS_JWT_AUDIENCE }}
 
-      - name: Deploy to Cloudflare Workers
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy
-          preCommands: wrangler d1 migrations apply DB --remote
-          secrets: |
-            SENTRY_DSN
-            VITE_SENTRY_DSN
-            VITE_WORKOS_CLIENT_ID
-            WORKOS_API_KEY
-            WORKOS_COOKIE_PASSWORD
-            WORKOS_JWT_AUDIENCE
+      # Secrets are uploaded with the deploy rather than via `wrangler secret
+      # bulk`, which refuses to run while a PR preview version is the latest
+      # (undeployed) version.
+      - name: Write Worker secrets file
+        run: |
+          jq -n 'env | {SENTRY_DSN, VITE_SENTRY_DSN, VITE_WORKOS_CLIENT_ID, WORKOS_API_KEY, WORKOS_COOKIE_PASSWORD, WORKOS_JWT_AUDIENCE}' \
+            > "$RUNNER_TEMP/worker-secrets.json"
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
           VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
           VITE_WORKOS_CLIENT_ID: ${{ secrets.VITE_WORKOS_CLIENT_ID }}
           WORKOS_API_KEY: ${{ secrets.WORKOS_API_KEY }}
           WORKOS_COOKIE_PASSWORD: ${{ secrets.WORKOS_COOKIE_PASSWORD }}
           WORKOS_JWT_AUDIENCE: ${{ secrets.WORKOS_JWT_AUDIENCE }}
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy --secrets-file ${{ runner.temp }}/worker-secrets.json
+          preCommands: wrangler d1 migrations apply DB --remote
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
