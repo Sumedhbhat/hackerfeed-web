@@ -96,6 +96,35 @@ The Worker creates one typed `DatabaseContext` from its D1 binding. tRPC
 contexts, services, and repositories receive that Drizzle context; application
 code must not access `env.DB` directly outside the Worker boundary.
 
+## Chat with ChatGPT
+
+Signed-in users can connect their own ChatGPT plan from `/profile` using
+[Sign in with ChatGPT](https://developers.openai.com/siwc/token-sharing-open-source/sign-in).
+The **Discuss** button on stories then opens `/chat/<storyId>`, which streams
+answers from the OpenAI Responses API using the user's plan. The story, its
+post text, and a few top Hacker News comments are sent as context.
+
+```bash
+# .dev.vars (all optional)
+CHATGPT_CLIENT_ID=oaiapp_...         # issued by OpenAI for this deployment
+CHATGPT_CLIENT_SECRET=...            # only for confidential clients
+CHATGPT_TOKEN_ENCRYPTION_KEY=...     # 32+ chars; defaults to WORKOS_COOKIE_PASSWORD
+```
+
+- **Local development:** without `CHATGPT_CLIENT_ID`, HackerFeed registers
+  itself dynamically, which OpenAI only allows with an `http://127.0.0.1`
+  callback. Open the app at `http://127.0.0.1:3000` (not `localhost`) and set
+  `SERVER_URL=http://127.0.0.1:3000`.
+- **Hosted deployments:** OpenAI must issue a client id with
+  `https://<host>/chatgpt/callback` registered
+  ([waitlist](https://openai.com/form/sign-in-with-chatgpt-interest/)). Until
+  then, the profile page shows that ChatGPT sign-in is unavailable and the chat
+  page offers an "Open in ChatGPT instead" fallback.
+
+OAuth tokens are encrypted with AES-GCM before they are stored in the
+`chatgpt_connections` D1 table. Conversations are not stored; requests use
+`store: false`.
+
 ## Hugging Face Papers
 
 The `/papers` route serves the latest successful Hugging Face Daily Papers

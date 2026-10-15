@@ -1,8 +1,33 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Mail, User } from "lucide-react";
+import { ChatGptConnectionCard } from "#/components/chatgpt/ChatGptConnectionCard";
 import { signIn, useAuthSession } from "#/hooks/useAuthSession";
 
+type ProfileSearch = {
+	chatgpt?: "connected" | "error";
+	reason?: string;
+};
+
+export function parseProfileSearch(
+	search: Record<string, unknown>,
+): ProfileSearch {
+	const chatgpt =
+		search.chatgpt === "connected" || search.chatgpt === "error"
+			? search.chatgpt
+			: undefined;
+	const reason =
+		typeof search.reason === "string" &&
+		/^[a-z0-9_.-]{1,100}$/i.test(search.reason)
+			? search.reason
+			: undefined;
+	return {
+		...(chatgpt ? { chatgpt } : {}),
+		...(chatgpt === "error" && reason ? { reason } : {}),
+	};
+}
+
 export const Route = createFileRoute("/profile")({
+	validateSearch: parseProfileSearch,
 	component: ProfilePage,
 });
 
@@ -27,6 +52,7 @@ function getInitials(
 
 function ProfilePage() {
 	const { user, isLoading } = useAuthSession();
+	const search = Route.useSearch();
 
 	if (isLoading) {
 		return (
@@ -115,6 +141,8 @@ function ProfilePage() {
 						</div>
 					</dl>
 				</div>
+
+				<ChatGptConnectionCard result={search.chatgpt} reason={search.reason} />
 
 				<Link
 					to="/favorites"

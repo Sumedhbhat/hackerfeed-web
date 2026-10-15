@@ -76,13 +76,16 @@ vi.mock("@tanstack/react-router", async (importOriginal) => {
 			to,
 			params,
 			className,
+			"aria-label": ariaLabel,
 		}: {
 			children: React.ReactNode;
 			to: string;
 			params?: Record<string, unknown>;
 			className?: string;
+			"aria-label"?: string;
 		}) => (
 			<a
+				aria-label={ariaLabel}
 				href={
 					params
 						? to.replace(/\$(\w+)/g, (_, k) => String(params[k] ?? ""))
@@ -242,19 +245,11 @@ describe("StoryCard link actions", () => {
 		expect(link.getAttribute("href")).toContain("99999");
 	});
 
-	it("'Discuss' links to ChatGPT with the article in the prompt", () => {
-		render(
-			<StoryCard
-				story={makeStory({ url: "https://article.example.com/post" })}
-			/>,
-		);
-		const link = screen.getByRole("link", { name: /in chatgpt$/i });
-		const url = new URL(link.getAttribute("href") ?? "");
-		expect(url.origin).toBe("https://chatgpt.com");
-		expect(url.searchParams.get("q")).toContain(
-			"https://article.example.com/post",
-		);
-		expect(link.getAttribute("target")).toBe("_blank");
+	it("'Discuss' opens the in-app ChatGPT chat for the story", () => {
+		render(<StoryCard story={makeStory({ id: 4242 })} />);
+		const link = screen.getByRole("link", { name: /with chatgpt$/i });
+		expect(link.getAttribute("href")).toBe("/chat/4242");
+		expect(link.getAttribute("target")).toBeNull();
 	});
 
 	it("records signed-in title and primary-action clicks as separate views", () => {

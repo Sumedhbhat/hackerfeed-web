@@ -277,3 +277,24 @@ export const hfIngestionRuns = sqliteTable(
 		),
 	],
 );
+
+export const chatgptConnections = sqliteTable("chatgpt_connections", {
+	id: uuidPrimaryKey(),
+	appUserId: text()
+		.notNull()
+		.unique()
+		.references(() => appUsers.id, { onDelete: "cascade" }),
+	/** Client id issued by OpenAI; kept after disconnect to avoid re-registering. */
+	clientId: text().notNull(),
+	hostId: text().notNull(),
+	subject: text().notNull(),
+	email: text(),
+	name: text(),
+	/** AES-GCM sealed; null once disconnected. */
+	accessToken: text(),
+	refreshToken: text(),
+	accessTokenExpiresAt: integer(),
+	scopes: text().notNull().default(""),
+	createdAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
+	updatedAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
+});

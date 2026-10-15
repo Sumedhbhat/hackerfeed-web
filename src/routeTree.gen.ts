@@ -9,27 +9,29 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ProfileRouteImport } from './routes/profile'
-import { Route as PapersRouteImport } from './routes/papers'
-import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as StoryStoryIdRouteImport } from './routes/story.$storyId'
-import { Route as AuthSignedOutRouteImport } from './routes/auth.signed-out'
-import { Route as AuthSignOutRouteImport } from './routes/auth.sign-out'
-import { Route as AuthSignInRouteImport } from './routes/auth.sign-in'
-import { Route as AuthErrorRouteImport } from './routes/auth.error'
+import { Route as FavoritesRouteImport } from './routes/favorites'
+import { Route as PapersRouteImport } from './routes/papers'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
-import { Route as ApiTrpcSplatRouteImport } from './routes/api/trpc/$'
+import { Route as AuthErrorRouteImport } from './routes/auth.error'
+import { Route as AuthSignInRouteImport } from './routes/auth.sign-in'
+import { Route as AuthSignOutRouteImport } from './routes/auth.sign-out'
+import { Route as AuthSignedOutRouteImport } from './routes/auth.signed-out'
+import { Route as ChatStoryIdRouteImport } from './routes/chat.$storyId'
+import { Route as ChatgptCallbackRouteImport } from './routes/chatgpt.callback'
+import { Route as ChatgptConnectRouteImport } from './routes/chatgpt.connect'
+import { Route as StoryStoryIdRouteImport } from './routes/story.$storyId'
 import { Route as ApiAuthMeRouteImport } from './routes/api.auth.me'
+import { Route as ApiChatgptChatRouteImport } from './routes/api.chatgpt.chat'
+import { Route as ApiChatgptDisconnectRouteImport } from './routes/api.chatgpt.disconnect'
+import { Route as ApiChatgptModelsRouteImport } from './routes/api.chatgpt.models'
+import { Route as ApiChatgptStatusRouteImport } from './routes/api.chatgpt.status'
+import { Route as ApiTrpcSplatRouteImport } from './routes/api/trpc/$'
 
-const ProfileRoute = ProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PapersRoute = PapersRouteImport.update({
-  id: '/papers',
-  path: '/papers',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FavoritesRoute = FavoritesRouteImport.update({
@@ -37,34 +39,14 @@ const FavoritesRoute = FavoritesRouteImport.update({
   path: '/favorites',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const PapersRoute = PapersRouteImport.update({
+  id: '/papers',
+  path: '/papers',
   getParentRoute: () => rootRouteImport,
 } as any)
-const StoryStoryIdRoute = StoryStoryIdRouteImport.update({
-  id: '/story/$storyId',
-  path: '/story/$storyId',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthSignedOutRoute = AuthSignedOutRouteImport.update({
-  id: '/auth/signed-out',
-  path: '/auth/signed-out',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthSignOutRoute = AuthSignOutRouteImport.update({
-  id: '/auth/sign-out',
-  path: '/auth/sign-out',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthSignInRoute = AuthSignInRouteImport.update({
-  id: '/auth/sign-in',
-  path: '/auth/sign-in',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthErrorRoute = AuthErrorRouteImport.update({
-  id: '/auth/error',
-  path: '/auth/error',
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthCallbackRoute = AuthCallbackRouteImport.update({
@@ -72,14 +54,74 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   path: '/auth/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiTrpcSplatRoute = ApiTrpcSplatRouteImport.update({
-  id: '/api/trpc/$',
-  path: '/api/trpc/$',
+const AuthErrorRoute = AuthErrorRouteImport.update({
+  id: '/auth/error',
+  path: '/auth/error',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthSignInRoute = AuthSignInRouteImport.update({
+  id: '/auth/sign-in',
+  path: '/auth/sign-in',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthSignOutRoute = AuthSignOutRouteImport.update({
+  id: '/auth/sign-out',
+  path: '/auth/sign-out',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthSignedOutRoute = AuthSignedOutRouteImport.update({
+  id: '/auth/signed-out',
+  path: '/auth/signed-out',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatStoryIdRoute = ChatStoryIdRouteImport.update({
+  id: '/chat/$storyId',
+  path: '/chat/$storyId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatgptCallbackRoute = ChatgptCallbackRouteImport.update({
+  id: '/chatgpt/callback',
+  path: '/chatgpt/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatgptConnectRoute = ChatgptConnectRouteImport.update({
+  id: '/chatgpt/connect',
+  path: '/chatgpt/connect',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StoryStoryIdRoute = StoryStoryIdRouteImport.update({
+  id: '/story/$storyId',
+  path: '/story/$storyId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuthMeRoute = ApiAuthMeRouteImport.update({
   id: '/api/auth/me',
   path: '/api/auth/me',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiChatgptChatRoute = ApiChatgptChatRouteImport.update({
+  id: '/api/chatgpt/chat',
+  path: '/api/chatgpt/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiChatgptDisconnectRoute = ApiChatgptDisconnectRouteImport.update({
+  id: '/api/chatgpt/disconnect',
+  path: '/api/chatgpt/disconnect',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiChatgptModelsRoute = ApiChatgptModelsRouteImport.update({
+  id: '/api/chatgpt/models',
+  path: '/api/chatgpt/models',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiChatgptStatusRoute = ApiChatgptStatusRouteImport.update({
+  id: '/api/chatgpt/status',
+  path: '/api/chatgpt/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTrpcSplatRoute = ApiTrpcSplatRouteImport.update({
+  id: '/api/trpc/$',
+  path: '/api/trpc/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -93,8 +135,15 @@ export interface FileRoutesByFullPath {
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-out': typeof AuthSignOutRoute
   '/auth/signed-out': typeof AuthSignedOutRoute
+  '/chat/$storyId': typeof ChatStoryIdRoute
+  '/chatgpt/callback': typeof ChatgptCallbackRoute
+  '/chatgpt/connect': typeof ChatgptConnectRoute
   '/story/$storyId': typeof StoryStoryIdRoute
   '/api/auth/me': typeof ApiAuthMeRoute
+  '/api/chatgpt/chat': typeof ApiChatgptChatRoute
+  '/api/chatgpt/disconnect': typeof ApiChatgptDisconnectRoute
+  '/api/chatgpt/models': typeof ApiChatgptModelsRoute
+  '/api/chatgpt/status': typeof ApiChatgptStatusRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
 }
 export interface FileRoutesByTo {
@@ -107,8 +156,15 @@ export interface FileRoutesByTo {
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-out': typeof AuthSignOutRoute
   '/auth/signed-out': typeof AuthSignedOutRoute
+  '/chat/$storyId': typeof ChatStoryIdRoute
+  '/chatgpt/callback': typeof ChatgptCallbackRoute
+  '/chatgpt/connect': typeof ChatgptConnectRoute
   '/story/$storyId': typeof StoryStoryIdRoute
   '/api/auth/me': typeof ApiAuthMeRoute
+  '/api/chatgpt/chat': typeof ApiChatgptChatRoute
+  '/api/chatgpt/disconnect': typeof ApiChatgptDisconnectRoute
+  '/api/chatgpt/models': typeof ApiChatgptModelsRoute
+  '/api/chatgpt/status': typeof ApiChatgptStatusRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
 }
 export interface FileRoutesById {
@@ -122,8 +178,15 @@ export interface FileRoutesById {
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-out': typeof AuthSignOutRoute
   '/auth/signed-out': typeof AuthSignedOutRoute
+  '/chat/$storyId': typeof ChatStoryIdRoute
+  '/chatgpt/callback': typeof ChatgptCallbackRoute
+  '/chatgpt/connect': typeof ChatgptConnectRoute
   '/story/$storyId': typeof StoryStoryIdRoute
   '/api/auth/me': typeof ApiAuthMeRoute
+  '/api/chatgpt/chat': typeof ApiChatgptChatRoute
+  '/api/chatgpt/disconnect': typeof ApiChatgptDisconnectRoute
+  '/api/chatgpt/models': typeof ApiChatgptModelsRoute
+  '/api/chatgpt/status': typeof ApiChatgptStatusRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
 }
 export interface FileRouteTypes {
@@ -138,8 +201,15 @@ export interface FileRouteTypes {
     | '/auth/sign-in'
     | '/auth/sign-out'
     | '/auth/signed-out'
+    | '/chat/$storyId'
+    | '/chatgpt/callback'
+    | '/chatgpt/connect'
     | '/story/$storyId'
     | '/api/auth/me'
+    | '/api/chatgpt/chat'
+    | '/api/chatgpt/disconnect'
+    | '/api/chatgpt/models'
+    | '/api/chatgpt/status'
     | '/api/trpc/$'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -152,8 +222,15 @@ export interface FileRouteTypes {
     | '/auth/sign-in'
     | '/auth/sign-out'
     | '/auth/signed-out'
+    | '/chat/$storyId'
+    | '/chatgpt/callback'
+    | '/chatgpt/connect'
     | '/story/$storyId'
     | '/api/auth/me'
+    | '/api/chatgpt/chat'
+    | '/api/chatgpt/disconnect'
+    | '/api/chatgpt/models'
+    | '/api/chatgpt/status'
     | '/api/trpc/$'
   id:
     | '__root__'
@@ -166,8 +243,15 @@ export interface FileRouteTypes {
     | '/auth/sign-in'
     | '/auth/sign-out'
     | '/auth/signed-out'
+    | '/chat/$storyId'
+    | '/chatgpt/callback'
+    | '/chatgpt/connect'
     | '/story/$storyId'
     | '/api/auth/me'
+    | '/api/chatgpt/chat'
+    | '/api/chatgpt/disconnect'
+    | '/api/chatgpt/models'
+    | '/api/chatgpt/status'
     | '/api/trpc/$'
   fileRoutesById: FileRoutesById
 }
@@ -181,25 +265,25 @@ export interface RootRouteChildren {
   AuthSignInRoute: typeof AuthSignInRoute
   AuthSignOutRoute: typeof AuthSignOutRoute
   AuthSignedOutRoute: typeof AuthSignedOutRoute
+  ChatStoryIdRoute: typeof ChatStoryIdRoute
+  ChatgptCallbackRoute: typeof ChatgptCallbackRoute
+  ChatgptConnectRoute: typeof ChatgptConnectRoute
   StoryStoryIdRoute: typeof StoryStoryIdRoute
   ApiAuthMeRoute: typeof ApiAuthMeRoute
+  ApiChatgptChatRoute: typeof ApiChatgptChatRoute
+  ApiChatgptDisconnectRoute: typeof ApiChatgptDisconnectRoute
+  ApiChatgptModelsRoute: typeof ApiChatgptModelsRoute
+  ApiChatgptStatusRoute: typeof ApiChatgptStatusRoute
   ApiTrpcSplatRoute: typeof ApiTrpcSplatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/profile': {
-      id: '/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof ProfileRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/papers': {
-      id: '/papers'
-      path: '/papers'
-      fullPath: '/papers'
-      preLoaderRoute: typeof PapersRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/favorites': {
@@ -209,46 +293,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FavoritesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/papers': {
+      id: '/papers'
+      path: '/papers'
+      fullPath: '/papers'
+      preLoaderRoute: typeof PapersRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/story/$storyId': {
-      id: '/story/$storyId'
-      path: '/story/$storyId'
-      fullPath: '/story/$storyId'
-      preLoaderRoute: typeof StoryStoryIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/signed-out': {
-      id: '/auth/signed-out'
-      path: '/auth/signed-out'
-      fullPath: '/auth/signed-out'
-      preLoaderRoute: typeof AuthSignedOutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/sign-out': {
-      id: '/auth/sign-out'
-      path: '/auth/sign-out'
-      fullPath: '/auth/sign-out'
-      preLoaderRoute: typeof AuthSignOutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/sign-in': {
-      id: '/auth/sign-in'
-      path: '/auth/sign-in'
-      fullPath: '/auth/sign-in'
-      preLoaderRoute: typeof AuthSignInRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/error': {
-      id: '/auth/error'
-      path: '/auth/error'
-      fullPath: '/auth/error'
-      preLoaderRoute: typeof AuthErrorRouteImport
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/callback': {
@@ -258,11 +314,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/trpc/$': {
-      id: '/api/trpc/$'
-      path: '/api/trpc/$'
-      fullPath: '/api/trpc/$'
-      preLoaderRoute: typeof ApiTrpcSplatRouteImport
+    '/auth/error': {
+      id: '/auth/error'
+      path: '/auth/error'
+      fullPath: '/auth/error'
+      preLoaderRoute: typeof AuthErrorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/sign-in': {
+      id: '/auth/sign-in'
+      path: '/auth/sign-in'
+      fullPath: '/auth/sign-in'
+      preLoaderRoute: typeof AuthSignInRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/sign-out': {
+      id: '/auth/sign-out'
+      path: '/auth/sign-out'
+      fullPath: '/auth/sign-out'
+      preLoaderRoute: typeof AuthSignOutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/signed-out': {
+      id: '/auth/signed-out'
+      path: '/auth/signed-out'
+      fullPath: '/auth/signed-out'
+      preLoaderRoute: typeof AuthSignedOutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chat/$storyId': {
+      id: '/chat/$storyId'
+      path: '/chat/$storyId'
+      fullPath: '/chat/$storyId'
+      preLoaderRoute: typeof ChatStoryIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chatgpt/callback': {
+      id: '/chatgpt/callback'
+      path: '/chatgpt/callback'
+      fullPath: '/chatgpt/callback'
+      preLoaderRoute: typeof ChatgptCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chatgpt/connect': {
+      id: '/chatgpt/connect'
+      path: '/chatgpt/connect'
+      fullPath: '/chatgpt/connect'
+      preLoaderRoute: typeof ChatgptConnectRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/story/$storyId': {
+      id: '/story/$storyId'
+      path: '/story/$storyId'
+      fullPath: '/story/$storyId'
+      preLoaderRoute: typeof StoryStoryIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/auth/me': {
@@ -270,6 +375,41 @@ declare module '@tanstack/react-router' {
       path: '/api/auth/me'
       fullPath: '/api/auth/me'
       preLoaderRoute: typeof ApiAuthMeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/chatgpt/chat': {
+      id: '/api/chatgpt/chat'
+      path: '/api/chatgpt/chat'
+      fullPath: '/api/chatgpt/chat'
+      preLoaderRoute: typeof ApiChatgptChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/chatgpt/disconnect': {
+      id: '/api/chatgpt/disconnect'
+      path: '/api/chatgpt/disconnect'
+      fullPath: '/api/chatgpt/disconnect'
+      preLoaderRoute: typeof ApiChatgptDisconnectRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/chatgpt/models': {
+      id: '/api/chatgpt/models'
+      path: '/api/chatgpt/models'
+      fullPath: '/api/chatgpt/models'
+      preLoaderRoute: typeof ApiChatgptModelsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/chatgpt/status': {
+      id: '/api/chatgpt/status'
+      path: '/api/chatgpt/status'
+      fullPath: '/api/chatgpt/status'
+      preLoaderRoute: typeof ApiChatgptStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/trpc/$': {
+      id: '/api/trpc/$'
+      path: '/api/trpc/$'
+      fullPath: '/api/trpc/$'
+      preLoaderRoute: typeof ApiTrpcSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -285,8 +425,15 @@ const rootRouteChildren: RootRouteChildren = {
   AuthSignInRoute: AuthSignInRoute,
   AuthSignOutRoute: AuthSignOutRoute,
   AuthSignedOutRoute: AuthSignedOutRoute,
+  ChatStoryIdRoute: ChatStoryIdRoute,
+  ChatgptCallbackRoute: ChatgptCallbackRoute,
+  ChatgptConnectRoute: ChatgptConnectRoute,
   StoryStoryIdRoute: StoryStoryIdRoute,
   ApiAuthMeRoute: ApiAuthMeRoute,
+  ApiChatgptChatRoute: ApiChatgptChatRoute,
+  ApiChatgptDisconnectRoute: ApiChatgptDisconnectRoute,
+  ApiChatgptModelsRoute: ApiChatgptModelsRoute,
+  ApiChatgptStatusRoute: ApiChatgptStatusRoute,
   ApiTrpcSplatRoute: ApiTrpcSplatRoute,
 }
 export const routeTree = rootRouteImport

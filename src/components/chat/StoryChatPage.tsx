@@ -1,0 +1,367 @@
+import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
+import {
+	ArrowLeft,
+	ArrowRight,
+	MessageCircle,
+	Send,
+	Square,
+} from "lucide-react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
+import { signIn } from "#/hooks/useAuthSession";
+import {
+	useChatGptModels,
+	useChatGptStatus,
+	useStoryChat,
+} from "#/hooks/useChatGpt";
+import { MAX_CHAT_MESSAGE_LENGTH } from "#/lib/chatgpt/schemas";
+import {
+	type HackerNewsStoryRecord,
+	storyQueryOptions,
+} from "#/lib/hacker-news/queries";
+import {
+	buildChatGptStoryDiscussionUrl,
+	getStoryTitle,
+} from "#/lib/hacker-news/utils";
+
+export const STARTER_PROMPTS = [
+	"Summarize this article in a few bullet points.",
+	"Why does this matter, and who is it useful for?",
+	"What are the main points of debate in the HN comments?",
+];
+
+const panelClassName =
+	"island-shell rounded-lg p-5 sm:p-6 text-sm leading-6 text-(--sea-ink-soft)";
+const primaryButtonClassName =
+	"inline-flex items-center gap-1.5 rounded-md bg-(--lagoon) px-3 py-2 text-sm font-semibold text-white no-underline hover:bg-(--lagoon-deep) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--lagoon) disabled:opacity-60";
+const secondaryButtonClassName =
+	"inline-flex items-center gap-1.5 rounded-md border border-(--chip-line) px-3 py-2 text-sm font-semibold text-(--sea-ink) no-underline hover:bg-(--chip-bg) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--lagoon) disabled:opacity-60";
+
+type StoryChatPageProps = { storyId: number };
+
+export function StoryChatPage({ storyId }: StoryChatPageProps) {
+	const {
+		data: story,
+		isPending,
+		isError,
+	} = useQuery(storyQueryOptions(storyId));
+
+	return (
+		<main className="page-wrap px-4 pt-6 pb-16 sm:pt-10">
+			<Link
+				to="/story/$storyId"
+				params={{ storyId }}
+				className="inline-block mb-6 text-sm text-(--sea-ink-soft) hover:text-(--sea-ink) transition-colors"
+			>
+				<ArrowLeft size={14} aria-hidden="true" /> Story
+			</Link>
+
+			{isPending ? (
+				<div className="island-shell rounded-lg p-6 animate-pulse">
+					<div className="h-6 w-3/4 rounded bg-(--sand) opacity-50" />
+				</div>
+			) : isError || !story ? (
+				<section className={panelClassName}>
+					<h1 className="m-0 text-xl font-semibold text-(--sea-ink)">
+						Story unavailable.
+					</h1>
+					<p className="m-0 mt-2">This story couldn't be loaded.</p>
+				</section>
+			) : (
+				<StoryChat story={story} />
+			)}
+		</main>
+	);
+}
+
+function StoryChat({ story }: { story: HackerNewsStoryRecord }) {
+	const title = getStoryTitle(story);
+	const status = useChatGptStatus();
+
+	return (
+		<>
+			<header className="mb-6">
+				<p className="island-kicker mb-2">Discuss with ChatGPT</p>
+				<h1 className="m-0 text-xl sm:text-2xl font-semibold leading-snug text-(--sea-ink)">
+					{title}
+				</h1>
+				{story.url ? (
+					<a
+						href={story.url}
+						target="_blank"
+						rel="noopener noreferrer"
+						className="mt-2 inline-block text-sm font-medium text-(--lagoon-deep) hover:text-(--lagoon) hover:underline underline-offset-2"
+					>
+						Read article{" "}
+						<ArrowRight
+							size={14}
+							aria-hidden="true"
+							className="inline opacity-60"
+						/>
+					</a>
+				) : null}
+			</header>
+
+			{status.isLoading ? (
+				<div className="island-shell rounded-lg p-6 animate-pulse">
+					<div className="h-4 w-1/2 rounded bg-(--sand) opacity-50" />
+				</div>
+			) : !status.isSignedIn ? (
+				<section className={panelClassName}>
+					<p className="m-0">
+						Sign in to HackerFeed, then connect ChatGPT from your profile to
+						discuss this story here.
+					</p>
+					<button
+						type="button"
+						onClick={() => signIn(`/chat/${story.id}`)}
+						className={`${primaryButtonClassName} mt-4`}
+					>
+						Sign in
+					</button>
+				</section>
+			) : status.isError || !status.data ? (
+				<section className={panelClassName}>
+					<p className="m-0">Couldn't check your ChatGPT connection.</p>
+					<button
+						type="button"
+						onClick={() => void status.refetch()}
+						className={`${secondaryButtonClassName} mt-4`}
+					>
+						Retry
+					</button>
+				</section>
+			) : !status.data.connected ? (
+				<section className={panelClassName}>
+					<p className="m-0">
+						Connect your ChatGPT account from your profile to chat about this
+						story without leaving HackerFeed.
+					</p>
+					<div className="mt-4 flex flex-wrap gap-3">
+						<Link to="/profile" className={primaryButtonClassName}>
+							Connect ChatGPT in profile
+						</Link>
+						<a
+							href={buildChatGptStoryDiscussionUrl(story)}
+							target="_blank"
+							rel="noopener noreferrer"
+							className={secondaryButtonClassName}
+						>
+							Open in ChatGPT instead
+						</a>
+					</div>
+				</section>
+			) : (
+				<ChatConversation storyId={story.id} />
+			)}
+		</>
+	);
+}
+
+function ChatConversation({ storyId }: { storyId: number }) {
+	const models = useChatGptModels(true);
+	const [selectedModel, setSelectedModel] = useState<string>();
+	const model = selectedModel ?? models.data?.[0]?.slug;
+	const chat = useStoryChat(storyId, model);
+	const [draft, setDraft] = useState("");
+	const endRef = useRef<HTMLDivElement>(null);
+	const messageCount = chat.messages.length;
+	const streamingLength = chat.streamingText?.length ?? 0;
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: scroll as content grows
+	useEffect(() => {
+		endRef.current?.scrollIntoView?.({ block: "end" });
+	}, [messageCount, streamingLength]);
+
+	if (models.isPending) {
+		return (
+			<div className="island-shell rounded-lg p-6 animate-pulse">
+				<div className="h-4 w-1/3 rounded bg-(--sand) opacity-50" />
+			</div>
+		);
+	}
+
+	if (models.isError || !model) {
+		return (
+			<section className={panelClassName} role="alert">
+				<p className="m-0">
+					{models.error?.message ??
+						"No ChatGPT models are available for your account."}
+				</p>
+				<button
+					type="button"
+					onClick={() => void models.refetch()}
+					className={`${secondaryButtonClassName} mt-4`}
+				>
+					Retry
+				</button>
+			</section>
+		);
+	}
+
+	const submit = (event?: FormEvent) => {
+		event?.preventDefault();
+		if (!draft.trim() || chat.isStreaming) return;
+		chat.send(draft);
+		setDraft("");
+	};
+
+	return (
+		<section aria-label="Chat" className="island-shell rounded-lg p-4 sm:p-6">
+			<div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+				<label className="flex items-center gap-2 text-sm text-(--sea-ink-soft)">
+					Model
+					<select
+						value={model}
+						onChange={(event) => setSelectedModel(event.target.value)}
+						disabled={chat.isStreaming}
+						className="rounded-md border border-(--chip-line) bg-(--surface-strong) px-2 py-1 text-sm text-(--sea-ink)"
+					>
+						{models.data.map((option) => (
+							<option key={option.slug} value={option.slug}>
+								{option.displayName}
+							</option>
+						))}
+					</select>
+				</label>
+				{messageCount > 0 ? (
+					<button
+						type="button"
+						onClick={chat.reset}
+						className={secondaryButtonClassName}
+					>
+						New chat
+					</button>
+				) : null}
+			</div>
+
+			<ol aria-label="Messages" className="m-0 list-none space-y-4 p-0">
+				{chat.messages.map((message, index) => (
+					<ChatBubble
+						// biome-ignore lint/suspicious/noArrayIndexKey: messages are append-only
+						key={index}
+						author={message.role}
+						content={message.content}
+					/>
+				))}
+				{chat.streamingText !== null ? (
+					<ChatBubble
+						author="assistant"
+						content={chat.streamingText || "Thinking…"}
+						isStreaming
+					/>
+				) : null}
+			</ol>
+
+			{messageCount === 0 && !chat.isStreaming ? (
+				<div className="flex flex-col items-start gap-2">
+					<p className="m-0 flex items-center gap-2 text-sm text-(--sea-ink-soft)">
+						<MessageCircle size={15} aria-hidden="true" /> Ask anything about
+						this story, or start with:
+					</p>
+					{STARTER_PROMPTS.map((prompt) => (
+						<button
+							key={prompt}
+							type="button"
+							onClick={() => chat.send(prompt)}
+							className="rounded-md border border-(--chip-line) px-3 py-1.5 text-left text-sm text-(--sea-ink) hover:bg-(--chip-bg)"
+						>
+							{prompt}
+						</button>
+					))}
+				</div>
+			) : null}
+
+			{chat.error ? (
+				<div
+					role="alert"
+					className="mt-4 flex flex-wrap items-center gap-3 rounded-md border border-(--chip-line) p-3 text-sm text-(--sea-ink)"
+				>
+					<span>{chat.error.message}</span>
+					{chat.error.code === "chatgpt_not_connected" ? (
+						<Link
+							to="/profile"
+							className="text-(--lagoon-deep) hover:underline"
+						>
+							Reconnect in profile
+						</Link>
+					) : chat.messages.at(-1)?.role === "user" ? (
+						<button
+							type="button"
+							onClick={chat.retry}
+							className="font-semibold text-(--lagoon-deep) hover:underline"
+						>
+							Try again
+						</button>
+					) : null}
+				</div>
+			) : null}
+
+			<div ref={endRef} />
+
+			<form onSubmit={submit} className="mt-4 flex items-end gap-2">
+				<label htmlFor="story-chat-input" className="sr-only">
+					Message
+				</label>
+				<textarea
+					id="story-chat-input"
+					value={draft}
+					onChange={(event) => setDraft(event.target.value)}
+					onKeyDown={(event) => {
+						if (event.key === "Enter" && !event.shiftKey) submit(event);
+					}}
+					maxLength={MAX_CHAT_MESSAGE_LENGTH}
+					rows={2}
+					placeholder="Ask a question about this story…"
+					className="min-h-11 flex-1 resize-y rounded-md border border-(--chip-line) bg-(--surface-strong) px-3 py-2 text-sm text-(--sea-ink) focus-visible:outline-2 focus-visible:outline-(--lagoon)"
+				/>
+				{chat.isStreaming ? (
+					<button
+						type="button"
+						onClick={chat.stop}
+						className={secondaryButtonClassName}
+					>
+						<Square size={14} aria-hidden="true" /> Stop
+					</button>
+				) : (
+					<button
+						type="submit"
+						disabled={!draft.trim()}
+						className={primaryButtonClassName}
+					>
+						<Send size={14} aria-hidden="true" /> Send
+					</button>
+				)}
+			</form>
+		</section>
+	);
+}
+
+function ChatBubble({
+	author,
+	content,
+	isStreaming = false,
+}: {
+	author: "user" | "assistant";
+	content: string;
+	isStreaming?: boolean;
+}) {
+	const isUser = author === "user";
+	return (
+		<li
+			aria-busy={isStreaming || undefined}
+			className={`flex ${isUser ? "justify-end" : "justify-start"}`}
+		>
+			<div
+				className={`max-w-[85%] whitespace-pre-wrap break-words rounded-lg px-3 py-2 text-sm leading-6 ${
+					isUser
+						? "bg-(--lagoon) text-white"
+						: "border border-(--line) bg-(--surface-strong) text-(--sea-ink)"
+				}`}
+			>
+				<span className="sr-only">{isUser ? "You: " : "ChatGPT: "}</span>
+				{content}
+			</div>
+		</li>
+	);
+}
