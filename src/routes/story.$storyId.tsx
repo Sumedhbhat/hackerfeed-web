@@ -209,7 +209,7 @@ function StoryContent({ storyId }: StoryContentProps) {
 					<Link
 						to="/chat/$storyId"
 						params={{ storyId: story.id }}
-						aria-label={`Discuss ${title} with ChatGPT`}
+						aria-label={`Discuss ${title} with AI`}
 						className="text-sm text-(--sea-ink-soft) hover:text-(--sea-ink) transition-colors"
 					>
 						<MessageCircle size={14} aria-hidden="true" className="inline" />{" "}

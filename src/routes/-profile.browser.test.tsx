@@ -38,10 +38,17 @@ beforeEach(() => {
 		"fetch",
 		vi.fn(async () =>
 			Response.json({
-				canConnect: true,
-				connected: false,
-				email: null,
-				name: null,
+				providers: [
+					{
+						id: "chatgpt",
+						name: "ChatGPT",
+						description: "Use your ChatGPT plan.",
+						manageUrl: null,
+						canConnect: true,
+						connected: false,
+						account: null,
+					},
+				],
 			}),
 		),
 	);
@@ -55,21 +62,28 @@ afterEach(() => {
 describe("parseProfileSearch", () => {
 	it.each([
 		[{}, {}],
-		[{ chatgpt: "connected" }, { chatgpt: "connected" }],
-		[{ chatgpt: "connected", reason: "x" }, { chatgpt: "connected" }],
 		[
-			{ chatgpt: "error", reason: "access_denied" },
-			{ chatgpt: "error", reason: "access_denied" },
+			{ ai: "connected", provider: "chatgpt" },
+			{ ai: "connected", provider: "chatgpt" },
 		],
-		[{ chatgpt: "error", reason: "<script>" }, { chatgpt: "error" }],
-		[{ chatgpt: "bogus", reason: "expired" }, {}],
+		[
+			{ ai: "connected", provider: "chatgpt", reason: "x" },
+			{ ai: "connected", provider: "chatgpt" },
+		],
+		[
+			{ ai: "error", provider: "claude", reason: "access_denied" },
+			{ ai: "error", provider: "claude", reason: "access_denied" },
+		],
+		[{ ai: "error", provider: "<x>", reason: "<script>" }, { ai: "error" }],
+		[{ ai: "bogus", provider: "chatgpt", reason: "expired" }, {}],
+		[{ provider: "chatgpt" }, {}],
 	])("parses %j", (input, expected) => {
 		expect(parseProfileSearch(input)).toEqual(expected);
 	});
 });
 
 describe("ProfilePage", () => {
-	it("shows the ChatGPT sign-in section for signed-in users", async () => {
+	it("shows the AI assistants section for signed-in users", async () => {
 		authMock.user = {
 			id: "u1",
 			email: "reader@example.com",
@@ -79,11 +93,13 @@ describe("ProfilePage", () => {
 		};
 		render(<ProfilePage />);
 
-		expect(screen.getByRole("heading", { name: "ChatGPT" })).toBeDefined();
+		expect(
+			screen.getByRole("heading", { name: "AI assistants" }),
+		).toBeDefined();
 		await screen.findByRole("button", { name: "Sign in with ChatGPT" });
 	});
 
-	it("passes callback results to the ChatGPT section", async () => {
+	it("passes callback results to the AI assistants section", async () => {
 		authMock.user = {
 			id: "u1",
 			email: "reader@example.com",
@@ -91,7 +107,7 @@ describe("ProfilePage", () => {
 			lastName: null,
 			profilePictureUrl: null,
 		};
-		authMock.search = { chatgpt: "error", reason: "expired" };
+		authMock.search = { ai: "error", provider: "chatgpt", reason: "expired" };
 		render(<ProfilePage />);
 
 		expect((await screen.findByRole("alert")).textContent).toContain(
@@ -99,9 +115,9 @@ describe("ProfilePage", () => {
 		);
 	});
 
-	it("doesn't show the ChatGPT section to signed-out users", () => {
+	it("doesn't show the AI assistants section to signed-out users", () => {
 		render(<ProfilePage />);
 
-		expect(screen.queryByRole("heading", { name: "ChatGPT" })).toBeNull();
+		expect(screen.queryByRole("heading", { name: "AI assistants" })).toBeNull();
 	});
 });

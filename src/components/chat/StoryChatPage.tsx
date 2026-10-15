@@ -8,13 +8,16 @@ import {
 	Square,
 } from "lucide-react";
 import { type FormEvent, useEffect, useRef, useState } from "react";
+import {
+	useAiModels,
+	useAiProviders,
+	useStoryChat,
+} from "#/hooks/useAiProviders";
 import { signIn } from "#/hooks/useAuthSession";
 import {
-	useChatGptModels,
-	useChatGptStatus,
-	useStoryChat,
-} from "#/hooks/useChatGpt";
-import { MAX_CHAT_MESSAGE_LENGTH } from "#/lib/chatgpt/schemas";
+	type AiProviderStatus,
+	MAX_CHAT_MESSAGE_LENGTH,
+} from "#/lib/ai/schemas";
 import {
 	type HackerNewsStoryRecord,
 	storyQueryOptions,
@@ -76,12 +79,14 @@ export function StoryChatPage({ storyId }: StoryChatPageProps) {
 
 function StoryChat({ story }: { story: HackerNewsStoryRecord }) {
 	const title = getStoryTitle(story);
-	const status = useChatGptStatus();
+	const status = useAiProviders();
+	const connectedProviders =
+		status.data?.filter((provider) => provider.connected) ?? [];
 
 	return (
 		<>
 			<header className="mb-6">
-				<p className="island-kicker mb-2">Discuss with ChatGPT</p>
+				<p className="island-kicker mb-2">Discuss with AI</p>
 				<h1 className="m-0 text-xl sm:text-2xl font-semibold leading-snug text-(--sea-ink)">
 					{title}
 				</h1>
@@ -109,8 +114,8 @@ function StoryChat({ story }: { story: HackerNewsStoryRecord }) {
 			) : !status.isSignedIn ? (
 				<section className={panelClassName}>
 					<p className="m-0">
-						Sign in to HackerFeed, then connect ChatGPT from your profile to
-						discuss this story here.
+						Sign in to HackerFeed, then connect an AI assistant from your
+						profile to discuss this story here.
 					</p>
 					<button
 						type="button"
@@ -122,7 +127,7 @@ function StoryChat({ story }: { story: HackerNewsStoryRecord }) {
 				</section>
 			) : status.isError || !status.data ? (
 				<section className={panelClassName}>
-					<p className="m-0">Couldn't check your ChatGPT connection.</p>
+					<p className="m-0">Couldn't check your AI connections.</p>
 					<button
 						type="button"
 						onClick={() => void status.refetch()}
@@ -131,15 +136,15 @@ function StoryChat({ story }: { story: HackerNewsStoryRecord }) {
 						Retry
 					</button>
 				</section>
-			) : !status.data.connected ? (
+			) : connectedProviders.length === 0 ? (
 				<section className={panelClassName}>
 					<p className="m-0">
-						Connect your ChatGPT account from your profile to chat about this
-						story without leaving HackerFeed.
+						Connect an AI assistant you already use from your profile to chat
+						about this story without leaving HackerFeed.
 					</p>
 					<div className="mt-4 flex flex-wrap gap-3">
 						<Link to="/profile" className={primaryButtonClassName}>
-							Connect ChatGPT in profile
+							Connect an AI app in profile
 						</Link>
 						<a
 							href={buildChatGptStoryDiscussionUrl(story)}
@@ -152,17 +157,50 @@ function StoryChat({ story }: { story: HackerNewsStoryRecord }) {
 					</div>
 				</section>
 			) : (
-				<ChatConversation storyId={story.id} />
+				<ChatConversation storyId={story.id} providers={connectedProviders} />
 			)}
 		</>
 	);
 }
 
-function ChatConversation({ storyId }: { storyId: number }) {
-	const models = useChatGptModels(true);
+/** Picks one of the user's connected providers; switching starts a new chat. */
+function ChatConversation({
+	storyId,
+	providers,
+}: {
+	storyId: number;
+	providers: AiProviderStatus[];
+}) {
+	const [selectedId, setSelectedId] = useState<string>();
+	const provider =
+		providers.find((candidate) => candidate.id === selectedId) ?? providers[0];
+
+	return (
+		<ProviderConversation
+			key={provider.id}
+			storyId={storyId}
+			provider={provider}
+			providers={providers}
+			onProviderChange={setSelectedId}
+		/>
+	);
+}
+
+function ProviderConversation({
+	storyId,
+	provider,
+	providers,
+	onProviderChange,
+}: {
+	storyId: number;
+	provider: AiProviderStatus;
+	providers: AiProviderStatus[];
+	onProviderChange: (providerId: string) => void;
+}) {
+	const models = useAiModels(provider.id);
 	const [selectedModel, setSelectedModel] = useState<string>();
 	const model = selectedModel ?? models.data?.[0]?.slug;
-	const chat = useStoryChat(storyId, model);
+	const chat = useStoryChat(storyId, provider.id, model);
 	const [draft, setDraft] = useState("");
 	const endRef = useRef<HTMLDivElement>(null);
 	const messageCount = chat.messages.length;
@@ -186,7 +224,7 @@ function ChatConversation({ storyId }: { storyId: number }) {
 			<section className={panelClassName} role="alert">
 				<p className="m-0">
 					{models.error?.message ??
-						"No ChatGPT models are available for your account."}
+						`No ${provider.name} models are available for your account.`}
 				</p>
 				<button
 					type="button"
@@ -209,21 +247,44 @@ function ChatConversation({ storyId }: { storyId: number }) {
 	return (
 		<section aria-label="Chat" className="island-shell rounded-lg p-4 sm:p-6">
 			<div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-				<label className="flex items-center gap-2 text-sm text-(--sea-ink-soft)">
-					Model
-					<select
-						value={model}
-						onChange={(event) => setSelectedModel(event.target.value)}
-						disabled={chat.isStreaming}
-						className="rounded-md border border-(--chip-line) bg-(--surface-strong) px-2 py-1 text-sm text-(--sea-ink)"
-					>
-						{models.data.map((option) => (
-							<option key={option.slug} value={option.slug}>
-								{option.displayName}
-							</option>
-						))}
-					</select>
-				</label>
+				<div className="flex flex-wrap items-center gap-3">
+					{providers.length > 1 ? (
+						<label className="flex items-center gap-2 text-sm text-(--sea-ink-soft)">
+							Assistant
+							<select
+								value={provider.id}
+								onChange={(event) => onProviderChange(event.target.value)}
+								disabled={chat.isStreaming}
+								className="rounded-md border border-(--chip-line) bg-(--surface-strong) px-2 py-1 text-sm text-(--sea-ink)"
+							>
+								{providers.map((option) => (
+									<option key={option.id} value={option.id}>
+										{option.name}
+									</option>
+								))}
+							</select>
+						</label>
+					) : (
+						<span className="text-sm font-semibold text-(--sea-ink)">
+							{provider.name}
+						</span>
+					)}
+					<label className="flex items-center gap-2 text-sm text-(--sea-ink-soft)">
+						Model
+						<select
+							value={model}
+							onChange={(event) => setSelectedModel(event.target.value)}
+							disabled={chat.isStreaming}
+							className="rounded-md border border-(--chip-line) bg-(--surface-strong) px-2 py-1 text-sm text-(--sea-ink)"
+						>
+							{models.data.map((option) => (
+								<option key={option.slug} value={option.slug}>
+									{option.displayName}
+								</option>
+							))}
+						</select>
+					</label>
+				</div>
 				{messageCount > 0 ? (
 					<button
 						type="button"
@@ -241,12 +302,14 @@ function ChatConversation({ storyId }: { storyId: number }) {
 						// biome-ignore lint/suspicious/noArrayIndexKey: messages are append-only
 						key={index}
 						author={message.role}
+						assistantName={provider.name}
 						content={message.content}
 					/>
 				))}
 				{chat.streamingText !== null ? (
 					<ChatBubble
 						author="assistant"
+						assistantName={provider.name}
 						content={chat.streamingText || "Thinking…"}
 						isStreaming
 					/>
@@ -278,7 +341,7 @@ function ChatConversation({ storyId }: { storyId: number }) {
 					className="mt-4 flex flex-wrap items-center gap-3 rounded-md border border-(--chip-line) p-3 text-sm text-(--sea-ink)"
 				>
 					<span>{chat.error.message}</span>
-					{chat.error.code === "chatgpt_not_connected" ? (
+					{chat.error.code === "provider_not_connected" ? (
 						<Link
 							to="/profile"
 							className="text-(--lagoon-deep) hover:underline"
@@ -339,10 +402,12 @@ function ChatConversation({ storyId }: { storyId: number }) {
 
 function ChatBubble({
 	author,
+	assistantName,
 	content,
 	isStreaming = false,
 }: {
 	author: "user" | "assistant";
+	assistantName: string;
 	content: string;
 	isStreaming?: boolean;
 }) {
@@ -359,7 +424,9 @@ function ChatBubble({
 						: "border border-(--line) bg-(--surface-strong) text-(--sea-ink)"
 				}`}
 			>
-				<span className="sr-only">{isUser ? "You: " : "ChatGPT: "}</span>
+				<span className="sr-only">
+					{isUser ? "You: " : `${assistantName}: `}
+				</span>
 				{content}
 			</div>
 		</li>

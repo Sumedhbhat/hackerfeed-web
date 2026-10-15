@@ -1,28 +1,35 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Mail, User } from "lucide-react";
-import { ChatGptConnectionCard } from "#/components/chatgpt/ChatGptConnectionCard";
+import { AiProvidersCard } from "#/components/ai/AiProvidersCard";
 import { signIn, useAuthSession } from "#/hooks/useAuthSession";
 
 type ProfileSearch = {
-	chatgpt?: "connected" | "error";
+	/** Result of an AI provider sign-in, set by the provider callback. */
+	ai?: "connected" | "error";
+	provider?: string;
 	reason?: string;
 };
+
+const SEARCH_TOKEN = /^[a-z0-9_.-]{1,100}$/i;
 
 export function parseProfileSearch(
 	search: Record<string, unknown>,
 ): ProfileSearch {
-	const chatgpt =
-		search.chatgpt === "connected" || search.chatgpt === "error"
-			? search.chatgpt
+	const ai =
+		search.ai === "connected" || search.ai === "error" ? search.ai : undefined;
+	if (!ai) return {};
+	const provider =
+		typeof search.provider === "string" && SEARCH_TOKEN.test(search.provider)
+			? search.provider
 			: undefined;
 	const reason =
-		typeof search.reason === "string" &&
-		/^[a-z0-9_.-]{1,100}$/i.test(search.reason)
+		typeof search.reason === "string" && SEARCH_TOKEN.test(search.reason)
 			? search.reason
 			: undefined;
 	return {
-		...(chatgpt ? { chatgpt } : {}),
-		...(chatgpt === "error" && reason ? { reason } : {}),
+		ai,
+		...(provider ? { provider } : {}),
+		...(ai === "error" && reason ? { reason } : {}),
 	};
 }
 
@@ -142,7 +149,11 @@ function ProfilePage() {
 					</dl>
 				</div>
 
-				<ChatGptConnectionCard result={search.chatgpt} reason={search.reason} />
+				<AiProvidersCard
+					result={search.ai}
+					resultProviderId={search.provider}
+					reason={search.reason}
+				/>
 
 				<Link
 					to="/favorites"

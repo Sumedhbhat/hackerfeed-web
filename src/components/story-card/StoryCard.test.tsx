@@ -245,9 +245,9 @@ describe("StoryCard link actions", () => {
 		expect(link.getAttribute("href")).toContain("99999");
 	});
 
-	it("'Discuss' opens the in-app ChatGPT chat for the story", () => {
+	it("'Discuss' opens the in-app AI chat for the story", () => {
 		render(<StoryCard story={makeStory({ id: 4242 })} />);
-		const link = screen.getByRole("link", { name: /with chatgpt$/i });
+		const link = screen.getByRole("link", { name: /with ai$/i });
 		expect(link.getAttribute("href")).toBe("/chat/4242");
 		expect(link.getAttribute("target")).toBeNull();
 	});

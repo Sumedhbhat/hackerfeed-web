@@ -92,7 +92,7 @@ export function StoryCard({ story, animationDelay }: StoryCardProps) {
 						<Link
 							to="/chat/$storyId"
 							params={{ storyId: story.id }}
-							aria-label={`Discuss ${title} with ChatGPT`}
+							aria-label={`Discuss ${title} with AI`}
 							className="text-sm text-(--sea-ink-soft) hover:text-(--sea-ink)"
 						>
 							<MessageCircle size={14} aria-hidden="true" className="inline" />{" "}

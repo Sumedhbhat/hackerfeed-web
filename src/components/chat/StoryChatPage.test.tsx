@@ -8,6 +8,7 @@ import {
 } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { AiProviderStatus } from "#/lib/ai/schemas";
 import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
 import { StoryChatPage } from "./StoryChatPage";
 
@@ -61,21 +62,35 @@ const story: HackerNewsStoryRecord = {
 	url: "https://example.com/article",
 };
 
+type ChatBody = {
+	providerId: string;
+	storyId: number;
+	messages: { role: string; content: string }[];
+	model: string;
+};
+
 type ChatHandler = (
-	body: {
-		messages: { role: string; content: string }[];
-		model: string;
-	},
+	body: ChatBody,
 	signal?: AbortSignal | null,
 ) => Response | Promise<Response>;
 
-let status: Record<string, unknown>;
-let models: Response | (() => Response);
+function provider(overrides: Partial<AiProviderStatus> = {}): AiProviderStatus {
+	return {
+		id: "chatgpt",
+		name: "ChatGPT",
+		description: "Use your ChatGPT plan.",
+		manageUrl: null,
+		canConnect: true,
+		connected: true,
+		account: { email: "r@example.com", name: null },
+		...overrides,
+	};
+}
+
+let providers: AiProviderStatus[];
+let models: Response | ((providerId: string) => Response);
 let chatHandler: ChatHandler;
-let chatBodies: {
-	messages: { role: string; content: string }[];
-	model: string;
-}[];
+let chatBodies: ChatBody[];
 
 function ndjson(...events: unknown[]) {
 	return new Response(
@@ -102,12 +117,7 @@ beforeEach(() => {
 	authMock.isLoading = false;
 	authMock.user = { id: "user-1" };
 	authMock.signIn.mockReset();
-	status = {
-		canConnect: true,
-		connected: true,
-		email: "r@example.com",
-		name: null,
-	};
+	providers = [provider()];
 	models = () =>
 		Response.json({
 			models: [
@@ -125,11 +135,14 @@ beforeEach(() => {
 	vi.stubGlobal(
 		"fetch",
 		vi.fn(async (url: string, init?: RequestInit) => {
-			if (url === "/api/chatgpt/status") return Response.json(status);
-			if (url === "/api/chatgpt/models") {
-				return typeof models === "function" ? models() : models;
+			if (url === "/api/ai/providers") return Response.json({ providers });
+			const modelsMatch = url.match(
+				/^\/api\/ai\/providers\/([a-z-]+)\/models$/,
+			);
+			if (modelsMatch) {
+				return typeof models === "function" ? models(modelsMatch[1]) : models;
 			}
-			if (url === "/api/chatgpt/chat") {
+			if (url === "/api/ai/chat") {
 				const body = JSON.parse(init?.body as string);
 				chatBodies.push(body);
 				return chatHandler(body, init?.signal);
@@ -170,11 +183,11 @@ describe("StoryChatPage", () => {
 	});
 
 	it("points unconnected users to the profile, with a ChatGPT fallback", async () => {
-		status = { canConnect: true, connected: false, email: null, name: null };
+		providers = [provider({ connected: false, account: null })];
 		renderPage();
 
 		const connect = await screen.findByRole("link", {
-			name: "Connect ChatGPT in profile",
+			name: "Connect an AI app in profile",
 		});
 		expect(connect.getAttribute("href")).toBe("/profile");
 		const fallback = screen.getByRole("link", {
@@ -198,6 +211,7 @@ describe("StoryChatPage", () => {
 		expect(within(messages).getByText("What is this about?")).toBeDefined();
 		expect(chatBodies).toEqual([
 			{
+				providerId: "chatgpt",
 				storyId: 42,
 				model: "gpt-a",
 				messages: [{ role: "user", content: "What is this about?" }],
@@ -330,7 +344,7 @@ describe("StoryChatPage", () => {
 	it("offers a reconnect link when the connection expired", async () => {
 		chatHandler = () =>
 			Response.json(
-				{ code: "chatgpt_not_connected", message: "Connect ChatGPT first." },
+				{ code: "provider_not_connected", message: "Connect ChatGPT first." },
 				{ status: 409 },
 			);
 		renderPage();
@@ -422,6 +436,73 @@ describe("StoryChatPage", () => {
 		expect((await screen.findByRole("alert")).textContent).toContain(
 			"No ChatGPT models",
 		);
+	});
+
+	it("shows the provider's name and labels replies with it", async () => {
+		renderPage();
+
+		fireEvent.change(await screen.findByLabelText("Message"), {
+			target: { value: "Hi" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: "Send" }));
+
+		await screen.findByText("It is about X.");
+		const messages = screen.getByRole("list", { name: "Messages" });
+		expect(within(messages).getByText("ChatGPT:")).toBeDefined();
+		expect(screen.queryByRole("combobox", { name: "Assistant" })).toBeNull();
+	});
+
+	it("ignores providers that aren't connected", async () => {
+		providers = [
+			provider({
+				id: "claude",
+				name: "Claude",
+				connected: false,
+				account: null,
+			}),
+			provider(),
+		];
+		renderPage();
+
+		await screen.findByLabelText("Message");
+		expect(screen.queryByRole("combobox", { name: "Assistant" })).toBeNull();
+		expect(screen.getByText("ChatGPT")).toBeDefined();
+	});
+
+	it("lets users with several connected providers switch, starting a new chat", async () => {
+		providers = [provider(), provider({ id: "claude", name: "Claude" })];
+		models = (providerId) =>
+			Response.json({
+				models: [{ slug: `${providerId}-model`, displayName: providerId }],
+			});
+		renderPage();
+
+		const picker = await screen.findByRole("combobox", { name: "Assistant" });
+		fireEvent.change(screen.getByLabelText("Message"), {
+			target: { value: "Hi" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: "Send" }));
+		await screen.findByText("It is about X.");
+
+		fireEvent.change(picker, { target: { value: "claude" } });
+
+		await screen.findByRole("option", { name: "claude" });
+		expect(screen.queryByText("It is about X.")).toBeNull();
+		fireEvent.change(screen.getByLabelText("Message"), {
+			target: { value: "Hello Claude" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: "Send" }));
+		await screen.findByText("It is about X.");
+
+		expect(
+			chatBodies.map(({ providerId, model }) => [providerId, model]),
+		).toEqual([
+			["chatgpt", "chatgpt-model"],
+			["claude", "claude-model"],
+		]);
+		expect(chatBodies[1]?.messages).toEqual([
+			{ role: "user", content: "Hello Claude" },
+		]);
 	});
 
 	it("shows an error when the story can't be loaded", async () => {

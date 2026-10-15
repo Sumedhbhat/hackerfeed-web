@@ -278,23 +278,49 @@ export const hfIngestionRuns = sqliteTable(
 	],
 );
 
-export const chatgptConnections = sqliteTable("chatgpt_connections", {
-	id: uuidPrimaryKey(),
-	appUserId: text()
-		.notNull()
-		.unique()
-		.references(() => appUsers.id, { onDelete: "cascade" }),
-	/** Client id issued by OpenAI; kept after disconnect to avoid re-registering. */
-	clientId: text().notNull(),
-	hostId: text().notNull(),
-	subject: text().notNull(),
-	email: text(),
-	name: text(),
-	/** AES-GCM sealed; null once disconnected. */
-	accessToken: text(),
-	refreshToken: text(),
-	accessTokenExpiresAt: integer(),
-	scopes: text().notNull().default(""),
+/**
+ * Catalog of AI apps users can connect with their own subscription (e.g.
+ * ChatGPT). Each enabled row needs a matching adapter in
+ * `src/server/ai/providers`; rows without one are hidden.
+ */
+export const aiProviders = sqliteTable("ai_providers", {
+	/** Stable slug used in URLs and to pick the adapter, e.g. "chatgpt". */
+	id: text().primaryKey(),
+	name: text().notNull(),
+	description: text().notNull(),
+	/** Where users manage usage or revoke access at the provider. */
+	manageUrl: text(),
+	enabled: integer({ mode: "boolean" }).notNull().default(true),
+	sortOrder: integer().notNull().default(0),
 	createdAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
 	updatedAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
 });
+
+export const aiProviderConnections = sqliteTable(
+	"ai_provider_connections",
+	{
+		id: uuidPrimaryKey(),
+		appUserId: text()
+			.notNull()
+			.references(() => appUsers.id, { onDelete: "cascade" }),
+		providerId: text()
+			.notNull()
+			.references(() => aiProviders.id, { onDelete: "cascade" }),
+		/** OAuth client registered for this user; kept after disconnect for reuse. */
+		clientId: text(),
+		/** Provider-specific registration details (JSON object). */
+		registrationMetadata: text().notNull().default("{}"),
+		/** The user's account id at the provider. */
+		subject: text().notNull(),
+		email: text(),
+		name: text(),
+		/** AES-GCM sealed; null once disconnected. */
+		accessToken: text(),
+		refreshToken: text(),
+		accessTokenExpiresAt: integer(),
+		scopes: text().notNull().default(""),
+		createdAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
+		updatedAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
+	},
+	(table) => [unique().on(table.appUserId, table.providerId)],
+);
