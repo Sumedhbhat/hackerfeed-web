@@ -15,6 +15,12 @@ On pushes to `master` (and manual dispatch), the workflow:
 The Worker is `hackerfeed-web` and its D1 database is configured as `DB` in
 `wrangler.jsonc`.
 
+`.github/workflows/preview.yaml` reuses the same token and `dev` environment on
+every same-repo, non-Dependabot pull request. It runs
+`wrangler versions upload --preview-alias pr-<number>` (no new permissions
+needed) and comments the preview URL on the PR. Previews share the production
+D1 database and secrets, and no migrations are applied for them.
+
 ## Create the token
 
 1. Sign in to Cloudflare with an account that can manage API tokens for the
