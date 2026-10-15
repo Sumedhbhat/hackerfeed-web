@@ -1,8 +1,40 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Mail, User } from "lucide-react";
+import { AiProvidersCard } from "#/components/ai/AiProvidersCard";
 import { signIn, useAuthSession } from "#/hooks/useAuthSession";
 
+type ProfileSearch = {
+	/** Result of an AI provider sign-in, set by the provider callback. */
+	ai?: "connected" | "error";
+	provider?: string;
+	reason?: string;
+};
+
+const SEARCH_TOKEN = /^[a-z0-9_.-]{1,100}$/i;
+
+export function parseProfileSearch(
+	search: Record<string, unknown>,
+): ProfileSearch {
+	const ai =
+		search.ai === "connected" || search.ai === "error" ? search.ai : undefined;
+	if (!ai) return {};
+	const provider =
+		typeof search.provider === "string" && SEARCH_TOKEN.test(search.provider)
+			? search.provider
+			: undefined;
+	const reason =
+		typeof search.reason === "string" && SEARCH_TOKEN.test(search.reason)
+			? search.reason
+			: undefined;
+	return {
+		ai,
+		...(provider ? { provider } : {}),
+		...(ai === "error" && reason ? { reason } : {}),
+	};
+}
+
 export const Route = createFileRoute("/profile")({
+	validateSearch: parseProfileSearch,
 	component: ProfilePage,
 });
 
@@ -27,6 +59,7 @@ function getInitials(
 
 function ProfilePage() {
 	const { user, isLoading } = useAuthSession();
+	const search = Route.useSearch();
 
 	if (isLoading) {
 		return (
@@ -115,6 +148,12 @@ function ProfilePage() {
 						</div>
 					</dl>
 				</div>
+
+				<AiProvidersCard
+					result={search.ai}
+					resultProviderId={search.provider}
+					reason={search.reason}
+				/>
 
 				<Link
 					to="/favorites"

@@ -8,7 +8,6 @@ import {
 	storyQueryOptions,
 } from "#/lib/hacker-news/queries";
 import {
-	buildChatGptStoryDiscussionUrl,
 	formatStoryAge,
 	getDiscussionUrl,
 	getStoryDomain,
@@ -207,16 +206,15 @@ function StoryContent({ storyId }: StoryContentProps) {
 					>
 						View on HN
 					</a>
-					<a
-						href={buildChatGptStoryDiscussionUrl(story)}
-						target="_blank"
-						rel="noopener noreferrer"
-						aria-label={`Discuss ${title} in ChatGPT`}
+					<Link
+						to="/chat/$storyId"
+						params={{ storyId: story.id }}
+						aria-label={`Discuss ${title} with AI`}
 						className="text-sm text-(--sea-ink-soft) hover:text-(--sea-ink) transition-colors"
 					>
 						<MessageCircle size={14} aria-hidden="true" className="inline" />{" "}
 						Discuss
-					</a>
+					</Link>
 				</div>
 			</article>
 

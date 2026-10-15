@@ -96,6 +96,63 @@ The Worker creates one typed `DatabaseContext` from its D1 binding. tRPC
 contexts, services, and repositories receive that Drizzle context; application
 code must not access `env.DB` directly outside the Worker boundary.
 
+## AI Assistants (bring your own subscription)
+
+Signed-in users can connect AI apps they already pay for from `/profile`, then
+use **Discuss** on any story to chat about it at `/chat/<storyId>`. Replies
+stream from the provider and count against the user's own plan. The story, its
+post text, and a few top Hacker News comments are sent as context.
+
+The feature is provider-agnostic:
+
+- **`ai_providers` table:** the catalog of AI apps shown on the profile page
+  (`id`, `name`, `description`, `manageUrl`, `enabled`, `sortOrder`). It's
+  seeded with one row, `chatgpt`.
+- **Adapters (`src/server/ai/providers/<id>/`):** everything protocol-specific
+  (OAuth, token refresh, models, streaming) behind the `AiProviderAdapter`
+  interface in `src/server/ai/types.ts`.
+- **Generic core (`src/server/ai/`):** sessions, the sealed OAuth flow cookie,
+  token encryption, refresh-before-expiry, disconnects, and the HTTP routes:
+  - `GET /ai/:provider/connect` and `GET /ai/:provider/callback`
+  - `GET /api/ai/providers`
+  - `GET /api/ai/providers/:provider/models`
+  - `POST /api/ai/providers/:provider/disconnect`
+  - `POST /api/ai/chat` (streams NDJSON)
+
+Connections live in `ai_provider_connections`, one per user and provider. OAuth
+tokens are encrypted with AES-GCM before they are stored. Conversations are not
+stored.
+
+### Adding a provider
+
+1. Implement `AiProviderAdapter` in `src/server/ai/providers/<id>/`.
+2. Register it in the `adapters` list in `src/server/ai/runtime.ts`.
+3. Add a row with the same `id` to `ai_providers` in a migration.
+
+A row without an adapter is hidden. Setting `enabled` to 0 turns a provider off
+without a deploy.
+
+### Configuration
+
+```bash
+# .dev.vars (all optional)
+AI_TOKEN_ENCRYPTION_KEY=...          # 32+ chars; defaults to WORKOS_COOKIE_PASSWORD
+CHATGPT_CLIENT_ID=oaiapp_...         # issued by OpenAI for this deployment
+CHATGPT_CLIENT_SECRET=...            # only for confidential clients
+```
+
+ChatGPT uses
+[Sign in with ChatGPT](https://developers.openai.com/siwc/token-sharing-open-source/sign-in):
+
+- **Local development:** without `CHATGPT_CLIENT_ID`, HackerFeed registers
+  itself dynamically, which OpenAI only allows with an `http://127.0.0.1`
+  callback. Open the app at `http://127.0.0.1:3000` (not `localhost`) and set
+  `SERVER_URL=http://127.0.0.1:3000`.
+- **Hosted deployments:** OpenAI must issue a client id with
+  `https://<host>/ai/chatgpt/callback` registered
+  ([waitlist](https://openai.com/form/sign-in-with-chatgpt-interest/)). Until
+  then, the profile page shows ChatGPT as not available on this deployment.
+
 ## Hugging Face Papers
 
 The `/papers` route serves the latest successful Hugging Face Daily Papers
