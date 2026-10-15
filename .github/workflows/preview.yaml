@@ -39,6 +39,40 @@ jobs:
           WORKOS_COOKIE_PASSWORD: ${{ secrets.WORKOS_COOKIE_PASSWORD }}
           WORKOS_JWT_AUDIENCE: ${{ secrets.WORKOS_JWT_AUDIENCE }}
 
+      # Each PR gets its own D1 database. Every wrangler command after the build
+      # reads dist/server/wrangler.json, so rebinding DB there keeps preview
+      # code and the PR's migrations away from production data.
+      - name: Prepare preview database
+        run: |
+          config=dist/server/wrangler.json
+          prod_db_id=$(jq -r '.d1_databases[] | select(.binding == "DB") | .database_id' "$config")
+          db_name="hackerfeed-web-pr-${PR_NUMBER}"
+          find_db() {
+            bunx wrangler d1 list --json | jq -r --arg name "$db_name" '.[] | select(.name == $name) | .uuid'
+          }
+
+          db_id=$(find_db)
+          if [ -z "$db_id" ]; then
+            bunx wrangler d1 create "$db_name" --update-config=false
+            db_id=$(find_db)
+          fi
+          if [ -z "$db_id" ] || [ "$db_id" = "$prod_db_id" ]; then
+            echo "Preview database id '${db_id}' is missing or is the production database" >&2
+            exit 1
+          fi
+
+          jq --arg id "$db_id" --arg name "$db_name" \
+            '(.d1_databases[] | select(.binding == "DB")) |= (.database_id = $id | .database_name = $name)' \
+            "$config" > "$config.tmp"
+          mv "$config.tmp" "$config"
+          echo "PROD_DB_ID=$prod_db_id" >> "$GITHUB_ENV"
+
+          bunx wrangler d1 migrations apply DB --remote
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
       # Uploads a Worker version without promoting it to production, and
       # aliases it to a stable per-PR URL.
       - name: Upload preview version
@@ -47,6 +81,21 @@ jobs:
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          WRANGLER_OUTPUT_FILE_PATH: ${{ runner.temp }}/wrangler-output.ndjson
+
+      - name: Verify preview is not bound to production database
+        run: |
+          version_id=$(jq -r 'select(.type == "version-upload") | .version_id' "$WRANGLER_OUTPUT_FILE_PATH" | tail -n1)
+          bound_db_id=$(bunx wrangler versions view "$version_id" --json \
+            | jq -r '.resources.bindings[] | select(.type == "d1" and .name == "DB") | .id')
+          if [ -z "$bound_db_id" ] || [ "$bound_db_id" = "$PROD_DB_ID" ]; then
+            echo "Preview version ${version_id} is bound to '${bound_db_id}', not an isolated database" >&2
+            exit 1
+          fi
+          echo "Preview version ${version_id} uses database ${bound_db_id}"
+        env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           WRANGLER_OUTPUT_FILE_PATH: ${{ runner.temp }}/wrangler-output.ndjson
@@ -70,7 +119,7 @@ jobs:
           | **Commit preview** | $version_url |
           | **Commit** | \`${HEAD_SHA:0:7}\` |
 
-          Uses production bindings (D1 database, secrets)."
+          Uses its own D1 database (\`hackerfeed-web-pr-${PR_NUMBER}\`, deleted when the PR closes) and production secrets."
 
           comment_id=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" --paginate \
             --jq "map(select(.body | startswith(\"$marker\"))) | first | .id // empty")

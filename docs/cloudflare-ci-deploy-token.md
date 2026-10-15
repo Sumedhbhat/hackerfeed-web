@@ -16,10 +16,23 @@ The Worker is `hackerfeed-web` and its D1 database is configured as `DB` in
 `wrangler.jsonc`.
 
 `.github/workflows/preview.yaml` reuses the same token and `dev` environment on
-every same-repo, non-Dependabot pull request. It runs
-`wrangler versions upload --preview-alias pr-<number>` (no new permissions
-needed) and comments the preview URL on the PR. Previews share the production
-D1 database and secrets, and no migrations are applied for them.
+every same-repo, non-Dependabot pull request. It:
+
+1. Creates (or reuses) a D1 database named `hackerfeed-web-pr-<number>`,
+   rebinds `DB` to it in the generated `dist/server/wrangler.json`, and applies
+   all migrations to it. The PR's migrations are rehearsed there; production
+   data is never touched by preview code.
+2. Runs `wrangler versions upload --preview-alias pr-<number>`. This uploads a
+   Worker version without deploying it, so production traffic is unaffected.
+3. Fails the job if the uploaded version is bound to the production database.
+4. Comments the preview URLs on the PR.
+
+`.github/workflows/preview-cleanup.yaml` deletes the PR's database when the PR
+closes. Previews still share production secrets (WorkOS, Sentry).
+
+Because a preview upload makes the latest Worker version an undeployed one,
+the production deploy passes secrets with `wrangler deploy --secrets-file`.
+`wrangler secret bulk` refuses to edit secrets in that state.
 
 ## Create the token
 

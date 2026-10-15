@@ -29,6 +29,12 @@ jobs:
       - name: Run lint
         run: bun run check
 
+      # Also runs shellcheck on every `run:` script (preinstalled on the runner).
+      - name: Lint GitHub workflows
+        run: |
+          bash <(curl -sSfL https://raw.githubusercontent.com/rhysd/actionlint/v1.7.12/scripts/download-actionlint.bash) 1.7.12
+          ./actionlint -color
+
       - name: Run tests
         run: bun run test
 
