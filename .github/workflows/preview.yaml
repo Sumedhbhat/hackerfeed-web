@@ -42,7 +42,8 @@ jobs:
       # Uploads a Worker version without promoting it to production, and
       # aliases it to a stable per-PR URL.
       - name: Upload preview version
-        run: bunx wrangler versions upload --preview-alias "pr-${PR_NUMBER}" --message "PR #${PR_NUMBER} @ ${HEAD_SHA}"
+        run: |
+          bunx wrangler versions upload --preview-alias "pr-${PR_NUMBER}" --message "PR #${PR_NUMBER} @ ${HEAD_SHA}"
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
