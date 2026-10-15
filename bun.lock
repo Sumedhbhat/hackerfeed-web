@@ -1,5 +1,6 @@
 {
   "lockfileVersion": 1,
+  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "hackerfeed-web",
@@ -23,7 +24,7 @@
         "@trpc/server": "^11.19.0",
         "@trpc/tanstack-react-query": "^11.19.0",
         "@workos-inc/authkit-react": "^0.16.2",
-        "@workos-inc/node": "^10.9.0",
+        "@workos-inc/node": "^11.0.0",
         "drizzle-orm": "^0.45.3",
         "jose": "^6.2.12",
         "ky": "^2.1.0",
@@ -615,7 +616,7 @@
 
     "@workos-inc/authkit-react": ["@workos-inc/authkit-react@0.16.3", "", { "dependencies": { "@workos-inc/authkit-js": "^0.20.4" }, "peerDependencies": { "react": ">=17" } }, "sha512-0dBvUp/ZEF/yrojfDHK9T/eMmNxMtH7HbWZvA8Aum5wRn874Yr0wraAFr/wAKBRJYoYLCcfYwSEDlYTjKTk2sQ=="],
 
-    "@workos-inc/node": ["@workos-inc/node@10.14.0", "", {}, "sha512-SnY9OHTzTyOmgJQj9+/6x116m+d+zJoQw5e8teNWKUuGe8FOKngVdBXRvZgdFxaL+3UfQbMlp95V67t43VYOWQ=="],
+    "@workos-inc/node": ["@workos-inc/node@11.0.0", "", {}, "sha512-swUT6CbkuVQXMOtUpI70LZ8usjSg8OXcKMjKdoYLeqCApRI0Oo97l+nZ0lKzZ5GxjxgcVZGGVK025h7z9WyCJg=="],
 
     "ansi-regex": ["ansi-regex@5.0.1", "", {}, "sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ=="],
 
