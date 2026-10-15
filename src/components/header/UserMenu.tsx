@@ -63,13 +63,13 @@ export default function UserMenu() {
 	}
 
 	return (
-		<div ref={containerRef} className="relative">
+		<div ref={containerRef} className="relative flex">
 			<button
 				type="button"
 				onClick={() => setOpen((v) => !v)}
 				aria-label="User menu"
 				aria-expanded={open}
-				className="rounded-full hover:opacity-90 transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--lagoon)"
+				className="flex rounded-full hover:opacity-90 transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--lagoon)"
 			>
 				<UserAvatar
 					imageUrl={user.profilePictureUrl}

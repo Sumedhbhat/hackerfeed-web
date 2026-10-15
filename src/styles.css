@@ -112,20 +112,18 @@ body {
   flex: 1;
 }
 
-a {
-  color: var(--lagoon-deep);
-  text-decoration-color: rgba(168, 74, 30, 0.35);
-  text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
-}
+/* Base link styles live in a layer so Tailwind utilities (text-white, …) can override them. */
+@layer base {
+  a {
+    color: var(--lagoon-deep);
+    text-decoration-color: rgba(168, 74, 30, 0.35);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+  }
 
-a:hover {
-  color: var(--lagoon);
-}
-
-.auth-primary-action,
-.auth-primary-action:hover {
-  color: #fff;
+  a:hover {
+    color: var(--lagoon);
+  }
 }
 
 code {
