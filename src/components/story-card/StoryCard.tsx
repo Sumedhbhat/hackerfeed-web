@@ -4,7 +4,6 @@ import { useFavorites } from "#/hooks/useFavorites";
 import { useViewActivity } from "#/hooks/useViewActivity";
 import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
 import {
-	buildChatGptStoryDiscussionUrl,
 	formatStoryAge,
 	getDiscussionUrl,
 	getStoryDomain,
@@ -90,16 +89,15 @@ export function StoryCard({ story, animationDelay }: StoryCardProps) {
 							Discussion
 						</Link>
 
-						<a
-							href={buildChatGptStoryDiscussionUrl(story)}
-							target="_blank"
-							rel="noopener noreferrer"
-							aria-label={`Discuss ${title} in ChatGPT`}
+						<Link
+							to="/chat/$storyId"
+							params={{ storyId: story.id }}
+							aria-label={`Discuss ${title} with AI`}
 							className="text-sm text-(--sea-ink-soft) hover:text-(--sea-ink)"
 						>
 							<MessageCircle size={14} aria-hidden="true" className="inline" />{" "}
 							Discuss
-						</a>
+						</Link>
 
 						<button
 							type="button"

@@ -4,6 +4,14 @@ import { WorkOS } from "@workos-inc/node";
 import { env } from "#/env";
 import type { AuthSessionUser } from "#/lib/auth/session-user";
 import { logger } from "#/lib/logger";
+import {
+	clearCookie,
+	decodeJsonCookie,
+	encodeJsonCookie,
+	getRequestCookie,
+	normalizeReturnTo,
+	serializeCookie,
+} from "./cookies";
 import type { AuthenticatedWorkosUser } from "./current-user";
 
 const SESSION_COOKIE = "hackerfeed_session";
@@ -35,77 +43,7 @@ const workos = new WorkOS({
 	clientId: env.VITE_WORKOS_CLIENT_ID,
 });
 
-function parseCookieHeader(header: string | null): Map<string, string> {
-	const cookies = new Map<string, string>();
-
-	if (!header) {
-		return cookies;
-	}
-
-	for (const part of header.split(";")) {
-		const [rawName, ...rawValue] = part.trim().split("=");
-		if (!rawName || rawValue.length === 0) {
-			continue;
-		}
-
-		cookies.set(rawName, rawValue.join("="));
-	}
-
-	return cookies;
-}
-
-function getRequestCookie(request: Request, name: string): string | null {
-	return parseCookieHeader(request.headers.get("Cookie")).get(name) ?? null;
-}
-
-function serializeCookie(
-	name: string,
-	value: string,
-	{
-		maxAge,
-		request,
-	}: {
-		maxAge: number;
-		request: Request;
-	},
-): string {
-	const isSecure = new URL(request.url).protocol === "https:";
-	const parts = [
-		`${name}=${value}`,
-		"Path=/",
-		"HttpOnly",
-		"SameSite=Lax",
-		`Max-Age=${maxAge}`,
-	];
-
-	if (isSecure) {
-		parts.push("Secure");
-	}
-
-	return parts.join("; ");
-}
-
-function clearCookie(name: string, request: Request): string {
-	return serializeCookie(name, "", { maxAge: 0, request });
-}
-
-function encodeJsonCookie(value: unknown): string {
-	return encodeURIComponent(JSON.stringify(value));
-}
-
-function decodeJsonCookie<T>(value: string | null): T | null {
-	if (!value) {
-		return null;
-	}
-
-	try {
-		return JSON.parse(decodeURIComponent(value)) as T;
-	} catch {
-		return null;
-	}
-}
-
-function getOrigin(request: Request): string {
+export function getOrigin(request: Request): string {
 	const configuredUrl = env.SERVER_URL?.trim();
 
 	if (configuredUrl) {
@@ -117,14 +55,6 @@ function getOrigin(request: Request): string {
 
 function getRedirectUri(request: Request): string {
 	return `${getOrigin(request)}/auth/callback`;
-}
-
-function normalizeReturnTo(value: string | null): string {
-	if (!value?.startsWith("/") || value.startsWith("//")) {
-		return "/";
-	}
-
-	return value;
 }
 
 function toSessionUser(user: {
