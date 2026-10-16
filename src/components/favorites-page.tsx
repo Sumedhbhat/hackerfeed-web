@@ -3,6 +3,9 @@ import { ArrowRight, RefreshCw } from "lucide-react";
 import { useMemo, useState } from "react";
 import { PaperRow } from "#/components/papers/PapersPage";
 import { StoryCard } from "#/components/story-card";
+import { Button } from "#/components/ui/atoms/Button";
+import { Tab } from "#/components/ui/atoms/Tab";
+import { TabList } from "#/components/ui/molecules/TabList";
 import { useAuthSession } from "#/hooks/useAuthSession";
 import { useFavorites } from "#/hooks/useFavorites";
 import { usePaperFavorites } from "#/hooks/usePaperFavorites";
@@ -69,22 +72,23 @@ export function FavoritesPage({
 
 	return (
 		<main className="px-4 pt-6 pb-14 page-wrap">
-			<div className="favorites-tabs" role="tablist" aria-label="Favorite type">
-				{(["stories", "papers"] as const).map((type) => (
-					<button
-						key={type}
-						type="button"
-						role="tab"
-						aria-selected={activeType === type}
-						aria-controls={`favorites-${type}-panel`}
-						id={`favorites-${type}-tab`}
-						tabIndex={activeType === type ? 0 : -1}
-						onClick={() => onTypeChange(type)}
-						onKeyDown={handleTabKeyDown}
-					>
-						{type === "stories" ? "Stories" : "Papers"}
-					</button>
-				))}
+			<div className="mb-6">
+				<TabList role="tablist" aria-label="Favorite type">
+					{(["stories", "papers"] as const).map((type) => (
+						<Tab
+							key={type}
+							role="tab"
+							aria-selected={activeType === type}
+							aria-controls={`favorites-${type}-panel`}
+							id={`favorites-${type}-tab`}
+							tabIndex={activeType === type ? 0 : -1}
+							onClick={() => onTypeChange(type)}
+							onKeyDown={handleTabKeyDown}
+						>
+							{type === "stories" ? "Stories" : "Papers"}
+						</Tab>
+					))}
+				</TabList>
 			</div>
 
 			<section
@@ -127,40 +131,38 @@ export function FavoritesPage({
 											["score", isStories ? "Top score" : "Upvotes"],
 										] as const
 									).map(([key, label]) => (
-										<button
+										<Button
 											key={key}
-											type="button"
+											variant="secondary"
 											onClick={() => setSortOrder(key)}
 											aria-pressed={sortOrder === key}
-											className={`rounded px-3 py-1 text-xs font-medium transition-colors ${sortOrder === key ? "bg-(--chip-bg) text-(--sea-ink) border border-(--chip-line)" : "text-(--sea-ink-soft) hover:text-(--sea-ink)"}`}
 										>
 											{label}
-										</button>
+										</Button>
 									))}
 								</div>
 							</div>
-							<button
-								type="button"
+							<Button
+								variant="secondary"
 								onClick={confirmClear}
 								disabled={!isStories && !papers.canClear}
-								className="py-1.5 px-4 text-sm font-medium rounded border transition-colors border-(--chip-line) text-(--sea-ink-soft) hover:text-(--sea-ink) hover:border-(--sea-ink-soft) disabled:cursor-wait disabled:opacity-55"
 							>
 								{!isStories && papers.isClearPending
 									? "Clearing..."
 									: `Clear ${isStories ? "stories" : "papers"}`}
-							</button>
+							</Button>
 						</div>
 						{papers.error && !isStories ? (
 							<output className="papers-favorites-error">
 								<span>{papers.error}</span>
-								<button
-									type="button"
+								<Button
+									variant="icon"
 									onClick={papers.refresh}
 									aria-label="Refresh saved favorites"
 									title="Refresh saved favorites"
 								>
 									<RefreshCw size={14} aria-hidden="true" />
-								</button>
+								</Button>
 							</output>
 						) : null}
 						<section
@@ -201,9 +203,9 @@ function PaperFavoritesError({ onRefresh }: { onRefresh: () => void }) {
 	return (
 		<div className="papers-favorites-error" role="alert">
 			<span>Could not load saved favorites.</span>
-			<button type="button" onClick={onRefresh}>
+			<Button variant="secondary" onClick={onRefresh}>
 				<RefreshCw size={14} aria-hidden="true" /> Refresh saved favorites
-			</button>
+			</Button>
 		</div>
 	);
 }

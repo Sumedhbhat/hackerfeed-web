@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { MessageCircle, Star } from "lucide-react";
+import { Button } from "#/components/ui/atoms/Button";
 import { useFavorites } from "#/hooks/useFavorites";
 import { useViewActivity } from "#/hooks/useViewActivity";
 import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
@@ -73,13 +74,9 @@ export function StoryCard({ story, animationDelay }: StoryCardProps) {
 
 					{/* Actions */}
 					<div className="flex flex-wrap gap-4 items-center">
-						<button
-							type="button"
-							onClick={openStory}
-							className="text-sm font-medium hover:underline text-(--lagoon-deep) underline-offset-2 hover:text-(--lagoon)"
-						>
+						<Button variant="ghost" onClick={openStory}>
 							{story.url ? "Read article" : "Open post"}
-						</button>
+						</Button>
 
 						<Link
 							to="/story/$storyId"
@@ -99,16 +96,11 @@ export function StoryCard({ story, animationDelay }: StoryCardProps) {
 							Discuss
 						</Link>
 
-						<button
-							type="button"
+						<Button
+							variant="ghost"
 							aria-label={isFav ? "Remove from favorites" : "Save to favorites"}
 							aria-pressed={isFav}
 							onClick={() => toggleFavorite(story)}
-							className={`text-sm transition-colors ${
-								isFav
-									? "font-medium text-(--kicker)"
-									: "text-(--sea-ink-soft) hover:text-(--sea-ink)"
-							}`}
 						>
 							{isFav ? (
 								<>
@@ -132,7 +124,7 @@ export function StoryCard({ story, animationDelay }: StoryCardProps) {
 									Save
 								</>
 							)}
-						</button>
+						</Button>
 					</div>
 				</div>
 			</div>

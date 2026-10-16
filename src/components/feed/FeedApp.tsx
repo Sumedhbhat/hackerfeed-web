@@ -4,6 +4,8 @@ import { FeedError } from "#/components/feed/FeedError";
 import { FeedPane } from "#/components/feed/FeedPane";
 import { FeedSkeletons } from "#/components/feed/FeedSkeletons";
 import { feedTabs } from "#/components/feed/feedTabs";
+import { Tab } from "#/components/ui/atoms/Tab";
+import { TabList } from "#/components/ui/molecules/TabList";
 import { HackerNewsFeedKey } from "#/lib/hacker-news/queries";
 
 export function FeedApp() {
@@ -22,31 +24,24 @@ export function FeedApp() {
 		<main className="page-wrap px-4 pb-10 pt-5 sm:pt-10 sm:pb-14">
 			<div className="space-y-6">
 				<div
-					className={`flex items-center gap-6 border-b border-(--line) transition-opacity ${
+					className={`transition-opacity ${
 						isPending ? "opacity-50 pointer-events-none" : ""
 					}`}
 				>
-					{feedTabs.map((feed) => {
-						const isActive = activeFeed === feed.key;
-						return (
-							<button
-								key={feed.key}
-								type="button"
-								onClick={() => setActiveFeed(feed.key)}
-								aria-pressed={isActive}
-								className={`relative pb-3 text-sm font-medium transition-colors ${
-									isActive
-										? "text-(--sea-ink)"
-										: "text-(--sea-ink-soft) hover:text-(--sea-ink)"
-								}`}
-							>
-								{feed.label}
-								{isActive ? (
-									<span className="absolute bottom-0 left-0 w-full h-[1.5px] bg-(--lagoon)" />
-								) : null}
-							</button>
-						);
-					})}
+					<TabList>
+						{feedTabs.map((feed) => {
+							const isActive = activeFeed === feed.key;
+							return (
+								<Tab
+									key={feed.key}
+									onClick={() => setActiveFeed(feed.key)}
+									aria-pressed={isActive}
+								>
+									{feed.label}
+								</Tab>
+							);
+						})}
+					</TabList>
 				</div>
 
 				{feedTabs.map((feed) => (

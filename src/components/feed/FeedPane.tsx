@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { Activity, Suspense } from "react";
 import { feedTabs } from "#/components/feed/feedTabs";
 import { StoryCard } from "#/components/story-card";
+import { Button } from "#/components/ui/atoms/Button";
 import { FeedStatus, useFeed } from "#/hooks/useFeed";
 import {
 	type HackerNewsFeedKey,
@@ -45,13 +46,9 @@ export function FeedPane({ feed }: FeedPaneProps) {
 					The feed came back empty. A quick refresh should pick up new items.
 				</p>
 				<div className="mt-5">
-					<button
-						type="button"
-						onClick={refetch}
-						className="text-sm font-medium text-(--lagoon-deep) hover:text-(--lagoon) hover:underline underline-offset-2"
-					>
+					<Button variant="secondary" onClick={refetch}>
 						Refresh feed <ArrowRight size={14} aria-hidden="true" />
-					</button>
+					</Button>
 				</div>
 			</article>
 		);
@@ -69,14 +66,9 @@ export function FeedPane({ feed }: FeedPaneProps) {
 
 			{hasMore && (
 				<div className="flex justify-center pt-4">
-					<button
-						type="button"
-						onClick={loadMore}
-						disabled={isPending}
-						className="border border-(--chip-line) rounded px-5 py-2 text-sm font-medium text-(--sea-ink-soft) hover:text-(--sea-ink) hover:border-(--sea-ink-soft) disabled:cursor-not-allowed disabled:opacity-40 transition-colors"
-					>
+					<Button variant="secondary" onClick={loadMore} disabled={isPending}>
 						{isPending ? "Loading..." : `Load ${nextBatchSize} more`}
-					</button>
+					</Button>
 				</div>
 			)}
 

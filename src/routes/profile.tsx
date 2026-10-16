@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Mail, User } from "lucide-react";
 import { AiProvidersCard } from "#/components/ai/AiProvidersCard";
+import { Button, buttonClassName } from "#/components/ui/atoms/Button";
 import { signIn, useAuthSession } from "#/hooks/useAuthSession";
 
 type ProfileSearch = {
@@ -86,13 +87,9 @@ function ProfilePage() {
 					<p className="mt-2 text-sm leading-6 text-(--sea-ink-soft)">
 						Sign in to view your HackerFeed profile.
 					</p>
-					<button
-						type="button"
-						onClick={() => signIn("/profile")}
-						className="mt-5 rounded-md bg-(--lagoon) px-3 py-2 text-sm font-semibold text-white hover:bg-(--lagoon-deep) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--lagoon)"
-					>
-						Sign in
-					</button>
+					<div className="mt-5">
+						<Button onClick={() => signIn("/profile")}>Sign in</Button>
+					</div>
 				</section>
 			</main>
 		);
@@ -155,12 +152,11 @@ function ProfilePage() {
 					reason={search.reason}
 				/>
 
-				<Link
-					to="/favorites"
-					className="mt-6 inline-flex rounded-md border border-(--chip-line) px-3 py-2 text-sm font-semibold text-(--sea-ink) no-underline hover:bg-(--chip-bg) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--lagoon)"
-				>
-					View favorites
-				</Link>
+				<div className="mt-6">
+					<Link to="/favorites" className={buttonClassName("secondary")}>
+						View favorites
+					</Link>
+				</div>
 			</section>
 		</main>
 	);

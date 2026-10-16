@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { CircleCheck, LogIn } from "lucide-react";
+import { buttonClassName } from "#/components/ui/atoms/Button";
 
 export const Route = createFileRoute("/auth/signed-out")({
 	component: SignedOutPage,
@@ -19,13 +20,15 @@ function SignedOutPage() {
 				<p className="mt-3 text-sm leading-6 text-(--sea-ink-soft)">
 					Your HackerFeed session has been cleared on this device.
 				</p>
-				<a
-					href="/auth/sign-in?returnTo=/"
-					className="auth-primary-action mt-6 inline-flex items-center gap-2 rounded-md bg-(--lagoon) px-3 py-2 text-sm font-semibold no-underline hover:bg-(--lagoon-deep) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--lagoon)"
-				>
-					<LogIn size={15} aria-hidden="true" />
-					Sign in
-				</a>
+				<div className="mt-6">
+					<a
+						href="/auth/sign-in?returnTo=/"
+						className={buttonClassName("primary")}
+					>
+						<LogIn size={15} aria-hidden="true" />
+						Sign in
+					</a>
+				</div>
 			</section>
 		</main>
 	);

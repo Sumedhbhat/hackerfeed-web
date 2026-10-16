@@ -112,20 +112,18 @@ body {
   flex: 1;
 }
 
-a {
-  color: var(--lagoon-deep);
-  text-decoration-color: rgba(168, 74, 30, 0.35);
-  text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
-}
+/* Base link styles live in a layer so Tailwind utilities (text-white, …) can override them. */
+@layer base {
+  a {
+    color: var(--lagoon-deep);
+    text-decoration-color: rgba(168, 74, 30, 0.35);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+  }
 
-a:hover {
-  color: var(--lagoon);
-}
-
-.auth-primary-action,
-.auth-primary-action:hover {
-  color: #fff;
+  a:hover {
+    color: var(--lagoon);
+  }
 }
 
 code {
@@ -337,24 +335,6 @@ a {
   display: none;
 }
 
-.papers-topics button {
-  flex: 0 0 auto;
-  padding: 0.46rem 0.75rem;
-  border: 1px solid var(--line);
-  border-radius: 0.35rem;
-  background: var(--surface-strong);
-  color: var(--sea-ink-soft);
-  cursor: pointer;
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
-.papers-topics button.is-active {
-  border-color: var(--lagoon);
-  background: color-mix(in srgb, var(--lagoon) 11%, var(--surface-strong));
-  color: var(--sea-ink);
-}
-
 .papers-topics small {
   margin-left: 0.3rem;
   opacity: 0.55;
@@ -369,32 +349,6 @@ a {
   background: var(--surface-strong);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   transition: border-color 180ms ease, box-shadow 180ms ease;
-}
-
-.favorites-tabs {
-	display: flex;
-	gap: 1.5rem;
-	margin-bottom: 1.5rem;
-	border-bottom: 1px solid var(--line);
-}
-
-.favorites-tabs button {
-	margin-bottom: -1px;
-	padding: 0.65rem 0.1rem;
-	border-bottom: 2px solid transparent;
-	color: var(--sea-ink-soft);
-	font-size: 0.875rem;
-	font-weight: 600;
-}
-
-.favorites-tabs button[aria-selected="true"] {
-	border-bottom-color: var(--lagoon);
-	color: var(--sea-ink);
-}
-
-.favorites-tabs button:focus-visible {
-	outline: 2px solid var(--lagoon);
-	outline-offset: 3px;
 }
 
 .papers-card:hover {
@@ -419,23 +373,6 @@ a {
   margin-top: 0.7rem;
   font-size: 0.875rem;
   line-height: 1.6;
-}
-
-.papers-abstract-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.38rem;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--sea-ink-soft);
-  cursor: pointer;
-  font-size: 0.78rem;
-  font-weight: 600;
-}
-
-.papers-abstract-toggle:hover {
-  color: var(--sea-ink);
 }
 
 .papers-signals {
@@ -553,18 +490,6 @@ a {
   font-size: 0.78rem;
 }
 
-.papers-favorites-error button {
-  display: inline-grid;
-  width: 1.75rem;
-  height: 1.75rem;
-  padding: 0;
-  place-items: center;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  color: currentColor;
-  background: transparent;
-}
-
 .papers-keyword-strip {
   width: 100%;
   display: flex;
@@ -595,21 +520,6 @@ a {
   display: flex;
   justify-content: center;
   padding-top: 1.75rem;
-}
-
-.papers-load-more button,
-.papers-state button {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.62rem 1rem;
-  border: 1px solid var(--chip-line);
-  border-radius: 0.35rem;
-  background: transparent;
-  color: var(--sea-ink-soft);
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 600;
 }
 
 .papers-state {

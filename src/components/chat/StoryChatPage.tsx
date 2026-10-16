@@ -8,6 +8,7 @@ import {
 	Square,
 } from "lucide-react";
 import { type FormEvent, useEffect, useRef, useState } from "react";
+import { Button, buttonClassName } from "#/components/ui/atoms/Button";
 import {
 	useAiModels,
 	useAiProviders,
@@ -35,10 +36,6 @@ export const STARTER_PROMPTS = [
 
 const panelClassName =
 	"island-shell rounded-lg p-5 sm:p-6 text-sm leading-6 text-(--sea-ink-soft)";
-const primaryButtonClassName =
-	"inline-flex items-center gap-1.5 rounded-md bg-(--lagoon) px-3 py-2 text-sm font-semibold text-white no-underline hover:bg-(--lagoon-deep) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--lagoon) disabled:opacity-60";
-const secondaryButtonClassName =
-	"inline-flex items-center gap-1.5 rounded-md border border-(--chip-line) px-3 py-2 text-sm font-semibold text-(--sea-ink) no-underline hover:bg-(--chip-bg) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--lagoon) disabled:opacity-60";
 
 type StoryChatPageProps = { storyId: number };
 
@@ -117,24 +114,18 @@ function StoryChat({ story }: { story: HackerNewsStoryRecord }) {
 						Sign in to HackerFeed, then connect an AI assistant from your
 						profile to discuss this story here.
 					</p>
-					<button
-						type="button"
-						onClick={() => signIn(`/chat/${story.id}`)}
-						className={`${primaryButtonClassName} mt-4`}
-					>
-						Sign in
-					</button>
+					<div className="mt-4">
+						<Button onClick={() => signIn(`/chat/${story.id}`)}>Sign in</Button>
+					</div>
 				</section>
 			) : status.isError || !status.data ? (
 				<section className={panelClassName}>
 					<p className="m-0">Couldn't check your AI connections.</p>
-					<button
-						type="button"
-						onClick={() => void status.refetch()}
-						className={`${secondaryButtonClassName} mt-4`}
-					>
-						Retry
-					</button>
+					<div className="mt-4">
+						<Button variant="secondary" onClick={() => void status.refetch()}>
+							Retry
+						</Button>
+					</div>
 				</section>
 			) : connectedProviders.length === 0 ? (
 				<section className={panelClassName}>
@@ -143,14 +134,14 @@ function StoryChat({ story }: { story: HackerNewsStoryRecord }) {
 						about this story without leaving HackerFeed.
 					</p>
 					<div className="mt-4 flex flex-wrap gap-3">
-						<Link to="/profile" className={primaryButtonClassName}>
+						<Link to="/profile" className={buttonClassName("primary")}>
 							Connect an AI app in profile
 						</Link>
 						<a
 							href={buildChatGptStoryDiscussionUrl(story)}
 							target="_blank"
 							rel="noopener noreferrer"
-							className={secondaryButtonClassName}
+							className={buttonClassName("secondary")}
 						>
 							Open in ChatGPT instead
 						</a>
@@ -226,13 +217,11 @@ function ProviderConversation({
 					{models.error?.message ??
 						`No ${provider.name} models are available for your account.`}
 				</p>
-				<button
-					type="button"
-					onClick={() => void models.refetch()}
-					className={`${secondaryButtonClassName} mt-4`}
-				>
-					Retry
-				</button>
+				<div className="mt-4">
+					<Button variant="secondary" onClick={() => void models.refetch()}>
+						Retry
+					</Button>
+				</div>
 			</section>
 		);
 	}
@@ -286,13 +275,9 @@ function ProviderConversation({
 					</label>
 				</div>
 				{messageCount > 0 ? (
-					<button
-						type="button"
-						onClick={chat.reset}
-						className={secondaryButtonClassName}
-					>
+					<Button variant="secondary" onClick={chat.reset}>
 						New chat
-					</button>
+					</Button>
 				) : null}
 			</div>
 
@@ -323,14 +308,13 @@ function ProviderConversation({
 						this story, or start with:
 					</p>
 					{STARTER_PROMPTS.map((prompt) => (
-						<button
+						<Button
 							key={prompt}
-							type="button"
+							variant="secondary"
 							onClick={() => chat.send(prompt)}
-							className="rounded-md border border-(--chip-line) px-3 py-1.5 text-left text-sm text-(--sea-ink) hover:bg-(--chip-bg)"
 						>
 							{prompt}
-						</button>
+						</Button>
 					))}
 				</div>
 			) : null}
@@ -349,13 +333,9 @@ function ProviderConversation({
 							Reconnect in profile
 						</Link>
 					) : chat.messages.at(-1)?.role === "user" ? (
-						<button
-							type="button"
-							onClick={chat.retry}
-							className="font-semibold text-(--lagoon-deep) hover:underline"
-						>
+						<Button variant="ghost" onClick={chat.retry}>
 							Try again
-						</button>
+						</Button>
 					) : null}
 				</div>
 			) : null}
@@ -379,21 +359,13 @@ function ProviderConversation({
 					className="min-h-11 flex-1 resize-y rounded-md border border-(--chip-line) bg-(--surface-strong) px-3 py-2 text-sm text-(--sea-ink) focus-visible:outline-2 focus-visible:outline-(--lagoon)"
 				/>
 				{chat.isStreaming ? (
-					<button
-						type="button"
-						onClick={chat.stop}
-						className={secondaryButtonClassName}
-					>
+					<Button variant="secondary" onClick={chat.stop}>
 						<Square size={14} aria-hidden="true" /> Stop
-					</button>
+					</Button>
 				) : (
-					<button
-						type="submit"
-						disabled={!draft.trim()}
-						className={primaryButtonClassName}
-					>
+					<Button type="submit" disabled={!draft.trim()}>
 						<Send size={14} aria-hidden="true" /> Send
-					</button>
+					</Button>
 				)}
 			</form>
 		</section>

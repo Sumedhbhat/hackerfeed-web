@@ -21,13 +21,29 @@
 		"enabled": true,
 		"indentStyle": "tab"
 	},
-	"assist": { "actions": { "source": { "organizeImports": "on" } } },
+	"assist": {
+		"actions": {
+			"source": {
+				"organizeImports": "on"
+			}
+		}
+	},
 	"linter": {
 		"enabled": true,
 		"rules": {
 			"preset": "recommended",
 			"complexity": {
 				"useOptionalChain": "error"
+			},
+			"correctness": {
+				"noRestrictedElements": {
+					"level": "error",
+					"options": {
+						"elements": {
+							"button": "Use <Button> from #/components/ui/atoms/Button instead of a raw <button>."
+						}
+					}
+				}
 			}
 		}
 	},
@@ -35,5 +51,18 @@
 		"formatter": {
 			"quoteStyle": "double"
 		}
-	}
+	},
+	"plugins": ["./lint/no-button-look-classes.grit"],
+	"overrides": [
+		{
+			"includes": ["**/src/components/ui/**", "**/*.test.tsx"],
+			"linter": {
+				"rules": {
+					"correctness": {
+						"noRestrictedElements": "off"
+					}
+				}
+			}
+		}
+	]
 }

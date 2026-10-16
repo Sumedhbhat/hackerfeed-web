@@ -1,4 +1,5 @@
 import { CheckCircle2, Sparkles, TriangleAlert } from "lucide-react";
+import { Button } from "#/components/ui/atoms/Button";
 import {
 	useAiProviders,
 	useDisconnectAiProvider,
@@ -34,10 +35,6 @@ type AiProvidersCardProps = {
 	reason?: string;
 	returnTo?: string;
 };
-
-const buttonClassName =
-	"rounded-md px-3 py-2 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--lagoon) disabled:opacity-60";
-const secondaryButtonClassName = `${buttonClassName} border border-(--chip-line) text-(--sea-ink) hover:bg-(--chip-bg)`;
 
 /** Profile section listing every AI app from the catalog the user can connect. */
 export function AiProvidersCard({
@@ -98,13 +95,9 @@ export function AiProvidersCard({
 			) : isError || !providers ? (
 				<div className="mt-4 flex items-center gap-3 text-sm text-(--sea-ink-soft)">
 					<span>Couldn't load your AI connections.</span>
-					<button
-						type="button"
-						onClick={() => void refetch()}
-						className={secondaryButtonClassName}
-					>
+					<Button variant="secondary" onClick={() => void refetch()}>
 						Retry
-					</button>
+					</Button>
 				</div>
 			) : providers.length === 0 ? (
 				<p className="mt-4 text-sm text-(--sea-ink-soft)">
@@ -164,24 +157,19 @@ function AiProviderRow({
 								Manage usage
 							</a>
 						) : null}
-						<button
-							type="button"
+						<Button
+							variant="secondary"
 							aria-label={`Disconnect ${provider.name}`}
 							disabled={disconnect.isPending}
 							onClick={() => disconnect.mutate(provider.id)}
-							className={secondaryButtonClassName}
 						>
 							{disconnect.isPending ? "Disconnecting…" : "Disconnect"}
-						</button>
+						</Button>
 					</div>
 				) : provider.canConnect ? (
-					<button
-						type="button"
-						onClick={() => connectAiProvider(provider.id, returnTo)}
-						className={`${buttonClassName} bg-(--lagoon) text-white hover:bg-(--lagoon-deep)`}
-					>
+					<Button onClick={() => connectAiProvider(provider.id, returnTo)}>
 						Sign in with {provider.name}
-					</button>
+					</Button>
 				) : (
 					<p className="m-0 text-sm text-(--sea-ink-soft)">
 						Not available on this deployment yet.
