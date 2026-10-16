@@ -14,9 +14,6 @@ import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as PapersRouteImport } from './routes/papers'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
-import { Route as AuthErrorRouteImport } from './routes/auth.error'
-import { Route as AuthSignInRouteImport } from './routes/auth.sign-in'
-import { Route as AuthSignOutRouteImport } from './routes/auth.sign-out'
 import { Route as AuthSignedOutRouteImport } from './routes/auth.signed-out'
 import { Route as ChatStoryIdRouteImport } from './routes/chat.$storyId'
 import { Route as StoryStoryIdRouteImport } from './routes/story.$storyId'
@@ -24,7 +21,6 @@ import { Route as AiProviderCallbackRouteImport } from './routes/ai.$provider.ca
 import { Route as AiProviderConnectRouteImport } from './routes/ai.$provider.connect'
 import { Route as ApiAiChatRouteImport } from './routes/api.ai.chat'
 import { Route as ApiAiProvidersRouteImport } from './routes/api.ai.providers'
-import { Route as ApiAuthMeRouteImport } from './routes/api.auth.me'
 import { Route as ApiTrpcSplatRouteImport } from './routes/api/trpc/$'
 import { Route as ApiAiProvidersProviderDisconnectRouteImport } from './routes/api.ai.providers_.$provider.disconnect'
 import { Route as ApiAiProvidersProviderModelsRouteImport } from './routes/api.ai.providers_.$provider.models'
@@ -52,21 +48,6 @@ const ProfileRoute = ProfileRouteImport.update({
 const AuthCallbackRoute = AuthCallbackRouteImport.update({
   id: '/auth/callback',
   path: '/auth/callback',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthErrorRoute = AuthErrorRouteImport.update({
-  id: '/auth/error',
-  path: '/auth/error',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthSignInRoute = AuthSignInRouteImport.update({
-  id: '/auth/sign-in',
-  path: '/auth/sign-in',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthSignOutRoute = AuthSignOutRouteImport.update({
-  id: '/auth/sign-out',
-  path: '/auth/sign-out',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthSignedOutRoute = AuthSignedOutRouteImport.update({
@@ -104,11 +85,6 @@ const ApiAiProvidersRoute = ApiAiProvidersRouteImport.update({
   path: '/api/ai/providers',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiAuthMeRoute = ApiAuthMeRouteImport.update({
-  id: '/api/auth/me',
-  path: '/api/auth/me',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiTrpcSplatRoute = ApiTrpcSplatRouteImport.update({
   id: '/api/trpc/$',
   path: '/api/trpc/$',
@@ -133,9 +109,6 @@ export interface FileRoutesByFullPath {
   '/papers': typeof PapersRoute
   '/profile': typeof ProfileRoute
   '/auth/callback': typeof AuthCallbackRoute
-  '/auth/error': typeof AuthErrorRoute
-  '/auth/sign-in': typeof AuthSignInRoute
-  '/auth/sign-out': typeof AuthSignOutRoute
   '/auth/signed-out': typeof AuthSignedOutRoute
   '/chat/$storyId': typeof ChatStoryIdRoute
   '/story/$storyId': typeof StoryStoryIdRoute
@@ -143,7 +116,6 @@ export interface FileRoutesByFullPath {
   '/ai/$provider/connect': typeof AiProviderConnectRoute
   '/api/ai/chat': typeof ApiAiChatRoute
   '/api/ai/providers': typeof ApiAiProvidersRoute
-  '/api/auth/me': typeof ApiAuthMeRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
   '/api/ai/providers/$provider/disconnect': typeof ApiAiProvidersProviderDisconnectRoute
   '/api/ai/providers/$provider/models': typeof ApiAiProvidersProviderModelsRoute
@@ -154,9 +126,6 @@ export interface FileRoutesByTo {
   '/papers': typeof PapersRoute
   '/profile': typeof ProfileRoute
   '/auth/callback': typeof AuthCallbackRoute
-  '/auth/error': typeof AuthErrorRoute
-  '/auth/sign-in': typeof AuthSignInRoute
-  '/auth/sign-out': typeof AuthSignOutRoute
   '/auth/signed-out': typeof AuthSignedOutRoute
   '/chat/$storyId': typeof ChatStoryIdRoute
   '/story/$storyId': typeof StoryStoryIdRoute
@@ -164,7 +133,6 @@ export interface FileRoutesByTo {
   '/ai/$provider/connect': typeof AiProviderConnectRoute
   '/api/ai/chat': typeof ApiAiChatRoute
   '/api/ai/providers': typeof ApiAiProvidersRoute
-  '/api/auth/me': typeof ApiAuthMeRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
   '/api/ai/providers/$provider/disconnect': typeof ApiAiProvidersProviderDisconnectRoute
   '/api/ai/providers/$provider/models': typeof ApiAiProvidersProviderModelsRoute
@@ -176,9 +144,6 @@ export interface FileRoutesById {
   '/papers': typeof PapersRoute
   '/profile': typeof ProfileRoute
   '/auth/callback': typeof AuthCallbackRoute
-  '/auth/error': typeof AuthErrorRoute
-  '/auth/sign-in': typeof AuthSignInRoute
-  '/auth/sign-out': typeof AuthSignOutRoute
   '/auth/signed-out': typeof AuthSignedOutRoute
   '/chat/$storyId': typeof ChatStoryIdRoute
   '/story/$storyId': typeof StoryStoryIdRoute
@@ -186,7 +151,6 @@ export interface FileRoutesById {
   '/ai/$provider/connect': typeof AiProviderConnectRoute
   '/api/ai/chat': typeof ApiAiChatRoute
   '/api/ai/providers': typeof ApiAiProvidersRoute
-  '/api/auth/me': typeof ApiAuthMeRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
   '/api/ai/providers_/$provider/disconnect': typeof ApiAiProvidersProviderDisconnectRoute
   '/api/ai/providers_/$provider/models': typeof ApiAiProvidersProviderModelsRoute
@@ -199,9 +163,6 @@ export interface FileRouteTypes {
     | '/papers'
     | '/profile'
     | '/auth/callback'
-    | '/auth/error'
-    | '/auth/sign-in'
-    | '/auth/sign-out'
     | '/auth/signed-out'
     | '/chat/$storyId'
     | '/story/$storyId'
@@ -209,7 +170,6 @@ export interface FileRouteTypes {
     | '/ai/$provider/connect'
     | '/api/ai/chat'
     | '/api/ai/providers'
-    | '/api/auth/me'
     | '/api/trpc/$'
     | '/api/ai/providers/$provider/disconnect'
     | '/api/ai/providers/$provider/models'
@@ -220,9 +180,6 @@ export interface FileRouteTypes {
     | '/papers'
     | '/profile'
     | '/auth/callback'
-    | '/auth/error'
-    | '/auth/sign-in'
-    | '/auth/sign-out'
     | '/auth/signed-out'
     | '/chat/$storyId'
     | '/story/$storyId'
@@ -230,7 +187,6 @@ export interface FileRouteTypes {
     | '/ai/$provider/connect'
     | '/api/ai/chat'
     | '/api/ai/providers'
-    | '/api/auth/me'
     | '/api/trpc/$'
     | '/api/ai/providers/$provider/disconnect'
     | '/api/ai/providers/$provider/models'
@@ -241,9 +197,6 @@ export interface FileRouteTypes {
     | '/papers'
     | '/profile'
     | '/auth/callback'
-    | '/auth/error'
-    | '/auth/sign-in'
-    | '/auth/sign-out'
     | '/auth/signed-out'
     | '/chat/$storyId'
     | '/story/$storyId'
@@ -251,7 +204,6 @@ export interface FileRouteTypes {
     | '/ai/$provider/connect'
     | '/api/ai/chat'
     | '/api/ai/providers'
-    | '/api/auth/me'
     | '/api/trpc/$'
     | '/api/ai/providers_/$provider/disconnect'
     | '/api/ai/providers_/$provider/models'
@@ -263,9 +215,6 @@ export interface RootRouteChildren {
   PapersRoute: typeof PapersRoute
   ProfileRoute: typeof ProfileRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
-  AuthErrorRoute: typeof AuthErrorRoute
-  AuthSignInRoute: typeof AuthSignInRoute
-  AuthSignOutRoute: typeof AuthSignOutRoute
   AuthSignedOutRoute: typeof AuthSignedOutRoute
   ChatStoryIdRoute: typeof ChatStoryIdRoute
   StoryStoryIdRoute: typeof StoryStoryIdRoute
@@ -273,7 +222,6 @@ export interface RootRouteChildren {
   AiProviderConnectRoute: typeof AiProviderConnectRoute
   ApiAiChatRoute: typeof ApiAiChatRoute
   ApiAiProvidersRoute: typeof ApiAiProvidersRoute
-  ApiAuthMeRoute: typeof ApiAuthMeRoute
   ApiTrpcSplatRoute: typeof ApiTrpcSplatRoute
   ApiAiProvidersProviderDisconnectRoute: typeof ApiAiProvidersProviderDisconnectRoute
   ApiAiProvidersProviderModelsRoute: typeof ApiAiProvidersProviderModelsRoute
@@ -314,27 +262,6 @@ declare module '@tanstack/react-router' {
       path: '/auth/callback'
       fullPath: '/auth/callback'
       preLoaderRoute: typeof AuthCallbackRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/error': {
-      id: '/auth/error'
-      path: '/auth/error'
-      fullPath: '/auth/error'
-      preLoaderRoute: typeof AuthErrorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/sign-in': {
-      id: '/auth/sign-in'
-      path: '/auth/sign-in'
-      fullPath: '/auth/sign-in'
-      preLoaderRoute: typeof AuthSignInRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/sign-out': {
-      id: '/auth/sign-out'
-      path: '/auth/sign-out'
-      fullPath: '/auth/sign-out'
-      preLoaderRoute: typeof AuthSignOutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/signed-out': {
@@ -386,13 +313,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAiProvidersRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/auth/me': {
-      id: '/api/auth/me'
-      path: '/api/auth/me'
-      fullPath: '/api/auth/me'
-      preLoaderRoute: typeof ApiAuthMeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/trpc/$': {
       id: '/api/trpc/$'
       path: '/api/trpc/$'
@@ -423,9 +343,6 @@ const rootRouteChildren: RootRouteChildren = {
   PapersRoute: PapersRoute,
   ProfileRoute: ProfileRoute,
   AuthCallbackRoute: AuthCallbackRoute,
-  AuthErrorRoute: AuthErrorRoute,
-  AuthSignInRoute: AuthSignInRoute,
-  AuthSignOutRoute: AuthSignOutRoute,
   AuthSignedOutRoute: AuthSignedOutRoute,
   ChatStoryIdRoute: ChatStoryIdRoute,
   StoryStoryIdRoute: StoryStoryIdRoute,
@@ -433,7 +350,6 @@ const rootRouteChildren: RootRouteChildren = {
   AiProviderConnectRoute: AiProviderConnectRoute,
   ApiAiChatRoute: ApiAiChatRoute,
   ApiAiProvidersRoute: ApiAiProvidersRoute,
-  ApiAuthMeRoute: ApiAuthMeRoute,
   ApiTrpcSplatRoute: ApiTrpcSplatRoute,
   ApiAiProvidersProviderDisconnectRoute: ApiAiProvidersProviderDisconnectRoute,
   ApiAiProvidersProviderModelsRoute: ApiAiProvidersProviderModelsRoute,

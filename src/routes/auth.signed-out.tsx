@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { CircleCheck, LogIn } from "lucide-react";
-import { buttonClassName } from "#/components/ui/atoms/Button";
+import { Button } from "#/components/ui/atoms/Button";
+import { signIn } from "#/hooks/useAuthSession";
 
 export const Route = createFileRoute("/auth/signed-out")({
 	component: SignedOutPage,
@@ -21,13 +22,10 @@ function SignedOutPage() {
 					Your HackerFeed session has been cleared on this device.
 				</p>
 				<div className="mt-6">
-					<a
-						href="/auth/sign-in?returnTo=/"
-						className={buttonClassName("primary")}
-					>
+					<Button onClick={() => signIn("/")}>
 						<LogIn size={15} aria-hidden="true" />
 						Sign in
-					</a>
+					</Button>
 				</div>
 			</section>
 		</main>

@@ -59,6 +59,10 @@ beforeEach(() => {
 			);
 			return Response.json({ connected: false });
 		}
+		const connect = url.match(/^\/ai\/([a-z-]+)\/connect/);
+		if (connect) {
+			return Response.json({ url: `https://${connect[1]}.test/authorize` });
+		}
 		throw new Error(`Unexpected fetch ${url}`);
 	});
 	vi.stubGlobal("fetch", fetchMock);
@@ -105,8 +109,12 @@ describe("AiProvidersCard", () => {
 			await screen.findByRole("button", { name: "Sign in with Claude" }),
 		);
 
-		expect(assign).toHaveBeenCalledWith(
+		await waitFor(() =>
+			expect(assign).toHaveBeenCalledWith("https://claude.test/authorize"),
+		);
+		expect(fetchMock).toHaveBeenCalledWith(
 			"/ai/claude/connect?returnTo=%2Fprofile",
+			expect.objectContaining({ method: "POST" }),
 		);
 	});
 

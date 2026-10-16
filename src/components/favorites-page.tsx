@@ -6,7 +6,6 @@ import { StoryCard } from "#/components/story-card";
 import { Button } from "#/components/ui/atoms/Button";
 import { Tab } from "#/components/ui/atoms/Tab";
 import { TabList } from "#/components/ui/molecules/TabList";
-import { useAuthSession } from "#/hooks/useAuthSession";
 import { useFavorites } from "#/hooks/useFavorites";
 import { usePaperFavorites } from "#/hooks/usePaperFavorites";
 import { useViewActivity } from "#/hooks/useViewActivity";
@@ -24,7 +23,6 @@ export function FavoritesPage({
 	onTypeChange = () => undefined,
 }: FavoritesPageProps) {
 	const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
-	const { user } = useAuthSession();
 	const stories = useFavorites();
 	const papers = usePaperFavorites();
 	const { recordPaperView } = useViewActivity();
@@ -96,15 +94,7 @@ export function FavoritesPage({
 				id={`favorites-${activeType}-panel`}
 				aria-labelledby={`favorites-${activeType}-tab`}
 			>
-				{!isStories && !user ? (
-					<EmptyState
-						kicker="Sign in required"
-						title="Sign in to view saved papers."
-						copy="Paper favorites are tied to your account and stay available across sessions."
-						to="/auth/sign-in"
-						linkLabel="Sign in"
-					/>
-				) : !isStories && papers.isLoading ? (
+				{!isStories && papers.isLoading ? (
 					<output className="text-sm text-(--sea-ink-soft)">
 						Loading saved papers...
 					</output>

@@ -1,44 +1,102 @@
 /**
- * Minimal structured logger for Cloudflare Workers.
+ * The one logger for HackerFeed, on the server (Worker) and in the browser.
  *
- * All console.* output is captured as structured events in the Workers
- * Logs dashboard. Each call emits a single-line JSON object so log
- * aggregators can parse individual fields (level, message, ts, …).
+ * Every call goes to two places:
+ *  - Sentry Logs, as structured attributes linked to the active trace.
+ *  - The console, so `wrangler tail`, Workers Logs and devtools still show it.
+ *
+ * Pass the caught value as `error` and `logger.error` also records a Sentry
+ * issue with its stack trace. Every error returns the trace ID; show it to the
+ * user (see `FatalErrorView`) and search `trace:<id>` in Sentry to find the
+ * issue, its logs, and the request spans across browser and server.
  *
  * Usage:
  *   import { logger } from "#/lib/logger";
  *   logger.info("feed loaded", { feed: "top", count: 30 });
- *   logger.error("fetch failed", { url, status: 503, err: e.message });
+ *   const traceId = logger.error("favorites load failed", { error, storyId });
  */
+import * as Sentry from "@sentry/core";
 
 type LogLevel = "debug" | "info" | "warn" | "error";
 
-type LogContext = Record<string, unknown>;
+/** Extra fields for a log line; `error` is the caught value, if any. */
+export type LogContext = { error?: unknown; [key: string]: unknown };
 
-function emit(level: LogLevel, message: string, ctx?: LogContext): void {
-	const entry = {
-		level,
-		message,
-		ts: new Date().toISOString(),
-		...ctx,
-	};
+const TRACE_ID_PATTERN = /^[a-f0-9]{32}$/;
 
-	const line = JSON.stringify(entry);
+/** Trace ID of the current request or page, when Sentry is running. */
+export function getTraceId(): string | undefined {
+	if (!Sentry.getClient()) return undefined;
 
-	if (level === "error") {
-		console.error(line);
-	} else if (level === "warn") {
-		console.warn(line);
-	} else if (level === "debug") {
-		console.debug(line);
-	} else {
-		console.log(line);
+	const span = Sentry.getActiveSpan();
+	const traceId = span
+		? Sentry.spanToJSON(span).trace_id
+		: Sentry.getCurrentScope().getPropagationContext().traceId;
+
+	return TRACE_ID_PATTERN.test(traceId) ? traceId : undefined;
+}
+
+/** Tags later logs, issues and traces with the WorkOS user (no PII). */
+export function setLogUser(workosUserId: string | null) {
+	Sentry.setUser(workosUserId ? { id: workosUserId } : null);
+}
+
+function toAttributes({ error, ...context }: LogContext = {}) {
+	const attributes: Record<string, string | number | boolean> = {};
+
+	for (const [key, value] of Object.entries(context)) {
+		if (value === undefined || value === null) continue;
+		attributes[key] =
+			typeof value === "string" ||
+			typeof value === "number" ||
+			typeof value === "boolean"
+				? value
+				: JSON.stringify(value);
 	}
+	if (error !== undefined) {
+		attributes.err = error instanceof Error ? error.message : String(error);
+	}
+
+	return attributes;
+}
+
+function emit(level: LogLevel, message: string, context?: LogContext) {
+	const attributes = toAttributes(context);
+	const traceId = getTraceId();
+
+	Sentry.logger[level](message, attributes);
+
+	if (level === "error" && context?.error !== undefined) {
+		Sentry.captureException(context.error, {
+			extra: attributes,
+			tags: { log_message: message },
+		});
+	}
+
+	const entry = { level, message, traceId, ...attributes };
+	const write = level === "debug" ? console.debug : console[level];
+
+	if (typeof window === "undefined") {
+		// One JSON object per line, so Workers Logs indexes each field.
+		write(JSON.stringify({ ts: new Date().toISOString(), ...entry }));
+	} else {
+		write(`[${level}] ${message}`, entry);
+	}
+
+	return traceId;
 }
 
 export const logger = {
-	debug: (message: string, ctx?: LogContext) => emit("debug", message, ctx),
-	info: (message: string, ctx?: LogContext) => emit("info", message, ctx),
-	warn: (message: string, ctx?: LogContext) => emit("warn", message, ctx),
-	error: (message: string, ctx?: LogContext) => emit("error", message, ctx),
+	debug: (message: string, context?: LogContext) => {
+		emit("debug", message, context);
+	},
+	info: (message: string, context?: LogContext) => {
+		emit("info", message, context);
+	},
+	warn: (message: string, context?: LogContext) => {
+		emit("warn", message, context);
+	},
+	/** Logs and, when `context.error` is set, records a Sentry issue. Returns the trace ID. */
+	error: (message: string, context?: LogContext): string | undefined =>
+		emit("error", message, context),
 };

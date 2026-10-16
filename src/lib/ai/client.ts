@@ -1,3 +1,4 @@
+import { getAuthHeaders, signIn } from "#/lib/auth/authkit";
 import type {
 	AiApiError,
 	AiModel,
@@ -40,8 +41,7 @@ async function toRequestError(response: Response): Promise<AiRequestError> {
 
 async function getJson<T>(path: string): Promise<T> {
 	const response = await fetch(path, {
-		credentials: "same-origin",
-		headers: { accept: "application/json" },
+		headers: { accept: "application/json", ...(await getAuthHeaders()) },
 	});
 	if (!response.ok) throw await toRequestError(response);
 	return (await response.json()) as T;
@@ -64,7 +64,7 @@ export async function fetchAiModels(providerId: string): Promise<AiModel[]> {
 export async function disconnectAiProvider(providerId: string): Promise<void> {
 	const response = await fetch(
 		`/api/ai/providers/${encodeURIComponent(providerId)}/disconnect`,
-		{ method: "POST", credentials: "same-origin" },
+		{ method: "POST", headers: await getAuthHeaders() },
 	);
 	if (!response.ok) throw await toRequestError(response);
 }
@@ -73,11 +73,19 @@ export function getAiConnectUrl(providerId: string, returnTo: string): string {
 	return `/ai/${encodeURIComponent(providerId)}/connect?returnTo=${encodeURIComponent(returnTo)}`;
 }
 
-export function connectAiProvider(
+/** Starts the provider's sign-in, then leaves the page for the provider. */
+export async function connectAiProvider(
 	providerId: string,
 	returnTo = window.location.pathname,
-) {
-	window.location.assign(getAiConnectUrl(providerId, returnTo));
+): Promise<void> {
+	const response = await fetch(getAiConnectUrl(providerId, returnTo), {
+		method: "POST",
+		headers: await getAuthHeaders(),
+	});
+	if (response.status === 401) return signIn(returnTo);
+	if (!response.ok) throw await toRequestError(response);
+	const { url } = (await response.json()) as { url: string };
+	window.location.assign(url);
 }
 
 /**
@@ -93,10 +101,10 @@ export async function streamStoryChat(
 ): Promise<void> {
 	const response = await fetch("/api/ai/chat", {
 		method: "POST",
-		credentials: "same-origin",
 		headers: {
 			accept: "application/x-ndjson",
 			"content-type": "application/json",
+			...(await getAuthHeaders()),
 		},
 		body: JSON.stringify(request),
 		signal,

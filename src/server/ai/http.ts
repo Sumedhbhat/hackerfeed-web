@@ -30,18 +30,9 @@ const FLOW_COOKIE = "hackerfeed_ai_flow";
 const FLOW_MAX_AGE_SECONDS = 60 * 10;
 const DEFAULT_RETURN_TO = "/profile";
 
-export function getAiConnectPath(providerId: string) {
-	return `/ai/${providerId}/connect`;
-}
-
 export function getAiCallbackPath(providerId: string) {
 	return `/ai/${providerId}/callback`;
 }
-
-type SessionLookup = {
-	user: AuthenticatedWorkosUser | null;
-	setCookie?: string;
-};
 
 export type StoryChatContext = {
 	story: HackerNewsStoryRecord;
@@ -52,7 +43,7 @@ export type AiHttpDependencies = {
 	cipher: TokenCipher;
 	getOrigin(request: Request): string;
 	getService(): AiProviderService;
-	getSession(request: Request): Promise<SessionLookup>;
+	getUser(request: Request): Promise<AuthenticatedWorkosUser | null>;
 	getStoryContext(
 		storyId: number,
 		signal: AbortSignal,
@@ -67,22 +58,15 @@ function redirect(location: string, headers = new Headers()): Response {
 function json(
 	body: unknown,
 	status: number,
-	session?: SessionLookup,
+	headers = new Headers(),
 ): Response {
-	const headers = new Headers({
-		"Cache-Control": "no-store",
-		"Content-Type": "application/json",
-	});
-	if (session?.setCookie) headers.append("Set-Cookie", session.setCookie);
+	headers.set("Cache-Control", "no-store");
+	headers.set("Content-Type", "application/json");
 	return new Response(JSON.stringify(body), { headers, status });
 }
 
-const unauthorized = (session?: SessionLookup) =>
-	json(
-		{ code: "unauthorized", message: "Sign in to HackerFeed first." },
-		401,
-		session,
-	);
+const unauthorized = () =>
+	json({ code: "unauthorized", message: "Sign in to HackerFeed first." }, 401);
 
 const forbidden = () =>
 	json({ code: "forbidden", message: "Cross-site request" }, 403);
@@ -124,11 +108,11 @@ function logProviderError(
 	error: unknown,
 	providerId?: string,
 ) {
-	logger.error(message, {
-		providerId,
-		code: error instanceof AiProviderError ? error.code : undefined,
-		err: error instanceof Error ? error.message : String(error),
-	});
+	if (error instanceof AiProviderError) {
+		logger.warn(message, { providerId, code: error.code, error });
+	} else {
+		logger.error(message, { providerId, error });
+	}
 }
 
 export function createAiHttpHandlers(deps: AiHttpDependencies) {
@@ -150,24 +134,19 @@ export function createAiHttpHandlers(deps: AiHttpDependencies) {
 	}
 
 	return {
-		/** GET /ai/:provider/connect — starts the provider's sign-in. */
+		/**
+		 * POST /ai/:provider/connect — starts the provider's sign-in and returns
+		 * `{ url }` for the browser to navigate to.
+		 */
 		async connect(request: Request, providerId: string): Promise<Response> {
+			if (isCrossSiteRequest(request)) return forbidden();
 			if (!isValidProviderId(providerId)) return notFound();
 			const url = new URL(request.url);
 			const returnTo = normalizeReturnTo(
 				url.searchParams.get("returnTo") ?? DEFAULT_RETURN_TO,
 			);
-			const session = await deps.getSession(request);
-			const headers = new Headers();
-			if (session.setCookie) headers.append("Set-Cookie", session.setCookie);
-
-			if (!session.user) {
-				const signInReturnTo = `${getAiConnectPath(providerId)}?returnTo=${encodeURIComponent(returnTo)}`;
-				return redirect(
-					`/auth/sign-in?returnTo=${encodeURIComponent(signInReturnTo)}`,
-					headers,
-				);
-			}
+			const user = await deps.getUser(request);
+			if (!user) return unauthorized();
 
 			let authorization: Awaited<
 				ReturnType<AiProviderService["startAuthorization"]>
@@ -175,7 +154,7 @@ export function createAiHttpHandlers(deps: AiHttpDependencies) {
 			try {
 				authorization = await deps
 					.getService()
-					.startAuthorization(session.user, providerId, {
+					.startAuthorization(user, providerId, {
 						redirectUri: getRedirectUri(request, providerId),
 						returnTo,
 					});
@@ -183,12 +162,13 @@ export function createAiHttpHandlers(deps: AiHttpDependencies) {
 				logProviderError("AI provider sign-in start failed", error, providerId);
 				const reason =
 					error instanceof AiProviderError ? error.code : "start_failed";
-				return redirect(
-					withResult(returnTo, providerId, "error", reason),
-					headers,
+				return json(
+					{ url: withResult(returnTo, providerId, "error", reason) },
+					200,
 				);
 			}
 
+			const headers = new Headers();
 			const sealedFlow = await deps.cipher.encrypt(
 				JSON.stringify(authorization.flow),
 			);
@@ -199,7 +179,7 @@ export function createAiHttpHandlers(deps: AiHttpDependencies) {
 					request,
 				}),
 			);
-			return redirect(authorization.url, headers);
+			return json({ url: authorization.url }, 200, headers);
 		},
 
 		/** GET /ai/:provider/callback — finishes sign-in and stores the connection. */
@@ -243,19 +223,16 @@ export function createAiHttpHandlers(deps: AiHttpDependencies) {
 				);
 			}
 
-			const session = await deps.getSession(request);
-			if (session.setCookie) headers.append("Set-Cookie", session.setCookie);
-			if (!session.user) {
-				return redirect(
-					withResult(returnTo, providerId, "error", "signed_out"),
-					headers,
-				);
-			}
-
+			// The sealed flow records who started the connection, so the provider's
+			// redirect back doesn't need to carry HackerFeed credentials.
 			try {
 				await deps
 					.getService()
-					.completeAuthorization(session.user, flow, url.searchParams);
+					.completeAuthorization(
+						{ workosUserId: flow.workosUserId },
+						flow,
+						url.searchParams,
+					);
 			} catch (error) {
 				logProviderError("AI provider callback failed", error, providerId);
 				const reason =
@@ -271,30 +248,28 @@ export function createAiHttpHandlers(deps: AiHttpDependencies) {
 
 		/** GET /api/ai/providers — the catalog with the user's connection state. */
 		async providers(request: Request): Promise<Response> {
-			const session = await deps.getSession(request);
-			if (!session.user) return unauthorized(session);
+			const user = await deps.getUser(request);
+			if (!user) return unauthorized();
 			const providers = await deps
 				.getService()
-				.listProviders(session.user, (providerId) =>
+				.listProviders(user, (providerId) =>
 					getRedirectUri(request, providerId),
 				);
-			return json({ providers }, 200, session);
+			return json({ providers }, 200);
 		},
 
 		/** GET /api/ai/providers/:provider/models */
 		async models(request: Request, providerId: string): Promise<Response> {
 			if (!isValidProviderId(providerId)) return notFound();
-			const session = await deps.getSession(request);
-			if (!session.user) return unauthorized(session);
+			const user = await deps.getUser(request);
+			if (!user) return unauthorized();
 			try {
-				const models = await deps
-					.getService()
-					.listModels(session.user, providerId);
-				return json({ models }, 200, session);
+				const models = await deps.getService().listModels(user, providerId);
+				return json({ models }, 200);
 			} catch (error) {
 				if (!(error instanceof AiProviderError)) throw error;
 				logProviderError("AI model listing failed", error, providerId);
-				return json(error, errorStatus(error), session);
+				return json(error, errorStatus(error));
 			}
 		},
 
@@ -302,15 +277,15 @@ export function createAiHttpHandlers(deps: AiHttpDependencies) {
 		async disconnect(request: Request, providerId: string): Promise<Response> {
 			if (isCrossSiteRequest(request)) return forbidden();
 			if (!isValidProviderId(providerId)) return notFound();
-			const session = await deps.getSession(request);
-			if (!session.user) return unauthorized(session);
+			const user = await deps.getUser(request);
+			if (!user) return unauthorized();
 			try {
-				await deps.getService().disconnect(session.user, providerId);
+				await deps.getService().disconnect(user, providerId);
 			} catch (error) {
 				if (!(error instanceof AiProviderError)) throw error;
-				return json(error, errorStatus(error), session);
+				return json(error, errorStatus(error));
 			}
-			return json({ connected: false }, 200, session);
+			return json({ connected: false }, 200);
 		},
 
 		/** POST /api/ai/chat — streams NDJSON ChatStreamEvents. */
@@ -333,8 +308,8 @@ export function createAiHttpHandlers(deps: AiHttpDependencies) {
 				);
 			}
 
-			const session = await deps.getSession(request);
-			if (!session.user) return unauthorized(session);
+			const user = await deps.getUser(request);
+			if (!user) return unauthorized();
 
 			const { messages, model, providerId, storyId } = parsed.data;
 			const context = await deps
@@ -347,13 +322,12 @@ export function createAiHttpHandlers(deps: AiHttpDependencies) {
 				return json(
 					{ code: "story_not_found", message: "That story isn't available." },
 					404,
-					session,
 				);
 			}
 
 			let deltas: AsyncGenerator<string>;
 			try {
-				deltas = await deps.getService().startChat(session.user, providerId, {
+				deltas = await deps.getService().startChat(user, providerId, {
 					instructions: buildStoryChatInstructions(
 						context.story,
 						context.comments,
@@ -365,7 +339,7 @@ export function createAiHttpHandlers(deps: AiHttpDependencies) {
 			} catch (error) {
 				if (!(error instanceof AiProviderError)) throw error;
 				logProviderError("AI chat start failed", error, providerId);
-				return json(error, errorStatus(error), session);
+				return json(error, errorStatus(error));
 			}
 
 			const encoder = new TextEncoder();
@@ -400,7 +374,6 @@ export function createAiHttpHandlers(deps: AiHttpDependencies) {
 				"Cache-Control": "no-store",
 				"Content-Type": "application/x-ndjson; charset=utf-8",
 			});
-			if (session.setCookie) headers.append("Set-Cookie", session.setCookie);
 			return new Response(body, { headers, status: 200 });
 		},
 	};

@@ -6,6 +6,7 @@ import {
 	type RequestHandler,
 } from "@tanstack/react-start/server";
 import { createServerEntry } from "@tanstack/react-start/server-entry";
+import { logger } from "#/lib/logger";
 import {
 	createDatabaseContext,
 	type D1DatabaseBinding,
@@ -22,7 +23,6 @@ type WorkerEnv = {
 };
 
 const startFetch = createStartHandler(defaultStreamHandler);
-const traceIdsByError = new WeakMap<object, string>();
 
 function getSentrySampleRate(value: string | undefined, fallback: number) {
 	if (!value) return fallback;
@@ -42,43 +42,23 @@ function wantsJson(request: Request) {
 	);
 }
 
-function getErrorMessage(error: unknown) {
-	return error instanceof Error ? error.message : String(error);
-}
+function renderErrorResponse(request: Request, traceId: string | undefined) {
+	const headers = new Headers();
+	if (traceId) headers.set("x-sentry-trace-id", traceId);
 
-function getErrorKey(error: unknown): object | undefined {
-	return (typeof error === "object" && error !== null) ||
-		typeof error === "function"
-		? error
-		: undefined;
-}
+	if (wantsJson(request)) {
+		return Response.json(
+			{
+				error: "Internal Server Error",
+				message: "HackerFeed could not process this request.",
+				traceId: traceId ?? null,
+			},
+			{ status: 500, headers },
+		);
+	}
 
-function getActiveSentryTraceId(): string | undefined {
-	const span = Sentry.getActiveSpan();
-	if (!span) return undefined;
-
-	const traceId = Sentry.spanToJSON(span).trace_id;
-	return /^[a-f0-9]{32}$/.test(traceId) ? traceId : undefined;
-}
-
-function logServerError(
-	request: Request,
-	error: unknown,
-	traceId: string | undefined,
-) {
-	const url = new URL(request.url);
-	const entry = {
-		level: "error",
-		message: "Unhandled server request error",
-		ts: new Date().toISOString(),
-		method: request.method,
-		pathname: url.pathname,
-		traceId,
-		err: getErrorMessage(error),
-		stack: error instanceof Error ? error.stack : undefined,
-	};
-
-	console.error(JSON.stringify(entry));
+	headers.set("content-type", "text/html; charset=utf-8");
+	return new Response(renderServerErrorPage(traceId), { status: 500, headers });
 }
 
 function createWorkerDatabaseContext(env: WorkerEnv) {
@@ -91,12 +71,14 @@ async function handleAppFetch(request: Request, env: WorkerEnv) {
 	try {
 		return await startFetch(request);
 	} catch (error) {
-		const errorKey = getErrorKey(error);
-		const traceId = getActiveSentryTraceId();
-		if (errorKey && traceId) {
-			traceIdsByError.set(errorKey, traceId);
-		}
-		throw error;
+		// Still inside Sentry's request span, so the issue, logs and spans share
+		// the trace ID the user sees on the error page.
+		const traceId = logger.error("Unhandled server request error", {
+			error,
+			method: request.method,
+			pathname: new URL(request.url).pathname,
+		});
+		return renderErrorResponse(request, traceId);
 	}
 }
 
@@ -125,50 +107,10 @@ const instrumentedWorker = Sentry.withSentry((env: WorkerEnv) => {
 		dsn: env.SENTRY_DSN,
 		environment: env.SENTRY_ENVIRONMENT ?? "production",
 		tracesSampleRate: getSentrySampleRate(env.SENTRY_TRACES_SAMPLE_RATE, 0.1),
+		// Logs come from `#/lib/logger`, which also writes the console line.
 		enableLogs: true,
-		integrations: [
-			Sentry.consoleLoggingIntegration({ levels: ["warn", "error"] }),
-		],
 		sendDefaultPii: false,
 	};
 }, worker);
 
-const instrumentedFetch =
-	instrumentedWorker.fetch as ExportedHandlerFetchHandler<WorkerEnv>;
-
-export default {
-	...instrumentedWorker,
-	async fetch(request, env, context) {
-		try {
-			return await instrumentedFetch(request, env, context);
-		} catch (error) {
-			const errorKey = getErrorKey(error);
-			const traceId = errorKey ? traceIdsByError.get(errorKey) : undefined;
-			if (errorKey) {
-				traceIdsByError.delete(errorKey);
-			}
-			logServerError(request, error, traceId);
-			const traceHeaders = new Headers();
-			if (traceId) {
-				traceHeaders.set("x-sentry-trace-id", traceId);
-			}
-
-			if (wantsJson(request)) {
-				return Response.json(
-					{
-						error: "Internal Server Error",
-						message: "HackerFeed could not process this request.",
-						traceId: traceId ?? null,
-					},
-					{ status: 500, headers: traceHeaders },
-				);
-			}
-
-			traceHeaders.set("content-type", "text/html; charset=utf-8");
-			return new Response(renderServerErrorPage(traceId), {
-				status: 500,
-				headers: traceHeaders,
-			});
-		}
-	},
-} satisfies ExportedHandler<WorkerEnv>;
+export default instrumentedWorker;

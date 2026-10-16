@@ -1,5 +1,6 @@
 import "@tanstack/react-start/server-only";
 
+import { logger } from "#/lib/logger";
 import type { DatabaseContext } from "#/server/database/client";
 import { fetchHuggingFaceDailyPapersEdition } from "./client";
 import { getPreviousIndiaEditionDate } from "./edition-date";
@@ -85,10 +86,10 @@ export async function runHuggingFaceDailyPapersIngestion(
 				errorMessage(error),
 			);
 		} catch (auditError) {
-			console.error(
-				"Failed to mark Hugging Face ingestion run as failed",
-				auditError,
-			);
+			logger.error("Failed to mark Hugging Face ingestion run as failed", {
+				runId,
+				error: auditError,
+			});
 		}
 		throw error;
 	}

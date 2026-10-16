@@ -72,10 +72,7 @@ async function fetchJson<T>(path: string, signal?: AbortSignal): Promise<T> {
 			signal,
 		});
 	} catch (err) {
-		logger.error("HN API network error", {
-			url,
-			err: err instanceof Error ? err.message : String(err),
-		});
+		logger.warn("HN API network error", { url, error: err });
 		throw err;
 	}
 
@@ -86,7 +83,7 @@ async function fetchJson<T>(path: string, signal?: AbortSignal): Promise<T> {
 		} catch {
 			// ignore body read failure
 		}
-		logger.error("HN API non-2xx response", {
+		logger.warn("HN API non-2xx response", {
 			url,
 			status: response.status,
 			body,

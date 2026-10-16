@@ -9,11 +9,8 @@ const runtimeEnv =
 export const env = createEnv({
 	server: {
 		SERVER_URL: z.url().optional(),
-		WORKOS_API_KEY: z.string().min(1),
-		WORKOS_COOKIE_PASSWORD: z.string().min(32),
-		WORKOS_JWT_AUDIENCE: z.string().min(1).optional(),
-		// Encrypts stored AI provider tokens; defaults to WORKOS_COOKIE_PASSWORD.
-		AI_TOKEN_ENCRYPTION_KEY: z.string().min(32).optional(),
+		// Encrypts stored AI provider tokens and the provider sign-in flow cookie.
+		AI_TOKEN_ENCRYPTION_KEY: z.string().min(32),
 		// Sign in with ChatGPT. Without a client id issued by OpenAI, sign-in
 		// only works on http://127.0.0.1 via dynamic registration.
 		CHATGPT_CLIENT_ID: z.string().min(1).optional(),
