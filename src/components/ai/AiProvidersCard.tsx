@@ -167,7 +167,7 @@ function AiProviderRow({
 						</Button>
 					</div>
 				) : provider.canConnect ? (
-					<Button onClick={() => connectAiProvider(provider.id, returnTo)}>
+					<Button onClick={() => void connectAiProvider(provider.id, returnTo)}>
 						Sign in with {provider.name}
 					</Button>
 				) : (

@@ -1,17 +1,14 @@
 import { createRouter as createTanStackRouter } from "@tanstack/react-router";
 import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query";
+import { useErrorReport } from "./hooks/useErrorReport";
 import { getContext } from "./integrations/tanstack-query/root-provider";
-import { logger } from "./lib/logger";
 import { routeTree } from "./routeTree.gen";
 
 function DefaultError({ error }: { error: unknown }) {
 	const message =
 		error instanceof Error ? error.message : "An unexpected error occurred.";
 
-	logger.error("Route error boundary triggered", {
-		err: message,
-		stack: error instanceof Error ? (error as Error).stack : undefined,
-	});
+	const traceId = useErrorReport("Route error boundary triggered", error);
 
 	return (
 		<div style={{ padding: "2rem", fontFamily: "sans-serif" }}>
@@ -35,6 +32,11 @@ function DefaultError({ error }: { error: unknown }) {
 			<p style={{ margin: "0 0 1.25rem", fontSize: "0.875rem", opacity: 0.7 }}>
 				{message}
 			</p>
+			{traceId ? (
+				<p style={{ margin: "0 0 1.25rem", fontSize: "0.75rem", opacity: 0.7 }}>
+					Trace ID: <code>{traceId}</code>
+				</p>
+			) : null}
 			<a href="/" style={{ fontSize: "0.875rem", fontWeight: 500 }}>
 				&larr; Back to feed
 			</a>

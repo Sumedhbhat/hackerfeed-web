@@ -22,8 +22,7 @@ export function getContext() {
 			onError(error, query) {
 				logger.error("TanStack Query error", {
 					queryKey: JSON.stringify(query.queryKey),
-					err: error instanceof Error ? error.message : String(error),
-					stack: error instanceof Error ? error.stack : undefined,
+					error,
 				});
 			},
 		}),

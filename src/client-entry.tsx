@@ -3,6 +3,7 @@ import { StartClient } from "@tanstack/react-start/client";
 import { StrictMode, startTransition } from "react";
 import { hydrateRoot } from "react-dom/client";
 import { env } from "#/env";
+import { getTraceId } from "#/lib/logger";
 
 const sentryDsn = env.VITE_SENTRY_DSN;
 
@@ -11,12 +12,12 @@ if (sentryDsn) {
 		dsn: sentryDsn,
 		environment: env.VITE_SENTRY_ENVIRONMENT,
 		tracesSampleRate: env.VITE_SENTRY_TRACES_SAMPLE_RATE,
+		// Logs come from `#/lib/logger`, which also writes the console line.
 		enableLogs: true,
 		sendDefaultPii: false,
-		integrations: [
-			Sentry.browserTracingIntegration(),
-			Sentry.consoleLoggingIntegration({ levels: ["warn", "error"] }),
-		],
+		// Same-origin API calls carry the trace, so browser and Worker spans,
+		// logs and issues share one trace ID.
+		integrations: [Sentry.browserTracingIntegration()],
 	});
 }
 
@@ -29,6 +30,7 @@ function ClientErrorFallback({
 }) {
 	const message =
 		error instanceof Error ? error.message : "An unexpected error occurred.";
+	const traceId = getTraceId();
 
 	return (
 		<main
@@ -57,6 +59,11 @@ function ClientErrorFallback({
 			<p style={{ fontSize: "0.95rem", lineHeight: 1.5, opacity: 0.72 }}>
 				{message}
 			</p>
+			{traceId ? (
+				<p style={{ fontSize: "0.8rem", opacity: 0.72 }}>
+					Trace ID: <code>{traceId}</code>
+				</p>
+			) : null}
 			{/* biome-ignore lint/correctness/noRestrictedElements: last-resort error UI is styled inline so it works without the stylesheet */}
 			<button
 				onClick={resetError}

@@ -2,6 +2,8 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight, MessageCircle } from "lucide-react";
 import { Suspense } from "react";
 import { Comment } from "#/components/comment";
+import { TraceIdNote } from "#/components/trace-id-note";
+import { useErrorReport } from "#/hooks/useErrorReport";
 import { useStoryPage } from "#/hooks/useStoryPage";
 import {
 	commentQueryOptions,
@@ -47,11 +49,7 @@ export const Route = createFileRoute("/story/$storyId")({
 				err.isNotFound === true;
 
 			if (!isNotFound) {
-				logger.error("Story loader failed", {
-					storyId,
-					err: err instanceof Error ? err.message : String(err),
-					stack: err instanceof Error ? err.stack : undefined,
-				});
+				logger.warn("Story loader failed", { storyId, error: err });
 			}
 
 			throw err;
@@ -79,7 +77,9 @@ export const Route = createFileRoute("/story/$storyId")({
 // StoryError — ErrorBoundary fallback
 // ---------------------------------------------------------------------------
 
-function StoryError() {
+function StoryError({ error }: { error: unknown }) {
+	const traceId = useErrorReport("Story page failed", error);
+
 	return (
 		<main className="page-wrap px-4 pt-6 pb-16 sm:pt-10">
 			<Link
@@ -96,6 +96,7 @@ function StoryError() {
 				<p className="m-0 mt-3 max-w-lg text-sm leading-relaxed text-(--sea-ink-soft)">
 					The Hacker News request failed. Check your connection and try again.
 				</p>
+				<TraceIdNote traceId={traceId} />
 			</article>
 		</main>
 	);
