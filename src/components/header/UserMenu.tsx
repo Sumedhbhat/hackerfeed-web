@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { LogOut, User } from "lucide-react";
 import { useState } from "react";
+import { Button, buttonClassName } from "#/components/ui/atoms/Button";
 import { useUserMenu } from "#/hooks/useUserMenu";
 
 function UserAvatar({
@@ -55,7 +56,7 @@ export default function UserMenu() {
 			<Link
 				to="/profile"
 				aria-label="Profile"
-				className="flex h-8 w-8 items-center justify-center rounded-full border border-(--chip-line) bg-(--chip-bg) text-(--sea-ink) no-underline hover:bg-(--link-bg-hover) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--lagoon)"
+				className={buttonClassName("icon")}
 			>
 				<User size={16} aria-hidden="true" />
 			</Link>
@@ -64,19 +65,18 @@ export default function UserMenu() {
 
 	return (
 		<div ref={containerRef} className="relative flex">
-			<button
-				type="button"
+			<Button
+				variant="icon"
 				onClick={() => setOpen((v) => !v)}
 				aria-label="User menu"
 				aria-expanded={open}
-				className="flex rounded-full hover:opacity-90 transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--lagoon)"
 			>
 				<UserAvatar
 					imageUrl={user.profilePictureUrl}
 					initials={initials}
 					displayName={displayName}
 				/>
-			</button>
+			</Button>
 
 			{open ? (
 				<div className="absolute right-0 top-full z-50 mt-2 w-[min(18rem,calc(100vw-1.5rem))] rounded-lg border border-(--chip-line) bg-(--surface-strong) shadow-lg">
@@ -97,23 +97,19 @@ export default function UserMenu() {
 						</div>
 					</div>
 
-					<div className="p-1.5">
+					<div className="flex flex-col gap-3 p-3">
 						<Link
 							to="/profile"
 							onClick={() => setOpen(false)}
-							className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left text-sm font-medium text-(--sea-ink) no-underline hover:bg-(--chip-bg) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--lagoon)"
+							className={buttonClassName("ghost")}
 						>
 							<User size={15} aria-hidden="true" />
 							Profile
 						</Link>
-						<button
-							type="button"
-							onClick={() => signOut()}
-							className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left text-sm font-medium text-(--sea-ink) hover:bg-(--chip-bg) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--lagoon)"
-						>
+						<Button variant="ghost" onClick={() => signOut()}>
 							<LogOut size={15} aria-hidden="true" />
 							Log out
-						</button>
+						</Button>
 					</div>
 				</div>
 			) : null}

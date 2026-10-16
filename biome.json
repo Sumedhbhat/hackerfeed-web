@@ -40,7 +40,7 @@
 					"level": "error",
 					"options": {
 						"elements": {
-							"button": "Use <Button> from #/components/ui/Button instead of a raw <button>."
+							"button": "Use <Button> from #/components/ui/atoms/Button instead of a raw <button>."
 						}
 					}
 				}
@@ -55,29 +55,7 @@
 	"plugins": ["./lint/no-button-look-classes.grit"],
 	"overrides": [
 		{
-			"includes": ["**/src/components/ui/Button.tsx", "**/*.test.tsx"],
-			"linter": {
-				"rules": {
-					"correctness": {
-						"noRestrictedElements": "off"
-					}
-				}
-			}
-		},
-		{
-			"includes": [
-				"**/src/client-entry.tsx",
-				"**/src/components/comment/Comment.tsx",
-				"**/src/components/favorites-page.tsx",
-				"**/src/components/feed/FeedApp.tsx",
-				"**/src/components/feed/FeedError.tsx",
-				"**/src/components/feed/FeedPane.tsx",
-				"**/src/components/header/ThemeToggle.tsx",
-				"**/src/components/header/UserMenu.tsx",
-				"**/src/components/papers/PapersPage.tsx",
-				"**/src/components/story-card/StoryCard.tsx",
-				"**/src/components/chat/StoryChatPage.tsx"
-			],
+			"includes": ["**/src/components/ui/**", "**/*.test.tsx"],
 			"linter": {
 				"rules": {
 					"correctness": {

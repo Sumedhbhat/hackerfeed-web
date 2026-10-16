@@ -57,6 +57,7 @@ function ClientErrorFallback({
 			<p style={{ fontSize: "0.95rem", lineHeight: 1.5, opacity: 0.72 }}>
 				{message}
 			</p>
+			{/* biome-ignore lint/correctness/noRestrictedElements: last-resort error UI is styled inline so it works without the stylesheet */}
 			<button
 				onClick={resetError}
 				style={{

@@ -11,6 +11,7 @@ import {
 	ThumbsUp,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { Button } from "#/components/ui/atoms/Button";
 import { usePaperEdition } from "#/hooks/usePaperEdition";
 import { usePaperFavorites } from "#/hooks/usePaperFavorites";
 import { useViewActivity } from "#/hooks/useViewActivity";
@@ -111,9 +112,8 @@ function PaperSummary({
 				{showAbstract && paper.abstract ? paper.abstract : paper.summary}
 			</p>
 			{canShowAbstract ? (
-				<button
-					type="button"
-					className="papers-abstract-toggle"
+				<Button
+					variant="ghost"
 					onClick={() => setShowAbstract((value) => !value)}
 				>
 					{showAbstract ? (
@@ -122,7 +122,7 @@ function PaperSummary({
 						<BookOpen size={14} aria-hidden="true" />
 					)}
 					{showAbstract ? "Show AI summary" : "Show abstract"}
-				</button>
+				</Button>
 			) : null}
 		</>
 	);
@@ -221,13 +221,8 @@ export function PaperRow({
 				<div className="papers-row-actions">
 					<ExternalPaperLinks paper={paper} compact />
 					{canFavorite ? (
-						<button
-							type="button"
-							className={`text-sm transition-colors disabled:cursor-wait disabled:opacity-55 ${
-								saved
-									? "font-medium text-(--kicker)"
-									: "text-(--sea-ink-soft) hover:text-(--sea-ink)"
-							}`}
+						<Button
+							variant="ghost"
 							aria-label={
 								saved
 									? `Remove ${paper.title} from favorites`
@@ -245,7 +240,7 @@ export function PaperRow({
 								className={`inline${saved ? " star-pop" : ""}`}
 							/>{" "}
 							{saved ? "Saved" : "Save"}
-						</button>
+						</Button>
 					) : null}
 				</div>
 				{paper.keywords.length > 0 ? (
@@ -325,37 +320,37 @@ export function PapersFeed({
 				</section>
 
 				<nav className="papers-topics" aria-label="Popular paper topics">
-					<button
-						type="button"
-						className={!filters.topic ? "is-active" : ""}
+					<Button
+						variant="secondary"
+						aria-pressed={!filters.topic}
 						onClick={() => onFiltersChange({ ...filters, topic: undefined })}
 					>
 						All papers <small>{edition.papers.length}</small>
-					</button>
+					</Button>
 					{edition.popularKeywords.slice(0, 8).map((topic) => (
-						<button
-							type="button"
-							className={filters.topic === topic.keyword ? "is-active" : ""}
+						<Button
+							variant="secondary"
+							aria-pressed={filters.topic === topic.keyword}
 							onClick={() =>
 								onFiltersChange({ ...filters, topic: topic.keyword })
 							}
 							key={topic.keyword}
 						>
 							{topic.keyword} <small>{topic.paperCount}</small>
-						</button>
+						</Button>
 					))}
 				</nav>
 				{favorites.error ? (
 					<output className="papers-favorites-error">
 						<span>{favorites.error}</span>
-						<button
-							type="button"
+						<Button
+							variant="icon"
 							onClick={favorites.refresh}
 							aria-label="Refresh saved favorites"
 							title="Refresh saved favorites"
 						>
 							<RefreshCw size={14} aria-hidden="true" />
-						</button>
+						</Button>
 					</output>
 				) : null}
 
@@ -377,14 +372,14 @@ export function PapersFeed({
 						</section>
 						{visibleCount < filteredPapers.length ? (
 							<div className="papers-load-more">
-								<button
-									type="button"
+								<Button
+									variant="secondary"
 									onClick={() =>
 										setVisibleCount((count) => count + INITIAL_PAPER_COUNT)
 									}
 								>
 									Load more papers
-								</button>
+								</Button>
 							</div>
 						) : null}
 					</>
@@ -392,20 +387,20 @@ export function PapersFeed({
 					<section className="papers-state">
 						<p>{emptyMessage}</p>
 						{hasPapers && hasActiveFilters ? (
-							<button
-								type="button"
+							<Button
+								variant="secondary"
 								onClick={() => onFiltersChange({ date: filters.date })}
 							>
 								Clear search and topic
-							</button>
+							</Button>
 						) : null}
 						{!hasPapers && filters.date ? (
-							<button
-								type="button"
+							<Button
+								variant="secondary"
 								onClick={() => onFiltersChange({ ...filters, date: undefined })}
 							>
 								View latest edition
-							</button>
+							</Button>
 						) : null}
 					</section>
 				)}
@@ -437,9 +432,9 @@ export function PapersPage({ filters, onFiltersChange }: PapersPageProps) {
 			<main className="papers-page">
 				<section className="papers-shell papers-state">
 					<p>HackerFeed couldn&apos;t load this paper edition.</p>
-					<button type="button" onClick={() => edition.refetch()}>
+					<Button variant="secondary" onClick={() => edition.refetch()}>
 						<RefreshCw size={14} aria-hidden="true" /> Try again
-					</button>
+					</Button>
 				</section>
 			</main>
 		);

@@ -8,7 +8,7 @@ import {
 	Square,
 } from "lucide-react";
 import { type FormEvent, useEffect, useRef, useState } from "react";
-import { Button, buttonClassName } from "#/components/ui/Button";
+import { Button, buttonClassName } from "#/components/ui/atoms/Button";
 import {
 	useAiModels,
 	useAiProviders,
@@ -308,14 +308,13 @@ function ProviderConversation({
 						this story, or start with:
 					</p>
 					{STARTER_PROMPTS.map((prompt) => (
-						<button
+						<Button
 							key={prompt}
-							type="button"
+							variant="secondary"
 							onClick={() => chat.send(prompt)}
-							className="rounded-md border border-(--chip-line) px-3 py-1.5 text-left text-sm text-(--sea-ink) hover:bg-(--chip-bg)"
 						>
 							{prompt}
-						</button>
+						</Button>
 					))}
 				</div>
 			) : null}
@@ -334,13 +333,9 @@ function ProviderConversation({
 							Reconnect in profile
 						</Link>
 					) : chat.messages.at(-1)?.role === "user" ? (
-						<button
-							type="button"
-							onClick={chat.retry}
-							className="font-semibold text-(--lagoon-deep) hover:underline"
-						>
+						<Button variant="ghost" onClick={chat.retry}>
 							Try again
-						</button>
+						</Button>
 					) : null}
 				</div>
 			) : null}

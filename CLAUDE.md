@@ -54,7 +54,11 @@ The root layout (`src/routes/__root.tsx`) wraps every page in `TanStackQueryProv
 
 ### UI components
 
-Buttons come from `src/components/ui/Button.tsx` (`<Button variant="primary|secondary">`, or `buttonClassName(variant)` for `<a>`/`<Link>`). Add a variant there instead of styling a one-off button. Biome enforces this (`bun run check`): `noRestrictedElements` rejects raw `<button>` and `lint/no-button-look-classes.grit` rejects className strings that recreate the button look. Files that still use raw `<button>` for tabs, chips or text links are listed in the `biome.json` overrides; don't add to that list for new buttons.
+Design components live in `src/components/ui/` and follow atoms → molecules:
+- `atoms/` — single elements: `Button` (`<Button variant="…">`, or `buttonClassName(variant)` for `<a>`/`<Link>`; variants: primary, secondary (also filter chips, via `aria-pressed`), ghost (text actions), icon) and `Tab` (selected state comes from the caller's `aria-selected`/`aria-pressed`).
+- `molecules/` — atoms composed together: `TabList` (the tab row).
+
+Add a variant or component there instead of styling one-offs. Biome enforces this (`bun run check`): `noRestrictedElements` rejects raw `<button>` and `lint/no-button-look-classes.grit` rejects className strings that recreate the button look. The only exemptions are `ui/`, tests, and the stylesheet-free error UI in `client-entry.tsx`.
 
 ### Testing
 

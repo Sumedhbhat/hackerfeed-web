@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AlertCircle, RotateCw } from "lucide-react";
-import { buttonClassName } from "#/components/ui/Button";
+import { buttonClassName } from "#/components/ui/atoms/Button";
 
 const authErrorCopy = {
 	expired: {

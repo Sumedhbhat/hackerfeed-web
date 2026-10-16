@@ -1,8 +1,5 @@
 language js(jsx);
 
-// Buttons get their look from src/components/ui/Button.tsx. Reject className
-// values that recreate it (padding + semibold text + a filled or outlined
-// surface) anywhere else.
 JsxAttribute() as $attribute where {
 	$attribute <: r"(?s)^className=.*",
 	$attribute <: r"(?s).*px-3 py-2.*",
@@ -10,7 +7,7 @@ JsxAttribute() as $attribute where {
 	$attribute <: or { r"(?s).*bg-\(--lagoon\).*", r"(?s).*border-\(--chip-line\).*" },
 	register_diagnostic(
 		span = $attribute,
-		message = "This recreates the button look. Use <Button> or buttonClassName() from #/components/ui/Button instead.",
+		message = "This recreates the button look. Use <Button> or buttonClassName() from #/components/ui/atoms/Button instead.",
 		severity = "error"
 	)
 }

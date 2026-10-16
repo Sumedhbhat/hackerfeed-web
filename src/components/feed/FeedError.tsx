@@ -1,4 +1,5 @@
 import type { feedTabs } from "#/components/feed/feedTabs";
+import { Button } from "#/components/ui/atoms/Button";
 
 type FeedErrorProps = {
 	feed: (typeof feedTabs)[number];
@@ -16,13 +17,9 @@ export function FeedError({ feed, onRetry }: FeedErrorProps) {
 				The Hacker News request failed. Check your connection and try again.
 			</p>
 			<div className="mt-5 flex flex-wrap gap-4">
-				<button
-					type="button"
-					onClick={onRetry}
-					className="text-sm font-medium text-(--lagoon-deep) hover:text-(--lagoon) hover:underline underline-offset-2"
-				>
+				<Button variant="secondary" onClick={onRetry}>
 					Retry &rarr;
-				</button>
+				</Button>
 				<a
 					href="https://github.com/HackerNews/API"
 					target="_blank"
