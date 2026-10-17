@@ -19,7 +19,8 @@ import {
 	waitFor,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { StoryCard, StoryCardSkeleton } from "#/components/story-card";
+import { StoryCardSkeleton } from "#/components/molecules/StoryCardSkeleton";
+import { StoryCard } from "#/components/organisms/story/StoryCard";
 import { clearAllFavorites, isFavorited } from "#/lib/favorites-store";
 import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
 
@@ -71,37 +72,33 @@ vi.mock("#/lib/trpc/client", () => ({
 	})),
 }));
 
-// Mock Link from @tanstack/react-router so tests don't need a full RouterProvider.
+// Mock createLink from @tanstack/react-router so the link atoms render plain
+// anchors (with route params filled in) without a full RouterProvider.
 vi.mock("@tanstack/react-router", async (importOriginal) => {
 	const actual =
 		await importOriginal<typeof import("@tanstack/react-router")>();
 	return {
 		...actual,
-		Link: ({
-			children,
-			to,
-			params,
-			className,
-			"aria-label": ariaLabel,
-		}: {
-			children: React.ReactNode;
-			to: string;
-			params?: Record<string, unknown>;
-			className?: string;
-			"aria-label"?: string;
-		}) => (
-			<a
-				aria-label={ariaLabel}
-				href={
-					params
-						? to.replace(/\$(\w+)/g, (_, k) => String(params[k] ?? ""))
-						: to
-				}
-				className={className}
-			>
-				{children}
-			</a>
-		),
+		createLink:
+			(Anchor: React.ComponentType<Record<string, unknown>>) =>
+			({
+				to,
+				params,
+				...rest
+			}: {
+				to: string;
+				params?: Record<string, unknown>;
+				[key: string]: unknown;
+			}) => (
+				<Anchor
+					{...rest}
+					href={
+						params
+							? to.replace(/\$(\w+)/g, (_, k) => String(params[k] ?? ""))
+							: to
+					}
+				/>
+			),
 	};
 });
 

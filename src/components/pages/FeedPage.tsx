@@ -1,14 +1,17 @@
 import * as Sentry from "@sentry/react";
 import { Activity, Suspense, useState, useTransition } from "react";
+import { PageContainer } from "#/components/atoms/PageContainer";
+import { PendingContent } from "#/components/atoms/PendingContent";
+import { Stack } from "#/components/atoms/Stack";
 import { Tab } from "#/components/atoms/Tab";
-import { FeedError } from "#/components/feed/FeedError";
-import { FeedPane } from "#/components/feed/FeedPane";
-import { FeedSkeletons } from "#/components/feed/FeedSkeletons";
-import { feedTabs } from "#/components/feed/feedTabs";
+import { StoryListSkeleton } from "#/components/molecules/StoryListSkeleton";
 import { TabList } from "#/components/molecules/TabList";
-import { HackerNewsFeedKey } from "#/lib/hacker-news/queries";
+import { FeedError } from "#/components/organisms/feed/FeedError";
+import { FeedPane } from "#/components/organisms/feed/FeedPane";
+import { feedTabs } from "#/components/organisms/feed/feedTabs";
+import { HackerNewsFeedKey, PAGE_SIZE } from "#/lib/hacker-news/queries";
 
-export function FeedApp() {
+export function FeedPage() {
 	const [activeFeed, setActiveFeedState] = useState<HackerNewsFeedKey>(
 		HackerNewsFeedKey.Top,
 	);
@@ -21,13 +24,9 @@ export function FeedApp() {
 	};
 
 	return (
-		<main className="page-wrap px-4 pb-10 pt-5 sm:pt-10 sm:pb-14">
-			<div className="space-y-6">
-				<div
-					className={`transition-opacity ${
-						isPending ? "opacity-50 pointer-events-none" : ""
-					}`}
-				>
+		<PageContainer>
+			<Stack gap="lg">
+				<PendingContent pending={isPending}>
 					<TabList>
 						{feedTabs.map((feed) => {
 							const isActive = activeFeed === feed.key;
@@ -42,7 +41,7 @@ export function FeedApp() {
 							);
 						})}
 					</TabList>
-				</div>
+				</PendingContent>
 
 				{feedTabs.map((feed) => (
 					<Activity
@@ -54,13 +53,13 @@ export function FeedApp() {
 								<FeedError feed={feed} onRetry={resetError} />
 							)}
 						>
-							<Suspense fallback={<FeedSkeletons />}>
+							<Suspense fallback={<StoryListSkeleton count={PAGE_SIZE} />}>
 								<FeedPane feed={feed.key} />
 							</Suspense>
 						</Sentry.ErrorBoundary>
 					</Activity>
 				))}
-			</div>
-		</main>
+			</Stack>
+		</PageContainer>
 	);
 }

@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { FeedApp } from "#/components/feed";
+import { FeedPage } from "#/components/pages/FeedPage";
 import {
 	feedStoryIdsQueryOptions,
 	HackerNewsFeedKey,
@@ -9,7 +9,7 @@ import {
 import { logger } from "#/lib/logger";
 
 export const Route = createFileRoute("/")({
-	component: FeedApp,
+	component: FeedPage,
 	loader: async ({ context }) => {
 		try {
 			const ids = await context.queryClient.ensureQueryData(
