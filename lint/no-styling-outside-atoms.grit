@@ -1,0 +1,10 @@
+language js(jsx);
+
+JsxAttribute() as $attribute where {
+	$attribute <: or { r"(?s)^className=.*", r"(?s)^style=.*" },
+	register_diagnostic(
+		span = $attribute,
+		message = "Organisms, pages and routes describe *what* is on screen, not how it looks. Use a semantic component from #/components/atoms or #/components/molecules (add one there if none fits) instead of className/style.",
+		severity = "error"
+	)
+}
