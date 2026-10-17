@@ -2,7 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight, MessageCircle } from "lucide-react";
 import { Suspense } from "react";
 import { Comment } from "#/components/comment";
-import { TraceIdNote } from "#/components/trace-id-note";
+import { TraceIdNote } from "#/components/molecules/TraceIdNote";
 import { useErrorReport } from "#/hooks/useErrorReport";
 import { useFeatureFlag } from "#/hooks/useFeatureFlags";
 import { useStoryPage } from "#/hooks/useStoryPage";

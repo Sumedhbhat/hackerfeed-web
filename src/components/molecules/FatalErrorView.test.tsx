@@ -1,6 +1,6 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
-import { FatalErrorView } from "./fatal-error-view";
+import { FatalErrorView } from "./FatalErrorView";
 
 afterEach(cleanup);
 

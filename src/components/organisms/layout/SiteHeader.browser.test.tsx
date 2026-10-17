@@ -1,6 +1,6 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import Header from "./Header";
+import SiteHeader from "./SiteHeader";
 
 const state = vi.hoisted(() => ({
 	paperCount: 0,
@@ -21,19 +21,6 @@ vi.mock("./ThemeToggle", () => ({ default: () => null }));
 vi.mock("./UserMenu", () => ({ default: () => null }));
 vi.mock("@tanstack/react-router", async () => ({
 	createLink: (await import("#/test/createLinkMock")).createLinkMock,
-	Link: ({
-		children,
-		to,
-		className,
-	}: {
-		children: React.ReactNode;
-		to: string;
-		className?: string;
-	}) => (
-		<a href={to} className={className}>
-			{children}
-		</a>
-	),
 }));
 
 afterEach(() => {
@@ -43,19 +30,19 @@ afterEach(() => {
 	state.user = null;
 });
 
-describe("Header favorites count", () => {
+describe("SiteHeader favorites count", () => {
 	it("combines story and paper favorites for authenticated users", () => {
 		state.user = { id: "header-user" };
 		state.storyCount = 2;
 		state.paperCount = 3;
-		render(<Header />);
+		render(<SiteHeader />);
 		expect(screen.getByRole("link", { name: "Favorites 5" })).toBeTruthy();
 	});
 
 	it("shows only guest story favorites when signed out", () => {
 		state.storyCount = 2;
 		state.paperCount = 9;
-		render(<Header />);
+		render(<SiteHeader />);
 		expect(screen.getByRole("link", { name: "Favorites 2" })).toBeTruthy();
 	});
 });
