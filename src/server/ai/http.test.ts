@@ -48,9 +48,11 @@ async function* fromArray(items: string[], error?: Error) {
 function setup({
 	user = USER as typeof USER | null,
 	context = { story, comments: [] } as StoryChatContext | null,
+	enabled = true,
 }: {
 	user?: typeof USER | null;
 	context?: StoryChatContext | null;
+	enabled?: boolean;
 } = {}) {
 	const cipher = createTokenCipher("test-secret-that-is-long-enough-123");
 	const service = {
@@ -80,6 +82,7 @@ function setup({
 		getOrigin: () => ORIGIN,
 		getService: () => service as unknown as AiProviderService,
 		getUser: vi.fn().mockResolvedValue(user),
+		isEnabled: vi.fn().mockReturnValue(enabled),
 		getStoryContext,
 	});
 	return { cipher, getStoryContext, handlers, service };
@@ -737,5 +740,55 @@ describe("chat", () => {
 			404,
 		);
 		expect(missing.service.startChat).not.toHaveBeenCalled();
+	});
+});
+
+describe("with the aiChat flag off", () => {
+	it("hides every endpoint from the user", async () => {
+		const { handlers, service } = setup({ enabled: false });
+		const responses = await Promise.all([
+			handlers.connect(
+				connectRequest(`${ORIGIN}/ai/chatgpt/connect?returnTo=%2Fprofile`),
+				"chatgpt",
+			),
+			handlers.providers(new Request(`${ORIGIN}/api/ai/providers`)),
+			handlers.models(
+				new Request(`${ORIGIN}/api/ai/providers/chatgpt/models`),
+				"chatgpt",
+			),
+			handlers.disconnect(
+				new Request(`${ORIGIN}/api/ai/providers/chatgpt/disconnect`, {
+					method: "POST",
+				}),
+				"chatgpt",
+			),
+			handlers.chat(chatRequest(validChat)),
+		]);
+
+		for (const response of responses) {
+			expect(response.status).toBe(404);
+			expect(await response.json()).toMatchObject({
+				code: "feature_disabled",
+			});
+		}
+		expect(service.startAuthorization).not.toHaveBeenCalled();
+		expect(service.listProviders).not.toHaveBeenCalled();
+		expect(service.listModels).not.toHaveBeenCalled();
+		expect(service.disconnect).not.toHaveBeenCalled();
+		expect(service.startChat).not.toHaveBeenCalled();
+	});
+
+	it("refuses to finish a sign-in that started before the flag went off", async () => {
+		const { cipher, handlers, service } = setup({ enabled: false });
+
+		const response = await handlers.callback(
+			await callbackRequest(cipher, "?code=code-1&state=state-1"),
+			"chatgpt",
+		);
+
+		expect(response.headers.get("Location")).toBe(
+			"/chat/42?ai=error&provider=chatgpt&reason=feature_disabled",
+		);
+		expect(service.completeAuthorization).not.toHaveBeenCalled();
 	});
 });

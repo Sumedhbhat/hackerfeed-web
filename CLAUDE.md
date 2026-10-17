@@ -48,7 +48,11 @@ All HN API calls go through `src/lib/hacker-news/queries.ts` (direct calls to `h
 
 ### Auth
 
-WorkOS AuthKit owns the session entirely in the browser (`src/integrations/workos/provider.tsx`, `devMode` keeps the refresh token in localStorage). There are no HackerFeed session cookies. `AuthGate` in `__root.tsx` sends signed-out users to WorkOS; only `/auth/callback` and `/auth/signed-out` are public. API calls (tRPC, `src/lib/ai/client.ts`) send `Authorization: Bearer <access token>` via `getAuthHeaders()` in `src/lib/auth/authkit.ts`; the server verifies it against WorkOS's JWKS with `getRequestUser()` in `src/server/auth/workos-access-token.ts`.
+WorkOS AuthKit owns the session entirely in the browser (`src/integrations/workos/provider.tsx`, `devMode` keeps the refresh token in localStorage). There are no HackerFeed session cookies. `SessionGate` in `__root.tsx` sends signed-out users to WorkOS; only `/auth/callback` and `/auth/signed-out` are public. API calls (tRPC, `src/lib/ai/client.ts`) send `Authorization: Bearer <access token>` via `getAuthHeaders()` in `src/lib/auth/authkit.ts`; the server verifies it against WorkOS's JWKS with `getRequestUser()` in `src/server/auth/workos-access-token.ts`.
+
+### Feature flags
+
+Flags are code, not a service. `src/server/feature-flags/config.ts` defines them, `GET /api/feature-flags` returns them for the requesting session, and `SessionGate` in `__root.tsx` holds the app until the auth state and that session's flags are both known. Read flags with `useFeatureFlag(name)` on the client, and enforce them with `isFeatureEnabled(name, user)` on the server. Follow `.claude/skills/feature-flags/SKILL.md` to add, target or remove a flag.
 
 ### Logging and debugging
 

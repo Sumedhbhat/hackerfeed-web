@@ -17,6 +17,12 @@ vi.mock("#/hooks/useAuthSession", () => ({
 	signIn: vi.fn(),
 }));
 
+const flagsMock = vi.hoisted(() => ({ aiChat: true }));
+
+vi.mock("#/hooks/useFeatureFlags", () => ({
+	useFeatureFlag: (name: keyof typeof flagsMock) => flagsMock[name],
+}));
+
 vi.mock("@tanstack/react-router", () => ({
 	createFileRoute: () => (options: Record<string, unknown>) => ({
 		...options,
@@ -34,6 +40,7 @@ const ProfilePage = Route.component as ComponentType;
 beforeEach(() => {
 	authMock.user = null;
 	authMock.search = {};
+	flagsMock.aiChat = true;
 	vi.stubGlobal(
 		"fetch",
 		vi.fn(async () =>
@@ -119,5 +126,20 @@ describe("ProfilePage", () => {
 		render(<ProfilePage />);
 
 		expect(screen.queryByRole("heading", { name: "AI assistants" })).toBeNull();
+	});
+
+	it("hides the AI assistants section while the aiChat flag is off", () => {
+		authMock.user = {
+			id: "u1",
+			email: "reader@example.com",
+			firstName: null,
+			lastName: null,
+			profilePictureUrl: null,
+		};
+		flagsMock.aiChat = false;
+		render(<ProfilePage />);
+
+		expect(screen.queryByRole("heading", { name: "AI assistants" })).toBeNull();
+		expect(fetch).not.toHaveBeenCalled();
 	});
 });

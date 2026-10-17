@@ -14,6 +14,7 @@ import { Footer } from "../components/footer";
 import { Header } from "../components/header";
 import { signIn, useAuthSession } from "../hooks/useAuthSession";
 import { useErrorReport } from "../hooks/useErrorReport";
+import { useFeatureFlags } from "../hooks/useFeatureFlags";
 import { useLocalFavoritesMigration } from "../hooks/useLocalFavoritesMigration";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 import TanStackQueryProvider from "../integrations/tanstack-query/root-provider";
@@ -135,9 +136,9 @@ function AppLayout() {
 					<LocalFavoritesMigration />
 					<Header />
 					<div className="app-content">
-						<AuthGate>
+						<SessionGate>
 							<Outlet />
-						</AuthGate>
+						</SessionGate>
 					</div>
 					<Footer />
 				</div>
@@ -158,16 +159,23 @@ function AppLayout() {
 	);
 }
 
-function AuthGate({ children }: { children: ReactNode }) {
+/**
+ * Holds every page until the session is known: who the user is (sending
+ * signed-out visitors to sign in) and that session's feature flags. Signing in
+ * or out changes the session, so the flags are fetched again.
+ */
+function SessionGate({ children }: { children: ReactNode }) {
 	const { pathname } = useLocation();
 	const { isLoading, user } = useAuthSession();
+	// Settles on failure too, leaving every flag off rather than blocking the app.
+	const { isPending: flagsPending } = useFeatureFlags();
 	const isPublic = isPublicPath(pathname);
 
 	useEffect(() => {
 		if (!isPublic && !isLoading && !user) signIn();
 	}, [isPublic, isLoading, user]);
 
-	if (isPublic || user) return children;
+	if (isPublic || (user && !flagsPending)) return children;
 
 	return (
 		<div className="flex min-h-[60vh] items-center justify-center">

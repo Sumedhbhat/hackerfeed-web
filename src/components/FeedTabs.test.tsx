@@ -65,6 +65,8 @@ vi.mock("#/hooks/useAuthSession", () => ({
 	}),
 }));
 
+vi.mock("#/hooks/useFeatureFlags", () => ({ useFeatureFlag: () => false }));
+
 // ---------------------------------------------------------------------------
 // Import the component under test AFTER mocks are registered.
 // ---------------------------------------------------------------------------

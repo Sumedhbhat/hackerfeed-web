@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { Comment } from "#/components/comment";
 import { TraceIdNote } from "#/components/trace-id-note";
 import { useErrorReport } from "#/hooks/useErrorReport";
+import { useFeatureFlag } from "#/hooks/useFeatureFlags";
 import { useStoryPage } from "#/hooks/useStoryPage";
 import {
 	commentQueryOptions,
@@ -133,6 +134,7 @@ type StoryContentProps = {
 
 function StoryContent({ storyId }: StoryContentProps) {
 	const { story, commentQueries } = useStoryPage(storyId);
+	const aiChat = useFeatureFlag("aiChat");
 
 	if (!story) return null;
 
@@ -207,15 +209,17 @@ function StoryContent({ storyId }: StoryContentProps) {
 					>
 						View on HN
 					</a>
-					<Link
-						to="/chat/$storyId"
-						params={{ storyId: story.id }}
-						aria-label={`Discuss ${title} with AI`}
-						className="text-sm text-(--sea-ink-soft) hover:text-(--sea-ink) transition-colors"
-					>
-						<MessageCircle size={14} aria-hidden="true" className="inline" />{" "}
-						Discuss
-					</Link>
+					{aiChat ? (
+						<Link
+							to="/chat/$storyId"
+							params={{ storyId: story.id }}
+							aria-label={`Discuss ${title} with AI`}
+							className="text-sm text-(--sea-ink-soft) hover:text-(--sea-ink) transition-colors"
+						>
+							<MessageCircle size={14} aria-hidden="true" className="inline" />{" "}
+							Discuss
+						</Link>
+					) : null}
 				</div>
 			</article>
 

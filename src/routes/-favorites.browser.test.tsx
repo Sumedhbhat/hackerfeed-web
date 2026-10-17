@@ -29,6 +29,8 @@ vi.mock("#/hooks/useAuthSession", () => ({
 	}),
 }));
 
+vi.mock("#/hooks/useFeatureFlags", () => ({ useFeatureFlag: () => false }));
+
 vi.mock("#/lib/trpc/client", () => ({
 	createTrpcClient: vi.fn(() => ({
 		favorites: {
