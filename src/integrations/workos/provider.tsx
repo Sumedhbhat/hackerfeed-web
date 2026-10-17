@@ -1,8 +1,7 @@
-import { useRouter } from "@tanstack/react-router";
 import { AuthKitProvider, useAuth } from "@workos-inc/authkit-react";
 import { type ReactNode, useEffect } from "react";
 import { env } from "#/env";
-import { setAuthKit, toSafeReturnTo } from "#/lib/auth/authkit";
+import { setAuthKit } from "#/lib/auth/authkit";
 import { logger, setLogUser } from "#/lib/logger";
 
 /**
@@ -11,20 +10,17 @@ import { logger, setLogUser } from "#/lib/logger";
  * short-lived access token on its own.
  */
 export function AuthProvider({ children }: { children: ReactNode }) {
-	const router = useRouter();
-
 	return (
 		<AuthKitProvider
 			clientId={env.VITE_WORKOS_CLIENT_ID}
 			apiHostname={env.VITE_WORKOS_API_HOSTNAME}
 			redirectUri={env.VITE_WORKOS_REDIRECT_URI}
 			devMode
-			onRedirectCallback={({ state, authenticationMethod }) => {
+			// Navigating here races AuthKit's own history.replaceState right after
+			// this callback, leaving the router on /auth/callback. That route
+			// navigates once the user is set instead.
+			onRedirectCallback={({ authenticationMethod }) => {
 				logger.info("Signed in", { authenticationMethod });
-				void router.navigate({
-					href: toSafeReturnTo(state?.returnTo),
-					replace: true,
-				});
 			}}
 			onRefreshFailure={() => {
 				// AuthKit has dropped the session; AuthGate sends the user to sign in.
