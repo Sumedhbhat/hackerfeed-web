@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { FavoritesPage } from "#/components/favorites-page";
+import { FavoritesPage } from "#/components/pages/FavoritesPage";
 
 export type FavoritesType = "stories" | "papers";
 
