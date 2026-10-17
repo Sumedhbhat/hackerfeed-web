@@ -7,7 +7,7 @@ JsxAttribute() as $attribute where {
 	$attribute <: or { r"(?s).*bg-\(--lagoon\).*", r"(?s).*border-\(--chip-line\).*" },
 	register_diagnostic(
 		span = $attribute,
-		message = "This recreates the button look. Use <Button> or buttonClassName() from #/components/ui/atoms/Button instead.",
+		message = "This recreates the button look. Use <Button> or buttonClassName() from #/components/atoms/Button instead.",
 		severity = "error"
 	)
 }

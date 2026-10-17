@@ -1,6 +1,6 @@
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { FavoritesPage } from "#/components/favorites-page";
+import { FavoritesPage } from "#/components/pages/FavoritesPage";
 import { clearAllFavorites, toggleFavorite } from "#/lib/favorites-store";
 import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
 import type { SavedPaper } from "#/lib/paper-favorites/schemas";
@@ -46,7 +46,8 @@ vi.mock("#/lib/trpc/client", () => ({
 	})),
 }));
 
-vi.mock("@tanstack/react-router", () => ({
+vi.mock("@tanstack/react-router", async () => ({
+	createLink: (await import("#/test/createLinkMock")).createLinkMock,
 	createFileRoute: () => (options: unknown) => options,
 	Link: ({
 		children,

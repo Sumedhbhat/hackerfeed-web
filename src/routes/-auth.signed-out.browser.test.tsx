@@ -4,7 +4,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 const authMock = vi.hoisted(() => ({ signIn: vi.fn() }));
 
-vi.mock("@tanstack/react-router", () => ({
+vi.mock("@tanstack/react-router", async () => ({
+	createLink: (await import("#/test/createLinkMock")).createLinkMock,
 	createFileRoute: () => (options: Record<string, unknown>) => options,
 }));
 

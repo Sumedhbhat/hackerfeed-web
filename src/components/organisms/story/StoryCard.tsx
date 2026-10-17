@@ -1,0 +1,101 @@
+import { MessageCircle, Star } from "lucide-react";
+import { Button } from "#/components/atoms/Button";
+import { Card } from "#/components/atoms/Card";
+import { Heading } from "#/components/atoms/Heading";
+import { Icon } from "#/components/atoms/Icon";
+import { TextLink } from "#/components/atoms/Link";
+import { Row } from "#/components/atoms/Row";
+import { Stack } from "#/components/atoms/Stack";
+import { MetaLine } from "#/components/molecules/MetaLine";
+import { StoryStats } from "#/components/molecules/StoryStats";
+import { useFavorites } from "#/hooks/useFavorites";
+import { useViewActivity } from "#/hooks/useViewActivity";
+import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
+import {
+	formatStoryAge,
+	getDiscussionUrl,
+	getStoryDomain,
+	getStoryTitle,
+} from "#/lib/hacker-news/utils";
+import { openLink } from "#/lib/open-link";
+
+type StoryCardProps = {
+	story: HackerNewsStoryRecord;
+	animationDelay?: number;
+};
+
+export function StoryCard({ story, animationDelay }: StoryCardProps) {
+	const { isFavorited, toggleFavorite } = useFavorites();
+	const { recordStoryView } = useViewActivity();
+	const isFav = isFavorited(story.id);
+
+	const domain = getStoryDomain(story.url);
+	const age = formatStoryAge(story.time);
+	const title = getStoryTitle(story);
+	const storyUrl = story.url ?? getDiscussionUrl(story.id);
+
+	function openStory() {
+		recordStoryView(story);
+		openLink(storyUrl);
+	}
+
+	return (
+		<Card animated animationDelay={animationDelay}>
+			<MetaLine items={[domain, age]} />
+			<Stack gap="md">
+				<Heading
+					level={3}
+					size="card"
+					onClick={openStory}
+					onKeyDown={(e) => {
+						if (e.key === "Enter" || e.key === " ") openStory();
+					}}
+				>
+					{title}
+				</Heading>
+
+				<StoryStats
+					score={story.score}
+					by={story.by}
+					commentCount={story.descendants}
+				/>
+
+				<Row gap="lg" wrap>
+					<Button variant="ghost" onClick={openStory}>
+						{story.url ? "Read article" : "Open post"}
+					</Button>
+
+					<TextLink to="/story/$storyId" params={{ storyId: story.id }}>
+						Discussion
+					</TextLink>
+
+					<TextLink
+						to="/chat/$storyId"
+						params={{ storyId: story.id }}
+						aria-label={`Discuss ${title} with AI`}
+					>
+						<Icon icon={MessageCircle} />
+						Discuss
+					</TextLink>
+
+					<Button
+						variant="ghost"
+						aria-label={isFav ? "Remove from favorites" : "Save to favorites"}
+						aria-pressed={isFav}
+						onClick={() => toggleFavorite(story)}
+					>
+						{isFav ? (
+							<>
+								<Icon key="star-filled" icon={Star} filled pop /> Saved
+							</>
+						) : (
+							<>
+								<Icon key="star-empty" icon={Star} /> Save
+							</>
+						)}
+					</Button>
+				</Row>
+			</Stack>
+		</Card>
+	);
+}

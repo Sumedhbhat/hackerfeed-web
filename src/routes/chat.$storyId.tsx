@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { StoryChatPage } from "#/components/chat/StoryChatPage";
+import { StoryChatPage } from "#/components/pages/StoryChatPage";
 
 export const Route = createFileRoute("/chat/$storyId")({
 	params: {

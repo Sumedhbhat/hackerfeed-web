@@ -215,12 +215,12 @@ a {
 }
 
 .nav-link:hover,
-.nav-link.is-active {
+.nav-link[data-status="active"] {
   color: var(--sea-ink);
 }
 
 .nav-link:hover::after,
-.nav-link.is-active::after {
+.nav-link[data-status="active"]::after {
   transform: scaleX(1);
 }
 
@@ -353,12 +353,6 @@ a {
 
 .papers-card:hover {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-
-.papers-authors {
-  margin: 0;
-  color: var(--sea-ink-soft);
-  font-size: 0.75rem;
 }
 
 .papers-summary {
@@ -514,12 +508,6 @@ a {
 
 .papers-external-links.is-compact {
   max-width: 100%;
-}
-
-.papers-load-more {
-  display: flex;
-  justify-content: center;
-  padding-top: 1.75rem;
 }
 
 .papers-state {
