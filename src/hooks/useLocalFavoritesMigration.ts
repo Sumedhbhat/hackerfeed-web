@@ -47,7 +47,7 @@ export function useLocalFavoritesMigration(): void {
 				markLocalFavoritesMigrationCompleted(migrationWorkosUserId);
 			} catch (error) {
 				logger.error("Local favorites migration failed", {
-					err: error instanceof Error ? error.message : String(error),
+					error,
 					workosUserId: migrationWorkosUserId,
 				});
 			} finally {

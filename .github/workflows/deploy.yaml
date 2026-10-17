@@ -40,9 +40,7 @@ jobs:
         env:
           VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
           VITE_WORKOS_CLIENT_ID: ${{ secrets.VITE_WORKOS_CLIENT_ID }}
-          WORKOS_API_KEY: ${{ secrets.WORKOS_API_KEY }}
-          WORKOS_COOKIE_PASSWORD: ${{ secrets.WORKOS_COOKIE_PASSWORD }}
-          WORKOS_JWT_AUDIENCE: ${{ secrets.WORKOS_JWT_AUDIENCE }}
+          AI_TOKEN_ENCRYPTION_KEY: ${{ secrets.AI_TOKEN_ENCRYPTION_KEY }}
 
       - name: Verify build has no demo data
         run: |
@@ -56,15 +54,13 @@ jobs:
       # (undeployed) version.
       - name: Write Worker secrets file
         run: |
-          jq -n 'env | {SENTRY_DSN, VITE_SENTRY_DSN, VITE_WORKOS_CLIENT_ID, WORKOS_API_KEY, WORKOS_COOKIE_PASSWORD, WORKOS_JWT_AUDIENCE}' \
+          jq -n 'env | {SENTRY_DSN, VITE_SENTRY_DSN, VITE_WORKOS_CLIENT_ID, AI_TOKEN_ENCRYPTION_KEY}' \
             > "$RUNNER_TEMP/worker-secrets.json"
         env:
           SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
           VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
           VITE_WORKOS_CLIENT_ID: ${{ secrets.VITE_WORKOS_CLIENT_ID }}
-          WORKOS_API_KEY: ${{ secrets.WORKOS_API_KEY }}
-          WORKOS_COOKIE_PASSWORD: ${{ secrets.WORKOS_COOKIE_PASSWORD }}
-          WORKOS_JWT_AUDIENCE: ${{ secrets.WORKOS_JWT_AUDIENCE }}
+          AI_TOKEN_ENCRYPTION_KEY: ${{ secrets.AI_TOKEN_ENCRYPTION_KEY }}
 
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3

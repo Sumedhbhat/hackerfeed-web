@@ -36,7 +36,7 @@ if [ "${1:-}" = "seed" ]; then
 fi
 
 if [ ! -f .dev.vars ]; then
-	echo "Missing .dev.vars with the WorkOS secrets (see README.md > Environment)" >&2
+	echo "Missing .dev.vars (see README.md > Environment)" >&2
 	exit 1
 fi
 
@@ -52,7 +52,7 @@ if [ "${1:-}" = "--reset" ]; then
 fi
 mkdir -p "$STATE_DIR"
 
-VITE_DEMO_DATA=true bun run build
+VITE_DEMO_DATA=true VITE_WORKOS_REDIRECT_URI="${url}/auth/callback" bun run build
 d1 migrations apply DB
 seed
 

@@ -47,12 +47,12 @@ async function* fromArray(items: string[], error?: Error) {
 
 function setup({
 	user = USER as typeof USER | null,
-	setCookie,
 	context = { story, comments: [] } as StoryChatContext | null,
+	enabled = true,
 }: {
 	user?: typeof USER | null;
-	setCookie?: string;
 	context?: StoryChatContext | null;
+	enabled?: boolean;
 } = {}) {
 	const cipher = createTokenCipher("test-secret-that-is-long-enough-123");
 	const service = {
@@ -81,7 +81,8 @@ function setup({
 		cipher,
 		getOrigin: () => ORIGIN,
 		getService: () => service as unknown as AiProviderService,
-		getSession: vi.fn().mockResolvedValue({ user, setCookie }),
+		getUser: vi.fn().mockResolvedValue(user),
+		isEnabled: vi.fn().mockReturnValue(enabled),
 		getStoryContext,
 	});
 	return { cipher, getStoryContext, handlers, service };
@@ -109,6 +110,14 @@ async function callbackRequest(
 	});
 }
 
+async function connectUrl(response: Response) {
+	return ((await response.json()) as { url: string }).url;
+}
+
+function connectRequest(url: string) {
+	return new Request(url, { method: "POST" });
+}
+
 function chatRequest(body: unknown, headers: Record<string, string> = {}) {
 	return new Request(`${ORIGIN}/api/ai/chat`, {
 		method: "POST",
@@ -133,16 +142,16 @@ async function readEvents(response: Response): Promise<ChatStreamEvent[]> {
 }
 
 describe("connect", () => {
-	it("redirects to the provider and seals the flow in a cookie", async () => {
+	it("returns the provider URL and seals the flow in a cookie", async () => {
 		const { handlers, service } = setup();
 
 		const response = await handlers.connect(
-			new Request(`${ORIGIN}/ai/chatgpt/connect?returnTo=%2Fchat%2F42`),
+			connectRequest(`${ORIGIN}/ai/chatgpt/connect?returnTo=%2Fchat%2F42`),
 			"chatgpt",
 		);
 
-		expect(response.status).toBe(302);
-		expect(response.headers.get("Location")).toContain(
+		expect(response.status).toBe(200);
+		expect(await connectUrl(response)).toContain(
 			"https://auth.openai.com/api/accounts/authorize",
 		);
 		expect(service.startAuthorization).toHaveBeenCalledWith(USER, "chatgpt", {
@@ -161,7 +170,7 @@ describe("connect", () => {
 		const { handlers, service } = setup();
 
 		await handlers.connect(
-			new Request(`${ORIGIN}/ai/claude/connect`),
+			connectRequest(`${ORIGIN}/ai/claude/connect`),
 			"claude",
 		);
 
@@ -175,7 +184,9 @@ describe("connect", () => {
 		const { handlers, service } = setup();
 
 		await handlers.connect(
-			new Request(`${ORIGIN}/ai/chatgpt/connect?returnTo=//evil.example.com`),
+			connectRequest(
+				`${ORIGIN}/ai/chatgpt/connect?returnTo=//evil.example.com`,
+			),
 			"chatgpt",
 		);
 
@@ -186,7 +197,7 @@ describe("connect", () => {
 		const { handlers, service } = setup();
 
 		const response = await handlers.connect(
-			new Request(`${ORIGIN}/ai/Bad%20Id/connect`),
+			connectRequest(`${ORIGIN}/ai/Bad%20Id/connect`),
 			"Bad Id",
 		);
 
@@ -194,34 +205,45 @@ describe("connect", () => {
 		expect(service.startAuthorization).not.toHaveBeenCalled();
 	});
 
-	it("sends signed-out users through HackerFeed sign-in first", async () => {
+	it("returns 401 for signed-out users", async () => {
 		const { handlers, service } = setup({ user: null });
 
 		const response = await handlers.connect(
-			new Request(`${ORIGIN}/ai/chatgpt/connect?returnTo=%2Fprofile`),
+			connectRequest(`${ORIGIN}/ai/chatgpt/connect?returnTo=%2Fprofile`),
 			"chatgpt",
 		);
 
-		const location = new URL(response.headers.get("Location") ?? "", ORIGIN);
-		expect(location.pathname).toBe("/auth/sign-in");
-		expect(location.searchParams.get("returnTo")).toBe(
-			"/ai/chatgpt/connect?returnTo=%2Fprofile",
-		);
+		expect(response.status).toBe(401);
 		expect(service.startAuthorization).not.toHaveBeenCalled();
 	});
 
-	it("redirects back with the error code when sign-in can't start", async () => {
+	it("rejects cross-site requests", async () => {
+		const { handlers, service } = setup();
+
+		const response = await handlers.connect(
+			new Request(`${ORIGIN}/ai/chatgpt/connect`, {
+				method: "POST",
+				headers: { "Sec-Fetch-Site": "cross-site" },
+			}),
+			"chatgpt",
+		);
+
+		expect(response.status).toBe(403);
+		expect(service.startAuthorization).not.toHaveBeenCalled();
+	});
+
+	it("returns to the page with the error code when sign-in can't start", async () => {
 		const { handlers, service } = setup();
 		service.startAuthorization.mockRejectedValue(
 			new AiProviderError("provider_unavailable", "nope"),
 		);
 
 		const response = await handlers.connect(
-			new Request(`${ORIGIN}/ai/chatgpt/connect`),
+			connectRequest(`${ORIGIN}/ai/chatgpt/connect`),
 			"chatgpt",
 		);
 
-		expect(response.headers.get("Location")).toBe(
+		expect(await connectUrl(response)).toBe(
 			"/profile?ai=error&provider=chatgpt&reason=provider_unavailable",
 		);
 		expect(response.headers.get("Set-Cookie")).toBeNull();
@@ -232,24 +254,11 @@ describe("connect", () => {
 		service.startAuthorization.mockRejectedValue(new Error("db down"));
 
 		const response = await handlers.connect(
-			new Request(`${ORIGIN}/ai/chatgpt/connect`),
+			connectRequest(`${ORIGIN}/ai/chatgpt/connect`),
 			"chatgpt",
 		);
 
-		expect(response.headers.get("Location")).toContain("reason=start_failed");
-	});
-
-	it("forwards refreshed session cookies", async () => {
-		const { handlers } = setup({ setCookie: "hackerfeed_session=new" });
-
-		const response = await handlers.connect(
-			new Request(`${ORIGIN}/ai/chatgpt/connect`),
-			"chatgpt",
-		);
-
-		expect(response.headers.get("Set-Cookie")).toContain(
-			"hackerfeed_session=new",
-		);
+		expect(await connectUrl(response)).toContain("reason=start_failed");
 	});
 });
 
@@ -364,16 +373,20 @@ describe("callback", () => {
 		expect(service.completeAuthorization).not.toHaveBeenCalled();
 	});
 
-	it("requires a signed-in HackerFeed session", async () => {
+	it("completes for the user who started the flow", async () => {
 		const { cipher, handlers, service } = setup({ user: null });
 
 		const response = await handlers.callback(
-			await callbackRequest(cipher, "?code=c&state=state-1"),
+			await callbackRequest(cipher, "?code=c&state=state-1", {
+				value: flow({ workosUserId: "workos-2" }),
+			}),
 			"chatgpt",
 		);
 
-		expect(response.headers.get("Location")).toContain("reason=signed_out");
-		expect(service.completeAuthorization).not.toHaveBeenCalled();
+		expect(response.headers.get("Location")).toContain("ai=connected");
+		expect(service.completeAuthorization.mock.calls[0][0]).toEqual({
+			workosUserId: "workos-2",
+		});
 	});
 
 	it("redirects with the service error code on failure", async () => {
@@ -727,5 +740,55 @@ describe("chat", () => {
 			404,
 		);
 		expect(missing.service.startChat).not.toHaveBeenCalled();
+	});
+});
+
+describe("with the aiChat flag off", () => {
+	it("hides every endpoint from the user", async () => {
+		const { handlers, service } = setup({ enabled: false });
+		const responses = await Promise.all([
+			handlers.connect(
+				connectRequest(`${ORIGIN}/ai/chatgpt/connect?returnTo=%2Fprofile`),
+				"chatgpt",
+			),
+			handlers.providers(new Request(`${ORIGIN}/api/ai/providers`)),
+			handlers.models(
+				new Request(`${ORIGIN}/api/ai/providers/chatgpt/models`),
+				"chatgpt",
+			),
+			handlers.disconnect(
+				new Request(`${ORIGIN}/api/ai/providers/chatgpt/disconnect`, {
+					method: "POST",
+				}),
+				"chatgpt",
+			),
+			handlers.chat(chatRequest(validChat)),
+		]);
+
+		for (const response of responses) {
+			expect(response.status).toBe(404);
+			expect(await response.json()).toMatchObject({
+				code: "feature_disabled",
+			});
+		}
+		expect(service.startAuthorization).not.toHaveBeenCalled();
+		expect(service.listProviders).not.toHaveBeenCalled();
+		expect(service.listModels).not.toHaveBeenCalled();
+		expect(service.disconnect).not.toHaveBeenCalled();
+		expect(service.startChat).not.toHaveBeenCalled();
+	});
+
+	it("refuses to finish a sign-in that started before the flag went off", async () => {
+		const { cipher, handlers, service } = setup({ enabled: false });
+
+		const response = await handlers.callback(
+			await callbackRequest(cipher, "?code=code-1&state=state-1"),
+			"chatgpt",
+		);
+
+		expect(response.headers.get("Location")).toBe(
+			"/chat/42?ai=error&provider=chatgpt&reason=feature_disabled",
+		);
+		expect(service.completeAuthorization).not.toHaveBeenCalled();
 	});
 });

@@ -1,0 +1,13 @@
+language js(jsx);
+
+JsxAttribute() as $attribute where {
+	$attribute <: r"(?s)^className=.*",
+	$attribute <: r"(?s).*px-3 py-2.*",
+	$attribute <: r"(?s).*font-semibold.*",
+	$attribute <: or { r"(?s).*bg-\(--lagoon\).*", r"(?s).*border-\(--chip-line\).*" },
+	register_diagnostic(
+		span = $attribute,
+		message = "This recreates the button look. Use <Button> or buttonClassName() from #/components/ui/atoms/Button instead.",
+		severity = "error"
+	)
+}

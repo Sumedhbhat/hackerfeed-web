@@ -31,16 +31,24 @@ jobs:
         run: bun install --frozen-lockfile
 
       # VITE_DEMO_DATA builds in the in-memory Hacker News API that serves
-      # fixtures/hacker-news instead of the live API.
+      # fixtures/hacker-news instead of the live API. Sign-in returns to the
+      # PR's alias URL rather than the production one in .env.production.
       - name: Build
-        run: bun run build
+        run: |
+          prod_host=$(sed -n 's|^VITE_WORKOS_REDIRECT_URI=https://\([^/]*\)/.*|\1|p' .env.production)
+          if [ -z "$prod_host" ]; then
+            echo "No production redirect URI in .env.production" >&2
+            exit 1
+          fi
+          export VITE_WORKOS_REDIRECT_URI="https://pr-${PR_NUMBER}-${prod_host}/auth/callback"
+          echo "Sign-in redirect: ${VITE_WORKOS_REDIRECT_URI}"
+          bun run build
         env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
           VITE_DEMO_DATA: "true"
           VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
           VITE_WORKOS_CLIENT_ID: ${{ secrets.VITE_WORKOS_CLIENT_ID }}
-          WORKOS_API_KEY: ${{ secrets.WORKOS_API_KEY }}
-          WORKOS_COOKIE_PASSWORD: ${{ secrets.WORKOS_COOKIE_PASSWORD }}
-          WORKOS_JWT_AUDIENCE: ${{ secrets.WORKOS_JWT_AUDIENCE }}
+          AI_TOKEN_ENCRYPTION_KEY: ${{ secrets.AI_TOKEN_ENCRYPTION_KEY }}
 
       - name: Verify build serves demo data
         run: |

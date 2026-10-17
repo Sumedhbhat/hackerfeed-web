@@ -34,8 +34,6 @@
 		"VITE_WORKOS_API_HOSTNAME": "api.workos.com",
 		// Required: WorkOS redirect URI after auth
 		"VITE_WORKOS_REDIRECT_URI": "https://hackerfeed-web.kgqk4vdcfq.workers.dev/auth/callback",
-		// Required: WorkOS access-token audience. Set via vars or secret before deploy.
-		// "WORKOS_JWT_AUDIENCE": "your-workos-jwt-audience"
 		// VITE_WORKOS_CLIENT_ID is a secret — set via: wrangler secret put VITE_WORKOS_CLIENT_ID
 	},
 	"d1_databases": [

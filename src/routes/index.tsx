@@ -23,10 +23,9 @@ export const Route = createFileRoute("/")({
 					),
 			);
 		} catch (err) {
-			logger.error("Feed loader failed", {
+			logger.warn("Feed loader failed", {
 				feed: HackerNewsFeedKey.Top,
-				err: err instanceof Error ? err.message : String(err),
-				stack: err instanceof Error ? err.stack : undefined,
+				error: err,
 			});
 			throw err;
 		}

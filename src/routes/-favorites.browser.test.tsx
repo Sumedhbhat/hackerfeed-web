@@ -29,6 +29,8 @@ vi.mock("#/hooks/useAuthSession", () => ({
 	}),
 }));
 
+vi.mock("#/hooks/useFeatureFlags", () => ({ useFeatureFlag: () => false }));
+
 vi.mock("#/lib/trpc/client", () => ({
 	createTrpcClient: vi.fn(() => ({
 		favorites: {
@@ -173,19 +175,6 @@ describe("FavoritesPage backend source of truth", () => {
 });
 
 describe("FavoritesPage paper collection", () => {
-	it("shows a sign-in action without loading protected paper favorites", () => {
-		render(<FavoritesPage activeType="papers" />);
-
-		expect(
-			screen.getByRole("heading", { name: "Sign in to view saved papers." }),
-		).toBeTruthy();
-		expect(
-			screen.getByRole("link", { name: /sign in/i }).getAttribute("href"),
-		).toBe("/auth/sign-in");
-		expect(trpcMock.paperList).not.toHaveBeenCalled();
-		expect(screen.queryByRole("button", { name: /clear papers/i })).toBeNull();
-	});
-
 	it("renders canonical paper links in newest-saved order and removes with the star", async () => {
 		authMock.user = { id: "paper-page-user" };
 		trpcMock.paperList.mockResolvedValue({

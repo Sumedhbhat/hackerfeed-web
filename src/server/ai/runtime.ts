@@ -2,8 +2,9 @@ import "@tanstack/react-start/server-only";
 
 import { env } from "#/env";
 import { fetchComment, fetchStory } from "#/lib/hacker-news/queries";
-import { getCurrentSession, getOrigin } from "#/server/auth/session";
+import { getRequestUser } from "#/server/auth/workos-access-token";
 import { getDatabaseContext } from "#/server/database/client";
+import { isFeatureEnabled } from "#/server/feature-flags/service";
 import { createUserServiceFromDatabase } from "#/server/users/service";
 import { createAiHttpHandlers } from "./http";
 import { createChatGptAdapter } from "./providers/chatgpt/adapter";
@@ -24,14 +25,18 @@ const adapters: AiProviderAdapter[] = [
 	}),
 ];
 
-const cipher = createTokenCipher(
-	env.AI_TOKEN_ENCRYPTION_KEY ?? env.WORKOS_COOKIE_PASSWORD,
-);
+const cipher = createTokenCipher(env.AI_TOKEN_ENCRYPTION_KEY);
+
+function getOrigin(request: Request): string {
+	const configuredUrl = env.SERVER_URL?.trim();
+	return new URL(configuredUrl || request.url).origin;
+}
 
 export const aiHttpHandlers = createAiHttpHandlers({
 	cipher,
 	getOrigin,
-	getSession: getCurrentSession,
+	getUser: getRequestUser,
+	isEnabled: (user) => isFeatureEnabled("aiChat", user),
 	getService() {
 		const database = getDatabaseContext();
 		return createAiProviderService({

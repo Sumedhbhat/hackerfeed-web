@@ -58,9 +58,7 @@ VITE_SENTRY_ENVIRONMENT=development
 VITE_SENTRY_TRACES_SAMPLE_RATE=0.1
 
 # .dev.vars
-WORKOS_API_KEY=...
-WORKOS_COOKIE_PASSWORD=... # at least 32 characters
-WORKOS_JWT_AUDIENCE=...
+AI_TOKEN_ENCRYPTION_KEY=... # at least 32 characters
 SENTRY_DSN=...
 SENTRY_ENVIRONMENT=development
 SENTRY_TRACES_SAMPLE_RATE=0.1
@@ -135,8 +133,7 @@ without a deploy.
 ### Configuration
 
 ```bash
-# .dev.vars (all optional)
-AI_TOKEN_ENCRYPTION_KEY=...          # 32+ chars; defaults to WORKOS_COOKIE_PASSWORD
+# .dev.vars (optional)
 CHATGPT_CLIENT_ID=oaiapp_...         # issued by OpenAI for this deployment
 CHATGPT_CLIENT_SECRET=...            # only for confidential clients
 ```

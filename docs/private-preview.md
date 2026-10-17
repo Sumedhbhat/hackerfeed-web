@@ -31,9 +31,9 @@ Nothing is read from or written to the Cloudflare databases.
 
 ## One-time setup
 
-- Put the WorkOS values in `.env.local` and `.dev.vars` (see README.md >
-  Environment). A WorkOS staging environment keeps preview sign-ins out of
-  production.
+- Put `VITE_WORKOS_CLIENT_ID` in `.env.local` and `AI_TOKEN_ENCRYPTION_KEY` in
+  `.dev.vars` (see README.md > Environment). A WorkOS staging environment keeps
+  preview sign-ins out of production.
 - In WorkOS, add the redirect URI
   `https://<machine>.<tailnet>.ts.net:8443/auth/callback`.
 

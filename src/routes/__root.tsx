@@ -4,19 +4,22 @@ import {
 	createRootRouteWithContext,
 	HeadContent,
 	Outlet,
-	redirect,
 	Scripts,
+	useLocation,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-import { useEffect } from "react";
+import { type ReactNode, useEffect } from "react";
 import { FatalErrorView } from "../components/fatal-error-view";
 import { Footer } from "../components/footer";
 import { Header } from "../components/header";
+import { signIn, useAuthSession } from "../hooks/useAuthSession";
+import { useErrorReport } from "../hooks/useErrorReport";
+import { useFeatureFlags } from "../hooks/useFeatureFlags";
 import { useLocalFavoritesMigration } from "../hooks/useLocalFavoritesMigration";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 import TanStackQueryProvider from "../integrations/tanstack-query/root-provider";
+import { AuthProvider } from "../integrations/workos/provider";
 import { logger } from "../lib/logger";
-import { getRequiredSessionUser } from "../server/auth/require-session";
 import appCss from "../styles.css?url";
 
 interface MyRouterContext {
@@ -24,22 +27,6 @@ interface MyRouterContext {
 }
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
-	beforeLoad: async ({ location }) => {
-		if (isPublicPath(location.pathname)) {
-			return;
-		}
-
-		const user = await getRequiredSessionUser();
-
-		if (!user) {
-			throw redirect({
-				to: "/auth/sign-in",
-				search: {
-					returnTo: location.href,
-				},
-			});
-		}
-	},
 	head: () => ({
 		meta: [
 			{
@@ -94,23 +81,9 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 	shellComponent: RootDocument,
 });
 
+/** Pages a signed-out visitor can see; everything else asks for sign-in. */
 function isPublicPath(pathname: string) {
-	return (
-		pathname === "/auth/sign-in" ||
-		pathname === "/auth/callback" ||
-		pathname === "/auth/error" ||
-		pathname === "/auth/signed-out" ||
-		pathname === "/auth/sign-out" ||
-		pathname.startsWith("/api/") ||
-		pathname.startsWith("/assets/") ||
-		pathname === "/favicon.ico" ||
-		pathname === "/manifest.json" ||
-		pathname === "/robots.txt" ||
-		pathname === "/sw.js" ||
-		pathname === "/theme-init.js" ||
-		pathname === "/logo192.png" ||
-		pathname === "/logo512.png"
-	);
+	return pathname === "/auth/callback" || pathname === "/auth/signed-out";
 }
 
 // ---------------------------------------------------------------------------
@@ -118,12 +91,9 @@ function isPublicPath(pathname: string) {
 // ---------------------------------------------------------------------------
 
 function RootError({ error }: { error: unknown }) {
-	logger.error("Root error boundary triggered", {
-		err: error instanceof Error ? error.message : String(error),
-		stack: error instanceof Error ? error.stack : undefined,
-	});
+	const traceId = useErrorReport("Root error boundary triggered", error);
 
-	return <FatalErrorView />;
+	return <FatalErrorView traceId={traceId} />;
 }
 
 function AppLayout() {
@@ -136,7 +106,7 @@ function AppLayout() {
 						registrations.map((registration) => registration.unregister()),
 					),
 				)
-				.catch((err) => console.warn("SW cleanup failed:", err));
+				.catch((error) => logger.warn("SW cleanup failed", { error }));
 
 			window.caches
 				?.keys()
@@ -147,7 +117,7 @@ function AppLayout() {
 							.map((cacheName) => caches.delete(cacheName)),
 					),
 				)
-				.catch((err) => console.warn("SW cache cleanup failed:", err));
+				.catch((error) => logger.warn("SW cache cleanup failed", { error }));
 
 			return;
 		}
@@ -155,51 +125,56 @@ function AppLayout() {
 		if ("serviceWorker" in navigator) {
 			navigator.serviceWorker
 				.register("/sw.js", { scope: "/" })
-				.catch((err) => console.warn("SW registration failed:", err));
+				.catch((error) => logger.warn("SW registration failed", { error }));
 		}
-
-		function handleUnhandledRejection(event: PromiseRejectionEvent) {
-			logger.error("Unhandled promise rejection", {
-				err:
-					event.reason instanceof Error
-						? event.reason.message
-						: String(event.reason),
-				stack: event.reason instanceof Error ? event.reason.stack : undefined,
-			});
-		}
-
-		window.addEventListener("unhandledrejection", handleUnhandledRejection);
-		return () => {
-			window.removeEventListener(
-				"unhandledrejection",
-				handleUnhandledRejection,
-			);
-		};
 	}, []);
 
 	return (
-		<TanStackQueryProvider>
-			<div className="app-shell">
-				<LocalFavoritesMigration />
-				<Header />
-				<div className="app-content">
-					<Outlet />
+		<AuthProvider>
+			<TanStackQueryProvider>
+				<div className="app-shell">
+					<LocalFavoritesMigration />
+					<Header />
+					<div className="app-content">
+						<SessionGate>
+							<Outlet />
+						</SessionGate>
+					</div>
+					<Footer />
 				</div>
-				<Footer />
-			</div>
-			<TanStackDevtools
-				config={{
-					position: "bottom-right",
-				}}
-				plugins={[
-					{
-						name: "Tanstack Router",
-						render: <TanStackRouterDevtoolsPanel />,
-					},
-					TanStackQueryDevtools,
-				]}
-			/>
-		</TanStackQueryProvider>
+				<TanStackDevtools
+					config={{
+						position: "bottom-right",
+					}}
+					plugins={[
+						{
+							name: "Tanstack Router",
+							render: <TanStackRouterDevtoolsPanel />,
+						},
+						TanStackQueryDevtools,
+					]}
+				/>
+			</TanStackQueryProvider>
+		</AuthProvider>
+	);
+}
+
+function SessionGate({ children }: { children: ReactNode }) {
+	const { pathname } = useLocation();
+	const { isLoading, user } = useAuthSession();
+	const { isPending: flagsPending } = useFeatureFlags();
+	const isPublic = isPublicPath(pathname);
+
+	useEffect(() => {
+		if (!isPublic && !isLoading && !user) signIn();
+	}, [isPublic, isLoading, user]);
+
+	if (isPublic || (user && !flagsPending)) return children;
+
+	return (
+		<div className="flex min-h-[60vh] items-center justify-center">
+			<div className="h-8 w-8 animate-spin rounded-full border-2 border-(--chip-line) border-t-(--lagoon)" />
+		</div>
 	);
 }
 

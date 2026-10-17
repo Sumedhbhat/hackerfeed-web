@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { Button } from "#/components/ui/atoms/Button";
 import { useComment } from "#/hooks/useComment";
 import type { HackerNewsCommentRecord } from "#/lib/hacker-news/queries";
 
@@ -63,14 +64,15 @@ export function Comment({ comment, depth = 0 }: CommentProps) {
 				)}
 
 				{!comment.deleted && !comment.dead && (
-					<button
-						type="button"
-						onClick={() => setCollapsed((v) => !v)}
-						className="ml-auto text-xs text-(--sea-ink-soft) opacity-50 hover:opacity-100 transition-opacity"
-						aria-label={collapsed ? "Expand comment" : "Collapse comment"}
-					>
-						{collapsed ? "[+]" : "[-]"}
-					</button>
+					<span className="ml-auto">
+						<Button
+							variant="ghost"
+							onClick={() => setCollapsed((v) => !v)}
+							aria-label={collapsed ? "Expand comment" : "Collapse comment"}
+						>
+							{collapsed ? "[+]" : "[-]"}
+						</Button>
+					</span>
 				)}
 			</div>
 
@@ -87,15 +89,11 @@ export function Comment({ comment, depth = 0 }: CommentProps) {
 
 					{/* Replies toggle */}
 					{replyCount > 0 && (
-						<button
-							type="button"
-							onClick={() => setRepliesOpen((v) => !v)}
-							className="text-xs text-(--sea-ink-soft) hover:text-(--sea-ink) transition-colors"
-						>
+						<Button variant="ghost" onClick={() => setRepliesOpen((v) => !v)}>
 							{repliesOpen
 								? "Hide replies"
 								: `${replyCount} ${replyCount === 1 ? "reply" : "replies"}`}
-						</button>
+						</Button>
 					)}
 
 					{/* Nested replies — wrapped in Suspense so parent comment isn't affected while loading */}

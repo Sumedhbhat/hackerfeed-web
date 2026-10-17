@@ -1,4 +1,7 @@
 import type { feedTabs } from "#/components/feed/feedTabs";
+import { TraceIdNote } from "#/components/trace-id-note";
+import { Button } from "#/components/ui/atoms/Button";
+import { getTraceId } from "#/lib/logger";
 
 type FeedErrorProps = {
 	feed: (typeof feedTabs)[number];
@@ -15,14 +18,11 @@ export function FeedError({ feed, onRetry }: FeedErrorProps) {
 			<p className="m-0 mt-3 max-w-lg text-sm leading-relaxed text-(--sea-ink-soft)">
 				The Hacker News request failed. Check your connection and try again.
 			</p>
+			<TraceIdNote traceId={getTraceId()} />
 			<div className="mt-5 flex flex-wrap gap-4">
-				<button
-					type="button"
-					onClick={onRetry}
-					className="text-sm font-medium text-(--lagoon-deep) hover:text-(--lagoon) hover:underline underline-offset-2"
-				>
+				<Button variant="secondary" onClick={onRetry}>
 					Retry &rarr;
-				</button>
+				</Button>
 				<a
 					href="https://github.com/HackerNews/API"
 					target="_blank"

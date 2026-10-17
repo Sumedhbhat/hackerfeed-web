@@ -81,7 +81,7 @@ export function useFavorites(): UseFavoritesReturn {
 				}
 			} catch (error) {
 				logger.error("Database favorites load failed", {
-					err: error instanceof Error ? error.message : String(error),
+					error,
 					workosUserId: authenticatedUserId,
 				});
 			} finally {
@@ -135,7 +135,7 @@ export function useFavorites(): UseFavoritesReturn {
 					userId: authenticatedUserId,
 				}));
 				logger.error("Database favorite mutation failed", {
-					err: error instanceof Error ? error.message : String(error),
+					error,
 					hnStoryId: story.id,
 					workosUserId: authenticatedUserId,
 				});
@@ -167,7 +167,7 @@ export function useFavorites(): UseFavoritesReturn {
 					userId: authenticatedUserId,
 				}));
 				logger.error("Database favorites clear failed", {
-					err: error instanceof Error ? error.message : String(error),
+					error,
 					workosUserId: authenticatedUserId,
 				});
 			}

@@ -27,6 +27,7 @@
   "dependencies": {
     "@cloudflare/vite-plugin": "^1.64.0",
     "@sentry/cloudflare": "^10.69.0",
+    "@sentry/core": "^10.69.0",
     "@sentry/react": "^10.69.0",
     "@t3-oss/env-core": "^0.13.10",
     "@tailwindcss/vite": "^4.3.3",
@@ -44,7 +45,6 @@
     "@trpc/server": "^11.19.0",
     "@trpc/tanstack-react-query": "^11.19.0",
     "@workos-inc/authkit-react": "^0.16.2",
-    "@workos-inc/node": "^10.9.0",
     "drizzle-orm": "^0.45.3",
     "jose": "^6.2.12",
     "ky": "^2.1.0",

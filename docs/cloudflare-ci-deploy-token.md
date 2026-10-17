@@ -30,7 +30,9 @@ every same-repo, non-Dependabot pull request. It:
 4. Comments the preview URLs on the PR.
 
 `.github/workflows/preview-cleanup.yaml` deletes the PR's database when the PR
-closes. Previews still share production secrets (WorkOS, Sentry). The same
+closes. Previews still share the production Worker secrets (Sentry, the AI
+token key). Sign-in on a preview returns to its alias URL, so WorkOS must allow
+`https://pr-<number>-hackerfeed-web.kgqk4vdcfq.workers.dev/auth/callback`. The same
 data can be run locally, tailnet-only, with `docs/private-preview.md`.
 
 Because a preview upload makes the latest Worker version an undeployed one,

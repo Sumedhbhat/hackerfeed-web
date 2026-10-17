@@ -1,6 +1,15 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+
+const authMock = vi.hoisted(() => ({
+	getAuthHeaders: vi.fn(async () => ({ Authorization: "Bearer token-1" })),
+	signIn: vi.fn(),
+}));
+
+vi.mock("#/lib/auth/authkit", () => authMock);
+
 import {
 	AiRequestError,
+	connectAiProvider,
 	disconnectAiProvider,
 	fetchAiModels,
 	fetchAiProviders,
@@ -106,8 +115,39 @@ describe("AI client", () => {
 
 		expect(fetch).toHaveBeenCalledWith(
 			"/api/ai/providers/chatgpt/disconnect",
-			expect.objectContaining({ method: "POST" }),
+			expect.objectContaining({
+				method: "POST",
+				headers: { Authorization: "Bearer token-1" },
+			}),
 		);
+	});
+
+	it("starts a connection with the bearer token and follows the provider URL", async () => {
+		const fetch = vi
+			.fn()
+			.mockResolvedValue(Response.json({ url: "https://provider.test/auth" }));
+		const assign = vi.fn();
+		vi.stubGlobal("fetch", fetch);
+		vi.stubGlobal("location", { ...window.location, assign });
+
+		await connectAiProvider("chatgpt", "/profile");
+
+		expect(fetch).toHaveBeenCalledWith(
+			"/ai/chatgpt/connect?returnTo=%2Fprofile",
+			{ method: "POST", headers: { Authorization: "Bearer token-1" } },
+		);
+		expect(assign).toHaveBeenCalledWith("https://provider.test/auth");
+	});
+
+	it("asks signed-out users to sign in before connecting", async () => {
+		vi.stubGlobal(
+			"fetch",
+			vi.fn().mockResolvedValue(new Response(null, { status: 401 })),
+		);
+
+		await connectAiProvider("chatgpt", "/profile");
+
+		expect(authMock.signIn).toHaveBeenCalledWith("/profile");
 	});
 });
 
