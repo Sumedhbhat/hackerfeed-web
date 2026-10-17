@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.5.6/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
 	"vcs": {
 		"enabled": false,
 		"clientKind": "git",
@@ -40,7 +40,7 @@
 					"level": "error",
 					"options": {
 						"elements": {
-							"button": "Use <Button> from #/components/ui/atoms/Button instead of a raw <button>."
+							"button": "Use <Button> from #/components/atoms/Button instead of a raw <button>."
 						}
 					}
 				}
@@ -55,11 +55,54 @@
 	"plugins": ["./lint/no-button-look-classes.grit"],
 	"overrides": [
 		{
-			"includes": ["**/src/components/atoms/**", "**/src/components/molecules/**", "**/*.test.tsx"],
+			"includes": [
+				"**/src/components/atoms/**",
+				"**/src/components/molecules/**",
+				"**/*.test.tsx"
+			],
 			"linter": {
 				"rules": {
 					"correctness": {
 						"noRestrictedElements": "off"
+					}
+				}
+			}
+		},
+		{
+			"includes": [
+				"**/src/components/organisms/**",
+				"**/src/components/pages/**",
+				"**/src/routes/**",
+				"!**/*.test.tsx"
+			],
+			"plugins": ["./lint/no-styling-outside-atoms.grit"]
+		},
+		{
+			"includes": [
+				"**/src/components/atoms/**",
+				"**/src/components/molecules/**",
+				"!**/*.test.tsx"
+			],
+			"linter": {
+				"rules": {
+					"style": {
+						"noRestrictedImports": {
+							"level": "error",
+							"options": {
+								"patterns": [
+									{
+										"group": [
+											"#/hooks/*",
+											"#/lib/*",
+											"#/server/*",
+											"#/components/organisms/*",
+											"#/components/pages/*"
+										],
+										"message": "Atoms and molecules are presentational: take data and callbacks as props instead of importing hooks, lib or higher layers."
+									}
+								]
+							}
+						}
 					}
 				}
 			}
