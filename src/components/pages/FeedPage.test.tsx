@@ -26,11 +26,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 // modules so vitest can hoist them correctly.
 // ---------------------------------------------------------------------------
 
-// Mock TanStack Router so createFileRoute and Link don't need a real router.
+// Mock TanStack Router so links don't need a real router.
 vi.mock("@tanstack/react-router", async () => ({
 	createLink: (await import("#/test/createLinkMock")).createLinkMock,
-	createFileRoute: (_path: string) => (options: { component: unknown }) =>
-		options,
 	Link: ({
 		to,
 		children,
@@ -70,9 +68,7 @@ vi.mock("#/hooks/useAuthSession", () => ({
 // Import the component under test AFTER mocks are registered.
 // ---------------------------------------------------------------------------
 
-import { Route } from "#/routes/index";
-
-const FeedApp = Route.component as React.ComponentType;
+import { FeedPage } from "#/components/pages/FeedPage";
 
 // ---------------------------------------------------------------------------
 // Mock data helpers
@@ -149,7 +145,7 @@ describe("feed tab buttons", () => {
 	});
 
 	it("renders all three feed tab buttons", () => {
-		render(<FeedApp />, { wrapper: Wrapper });
+		render(<FeedPage />, { wrapper: Wrapper });
 
 		expect(screen.getByRole("button", { name: /top/i })).toBeDefined();
 		expect(screen.getByRole("button", { name: /new/i })).toBeDefined();
@@ -157,14 +153,14 @@ describe("feed tab buttons", () => {
 	});
 
 	it("'Top' tab is active (aria-pressed=true) by default", () => {
-		render(<FeedApp />, { wrapper: Wrapper });
+		render(<FeedPage />, { wrapper: Wrapper });
 
 		const topBtn = screen.getByRole("button", { name: /^top$/i });
 		expect(topBtn.getAttribute("aria-pressed")).toBe("true");
 	});
 
 	it("'New' and 'Best' tabs are inactive (aria-pressed=false) by default", () => {
-		render(<FeedApp />, { wrapper: Wrapper });
+		render(<FeedPage />, { wrapper: Wrapper });
 
 		const newBtn = screen.getByRole("button", { name: /^new$/i });
 		const bestBtn = screen.getByRole("button", { name: /^best$/i });
@@ -185,7 +181,7 @@ describe("tab switching", () => {
 	});
 
 	it("clicking 'New' makes it the active tab", () => {
-		render(<FeedApp />, { wrapper: Wrapper });
+		render(<FeedPage />, { wrapper: Wrapper });
 
 		fireEvent.click(screen.getByRole("button", { name: /^new$/i }));
 
@@ -197,7 +193,7 @@ describe("tab switching", () => {
 	});
 
 	it("clicking 'Best' makes it the active tab", () => {
-		render(<FeedApp />, { wrapper: Wrapper });
+		render(<FeedPage />, { wrapper: Wrapper });
 
 		fireEvent.click(screen.getByRole("button", { name: /^best$/i }));
 
@@ -209,7 +205,7 @@ describe("tab switching", () => {
 	});
 
 	it("switching tab deactivates the previously active tab", () => {
-		render(<FeedApp />, { wrapper: Wrapper });
+		render(<FeedPage />, { wrapper: Wrapper });
 
 		fireEvent.click(screen.getByRole("button", { name: /^new$/i }));
 
@@ -221,7 +217,7 @@ describe("tab switching", () => {
 	});
 
 	it("switching to 'New' deactivates other tabs", () => {
-		render(<FeedApp />, { wrapper: Wrapper });
+		render(<FeedPage />, { wrapper: Wrapper });
 
 		fireEvent.click(screen.getByRole("button", { name: /^new$/i }));
 
@@ -238,7 +234,7 @@ describe("tab switching", () => {
 	});
 
 	it("switching to 'Best' deactivates other tabs", () => {
-		render(<FeedApp />, { wrapper: Wrapper });
+		render(<FeedPage />, { wrapper: Wrapper });
 
 		fireEvent.click(screen.getByRole("button", { name: /^best$/i }));
 
@@ -255,7 +251,7 @@ describe("tab switching", () => {
 	});
 
 	it("switching back to 'Top' reactivates it", () => {
-		render(<FeedApp />, { wrapper: Wrapper });
+		render(<FeedPage />, { wrapper: Wrapper });
 
 		fireEvent.click(screen.getByRole("button", { name: /^new$/i }));
 		fireEvent.click(screen.getByRole("button", { name: /^top$/i }));
@@ -277,7 +273,7 @@ describe("empty state", () => {
 		mockUseSuspenseQuery.mockReturnValue(emptyIdsQuery);
 		mockUseSuspenseQueries.mockReturnValue([]);
 
-		render(<FeedApp />, { wrapper: Wrapper });
+		render(<FeedPage />, { wrapper: Wrapper });
 
 		// Activity renders all three panes in the DOM (hidden ones get display:none),
 		// so use getAllBy* and assert at least one match.
@@ -301,7 +297,7 @@ describe("error state", () => {
 			throw new Error("feed unavailable");
 		});
 
-		render(<FeedApp />, { wrapper: Wrapper });
+		render(<FeedPage />, { wrapper: Wrapper });
 
 		expect(screen.getByText("Feed unavailable")).toBeDefined();
 		expect(screen.getByRole("button", { name: /retry/i })).toBeDefined();
@@ -319,7 +315,7 @@ describe("ready state", () => {
 		mockUseSuspenseQuery.mockReturnValue(readyIdsQuery(ids));
 		mockUseSuspenseQueries.mockReturnValue(ids.map(storyResult));
 
-		render(<FeedApp />, { wrapper: Wrapper });
+		render(<FeedPage />, { wrapper: Wrapper });
 
 		// Activity renders all three panes in DOM; use getAllBy* variants.
 		expect(screen.getAllByText("Story 101").length).toBeGreaterThan(0);
@@ -334,7 +330,7 @@ describe("ready state", () => {
 		const firstPage = ids.slice(0, 12).map(storyResult);
 		mockUseSuspenseQueries.mockReturnValue(firstPage);
 
-		render(<FeedApp />, { wrapper: Wrapper });
+		render(<FeedPage />, { wrapper: Wrapper });
 
 		expect(
 			screen.getAllByRole("button", { name: /load \d+ more/i }).length,
@@ -346,7 +342,7 @@ describe("ready state", () => {
 		mockUseSuspenseQuery.mockReturnValue(readyIdsQuery(ids));
 		mockUseSuspenseQueries.mockReturnValue(ids.map(storyResult));
 
-		render(<FeedApp />, { wrapper: Wrapper });
+		render(<FeedPage />, { wrapper: Wrapper });
 
 		expect(
 			screen.queryAllByRole("button", { name: /load \d+ more/i }),

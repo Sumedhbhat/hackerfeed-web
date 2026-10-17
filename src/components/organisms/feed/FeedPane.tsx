@@ -2,8 +2,12 @@ import { useSuspenseQueries } from "@tanstack/react-query";
 import { ArrowRight } from "lucide-react";
 import { Activity, Suspense } from "react";
 import { Button } from "#/components/atoms/Button";
-import { feedTabs } from "#/components/feed/feedTabs";
-import { StoryCard } from "#/components/story-card";
+import { Icon } from "#/components/atoms/Icon";
+import { Stack } from "#/components/atoms/Stack";
+import { EmptyState } from "#/components/molecules/EmptyState";
+import { LoadMoreButton } from "#/components/molecules/LoadMoreButton";
+import { feedTabs } from "#/components/organisms/feed/feedTabs";
+import { StoryCard } from "#/components/organisms/story/StoryCard";
 import { FeedStatus, useFeed } from "#/hooks/useFeed";
 import {
 	type HackerNewsFeedKey,
@@ -37,39 +41,37 @@ export function FeedPane({ feed }: FeedPaneProps) {
 
 	if (activeStatus === FeedStatus.Empty) {
 		return (
-			<article className="island-shell rise-in rounded-lg p-6 sm:p-8">
-				<p className="island-kicker mb-3">Nothing here yet</p>
-				<h3 className="m-0 text-xl font-semibold tracking-tight text-(--sea-ink)">
-					No {feedLabel.toLowerCase()} stories found.
-				</h3>
-				<p className="m-0 mt-3 max-w-lg text-sm leading-relaxed text-(--sea-ink-soft)">
-					The feed came back empty. A quick refresh should pick up new items.
-				</p>
-				<div className="mt-5">
+			<EmptyState
+				kicker="Nothing here yet"
+				title={`No ${feedLabel.toLowerCase()} stories found.`}
+				headingLevel={3}
+				headingSize="section"
+				description="The feed came back empty. A quick refresh should pick up new items."
+				action={
 					<Button variant="secondary" onClick={refetch}>
-						Refresh feed <ArrowRight size={14} aria-hidden="true" />
+						Refresh feed <Icon icon={ArrowRight} />
 					</Button>
-				</div>
-			</article>
+				}
+			/>
 		);
 	}
 
 	return (
-		<>
-			<div className="space-y-3">
+		<Stack gap="md">
+			<Stack gap="md">
 				{displayedIds.map((storyId, i) => {
 					const story = storyQueries[i]?.data;
 					if (!story) return null;
 					return <StoryCard key={`${feed}-${storyId}`} story={story} />;
 				})}
-			</div>
+			</Stack>
 
 			{hasMore && (
-				<div className="flex justify-center pt-4">
-					<Button variant="secondary" onClick={loadMore} disabled={isPending}>
-						{isPending ? "Loading..." : `Load ${nextBatchSize} more`}
-					</Button>
-				</div>
+				<LoadMoreButton
+					label={isPending ? "Loading..." : `Load ${nextBatchSize} more`}
+					onClick={loadMore}
+					disabled={isPending}
+				/>
 			)}
 
 			{hasMore && nextBatchIds.length > 0 && (
@@ -79,6 +81,6 @@ export function FeedPane({ feed }: FeedPaneProps) {
 					</Suspense>
 				</Activity>
 			)}
-		</>
+		</Stack>
 	);
 }
