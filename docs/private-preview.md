@@ -1,32 +1,30 @@
 # Private preview with demo data
 
 `scripts/private-preview.sh` runs the current checkout on this machine and
-serves it to your tailnet only. It complements the Cloudflare PR previews,
-whose databases start empty: the private preview keeps a local D1 (SQLite)
-database with demo data, so changes can be checked visually before they ship.
+serves it to your tailnet only. Like the Cloudflare PR previews, it shows only
+the dummy data in `fixtures/` (see `fixtures/README.md`).
 
 ```sh
 gh pr checkout <number>              # or any branch
-bun run preview:private              # build, migrate, seed, serve
-scripts/private-preview.sh seed      # in a second terminal, after signing in
+bun run preview:private              # build, migrate, load fixtures, serve
+scripts/private-preview.sh seed      # reload fixtures/database after editing it
 scripts/private-preview.sh --reset   # start again from an empty database
 ```
 
 It prints `https://<machine>.<tailnet>.ts.net:8443`. Press Ctrl-C to stop; that
-also removes the tailnet port.
+also removes the tailnet port. Edits to `fixtures/hacker-news` need a restart,
+because they are built into the app.
 
 ## What it does
 
-1. Builds the app (`bun run build`), exactly as production does.
+1. Builds the app with `VITE_DEMO_DATA=true`, so Hacker News requests are
+   answered from `fixtures/hacker-news`.
 2. Applies the branch's migrations to the local database. The database is kept
-   between runs, so a PR's new migrations run on top of existing data, as they
-   would in production.
-3. Starts the built Worker with `wrangler dev`, listening on `127.0.0.1` only.
-4. Runs the Worker's cron handler, which ingests the latest Hugging Face Daily
-   Papers edition.
-5. Seeds the current Hacker News top stories, and gives every signed-in user
-   favorites, saved papers and history.
-6. Exposes the port with `tailscale serve`, which is reachable only from devices
+   between runs, so new migrations run on top of the previous fixture rows.
+3. Replaces every row with `fixtures/database`. Anyone who signs in gets the
+   demo user's favorites and history.
+4. Starts the built Worker with `wrangler dev`, listening on `127.0.0.1` only.
+5. Exposes the port with `tailscale serve`, which is reachable only from devices
    on your tailnet. It never uses `tailscale funnel`.
 
 Nothing is read from or written to the Cloudflare databases.
@@ -38,8 +36,6 @@ Nothing is read from or written to the Cloudflare databases.
   production.
 - In WorkOS, add the redirect URI
   `https://<machine>.<tailnet>.ts.net:8443/auth/callback`.
-- On first use, sign in, then run `scripts/private-preview.sh seed` so your
-  account gets demo favorites and history.
 
 The database lives in `~/.local/state/hackerfeed-web/private-preview`, shared by
 every checkout. Override it with `PRIVATE_PREVIEW_STATE_DIR`, the local port

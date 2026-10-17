@@ -44,6 +44,13 @@ jobs:
           WORKOS_COOKIE_PASSWORD: ${{ secrets.WORKOS_COOKIE_PASSWORD }}
           WORKOS_JWT_AUDIENCE: ${{ secrets.WORKOS_JWT_AUDIENCE }}
 
+      - name: Verify build has no demo data
+        run: |
+          if grep -rlF hackerfeed-demo-data dist; then
+            echo "Production build includes fixtures; VITE_DEMO_DATA must not be set" >&2
+            exit 1
+          fi
+
       # Secrets are uploaded with the deploy rather than via `wrangler secret
       # bulk`, which refuses to run while a PR preview version is the latest
       # (undeployed) version.

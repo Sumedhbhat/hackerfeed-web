@@ -1,0 +1,14 @@
+[
+	{
+		"id": "demo-paper-favorite-1",
+		"appUserId": "demo-user",
+		"paperId": "demo-paper-1",
+		"createdAt": "2026-01-15 10:45:00"
+	},
+	{
+		"id": "demo-paper-favorite-2",
+		"appUserId": "demo-user",
+		"paperId": "demo-paper-2",
+		"createdAt": "2026-01-15 11:45:00"
+	}
+]
