@@ -9,7 +9,6 @@ const featureFlagsResponseSchema = z.object({
 	flags: z.record(z.string(), z.boolean()),
 });
 
-/** The server's flags for the current session (signed in or not). */
 export async function fetchFeatureFlags(): Promise<Partial<FeatureFlags>> {
 	const response = await fetch("/api/feature-flags", {
 		headers: { accept: "application/json", ...(await getAuthHeaders()) },

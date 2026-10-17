@@ -159,15 +159,9 @@ function AppLayout() {
 	);
 }
 
-/**
- * Holds every page until the session is known: who the user is (sending
- * signed-out visitors to sign in) and that session's feature flags. Signing in
- * or out changes the session, so the flags are fetched again.
- */
 function SessionGate({ children }: { children: ReactNode }) {
 	const { pathname } = useLocation();
 	const { isLoading, user } = useAuthSession();
-	// Settles on failure too, leaving every flag off rather than blocking the app.
 	const { isPending: flagsPending } = useFeatureFlags();
 	const isPublic = isPublicPath(pathname);
 

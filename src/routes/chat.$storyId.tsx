@@ -13,7 +13,6 @@ export const Route = createFileRoute("/chat/$storyId")({
 function ChatRoute() {
 	const { storyId } = Route.useParams();
 	const aiChat = useFeatureFlag("aiChat");
-	// Old links land on the story's comments while AI chat is off.
 	if (!aiChat) {
 		return <Navigate to="/story/$storyId" params={{ storyId }} replace />;
 	}

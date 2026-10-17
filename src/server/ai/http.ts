@@ -44,7 +44,6 @@ export type AiHttpDependencies = {
 	getOrigin(request: Request): string;
 	getService(): AiProviderService;
 	getUser(request: Request): Promise<AuthenticatedWorkosUser | null>;
-	/** Whether AI chat is on for this user (the `aiChat` feature flag). */
 	isEnabled(user: AuthenticatedWorkosUser): boolean;
 	getStoryContext(
 		storyId: number,

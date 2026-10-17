@@ -5,10 +5,6 @@ import {
 } from "#/lib/feature-flags/client";
 import { useAuthSession } from "./useAuthSession";
 
-/**
- * The session's flags. Keyed by user so signing in or out fetches that
- * session's flags; `SessionGate` holds the app until the first answer.
- */
 export function useFeatureFlags() {
 	const { isLoading, user } = useAuthSession();
 	return useQuery({
@@ -20,7 +16,6 @@ export function useFeatureFlags() {
 	});
 }
 
-/** Off until the server says on, including when the flags request fails. */
 export function useFeatureFlag(name: FeatureFlagName): boolean {
 	return useFeatureFlags().data?.[name] === true;
 }

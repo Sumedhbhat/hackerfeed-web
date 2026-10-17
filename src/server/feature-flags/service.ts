@@ -11,7 +11,7 @@ export type FeatureFlags = Record<FeatureFlagName, boolean>;
 
 type FeatureFlagConfig = Record<FeatureFlagName, FeatureFlagDefinition>;
 
-function isOn(
+function isEnabled(
 	flag: FeatureFlagDefinition,
 	user: AuthenticatedWorkosUser | null,
 ): boolean {
@@ -24,15 +24,14 @@ export function isFeatureEnabled(
 	user: AuthenticatedWorkosUser | null,
 	config: FeatureFlagConfig = featureFlags,
 ): boolean {
-	return isOn(config[name], user);
+	return isEnabled(config[name], user);
 }
 
-/** Every flag's value for this visitor (`null` when signed out). */
 export function evaluateFeatureFlags(
 	user: AuthenticatedWorkosUser | null,
 	config: FeatureFlagConfig = featureFlags,
 ): FeatureFlags {
 	return Object.fromEntries(
-		Object.entries(config).map(([name, flag]) => [name, isOn(flag, user)]),
+		Object.entries(config).map(([name, flag]) => [name, isEnabled(flag, user)]),
 	) as FeatureFlags;
 }
