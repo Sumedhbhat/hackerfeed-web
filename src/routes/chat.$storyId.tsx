@@ -1,5 +1,5 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
-import { StoryChatPage } from "#/components/chat/StoryChatPage";
+import { StoryChatPage } from "#/components/pages/StoryChatPage";
 import { useFeatureFlag } from "#/hooks/useFeatureFlags";
 
 export const Route = createFileRoute("/chat/$storyId")({
