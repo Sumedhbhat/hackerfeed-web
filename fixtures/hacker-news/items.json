@@ -1,0 +1,407 @@
+[
+	{
+		"by": "demo_alice",
+		"descendants": 4,
+		"id": 900001,
+		"kids": [
+			990001,
+			990003,
+			990004
+		],
+		"score": 420,
+		"time": 1768478400,
+		"title": "Show HN: A tiny terminal spreadsheet written in 400 lines",
+		"type": "story",
+		"url": "https://example.com/tiny-sheet"
+	},
+	{
+		"by": "demo_kim",
+		"id": 990001,
+		"kids": [
+			990002
+		],
+		"parent": 900001,
+		"text": "<p>Dummy comment 1 on “Show HN: A tiny terminal spreadsheet wri”. This text exists only for previews.</p>",
+		"time": 1768478280,
+		"type": "comment"
+	},
+	{
+		"by": "demo_nia",
+		"id": 990002,
+		"parent": 990001,
+		"text": "<p>A dummy reply, to show nested threads.</p>",
+		"time": 1768478340,
+		"type": "comment"
+	},
+	{
+		"by": "demo_lee",
+		"id": 990003,
+		"parent": 900001,
+		"text": "<p>Dummy comment 2 on “Show HN: A tiny terminal spreadsheet wri”. This text exists only for previews.</p>",
+		"time": 1768478160,
+		"type": "comment"
+	},
+	{
+		"by": "demo_max",
+		"id": 990004,
+		"parent": 900001,
+		"text": "<p>Dummy comment 3 on “Show HN: A tiny terminal spreadsheet wri”. This text exists only for previews.</p>",
+		"time": 1768478040,
+		"type": "comment"
+	},
+	{
+		"by": "demo_bob",
+		"descendants": 4,
+		"id": 900002,
+		"kids": [
+			990005,
+			990007,
+			990008
+		],
+		"score": 395,
+		"time": 1768474800,
+		"title": "Why our build got 3x faster after deleting the cache",
+		"type": "story",
+		"url": "https://example.com/build-cache"
+	},
+	{
+		"by": "demo_kim",
+		"id": 990005,
+		"kids": [
+			990006
+		],
+		"parent": 900002,
+		"text": "<p>Dummy comment 1 on “Why our build got 3x faster after deleti”. This text exists only for previews.</p>",
+		"time": 1768474680,
+		"type": "comment"
+	},
+	{
+		"by": "demo_nia",
+		"id": 990006,
+		"parent": 990005,
+		"text": "<p>A dummy reply, to show nested threads.</p>",
+		"time": 1768474740,
+		"type": "comment"
+	},
+	{
+		"by": "demo_lee",
+		"id": 990007,
+		"parent": 900002,
+		"text": "<p>Dummy comment 2 on “Why our build got 3x faster after deleti”. This text exists only for previews.</p>",
+		"time": 1768474560,
+		"type": "comment"
+	},
+	{
+		"by": "demo_max",
+		"id": 990008,
+		"parent": 900002,
+		"text": "<p>Dummy comment 3 on “Why our build got 3x faster after deleti”. This text exists only for previews.</p>",
+		"time": 1768474440,
+		"type": "comment"
+	},
+	{
+		"by": "demo_carol",
+		"descendants": 4,
+		"id": 900003,
+		"kids": [
+			990009,
+			990011,
+			990012
+		],
+		"score": 370,
+		"time": 1768471200,
+		"title": "Ask HN: How do you keep side projects maintainable?",
+		"type": "story",
+		"text": "<p>I keep starting projects and abandoning them after a month. What habits help you keep them healthy?</p>"
+	},
+	{
+		"by": "demo_kim",
+		"id": 990009,
+		"kids": [
+			990010
+		],
+		"parent": 900003,
+		"text": "<p>Dummy comment 1 on “Ask HN: How do you keep side projects ma”. This text exists only for previews.</p>",
+		"time": 1768471080,
+		"type": "comment"
+	},
+	{
+		"by": "demo_nia",
+		"id": 990010,
+		"parent": 990009,
+		"text": "<p>A dummy reply, to show nested threads.</p>",
+		"time": 1768471140,
+		"type": "comment"
+	},
+	{
+		"by": "demo_lee",
+		"id": 990011,
+		"parent": 900003,
+		"text": "<p>Dummy comment 2 on “Ask HN: How do you keep side projects ma”. This text exists only for previews.</p>",
+		"time": 1768470960,
+		"type": "comment"
+	},
+	{
+		"by": "demo_max",
+		"id": 990012,
+		"parent": 900003,
+		"text": "<p>Dummy comment 3 on “Ask HN: How do you keep side projects ma”. This text exists only for previews.</p>",
+		"time": 1768470840,
+		"type": "comment"
+	},
+	{
+		"by": "demo_dave",
+		"descendants": 4,
+		"id": 900004,
+		"kids": [
+			990013,
+			990015,
+			990016
+		],
+		"score": 345,
+		"time": 1768467600,
+		"title": "A field guide to reading database query plans",
+		"type": "story",
+		"url": "https://example.com/query-plans"
+	},
+	{
+		"by": "demo_kim",
+		"id": 990013,
+		"kids": [
+			990014
+		],
+		"parent": 900004,
+		"text": "<p>Dummy comment 1 on “A field guide to reading database query ”. This text exists only for previews.</p>",
+		"time": 1768467480,
+		"type": "comment"
+	},
+	{
+		"by": "demo_nia",
+		"id": 990014,
+		"parent": 990013,
+		"text": "<p>A dummy reply, to show nested threads.</p>",
+		"time": 1768467540,
+		"type": "comment"
+	},
+	{
+		"by": "demo_lee",
+		"id": 990015,
+		"parent": 900004,
+		"text": "<p>Dummy comment 2 on “A field guide to reading database query ”. This text exists only for previews.</p>",
+		"time": 1768467360,
+		"type": "comment"
+	},
+	{
+		"by": "demo_max",
+		"id": 990016,
+		"parent": 900004,
+		"text": "<p>Dummy comment 3 on “A field guide to reading database query ”. This text exists only for previews.</p>",
+		"time": 1768467240,
+		"type": "comment"
+	},
+	{
+		"by": "demo_erin",
+		"descendants": 4,
+		"id": 900005,
+		"kids": [
+			990017,
+			990019,
+			990020
+		],
+		"score": 320,
+		"time": 1768464000,
+		"title": "The quiet return of server-rendered HTML",
+		"type": "story",
+		"url": "https://example.com/server-html"
+	},
+	{
+		"by": "demo_kim",
+		"id": 990017,
+		"kids": [
+			990018
+		],
+		"parent": 900005,
+		"text": "<p>Dummy comment 1 on “The quiet return of server-rendered HTML”. This text exists only for previews.</p>",
+		"time": 1768463880,
+		"type": "comment"
+	},
+	{
+		"by": "demo_nia",
+		"id": 990018,
+		"parent": 990017,
+		"text": "<p>A dummy reply, to show nested threads.</p>",
+		"time": 1768463940,
+		"type": "comment"
+	},
+	{
+		"by": "demo_lee",
+		"id": 990019,
+		"parent": 900005,
+		"text": "<p>Dummy comment 2 on “The quiet return of server-rendered HTML”. This text exists only for previews.</p>",
+		"time": 1768463760,
+		"type": "comment"
+	},
+	{
+		"by": "demo_max",
+		"id": 990020,
+		"parent": 900005,
+		"text": "<p>Dummy comment 3 on “The quiet return of server-rendered HTML”. This text exists only for previews.</p>",
+		"time": 1768463640,
+		"type": "comment"
+	},
+	{
+		"by": "demo_frank",
+		"descendants": 0,
+		"id": 900006,
+		"score": 295,
+		"time": 1768460400,
+		"title": "Launch HN: Placeholder Labs (YC W26) – Mock APIs for staging",
+		"type": "story",
+		"url": "https://example.com/placeholder-labs"
+	},
+	{
+		"by": "demo_alice",
+		"descendants": 1,
+		"id": 900007,
+		"kids": [
+			990021
+		],
+		"score": 270,
+		"time": 1768456800,
+		"title": "How a 1970s scheduling algorithm still runs your phone",
+		"type": "story",
+		"url": "https://example.com/scheduler"
+	},
+	{
+		"by": "demo_kim",
+		"id": 990021,
+		"parent": 900007,
+		"text": "<p>Dummy comment 1 on “How a 1970s scheduling algorithm still r”. This text exists only for previews.</p>",
+		"time": 1768456680,
+		"type": "comment"
+	},
+	{
+		"by": "demo_grace",
+		"descendants": 0,
+		"id": 900008,
+		"score": 245,
+		"time": 1768453200,
+		"title": "Notes on writing a compiler in a weekend",
+		"type": "story",
+		"url": "https://example.com/weekend-compiler"
+	},
+	{
+		"by": "demo_heidi",
+		"descendants": 1,
+		"id": 900009,
+		"kids": [
+			990022
+		],
+		"score": 220,
+		"time": 1768449600,
+		"title": "Ask HN: What is the most useful script you have written?",
+		"type": "story",
+		"text": "<p>Mine renames photos by the date they were taken. Curious what small tools others rely on.</p>"
+	},
+	{
+		"by": "demo_kim",
+		"id": 990022,
+		"parent": 900009,
+		"text": "<p>Dummy comment 1 on “Ask HN: What is the most useful script y”. This text exists only for previews.</p>",
+		"time": 1768449480,
+		"type": "comment"
+	},
+	{
+		"by": "demo_ivan",
+		"descendants": 0,
+		"id": 900010,
+		"score": 195,
+		"time": 1768446000,
+		"title": "Measuring keyboard latency with a high-speed camera",
+		"type": "story",
+		"url": "https://example.com/keyboard-latency"
+	},
+	{
+		"by": "demo_judy",
+		"descendants": 1,
+		"id": 900011,
+		"kids": [
+			990023
+		],
+		"score": 170,
+		"time": 1768442400,
+		"title": "An illustrated introduction to CRDTs",
+		"type": "story",
+		"url": "https://example.com/crdts"
+	},
+	{
+		"by": "demo_kim",
+		"id": 990023,
+		"parent": 900011,
+		"text": "<p>Dummy comment 1 on “An illustrated introduction to CRDTs”. This text exists only for previews.</p>",
+		"time": 1768442280,
+		"type": "comment"
+	},
+	{
+		"by": "demo_bob",
+		"descendants": 0,
+		"id": 900012,
+		"score": 145,
+		"time": 1768438800,
+		"title": "We replaced our message queue with a database table",
+		"type": "story",
+		"url": "https://example.com/db-queue"
+	},
+	{
+		"by": "demo_mallory",
+		"descendants": 1,
+		"id": 900013,
+		"kids": [
+			990024
+		],
+		"score": 120,
+		"time": 1768435200,
+		"title": "Show HN: Dummy Weather – a forecast that is always sunny",
+		"type": "story",
+		"url": "https://example.com/dummy-weather"
+	},
+	{
+		"by": "demo_kim",
+		"id": 990024,
+		"parent": 900013,
+		"text": "<p>Dummy comment 1 on “Show HN: Dummy Weather – a forecast that”. This text exists only for previews.</p>",
+		"time": 1768435080,
+		"type": "comment"
+	},
+	{
+		"by": "demo_carol",
+		"descendants": 0,
+		"id": 900014,
+		"score": 95,
+		"time": 1768431600,
+		"title": "The surprising physics of pouring coffee",
+		"type": "story",
+		"url": "https://example.com/coffee-physics"
+	},
+	{
+		"by": "demo_dave",
+		"descendants": 1,
+		"id": 900015,
+		"kids": [
+			990025
+		],
+		"score": 70,
+		"time": 1768428000,
+		"title": "A minimal guide to self-hosting your email",
+		"type": "story",
+		"url": "https://example.com/self-host-email"
+	},
+	{
+		"by": "demo_kim",
+		"id": 990025,
+		"parent": 900015,
+		"text": "<p>Dummy comment 1 on “A minimal guide to self-hosting your ema”. This text exists only for previews.</p>",
+		"time": 1768427880,
+		"type": "comment"
+	}
+]

@@ -1,0 +1,74 @@
+[
+	{
+		"id": "demo-story-900001",
+		"hnStoryId": 900001,
+		"title": "Show HN: A tiny terminal spreadsheet written in 400 lines",
+		"url": "https://example.com/tiny-sheet",
+		"text": null,
+		"score": 420,
+		"hnPostedAt": "2026-01-15T12:00:00.000Z",
+		"authorUsername": "demo_alice",
+		"commentCount": 4,
+		"commentIds": "[990001, 990003, 990004]"
+	},
+	{
+		"id": "demo-story-900002",
+		"hnStoryId": 900002,
+		"title": "Why our build got 3x faster after deleting the cache",
+		"url": "https://example.com/build-cache",
+		"text": null,
+		"score": 395,
+		"hnPostedAt": "2026-01-15T11:00:00.000Z",
+		"authorUsername": "demo_bob",
+		"commentCount": 4,
+		"commentIds": "[990005, 990007, 990008]"
+	},
+	{
+		"id": "demo-story-900003",
+		"hnStoryId": 900003,
+		"title": "Ask HN: How do you keep side projects maintainable?",
+		"url": null,
+		"text": "<p>I keep starting projects and abandoning them after a month. What habits help you keep them healthy?</p>",
+		"score": 370,
+		"hnPostedAt": "2026-01-15T10:00:00.000Z",
+		"authorUsername": "demo_carol",
+		"commentCount": 4,
+		"commentIds": "[990009, 990011, 990012]"
+	},
+	{
+		"id": "demo-story-900004",
+		"hnStoryId": 900004,
+		"title": "A field guide to reading database query plans",
+		"url": "https://example.com/query-plans",
+		"text": null,
+		"score": 345,
+		"hnPostedAt": "2026-01-15T09:00:00.000Z",
+		"authorUsername": "demo_dave",
+		"commentCount": 4,
+		"commentIds": "[990013, 990015, 990016]"
+	},
+	{
+		"id": "demo-story-900005",
+		"hnStoryId": 900005,
+		"title": "The quiet return of server-rendered HTML",
+		"url": "https://example.com/server-html",
+		"text": null,
+		"score": 320,
+		"hnPostedAt": "2026-01-15T08:00:00.000Z",
+		"authorUsername": "demo_erin",
+		"commentCount": 4,
+		"commentIds": "[990017, 990019, 990020]"
+	},
+	{
+		"id": "demo-story-900006",
+		"hnStoryId": 900006,
+		"title": "Launch HN: Placeholder Labs (YC W26) – Mock APIs for staging",
+		"url": "https://example.com/placeholder-labs",
+		"text": null,
+		"score": 295,
+		"hnPostedAt": "2026-01-15T07:00:00.000Z",
+		"authorUsername": "demo_frank",
+		"commentCount": 0,
+		"commentIds": "[]"
+	}
+]

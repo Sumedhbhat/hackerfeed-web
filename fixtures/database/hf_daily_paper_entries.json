@@ -1,0 +1,62 @@
+[
+	{
+		"id": "demo-entry-1",
+		"editionDate": "2026-01-15",
+		"paperId": "demo-paper-1",
+		"entryPublishedAt": "2026-01-15T00:00:00.000Z",
+		"isAuthorParticipating": true,
+		"rank": 1,
+		"createdAt": "2026-01-15T00:30:00.000Z",
+		"updatedAt": "2026-01-15T00:30:00.000Z"
+	},
+	{
+		"id": "demo-entry-2",
+		"editionDate": "2026-01-15",
+		"paperId": "demo-paper-2",
+		"entryPublishedAt": "2026-01-15T01:00:00.000Z",
+		"isAuthorParticipating": false,
+		"rank": 2,
+		"createdAt": "2026-01-15T00:30:00.000Z",
+		"updatedAt": "2026-01-15T00:30:00.000Z"
+	},
+	{
+		"id": "demo-entry-3",
+		"editionDate": "2026-01-15",
+		"paperId": "demo-paper-3",
+		"entryPublishedAt": "2026-01-15T02:00:00.000Z",
+		"isAuthorParticipating": true,
+		"rank": 3,
+		"createdAt": "2026-01-15T00:30:00.000Z",
+		"updatedAt": "2026-01-15T00:30:00.000Z"
+	},
+	{
+		"id": "demo-entry-4",
+		"editionDate": "2026-01-15",
+		"paperId": "demo-paper-4",
+		"entryPublishedAt": "2026-01-15T03:00:00.000Z",
+		"isAuthorParticipating": false,
+		"rank": 4,
+		"createdAt": "2026-01-15T00:30:00.000Z",
+		"updatedAt": "2026-01-15T00:30:00.000Z"
+	},
+	{
+		"id": "demo-entry-5",
+		"editionDate": "2026-01-15",
+		"paperId": "demo-paper-5",
+		"entryPublishedAt": "2026-01-15T04:00:00.000Z",
+		"isAuthorParticipating": true,
+		"rank": 5,
+		"createdAt": "2026-01-15T00:30:00.000Z",
+		"updatedAt": "2026-01-15T00:30:00.000Z"
+	},
+	{
+		"id": "demo-entry-6",
+		"editionDate": "2026-01-15",
+		"paperId": "demo-paper-6",
+		"entryPublishedAt": "2026-01-15T05:00:00.000Z",
+		"isAuthorParticipating": false,
+		"rank": 6,
+		"createdAt": "2026-01-15T00:30:00.000Z",
+		"updatedAt": "2026-01-15T00:30:00.000Z"
+	}
+]

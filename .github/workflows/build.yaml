@@ -29,8 +29,21 @@ jobs:
       - name: Run lint
         run: bun run check
 
+      # Also runs shellcheck on every `run:` script (preinstalled on the runner).
+      - name: Lint GitHub workflows
+        run: |
+          bash <(curl -sSfL https://raw.githubusercontent.com/rhysd/actionlint/v1.7.12/scripts/download-actionlint.bash) 1.7.12
+          ./actionlint -color
+
       - name: Run tests
         run: bun run test
 
       - name: Build
         run: bun run build
+
+      - name: Verify build has no demo data
+        run: |
+          if grep -rlF hackerfeed-demo-data dist; then
+            echo "Production build includes fixtures; VITE_DEMO_DATA must not be set" >&2
+            exit 1
+          fi
