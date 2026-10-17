@@ -1,19 +1,21 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { AlertCircle, RotateCw } from "lucide-react";
 import { useState } from "react";
 import { TraceIdNote } from "#/components/trace-id-note";
 import { Button } from "#/components/ui/atoms/Button";
 import { signIn, useAuthSession } from "#/hooks/useAuthSession";
 import { useErrorReport } from "#/hooks/useErrorReport";
+import { toSafeReturnTo } from "#/lib/auth/authkit";
 
-// AuthKit exchanges the code in the browser and then navigates to the
-// original page (see `AuthProvider`); this shows a spinner meanwhile, or the
-// failure when AuthKit finishes without a user.
+// AuthKit exchanges the code in the browser; this shows a spinner meanwhile,
+// then navigates to the original page, or shows the failure when AuthKit
+// finishes without a user.
 export const Route = createFileRoute("/auth/callback")({
 	component: AuthCallback,
 });
 
 type CallbackParams = {
+	returnTo: string;
 	hadCode: boolean;
 	providerError: string | null;
 	providerErrorDescription: string | null;
@@ -22,6 +24,7 @@ type CallbackParams = {
 function readCallbackParams(): CallbackParams {
 	if (typeof window === "undefined") {
 		return {
+			returnTo: "/",
 			hadCode: false,
 			providerError: null,
 			providerErrorDescription: null,
@@ -29,10 +32,19 @@ function readCallbackParams(): CallbackParams {
 	}
 	const params = new URLSearchParams(window.location.search);
 	return {
+		returnTo: readReturnTo(params.get("state")),
 		hadCode: params.has("code"),
 		providerError: params.get("error"),
 		providerErrorDescription: params.get("error_description"),
 	};
+}
+
+function readReturnTo(state: string | null): string {
+	try {
+		return toSafeReturnTo(state ? JSON.parse(state)?.returnTo : undefined);
+	} catch {
+		return "/";
+	}
 }
 
 function AuthCallback() {
@@ -43,6 +55,7 @@ function AuthCallback() {
 	if (isLoading || user) {
 		return (
 			<div className="flex min-h-[60vh] items-center justify-center">
+				{user ? <Navigate href={params.returnTo} replace /> : null}
 				<div className="h-8 w-8 animate-spin rounded-full border-2 border-(--chip-line) border-t-(--lagoon)" />
 			</div>
 		);
