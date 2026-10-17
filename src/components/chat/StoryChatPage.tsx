@@ -8,7 +8,7 @@ import {
 	Square,
 } from "lucide-react";
 import { type FormEvent, useEffect, useRef, useState } from "react";
-import { Button, buttonClassName } from "#/components/ui/atoms/Button";
+import { Button, buttonClassName } from "#/components/atoms/Button";
 import {
 	useAiModels,
 	useAiProviders,

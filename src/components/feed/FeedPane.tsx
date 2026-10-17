@@ -1,9 +1,9 @@
 import { useSuspenseQueries } from "@tanstack/react-query";
 import { ArrowRight } from "lucide-react";
 import { Activity, Suspense } from "react";
+import { Button } from "#/components/atoms/Button";
 import { feedTabs } from "#/components/feed/feedTabs";
 import { StoryCard } from "#/components/story-card";
-import { Button } from "#/components/ui/atoms/Button";
 import { FeedStatus, useFeed } from "#/hooks/useFeed";
 import {
 	type HackerNewsFeedKey,

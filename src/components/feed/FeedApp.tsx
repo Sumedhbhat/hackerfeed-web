@@ -1,11 +1,11 @@
 import * as Sentry from "@sentry/react";
 import { Activity, Suspense, useState, useTransition } from "react";
+import { Tab } from "#/components/atoms/Tab";
 import { FeedError } from "#/components/feed/FeedError";
 import { FeedPane } from "#/components/feed/FeedPane";
 import { FeedSkeletons } from "#/components/feed/FeedSkeletons";
 import { feedTabs } from "#/components/feed/feedTabs";
-import { Tab } from "#/components/ui/atoms/Tab";
-import { TabList } from "#/components/ui/molecules/TabList";
+import { TabList } from "#/components/molecules/TabList";
 import { HackerNewsFeedKey } from "#/lib/hacker-news/queries";
 
 export function FeedApp() {

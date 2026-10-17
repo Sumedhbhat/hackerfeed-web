@@ -11,7 +11,7 @@ import {
 	ThumbsUp,
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import { Button } from "#/components/ui/atoms/Button";
+import { Button } from "#/components/atoms/Button";
 import { usePaperEdition } from "#/hooks/usePaperEdition";
 import { usePaperFavorites } from "#/hooks/usePaperFavorites";
 import { useViewActivity } from "#/hooks/useViewActivity";

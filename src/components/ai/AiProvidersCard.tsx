@@ -1,5 +1,5 @@
 import { CheckCircle2, Sparkles, TriangleAlert } from "lucide-react";
-import { Button } from "#/components/ui/atoms/Button";
+import { Button } from "#/components/atoms/Button";
 import {
 	useAiProviders,
 	useDisconnectAiProvider,

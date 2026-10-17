@@ -1,4 +1,5 @@
-import type { ButtonHTMLAttributes } from "react";
+import { createLink } from "@tanstack/react-router";
+import type { AnchorHTMLAttributes, ButtonHTMLAttributes } from "react";
 
 const BASE_CLASSES =
 	"inline-flex shrink-0 items-center gap-1.5 no-underline transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--lagoon) cursor-pointer disabled:cursor-not-allowed disabled:opacity-60";
@@ -32,4 +33,26 @@ export function Button({
 	...props
 }: ButtonProps) {
 	return <button type={type} className={buttonClassName(variant)} {...props} />;
+}
+
+type ButtonAnchorProps = Omit<
+	AnchorHTMLAttributes<HTMLAnchorElement>,
+	"className" | "style"
+> & {
+	variant?: ButtonVariant;
+	ref?: React.Ref<HTMLAnchorElement>;
+};
+
+function ButtonAnchor({ variant = "primary", ...props }: ButtonAnchorProps) {
+	return <a className={buttonClassName(variant)} {...props} />;
+}
+
+/** In-app link (`to="/profile"`) that looks like a button. */
+export const ButtonLink = createLink(ButtonAnchor);
+
+/** Link to another website that looks like a button; opens in a new tab. */
+export function ExternalButtonLink(
+	props: ButtonAnchorProps & { href: string },
+) {
+	return <ButtonAnchor target="_blank" rel="noopener noreferrer" {...props} />;
 }

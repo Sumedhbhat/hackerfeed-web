@@ -1,11 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, RefreshCw } from "lucide-react";
 import { useMemo, useState } from "react";
+import { Button } from "#/components/atoms/Button";
+import { Tab } from "#/components/atoms/Tab";
+import { TabList } from "#/components/molecules/TabList";
 import { PaperRow } from "#/components/papers/PapersPage";
 import { StoryCard } from "#/components/story-card";
-import { Button } from "#/components/ui/atoms/Button";
-import { Tab } from "#/components/ui/atoms/Tab";
-import { TabList } from "#/components/ui/molecules/TabList";
 import { useFavorites } from "#/hooks/useFavorites";
 import { usePaperFavorites } from "#/hooks/usePaperFavorites";
 import { useViewActivity } from "#/hooks/useViewActivity";

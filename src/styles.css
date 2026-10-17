@@ -215,12 +215,14 @@ a {
 }
 
 .nav-link:hover,
-.nav-link.is-active {
+.nav-link.is-active,
+.nav-link[data-status="active"] {
   color: var(--sea-ink);
 }
 
 .nav-link:hover::after,
-.nav-link.is-active::after {
+.nav-link.is-active::after,
+.nav-link[data-status="active"]::after {
   transform: scaleX(1);
 }
 

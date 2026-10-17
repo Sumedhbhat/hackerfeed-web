@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { MessageCircle, Star } from "lucide-react";
-import { Button } from "#/components/ui/atoms/Button";
+import { Button } from "#/components/atoms/Button";
 import { useFavorites } from "#/hooks/useFavorites";
 import { useViewActivity } from "#/hooks/useViewActivity";
 import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";

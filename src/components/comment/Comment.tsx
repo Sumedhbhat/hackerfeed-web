@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { Button } from "#/components/ui/atoms/Button";
+import { Button } from "#/components/atoms/Button";
 import { useComment } from "#/hooks/useComment";
 import type { HackerNewsCommentRecord } from "#/lib/hacker-news/queries";
 

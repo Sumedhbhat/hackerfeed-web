@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { CircleCheck, LogIn } from "lucide-react";
-import { Button } from "#/components/ui/atoms/Button";
+import { Button } from "#/components/atoms/Button";
 import { signIn } from "#/hooks/useAuthSession";
 
 export const Route = createFileRoute("/auth/signed-out")({

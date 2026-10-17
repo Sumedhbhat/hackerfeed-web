@@ -55,7 +55,7 @@
 	"plugins": ["./lint/no-button-look-classes.grit"],
 	"overrides": [
 		{
-			"includes": ["**/src/components/ui/**", "**/*.test.tsx"],
+			"includes": ["**/src/components/atoms/**", "**/src/components/molecules/**", "**/*.test.tsx"],
 			"linter": {
 				"rules": {
 					"correctness": {
