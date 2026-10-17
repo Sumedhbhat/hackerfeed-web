@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { MessageCircle, Star } from "lucide-react";
 import { Button } from "#/components/ui/atoms/Button";
 import { useFavorites } from "#/hooks/useFavorites";
+import { useFeatureFlag } from "#/hooks/useFeatureFlags";
 import { useViewActivity } from "#/hooks/useViewActivity";
 import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
 import {
@@ -24,6 +25,7 @@ type StoryCardProps = {
 export function StoryCard({ story, animationDelay }: StoryCardProps) {
 	const { isFavorited, toggleFavorite } = useFavorites();
 	const { recordStoryView } = useViewActivity();
+	const aiChat = useFeatureFlag("aiChat");
 	const isFav = isFavorited(story.id);
 
 	const domain = getStoryDomain(story.url);
@@ -86,15 +88,21 @@ export function StoryCard({ story, animationDelay }: StoryCardProps) {
 							Discussion
 						</Link>
 
-						<Link
-							to="/chat/$storyId"
-							params={{ storyId: story.id }}
-							aria-label={`Discuss ${title} with AI`}
-							className="text-sm text-(--sea-ink-soft) hover:text-(--sea-ink)"
-						>
-							<MessageCircle size={14} aria-hidden="true" className="inline" />{" "}
-							Discuss
-						</Link>
+						{aiChat ? (
+							<Link
+								to="/chat/$storyId"
+								params={{ storyId: story.id }}
+								aria-label={`Discuss ${title} with AI`}
+								className="text-sm text-(--sea-ink-soft) hover:text-(--sea-ink)"
+							>
+								<MessageCircle
+									size={14}
+									aria-hidden="true"
+									className="inline"
+								/>{" "}
+								Discuss
+							</Link>
+						) : null}
 
 						<Button
 							variant="ghost"

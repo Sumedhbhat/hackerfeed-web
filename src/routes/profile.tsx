@@ -3,6 +3,7 @@ import { Mail, User } from "lucide-react";
 import { AiProvidersCard } from "#/components/ai/AiProvidersCard";
 import { Button, buttonClassName } from "#/components/ui/atoms/Button";
 import { signIn, useAuthSession } from "#/hooks/useAuthSession";
+import { useFeatureFlag } from "#/hooks/useFeatureFlags";
 
 type ProfileSearch = {
 	/** Result of an AI provider sign-in, set by the provider callback. */
@@ -61,6 +62,7 @@ function getInitials(
 function ProfilePage() {
 	const { user, isLoading } = useAuthSession();
 	const search = Route.useSearch();
+	const aiChat = useFeatureFlag("aiChat");
 
 	if (isLoading) {
 		return (
@@ -146,11 +148,13 @@ function ProfilePage() {
 					</dl>
 				</div>
 
-				<AiProvidersCard
-					result={search.ai}
-					resultProviderId={search.provider}
-					reason={search.reason}
-				/>
+				{aiChat ? (
+					<AiProvidersCard
+						result={search.ai}
+						resultProviderId={search.provider}
+						reason={search.reason}
+					/>
+				) : null}
 
 				<div className="mt-6">
 					<Link to="/favorites" className={buttonClassName("secondary")}>

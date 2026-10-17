@@ -4,6 +4,7 @@ import { env } from "#/env";
 import { fetchComment, fetchStory } from "#/lib/hacker-news/queries";
 import { getRequestUser } from "#/server/auth/workos-access-token";
 import { getDatabaseContext } from "#/server/database/client";
+import { isFeatureEnabled } from "#/server/feature-flags/service";
 import { createUserServiceFromDatabase } from "#/server/users/service";
 import { createAiHttpHandlers } from "./http";
 import { createChatGptAdapter } from "./providers/chatgpt/adapter";
@@ -35,6 +36,7 @@ export const aiHttpHandlers = createAiHttpHandlers({
 	cipher,
 	getOrigin,
 	getUser: getRequestUser,
+	isEnabled: (user) => isFeatureEnabled("aiChat", user),
 	getService() {
 		const database = getDatabaseContext();
 		return createAiProviderService({

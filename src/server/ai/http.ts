@@ -44,6 +44,7 @@ export type AiHttpDependencies = {
 	getOrigin(request: Request): string;
 	getService(): AiProviderService;
 	getUser(request: Request): Promise<AuthenticatedWorkosUser | null>;
+	isEnabled(user: AuthenticatedWorkosUser): boolean;
 	getStoryContext(
 		storyId: number,
 		signal: AbortSignal,
@@ -72,6 +73,12 @@ const forbidden = () =>
 	json({ code: "forbidden", message: "Cross-site request" }, 403);
 
 const notFound = () => json(new AiProviderNotFoundError(), 404);
+
+const featureDisabled = () =>
+	json(
+		{ code: "feature_disabled", message: "AI chat isn't available yet." },
+		404,
+	);
 
 function withResult(
 	returnTo: string,
@@ -147,6 +154,7 @@ export function createAiHttpHandlers(deps: AiHttpDependencies) {
 			);
 			const user = await deps.getUser(request);
 			if (!user) return unauthorized();
+			if (!deps.isEnabled(user)) return featureDisabled();
 
 			let authorization: Awaited<
 				ReturnType<AiProviderService["startAuthorization"]>
@@ -204,6 +212,12 @@ export function createAiHttpHandlers(deps: AiHttpDependencies) {
 			}
 
 			const returnTo = normalizeReturnTo(flow.returnTo);
+			if (!deps.isEnabled({ workosUserId: flow.workosUserId })) {
+				return redirect(
+					withResult(returnTo, providerId, "error", "feature_disabled"),
+					headers,
+				);
+			}
 			const providerError = url.searchParams.get("error");
 			if (providerError) {
 				const reason = /^[a-z_]{1,64}$/.test(providerError)
@@ -250,6 +264,7 @@ export function createAiHttpHandlers(deps: AiHttpDependencies) {
 		async providers(request: Request): Promise<Response> {
 			const user = await deps.getUser(request);
 			if (!user) return unauthorized();
+			if (!deps.isEnabled(user)) return featureDisabled();
 			const providers = await deps
 				.getService()
 				.listProviders(user, (providerId) =>
@@ -263,6 +278,7 @@ export function createAiHttpHandlers(deps: AiHttpDependencies) {
 			if (!isValidProviderId(providerId)) return notFound();
 			const user = await deps.getUser(request);
 			if (!user) return unauthorized();
+			if (!deps.isEnabled(user)) return featureDisabled();
 			try {
 				const models = await deps.getService().listModels(user, providerId);
 				return json({ models }, 200);
@@ -279,6 +295,7 @@ export function createAiHttpHandlers(deps: AiHttpDependencies) {
 			if (!isValidProviderId(providerId)) return notFound();
 			const user = await deps.getUser(request);
 			if (!user) return unauthorized();
+			if (!deps.isEnabled(user)) return featureDisabled();
 			try {
 				await deps.getService().disconnect(user, providerId);
 			} catch (error) {
@@ -310,6 +327,7 @@ export function createAiHttpHandlers(deps: AiHttpDependencies) {
 
 			const user = await deps.getUser(request);
 			if (!user) return unauthorized();
+			if (!deps.isEnabled(user)) return featureDisabled();
 
 			const { messages, model, providerId, storyId } = parsed.data;
 			const context = await deps

@@ -28,6 +28,8 @@ const authMock = vi.hoisted(() => ({
 	user: null as { id: string } | null,
 }));
 
+const flagsMock = vi.hoisted(() => ({ aiChat: true }));
+
 const trpcMock = vi.hoisted(() => ({
 	add: vi.fn(),
 	clear: vi.fn(),
@@ -49,6 +51,10 @@ vi.mock("#/hooks/useAuthSession", () => ({
 		isLoading: authMock.isLoading,
 		user: authMock.user,
 	}),
+}));
+
+vi.mock("#/hooks/useFeatureFlags", () => ({
+	useFeatureFlag: (name: keyof typeof flagsMock) => flagsMock[name],
 }));
 
 vi.mock("#/lib/trpc/client", () => ({
@@ -131,6 +137,7 @@ function makeStory(
 beforeEach(() => {
 	authMock.isLoading = false;
 	authMock.user = null;
+	flagsMock.aiChat = true;
 	trpcMock.add.mockResolvedValue(undefined);
 	trpcMock.clear.mockResolvedValue(undefined);
 	trpcMock.list.mockResolvedValue([]);
@@ -250,6 +257,12 @@ describe("StoryCard link actions", () => {
 		const link = screen.getByRole("link", { name: /with ai$/i });
 		expect(link.getAttribute("href")).toBe("/chat/4242");
 		expect(link.getAttribute("target")).toBeNull();
+	});
+
+	it("hides 'Discuss' while the aiChat flag is off", () => {
+		flagsMock.aiChat = false;
+		render(<StoryCard story={makeStory()} />);
+		expect(screen.queryByRole("link", { name: /with ai$/i })).toBeNull();
 	});
 
 	it("records signed-in title and primary-action clicks as separate views", () => {
