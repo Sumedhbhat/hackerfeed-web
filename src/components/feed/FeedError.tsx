@@ -1,6 +1,6 @@
+import { Button } from "#/components/atoms/Button";
 import type { feedTabs } from "#/components/feed/feedTabs";
 import { TraceIdNote } from "#/components/trace-id-note";
-import { Button } from "#/components/ui/atoms/Button";
 import { getTraceId } from "#/lib/logger";
 
 type FeedErrorProps = {

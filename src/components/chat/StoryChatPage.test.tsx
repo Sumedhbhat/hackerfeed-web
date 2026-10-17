@@ -26,7 +26,8 @@ vi.mock("#/hooks/useAuthSession", () => ({
 	signIn: authMock.signIn,
 }));
 
-vi.mock("@tanstack/react-router", () => ({
+vi.mock("@tanstack/react-router", async () => ({
+	createLink: (await import("#/test/createLinkMock")).createLinkMock,
 	Link: ({
 		children,
 		to,

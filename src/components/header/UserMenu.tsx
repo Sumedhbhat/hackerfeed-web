@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { LogOut, User } from "lucide-react";
 import { useState } from "react";
-import { Button, buttonClassName } from "#/components/ui/atoms/Button";
+import { Button, buttonClassName } from "#/components/atoms/Button";
 import { useUserMenu } from "#/hooks/useUserMenu";
 
 function UserAvatar({

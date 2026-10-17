@@ -1,8 +1,8 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { AlertCircle, RotateCw } from "lucide-react";
 import { useState } from "react";
+import { Button } from "#/components/atoms/Button";
 import { TraceIdNote } from "#/components/trace-id-note";
-import { Button } from "#/components/ui/atoms/Button";
 import { signIn, useAuthSession } from "#/hooks/useAuthSession";
 import { useErrorReport } from "#/hooks/useErrorReport";
 import { toSafeReturnTo } from "#/lib/auth/authkit";

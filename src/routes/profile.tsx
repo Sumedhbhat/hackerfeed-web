@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Mail, User } from "lucide-react";
 import { AiProvidersCard } from "#/components/ai/AiProvidersCard";
-import { Button, buttonClassName } from "#/components/ui/atoms/Button";
+import { Button, buttonClassName } from "#/components/atoms/Button";
 import { signIn, useAuthSession } from "#/hooks/useAuthSession";
 import { useFeatureFlag } from "#/hooks/useFeatureFlags";
 

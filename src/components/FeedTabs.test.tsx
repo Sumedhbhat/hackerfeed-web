@@ -27,7 +27,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 // ---------------------------------------------------------------------------
 
 // Mock TanStack Router so createFileRoute and Link don't need a real router.
-vi.mock("@tanstack/react-router", () => ({
+vi.mock("@tanstack/react-router", async () => ({
+	createLink: (await import("#/test/createLinkMock")).createLinkMock,
 	createFileRoute: (_path: string) => (options: { component: unknown }) =>
 		options,
 	Link: ({
