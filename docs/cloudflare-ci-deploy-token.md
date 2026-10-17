@@ -28,7 +28,9 @@ every same-repo, non-Dependabot pull request. It:
 4. Comments the preview URLs on the PR.
 
 `.github/workflows/preview-cleanup.yaml` deletes the PR's database when the PR
-closes. Previews still share production secrets (WorkOS, Sentry).
+closes. Previews still share production secrets (WorkOS, Sentry). To check a
+change against demo data instead, use the tailnet-only private preview in
+`docs/private-preview.md`.
 
 Because a preview upload makes the latest Worker version an undeployed one,
 the production deploy passes secrets with `wrangler deploy --secrets-file`.

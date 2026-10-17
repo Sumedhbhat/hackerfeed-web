@@ -9,6 +9,7 @@
     "dev": "vite dev --port 3000",
     "build": "vite build",
     "preview": "vite preview",
+    "preview:private": "scripts/private-preview.sh",
     "security:audit": "bun audit --audit-level=high",
     "security:overrides": "bun scripts/check-security-overrides.mjs",
     "test": "vitest run",
