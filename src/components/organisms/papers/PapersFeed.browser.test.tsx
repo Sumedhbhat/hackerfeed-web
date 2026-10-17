@@ -2,7 +2,7 @@ import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { PaperEdition } from "#/lib/papers/schemas";
 import { renderWithQueryClient as render } from "#/test/renderWithQueryClient";
-import { PapersFeed } from "./PapersPage";
+import { PapersFeed } from "./PapersFeed";
 
 const authMock = vi.hoisted(() => ({ userId: "papers-page-user" }));
 const trpcMock = vi.hoisted(() => ({
