@@ -23,7 +23,8 @@ vi.mock("#/hooks/useFeatureFlags", () => ({
 	useFeatureFlag: (name: keyof typeof flagsMock) => flagsMock[name],
 }));
 
-vi.mock("@tanstack/react-router", () => ({
+vi.mock("@tanstack/react-router", async () => ({
+	createLink: (await import("#/test/createLinkMock")).createLinkMock,
 	createFileRoute: () => (options: Record<string, unknown>) => ({
 		...options,
 		useSearch: () => authMock.search,

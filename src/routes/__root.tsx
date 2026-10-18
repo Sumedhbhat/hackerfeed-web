@@ -9,9 +9,12 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { type ReactNode, useEffect } from "react";
-import { FatalErrorView } from "../components/fatal-error-view";
-import { Footer } from "../components/footer";
-import { Header } from "../components/header";
+import { Document } from "../components/atoms/Document";
+import { AppShell } from "../components/molecules/AppShell";
+import { FatalErrorView } from "../components/molecules/FatalErrorView";
+import { LoadingScreen } from "../components/molecules/LoadingScreen";
+import SiteFooter from "../components/organisms/layout/SiteFooter";
+import SiteHeader from "../components/organisms/layout/SiteHeader";
 import { signIn, useAuthSession } from "../hooks/useAuthSession";
 import { useErrorReport } from "../hooks/useErrorReport";
 import { useFeatureFlags } from "../hooks/useFeatureFlags";
@@ -132,16 +135,12 @@ function AppLayout() {
 	return (
 		<AuthProvider>
 			<TanStackQueryProvider>
-				<div className="app-shell">
-					<LocalFavoritesMigration />
-					<Header />
-					<div className="app-content">
-						<SessionGate>
-							<Outlet />
-						</SessionGate>
-					</div>
-					<Footer />
-				</div>
+				<LocalFavoritesMigration />
+				<AppShell header={<SiteHeader />} footer={<SiteFooter />}>
+					<SessionGate>
+						<Outlet />
+					</SessionGate>
+				</AppShell>
 				<TanStackDevtools
 					config={{
 						position: "bottom-right",
@@ -171,25 +170,22 @@ function SessionGate({ children }: { children: ReactNode }) {
 
 	if (isPublic || (user && !flagsPending)) return children;
 
-	return (
-		<div className="flex min-h-[60vh] items-center justify-center">
-			<div className="h-8 w-8 animate-spin rounded-full border-2 border-(--chip-line) border-t-(--lagoon)" />
-		</div>
-	);
+	return <LoadingScreen />;
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
 	return (
-		<html lang="en" suppressHydrationWarning>
-			<head>
-				<script src="/theme-init.js" />
-				<HeadContent />
-			</head>
-			<body className="font-sans antialiased wrap-anywhere selection:bg-[rgba(79,184,178,0.24)]">
-				{children}
-				<Scripts />
-			</body>
-		</html>
+		<Document
+			head={
+				<>
+					<script src="/theme-init.js" />
+					<HeadContent />
+				</>
+			}
+		>
+			{children}
+			<Scripts />
+		</Document>
 	);
 }
 

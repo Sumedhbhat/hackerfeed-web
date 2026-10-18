@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.5.6/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
 	"vcs": {
 		"enabled": false,
 		"clientKind": "git",
@@ -35,13 +35,47 @@
 			"complexity": {
 				"useOptionalChain": "error"
 			},
+			"a11y": {
+				"noLabelWithoutControl": {
+					"level": "error",
+					"options": {
+						"inputComponents": ["TextInput", "TextArea"]
+					}
+				}
+			},
 			"correctness": {
 				"noRestrictedElements": {
 					"level": "error",
 					"options": {
 						"elements": {
-							"button": "Use <Button> from #/components/ui/atoms/Button instead of a raw <button>."
+							"button": "Use <Button> from #/components/atoms/Button.",
+							"a": "Use <TextLink>/<ExternalLink> from #/components/atoms/Link or <ButtonLink>/<ExternalButtonLink> from #/components/atoms/Button.",
+							"input": "Use <TextInput> from #/components/atoms/TextField, or add a field atom.",
+							"textarea": "Use <TextArea> from #/components/atoms/TextField.",
+							"select": "Use <Select> from #/components/atoms/TextField or <SelectField> from #/components/molecules/SelectField.",
+							"h1": "Use <Heading level={1}> from #/components/atoms/Heading.",
+							"h2": "Use <Heading level={2}> from #/components/atoms/Heading.",
+							"h3": "Use <Heading level={3}> from #/components/atoms/Heading.",
+							"h4": "Use <Heading level={4}> from #/components/atoms/Heading.",
+							"h5": "Use <Heading> from #/components/atoms/Heading.",
+							"h6": "Use <Heading> from #/components/atoms/Heading.",
+							"p": "Use <Text> from #/components/atoms/Text.",
+							"img": "Use <Avatar> or add an image atom in #/components/atoms.",
+							"style": "Styles live in atoms/molecules (Tailwind) or src/styles.css, never in an inline <style>."
 						}
+					}
+				}
+			},
+			"style": {
+				"noRestrictedImports": {
+					"level": "error",
+					"options": {
+						"patterns": [
+							{
+								"group": ["@base-ui/**"],
+								"message": "Base UI is wrapped by the atoms in #/components/atoms (Tabs, Menu, Toggle, Select...). Use or extend an atom instead of importing Base UI here."
+							}
+						]
 					}
 				}
 			}
@@ -52,14 +86,88 @@
 			"quoteStyle": "double"
 		}
 	},
-	"plugins": ["./lint/no-button-look-classes.grit"],
 	"overrides": [
 		{
-			"includes": ["**/src/components/ui/**", "**/*.test.tsx"],
+			"includes": [
+				"**/src/components/atoms/**",
+				"**/src/components/molecules/**",
+				"**/*.test.tsx",
+				"**/src/client-entry.tsx",
+				"**/src/router.tsx",
+				"**/src/server/errors/**"
+			],
 			"linter": {
 				"rules": {
 					"correctness": {
 						"noRestrictedElements": "off"
+					}
+				}
+			}
+		},
+		{
+			"includes": [
+				"**/src/**/*.tsx",
+				"!**/src/components/atoms/**",
+				"!**/src/components/molecules/**",
+				"!**/*.test.tsx",
+				"!**/src/client-entry.tsx",
+				"!**/src/router.tsx",
+				"!**/src/server/errors/**"
+			],
+			"plugins": ["./lint/no-styling-outside-atoms.grit"]
+		},
+		{
+			"includes": ["**/src/components/atoms/**", "!**/*.test.tsx"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noRestrictedImports": {
+							"level": "error",
+							"options": {
+								"patterns": [
+									{
+										"group": [
+											"#/hooks/*",
+											"#/lib/*",
+											"#/server/*",
+											"#/components/organisms/*",
+											"#/components/pages/*"
+										],
+										"message": "Atoms and molecules are presentational: take data and callbacks as props instead of importing hooks, lib or higher layers."
+									}
+								]
+							}
+						}
+					}
+				}
+			}
+		},
+		{
+			"includes": ["**/src/components/molecules/**", "!**/*.test.tsx"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noRestrictedImports": {
+							"level": "error",
+							"options": {
+								"patterns": [
+									{
+										"group": [
+											"#/hooks/*",
+											"#/lib/*",
+											"#/server/*",
+											"#/components/organisms/*",
+											"#/components/pages/*"
+										],
+										"message": "Atoms and molecules are presentational: take data and callbacks as props instead of importing hooks, lib or higher layers."
+									},
+									{
+										"group": ["@base-ui/**"],
+										"message": "Base UI is wrapped by the atoms in #/components/atoms (Tabs, Menu, Toggle, Select...). Use or extend an atom instead of importing Base UI here."
+									}
+								]
+							}
+						}
 					}
 				}
 			}

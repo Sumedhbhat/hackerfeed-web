@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { PapersPage } from "#/components/papers/PapersPage";
+import { PapersPage } from "#/components/pages/PapersPage";
 
 type PapersSearch = {
 	date?: string;
