@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Avatar as BaseAvatar } from "@base-ui/react/avatar";
 
 const SIZE = {
 	sm: "h-8 w-8 text-xs",
@@ -24,24 +24,23 @@ export function Avatar({
 	initials,
 	labelled = false,
 }: AvatarProps) {
-	const [imageFailed, setImageFailed] = useState(false);
-
-	if (imageUrl && !imageFailed) {
-		return (
-			<img
-				src={imageUrl}
-				alt={labelled ? name : ""}
-				onError={() => setImageFailed(true)}
-				className={`${SIZE[size]} shrink-0 rounded-full border border-(--chip-line) bg-(--chip-bg) object-cover`}
-			/>
-		);
-	}
 	return (
-		<span
-			aria-hidden={labelled ? undefined : "true"}
-			className={`${SIZE[size]} flex shrink-0 items-center justify-center rounded-full border border-(--chip-line) bg-(--lagoon) font-semibold text-white`}
+		<BaseAvatar.Root
+			{...(labelled
+				? { role: "img", "aria-label": name }
+				: { "aria-hidden": true })}
+			className={`${SIZE[size]} flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-(--chip-line) bg-(--lagoon) font-semibold text-white`}
 		>
-			{initials || name.trim().charAt(0).toUpperCase() || "?"}
-		</span>
+			{imageUrl ? (
+				<BaseAvatar.Image
+					src={imageUrl}
+					alt=""
+					className="h-full w-full bg-(--chip-bg) object-cover"
+				/>
+			) : null}
+			<BaseAvatar.Fallback>
+				{initials || name.trim().charAt(0).toUpperCase() || "?"}
+			</BaseAvatar.Fallback>
+		</BaseAvatar.Root>
 	);
 }
