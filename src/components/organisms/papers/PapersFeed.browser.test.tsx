@@ -187,7 +187,8 @@ describe("PapersFeed", () => {
 		fireEvent.click(save);
 
 		const remove = await screen.findByRole("button", {
-			name: "Remove Reasoning Paper from favorites",
+			name: "Save Reasoning Paper to favorites",
+			pressed: true,
 		});
 		expect(remove.getAttribute("aria-pressed")).toBe("true");
 		expect(remove.textContent).toContain("Saved");

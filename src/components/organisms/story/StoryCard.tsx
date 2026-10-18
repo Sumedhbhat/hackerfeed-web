@@ -6,6 +6,7 @@ import { Icon } from "#/components/atoms/Icon";
 import { TextLink } from "#/components/atoms/Link";
 import { Row } from "#/components/atoms/Row";
 import { Stack } from "#/components/atoms/Stack";
+import { ToggleButton } from "#/components/atoms/Toggle";
 import { MetaLine } from "#/components/molecules/MetaLine";
 import { StoryStats } from "#/components/molecules/StoryStats";
 import { useFavorites } from "#/hooks/useFavorites";
@@ -82,11 +83,10 @@ export function StoryCard({ story, animationDelay }: StoryCardProps) {
 						</TextLink>
 					) : null}
 
-					<Button
-						variant="ghost"
-						aria-label={isFav ? "Remove from favorites" : "Save to favorites"}
-						aria-pressed={isFav}
-						onClick={() => toggleFavorite(story)}
+					<ToggleButton
+						aria-label="Save to favorites"
+						pressed={isFav}
+						onPressedChange={() => toggleFavorite(story)}
 					>
 						{isFav ? (
 							<>
@@ -97,7 +97,7 @@ export function StoryCard({ story, animationDelay }: StoryCardProps) {
 								<Icon key="star-empty" icon={Star} /> Save
 							</>
 						)}
-					</Button>
+					</ToggleButton>
 				</Row>
 			</Stack>
 		</Card>

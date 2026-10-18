@@ -211,7 +211,8 @@ describe("FavoritesPage paper collection", () => {
 
 		fireEvent.click(
 			screen.getByRole("button", {
-				name: "Remove Saved Reasoning Paper from favorites",
+				name: "Save Saved Reasoning Paper to favorites",
+				pressed: true,
 			}),
 		);
 		await waitFor(() =>

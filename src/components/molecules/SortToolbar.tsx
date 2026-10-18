@@ -1,6 +1,6 @@
-import type { ReactNode } from "react";
-import { Button } from "#/components/atoms/Button";
+import { type ReactNode, useId } from "react";
 import { Kicker } from "#/components/atoms/Kicker";
+import { ToggleButton, ToggleGroup } from "#/components/atoms/Toggle";
 
 type SortOption<T extends string> = { value: T; label: string };
 
@@ -16,22 +16,28 @@ export function SortToolbar<T extends string>({
 	onChange: (value: T) => void;
 	action?: ReactNode;
 }) {
+	const labelId = useId();
 	return (
 		<div className="flex flex-wrap gap-3 justify-between items-center mb-6 rise-in">
 			<div className="flex gap-3 items-center">
-				<Kicker as="span">Sort by</Kicker>
-				<div className="flex gap-1">
+				<span id={labelId}>
+					<Kicker as="span">Sort by</Kicker>
+				</span>
+				<ToggleGroup
+					value={value}
+					onValueChange={onChange}
+					aria-labelledby={labelId}
+				>
 					{options.map((option) => (
-						<Button
+						<ToggleButton
 							key={option.value}
 							variant="secondary"
-							onClick={() => onChange(option.value)}
-							aria-pressed={value === option.value}
+							value={option.value}
 						>
 							{option.label}
-						</Button>
+						</ToggleButton>
 					))}
-				</div>
+				</ToggleGroup>
 			</div>
 			{action}
 		</div>

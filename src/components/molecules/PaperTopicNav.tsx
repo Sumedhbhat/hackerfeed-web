@@ -1,6 +1,8 @@
-import { Button } from "#/components/atoms/Button";
+import { ToggleButton, ToggleGroup } from "#/components/atoms/Toggle";
 
 type Topic = { keyword: string; paperCount: number };
+
+const ALL = "\u0000all";
 
 /** Scrollable row of topic filter chips, starting with "All papers". */
 export function PaperTopicNav({
@@ -15,24 +17,24 @@ export function PaperTopicNav({
 	onSelect: (topic: string | undefined) => void;
 }) {
 	return (
-		<nav className="papers-topics" aria-label="Popular paper topics">
-			<Button
-				variant="secondary"
-				aria-pressed={!selected}
-				onClick={() => onSelect(undefined)}
-			>
+		<ToggleGroup
+			layout="scroll"
+			aria-label="Popular paper topics"
+			value={selected ?? ALL}
+			onValueChange={(topic) => onSelect(topic === ALL ? undefined : topic)}
+		>
+			<ToggleButton variant="secondary" value={ALL}>
 				All papers <small>{totalCount}</small>
-			</Button>
+			</ToggleButton>
 			{topics.map((topic) => (
-				<Button
+				<ToggleButton
 					variant="secondary"
-					aria-pressed={selected === topic.keyword}
-					onClick={() => onSelect(topic.keyword)}
+					value={topic.keyword}
 					key={topic.keyword}
 				>
 					{topic.keyword} <small>{topic.paperCount}</small>
-				</Button>
+				</ToggleButton>
 			))}
-		</nav>
+		</ToggleGroup>
 	);
 }

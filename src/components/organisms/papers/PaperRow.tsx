@@ -1,8 +1,8 @@
 import { Star } from "lucide-react";
-import { Button } from "#/components/atoms/Button";
 import { Icon } from "#/components/atoms/Icon";
 import { PaperCard } from "#/components/atoms/PaperCard";
 import { Text } from "#/components/atoms/Text";
+import { ToggleButton } from "#/components/atoms/Toggle";
 import { KeywordList } from "#/components/molecules/KeywordList";
 import { PaperCardFooter } from "#/components/molecules/PaperCardFooter";
 import { PaperLinks } from "#/components/molecules/PaperLinks";
@@ -61,21 +61,16 @@ export function PaperRow({
 							githubRepo={paper.githubRepo}
 						/>
 						{canFavorite ? (
-							<Button
-								variant="ghost"
-								aria-label={
-									saved
-										? `Remove ${paper.title} from favorites`
-										: `Save ${paper.title} to favorites`
-								}
-								aria-pressed={saved}
+							<ToggleButton
+								aria-label={`Save ${paper.title} to favorites`}
+								pressed={saved}
 								title={saved ? "Remove from favorites" : "Save to favorites"}
 								disabled={pending}
-								onClick={onToggleFavorite}
+								onPressedChange={onToggleFavorite}
 							>
 								<Icon icon={Star} filled={saved} pop={saved} />{" "}
 								{saved ? "Saved" : "Save"}
-							</Button>
+							</ToggleButton>
 						) : null}
 					</>
 				}

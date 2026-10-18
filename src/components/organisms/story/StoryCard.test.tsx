@@ -317,13 +317,12 @@ describe("StoryCard favorite toggle", () => {
 		expect(isFavorited(777)).toBe(true);
 	});
 
-	it("aria-label changes to 'Remove from favorites' after saving", () => {
+	it("keeps its label and reports the saved state through aria-pressed", () => {
 		render(<StoryCard story={makeStory()} />);
 		fireEvent.click(screen.getByRole("button", { name: /save to favorites/i }));
 
-		// After clicking, the button label should flip.
 		expect(
-			screen.getByRole("button", { name: /remove from favorites/i }),
+			screen.getByRole("button", { name: /save to favorites/i, pressed: true }),
 		).toBeDefined();
 	});
 
@@ -331,7 +330,7 @@ describe("StoryCard favorite toggle", () => {
 		render(<StoryCard story={makeStory()} />);
 		fireEvent.click(screen.getByRole("button", { name: /save to favorites/i }));
 
-		const btn = screen.getByRole("button", { name: /remove from favorites/i });
+		const btn = screen.getByRole("button", { name: /save to favorites/i });
 		expect(btn.getAttribute("aria-pressed")).toBe("true");
 	});
 
@@ -345,7 +344,7 @@ describe("StoryCard favorite toggle", () => {
 
 		// Remove
 		fireEvent.click(
-			screen.getByRole("button", { name: /remove from favorites/i }),
+			screen.getByRole("button", { name: /save to favorites/i, pressed: true }),
 		);
 		expect(isFavorited(888)).toBe(false);
 	});
@@ -370,7 +369,10 @@ describe("StoryCard favorite toggle", () => {
 
 		await waitFor(() => {
 			expect(
-				screen.getByRole("button", { name: /remove from favorites/i }),
+				screen.getByRole("button", {
+					name: /save to favorites/i,
+					pressed: true,
+				}),
 			).toBeDefined();
 		});
 	});
@@ -396,12 +398,15 @@ describe("StoryCard favorite toggle", () => {
 		render(<StoryCard story={story} />);
 		await waitFor(() => {
 			expect(
-				screen.getByRole("button", { name: /remove from favorites/i }),
+				screen.getByRole("button", {
+					name: /save to favorites/i,
+					pressed: true,
+				}),
 			).toBeDefined();
 		});
 
 		fireEvent.click(
-			screen.getByRole("button", { name: /remove from favorites/i }),
+			screen.getByRole("button", { name: /save to favorites/i, pressed: true }),
 		);
 
 		expect(trpcMock.remove).toHaveBeenCalledWith({ hnStoryId: 903 });
