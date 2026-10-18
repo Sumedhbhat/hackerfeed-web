@@ -32,6 +32,10 @@ const fixtures: Record<string, string> = {
 	"src/components/atoms/AtomOk.tsx": `export const A = () => <a className="p-4" href="/x">x</a>;`,
 	"src/features/RawButton.tsx": `export const A = () => <button type="button">x</button>;`,
 	"src/components/molecules/ImportsHook.tsx": `import { useFeed } from "#/hooks/useFeed";\nexport const A = () => <span>{String(useFeed)}</span>;`,
+	"src/components/atoms/ImportsHook.tsx": `import { useFeed } from "#/hooks/useFeed";\nexport const A = () => <span>{String(useFeed)}</span>;`,
+	"src/components/atoms/BaseUiOk.tsx": `import { Toggle } from "@base-ui/react/toggle";\nexport const A = () => <Toggle />;`,
+	"src/components/molecules/BaseUi.tsx": `import { Toggle } from "@base-ui/react/toggle";\nexport const A = () => <Toggle />;`,
+	"src/components/organisms/x/BaseUi.tsx": `import { Toggle } from "@base-ui/react/toggle";\nexport const A = () => <Toggle />;`,
 };
 
 const expected: Record<string, string[]> = {
@@ -47,6 +51,10 @@ const expected: Record<string, string[]> = {
 	"src/components/atoms/AtomOk.tsx": [],
 	"src/features/RawButton.tsx": [RAW_ELEMENT],
 	"src/components/molecules/ImportsHook.tsx": [LAYER_IMPORT],
+	"src/components/atoms/ImportsHook.tsx": [LAYER_IMPORT],
+	"src/components/atoms/BaseUiOk.tsx": [],
+	"src/components/molecules/BaseUi.tsx": [LAYER_IMPORT],
+	"src/components/organisms/x/BaseUi.tsx": [LAYER_IMPORT],
 };
 
 type Diagnostic = {

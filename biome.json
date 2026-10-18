@@ -65,6 +65,19 @@
 						}
 					}
 				}
+			},
+			"style": {
+				"noRestrictedImports": {
+					"level": "error",
+					"options": {
+						"patterns": [
+							{
+								"group": ["@base-ui/**"],
+								"message": "Base UI is wrapped by the atoms in #/components/atoms (Tabs, Menu, Toggle, Select...). Use or extend an atom instead of importing Base UI here."
+							}
+						]
+					}
+				}
 			}
 		}
 	},
@@ -104,11 +117,7 @@
 			"plugins": ["./lint/no-styling-outside-atoms.grit"]
 		},
 		{
-			"includes": [
-				"**/src/components/atoms/**",
-				"**/src/components/molecules/**",
-				"!**/*.test.tsx"
-			],
+			"includes": ["**/src/components/atoms/**", "!**/*.test.tsx"],
 			"linter": {
 				"rules": {
 					"style": {
@@ -125,6 +134,36 @@
 											"#/components/pages/*"
 										],
 										"message": "Atoms and molecules are presentational: take data and callbacks as props instead of importing hooks, lib or higher layers."
+									}
+								]
+							}
+						}
+					}
+				}
+			}
+		},
+		{
+			"includes": ["**/src/components/molecules/**", "!**/*.test.tsx"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noRestrictedImports": {
+							"level": "error",
+							"options": {
+								"patterns": [
+									{
+										"group": [
+											"#/hooks/*",
+											"#/lib/*",
+											"#/server/*",
+											"#/components/organisms/*",
+											"#/components/pages/*"
+										],
+										"message": "Atoms and molecules are presentational: take data and callbacks as props instead of importing hooks, lib or higher layers."
+									},
+									{
+										"group": ["@base-ui/**"],
+										"message": "Base UI is wrapped by the atoms in #/components/atoms (Tabs, Menu, Toggle, Select...). Use or extend an atom instead of importing Base UI here."
 									}
 								]
 							}
