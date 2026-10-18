@@ -1,23 +1,15 @@
 import { LogOut, User } from "lucide-react";
 import { Avatar } from "#/components/atoms/Avatar";
 import { AvatarSkeleton } from "#/components/atoms/AvatarSkeleton";
-import { Button, ButtonLink } from "#/components/atoms/Button";
+import { ButtonLink } from "#/components/atoms/Button";
+import { MenuItem, MenuLinkItem } from "#/components/atoms/Menu";
 import { Stack } from "#/components/atoms/Stack";
 import { Text } from "#/components/atoms/Text";
 import { DropdownMenu } from "#/components/molecules/DropdownMenu";
 import { useUserMenu } from "#/hooks/useUserMenu";
 
 export default function UserMenu() {
-	const {
-		open,
-		setOpen,
-		containerRef,
-		user,
-		isLoading,
-		signOut,
-		initials,
-		displayName,
-	} = useUserMenu();
+	const { user, isLoading, signOut, initials, displayName } = useUserMenu();
 
 	if (isLoading) {
 		return <AvatarSkeleton />;
@@ -33,22 +25,13 @@ export default function UserMenu() {
 
 	return (
 		<DropdownMenu
-			containerRef={containerRef}
-			open={open}
+			triggerLabel="User menu"
 			trigger={
-				<Button
-					variant="icon"
-					onClick={() => setOpen((v) => !v)}
-					aria-label="User menu"
-					aria-expanded={open}
-				>
-					<Avatar
-						name={displayName}
-						initials={initials}
-						imageUrl={user.profilePictureUrl}
-						labelled
-					/>
-				</Button>
+				<Avatar
+					name={displayName}
+					initials={initials}
+					imageUrl={user.profilePictureUrl}
+				/>
 			}
 			header={
 				<>
@@ -57,7 +40,6 @@ export default function UserMenu() {
 						initials={initials}
 						imageUrl={user.profilePictureUrl}
 						size="md"
-						labelled
 					/>
 					<Stack gap="none" grow>
 						<Text as="div" weight="semibold" truncate>
@@ -70,14 +52,14 @@ export default function UserMenu() {
 				</>
 			}
 		>
-			<ButtonLink to="/profile" variant="ghost" onClick={() => setOpen(false)}>
+			<MenuLinkItem to="/profile">
 				<User size={15} aria-hidden="true" />
 				Profile
-			</ButtonLink>
-			<Button variant="ghost" onClick={() => signOut()}>
+			</MenuLinkItem>
+			<MenuItem onClick={() => signOut()}>
 				<LogOut size={15} aria-hidden="true" />
 				Log out
-			</Button>
+			</MenuItem>
 		</DropdownMenu>
 	);
 }

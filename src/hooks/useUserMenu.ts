@@ -1,4 +1,3 @@
-import { useEffect, useRef, useState } from "react";
 import { signOut, useAuthSession } from "./useAuthSession";
 
 function getInitials(
@@ -13,9 +12,6 @@ function getInitials(
 }
 
 export type UseUserMenuReturn = {
-	open: boolean;
-	setOpen: (value: boolean | ((prev: boolean) => boolean)) => void;
-	containerRef: React.RefObject<HTMLDivElement>;
 	user: ReturnType<typeof useAuthSession>["user"];
 	isLoading: boolean;
 	signOut: () => void;
@@ -25,22 +21,6 @@ export type UseUserMenuReturn = {
 
 export function useUserMenu(): UseUserMenuReturn {
 	const { user, isLoading } = useAuthSession();
-	const [open, setOpen] = useState(false);
-	const containerRef = useRef<HTMLDivElement>(null);
-
-	useEffect(() => {
-		if (!open) return;
-		function handleClickOutside(e: MouseEvent) {
-			if (
-				containerRef.current &&
-				!containerRef.current.contains(e.target as Node)
-			) {
-				setOpen(false);
-			}
-		}
-		document.addEventListener("mousedown", handleClickOutside);
-		return () => document.removeEventListener("mousedown", handleClickOutside);
-	}, [open]);
 
 	const initials = user
 		? getInitials(user.firstName, user.lastName, user.email)
@@ -50,9 +30,6 @@ export function useUserMenu(): UseUserMenuReturn {
 		: "";
 
 	return {
-		open,
-		setOpen,
-		containerRef,
 		user,
 		isLoading,
 		signOut,
