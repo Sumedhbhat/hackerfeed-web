@@ -35,6 +35,14 @@
 			"complexity": {
 				"useOptionalChain": "error"
 			},
+			"a11y": {
+				"noLabelWithoutControl": {
+					"level": "error",
+					"options": {
+						"inputComponents": ["TextInput", "TextArea"]
+					}
+				}
+			},
 			"correctness": {
 				"noRestrictedElements": {
 					"level": "error",

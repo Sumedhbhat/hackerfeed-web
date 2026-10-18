@@ -1,4 +1,5 @@
 import { CalendarDays, Search } from "lucide-react";
+import { TextInput } from "#/components/atoms/TextField";
 
 /** Search box and edition date picker at the top of the papers feed. */
 export function PaperEditionToolbar({
@@ -16,7 +17,8 @@ export function PaperEditionToolbar({
 		<section className="papers-toolbar" aria-label="Find a paper edition">
 			<label className="papers-search">
 				<Search size={16} aria-hidden="true" />
-				<input
+				<TextInput
+					variant="bare"
 					type="search"
 					value={query}
 					onChange={(event) => onQueryChange(event.target.value)}
@@ -26,7 +28,8 @@ export function PaperEditionToolbar({
 			</label>
 			<label className="papers-date">
 				<CalendarDays size={16} aria-hidden="true" />
-				<input
+				<TextInput
+					variant="bare"
 					type="date"
 					value={date}
 					onChange={(event) => onDateChange(event.target.value)}
