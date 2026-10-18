@@ -78,5 +78,8 @@
       "esbuild",
       "lightningcss"
     ]
+  },
+  "overrides": {
+    "esbuild": "^0.28.2"
   }
 }
