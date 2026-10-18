@@ -24,6 +24,7 @@
     "check": "biome check"
   },
   "dependencies": {
+    "@base-ui/react": "^1.8.0",
     "@cloudflare/vite-plugin": "^1.64.0",
     "@sentry/cloudflare": "^10.69.0",
     "@sentry/core": "^10.69.0",
