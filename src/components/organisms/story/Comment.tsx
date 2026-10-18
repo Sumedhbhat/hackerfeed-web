@@ -1,5 +1,9 @@
 import { Suspense } from "react";
-import { Button } from "#/components/atoms/Button";
+import {
+	Collapsible,
+	CollapsiblePanel,
+	CollapsibleTrigger,
+} from "#/components/atoms/Collapsible";
 import { Prose } from "#/components/atoms/Prose";
 import { Row } from "#/components/atoms/Row";
 import { Stack } from "#/components/atoms/Stack";
@@ -31,86 +35,90 @@ export function Comment({ comment, depth = 0 }: CommentProps) {
 
 	return (
 		<ThreadItem depth={depth}>
-			<Stack gap="sm">
-				{/* Header row: author + age + collapse toggle */}
-				<Row gap="sm">
-					{comment.deleted ? (
-						<Text as="span" size="xs" tone="faint" italic>
-							[deleted]
-						</Text>
-					) : comment.dead ? (
-						<Text as="span" size="xs" tone="faint" italic>
-							[dead]
-						</Text>
-					) : (
-						<>
-							<Text as="span" size="xs" weight="semibold">
-								{comment.by ?? "unknown"}
+			<Collapsible
+				open={!collapsed && !isGone}
+				onOpenChange={(open) => setCollapsed(!open)}
+			>
+				<Stack gap="sm">
+					{/* Header row: author + age + collapse toggle */}
+					<Row gap="sm">
+						{comment.deleted ? (
+							<Text as="span" size="xs" tone="faint" italic>
+								[deleted]
 							</Text>
-							<Text as="span" size="xs" tone="faint">
-								{age}
+						) : comment.dead ? (
+							<Text as="span" size="xs" tone="faint" italic>
+								[dead]
 							</Text>
-						</>
-					)}
+						) : (
+							<>
+								<Text as="span" size="xs" weight="semibold">
+									{comment.by ?? "unknown"}
+								</Text>
+								<Text as="span" size="xs" tone="faint">
+									{age}
+								</Text>
+							</>
+						)}
 
-					{!isGone && (
-						<Row as="span" pushEnd>
-							<Button
-								variant="ghost"
-								onClick={() => setCollapsed((v) => !v)}
-								aria-label={collapsed ? "Expand comment" : "Collapse comment"}
-							>
-								{collapsed ? "[+]" : "[-]"}
-							</Button>
-						</Row>
-					)}
-				</Row>
-
-				{!collapsed && !isGone && (
-					<Stack gap="md">
-						{comment.text && <Prose html={comment.text} />}
-
-						{replyCount > 0 && (
-							<Row>
-								<Button
-									variant="ghost"
-									onClick={() => setRepliesOpen((v) => !v)}
+						{!isGone && (
+							<Row as="span" pushEnd>
+								<CollapsibleTrigger
+									aria-label={`Comment by ${comment.by ?? "unknown"}`}
 								>
-									{repliesOpen
-										? "Hide replies"
-										: `${replyCount} ${replyCount === 1 ? "reply" : "replies"}`}
-								</Button>
+									{collapsed ? "[+]" : "[-]"}
+								</CollapsibleTrigger>
 							</Row>
 						)}
+					</Row>
 
-						{/* Nested replies — wrapped in Suspense so parent comment isn't affected while loading */}
-						{repliesOpen && (
-							<Suspense
-								fallback={
-									<Stack gap="xs">
-										{comment.kids.map((id) => (
-											<CommentSkeleton key={id} />
-										))}
+					<CollapsiblePanel>
+						<Stack gap="md">
+							{comment.text && <Prose html={comment.text} />}
+
+							{replyCount > 0 && (
+								<Collapsible open={repliesOpen} onOpenChange={setRepliesOpen}>
+									<Stack gap="md">
+										<Row>
+											<CollapsibleTrigger>
+												{repliesOpen
+													? "Hide replies"
+													: `${replyCount} ${replyCount === 1 ? "reply" : "replies"}`}
+											</CollapsibleTrigger>
+										</Row>
+
+										{/* Nested replies — wrapped in Suspense so parent comment isn't affected while loading */}
+										<CollapsiblePanel>
+											<Suspense
+												fallback={
+													<Stack gap="xs">
+														{comment.kids.map((id) => (
+															<CommentSkeleton key={id} />
+														))}
+													</Stack>
+												}
+											>
+												<Stack gap="none">
+													{childQueries.map((q) => {
+														if (!q.data) return null;
+														return (
+															<Comment
+																key={q.data.id}
+																comment={q.data}
+																depth={depth + 1}
+															/>
+														);
+													})}
+												</Stack>
+											</Suspense>
+										</CollapsiblePanel>
 									</Stack>
-								}
-							>
-								<Stack gap="none">
-									{childQueries.map((q) => {
-										if (!q.data) return null;
-										return (
-											<Comment
-												key={q.data.id}
-												comment={q.data}
-												depth={depth + 1}
-											/>
-										);
-									})}
-								</Stack>
-							</Suspense>
-						)}
-					</Stack>
-				)}
-			</Stack>
+								</Collapsible>
+							)}
+						</Stack>
+					</CollapsiblePanel>
+				</Stack>
+			</Collapsible>
 		</ThreadItem>
 	);
 }
