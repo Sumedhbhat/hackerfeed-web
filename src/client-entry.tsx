@@ -64,7 +64,6 @@ function ClientErrorFallback({
 					Trace ID: <code>{traceId}</code>
 				</p>
 			) : null}
-			{/* biome-ignore lint/correctness/noRestrictedElements: last-resort error UI is styled inline so it works without the stylesheet */}
 			<button
 				onClick={resetError}
 				style={{

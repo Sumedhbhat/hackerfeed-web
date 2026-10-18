@@ -77,11 +77,15 @@ Every component lives in one of four layers under `src/components/`. Read a file
 
 Routes in `src/routes/` stay thin: route config, loader, search params, then render a page. They follow the same rule as pages.
 
-Rules, enforced by Biome (`bun run check`):
-- `lint/no-styling-outside-atoms.grit` rejects `className` and `style` in `organisms/`, `pages/` and `routes/`. If no component fits, add an atom/molecule (or a variant) instead of styling inline.
+Before building UI, list `src/components/atoms/` and `src/components/molecules/` and reuse what is there. Add a variant to an existing atom before adding a new atom.
+
+Rules, enforced by Biome (`bun run check`) and guarded by `src/test/lint-rules.test.ts`:
+- `lint/no-styling-outside-atoms.grit` rejects `className`, `class`, `style` and spreads that carry them in every `.tsx` file outside `atoms/` and `molecules/`, including new folders. If no component fits, add an atom/molecule (or a variant) instead of styling inline.
+- `noRestrictedElements` rejects raw `<button>`, `<a>`, `<input>`, `<textarea>`, `<select>`, `<h1>`–`<h6>`, `<p>`, `<img>` and `<style>` everywhere outside atoms/molecules. Each diagnostic names the atom to use.
 - `noRestrictedImports` stops atoms and molecules from importing `#/hooks`, `#/lib`, `#/server` or higher layers, so they stay presentational.
-- `noRestrictedElements` rejects raw `<button>` outside atoms/molecules; `lint/no-button-look-classes.grit` rejects class strings that recreate the button look.
-- Exempt: tests, and the stylesheet-free error UI in `client-entry.tsx`.
+- Exempt (in `biome.json` overrides, never inline): tests, and the stylesheet-free error UI in `client-entry.tsx`, `router.tsx` and `src/server/errors/`.
+
+When a rule blocks you, change the component, not the rule. Do not edit `biome.json` or `lint/`, add `biome-ignore` for these rules (the test fails on it), restyle elements from `src/styles.css`, or move files to dodge a rule. If the request can't be met within the layers, stop and say so. Colors come from the CSS variables in `src/styles.css` (`--lagoon`, `--sea-ink`…); add a token there rather than using raw Tailwind palette colors or hex values.
 
 Prefer props that describe intent (`tone="soft"`, `size="page"`, `variant="accent"`) over props that leak CSS. Selected state for `Tab` and secondary `Button` chips comes from the caller's `aria-selected`/`aria-pressed`. Tests that mock `@tanstack/react-router` must provide `createLink` (see `src/test/createLinkMock.tsx`), because the link atoms are built with it.
 
