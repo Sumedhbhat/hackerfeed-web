@@ -1,5 +1,6 @@
+import { Button as BaseButton } from "@base-ui/react/button";
 import { createLink } from "@tanstack/react-router";
-import type { AnchorHTMLAttributes, ButtonHTMLAttributes } from "react";
+import type { AnchorHTMLAttributes } from "react";
 
 const BASE_CLASSES =
 	"inline-flex shrink-0 items-center gap-1.5 no-underline transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--lagoon) cursor-pointer disabled:cursor-not-allowed disabled:opacity-60";
@@ -20,10 +21,7 @@ export function buttonClassName(variant: ButtonVariant = "primary"): string {
 	return `${BASE_CLASSES} ${VARIANT_CLASSES[variant]}`;
 }
 
-type ButtonProps = Omit<
-	ButtonHTMLAttributes<HTMLButtonElement>,
-	"className"
-> & {
+type ButtonProps = Omit<BaseButton.Props, "className" | "style" | "render"> & {
 	variant?: ButtonVariant;
 };
 
@@ -32,7 +30,9 @@ export function Button({
 	type = "button",
 	...props
 }: ButtonProps) {
-	return <button type={type} className={buttonClassName(variant)} {...props} />;
+	return (
+		<BaseButton type={type} className={buttonClassName(variant)} {...props} />
+	);
 }
 
 type ButtonAnchorProps = Omit<
