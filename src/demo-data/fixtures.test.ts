@@ -4,8 +4,7 @@ import { DatabaseSync } from "node:sqlite";
 import { getTableColumns, getTableName } from "drizzle-orm";
 import { getTableConfig } from "drizzle-orm/sqlite-core";
 import { describe, expect, it, vi } from "vitest";
-import feeds from "../../fixtures/hacker-news/feeds.json";
-import items from "../../fixtures/hacker-news/items.json";
+import { type DemoItem, feeds, items } from "./hacker-news";
 import {
 	buildDemoDataSql,
 	DEMO_USER_ID,
@@ -175,14 +174,9 @@ describe("fixtures/database", () => {
 	});
 });
 
-describe("fixtures/hacker-news", () => {
-	type Item = (typeof items)[number] & {
-		kids?: number[];
-		parent?: number;
-		descendants?: number;
-	};
-	const byId = new Map<number, Item>(items.map((item) => [item.id, item]));
-	const countDescendants = (item: Item): number =>
+describe("demo Hacker News items", () => {
+	const byId = new Map(items.map((item) => [item.id, item]));
+	const countDescendants = (item: DemoItem): number =>
 		(item.kids ?? []).reduce((total, kid) => {
 			const child = byId.get(kid);
 			return child ? total + 1 + countDescendants(child) : total;
@@ -196,9 +190,13 @@ describe("fixtures/hacker-news", () => {
 	});
 
 	it("links comments to existing parents and counts them on each story", () => {
-		for (const item of items as Item[]) {
+		for (const item of items) {
 			for (const kid of item.kids ?? []) {
-				expect(byId.get(kid)?.parent, `comment ${kid}`).toBe(item.id);
+				const child = byId.get(kid);
+				expect(
+					child?.type === "comment" && child.parent,
+					`comment ${kid}`,
+				).toBe(item.id);
 			}
 			if (item.type === "story") {
 				expect(item.descendants, `story ${item.id}`).toBe(
@@ -210,7 +208,8 @@ describe("fixtures/hacker-news", () => {
 
 	it("matches the stored copies in fixtures/database/stories.json", () => {
 		for (const row of fixtures.get("stories") ?? []) {
-			const item = byId.get(row.hnStoryId as number);
+			const found = byId.get(row.hnStoryId as number);
+			const item = found?.type === "story" ? found : undefined;
 			expect(item, `story ${row.hnStoryId}`).toBeDefined();
 			expect(row.title).toBe(item?.title);
 			expect(row.commentCount).toBe(item?.descendants);

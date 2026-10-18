@@ -1,8 +1,8 @@
-// Compares fixtures/hacker-news with the live Hacker News API: reports fields
+// Compares src/demo-data/hacker-news.ts with the live Hacker News API: reports fields
 // the live API returns that no fixture item has, and fields whose type differs.
 // Reads live data only to compare shapes; nothing is saved.
 // Usage: bun run demo-data:compare
-import items from "../fixtures/hacker-news/items.json";
+import { items } from "#/demo-data/hacker-news";
 
 const API = "https://hacker-news.firebaseio.com/v0";
 
@@ -33,7 +33,7 @@ async function liveSamples(): Promise<Item[]> {
 
 const problems: string[] = [];
 for (const live of await liveSamples()) {
-	const fixtureItems = (items as Item[]).filter(
+	const fixtureItems = (items as unknown as Item[]).filter(
 		(item) => item.type === live.type,
 	);
 	for (const [key, value] of Object.entries(live)) {
@@ -55,4 +55,4 @@ if (unique.length > 0) {
 	console.error(unique.join("\n"));
 	process.exit(1);
 }
-console.log("fixtures/hacker-news matches the live API's fields and types");
+console.log("src/demo-data/hacker-news.ts matches the live API's fields and types");
