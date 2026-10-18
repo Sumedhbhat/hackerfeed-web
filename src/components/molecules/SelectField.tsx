@@ -1,7 +1,10 @@
-import { useId } from "react";
-import { Select } from "#/components/atoms/TextField";
-
-type SelectOption = { value: string; label: string };
+import {
+	Select,
+	SelectLabel,
+	type SelectOption,
+	SelectOptions,
+	SelectTrigger,
+} from "#/components/atoms/Select";
 
 /** Labelled dropdown that sits inline with other controls, e.g. "Model [GPT-5 ▾]". */
 export function SelectField({
@@ -17,25 +20,18 @@ export function SelectField({
 	onChange: (value: string) => void;
 	disabled?: boolean;
 }) {
-	const id = useId();
 	return (
-		<label
-			htmlFor={id}
-			className="flex items-center gap-2 text-sm text-(--sea-ink-soft)"
+		<Select
+			value={value}
+			options={options}
+			onValueChange={onChange}
+			disabled={disabled}
 		>
-			{label}
-			<Select
-				id={id}
-				value={value}
-				onChange={(event) => onChange(event.target.value)}
-				disabled={disabled}
-			>
-				{options.map((option) => (
-					<option key={option.value} value={option.value}>
-						{option.label}
-					</option>
-				))}
-			</Select>
-		</label>
+			<div className="flex items-center gap-2">
+				<SelectLabel>{label}</SelectLabel>
+				<SelectTrigger />
+			</div>
+			<SelectOptions options={options} />
+		</Select>
 	);
 }

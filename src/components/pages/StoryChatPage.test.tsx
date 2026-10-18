@@ -4,6 +4,7 @@ import {
 	fireEvent,
 	render,
 	screen,
+	waitFor,
 	within,
 } from "@testing-library/react";
 import type { ReactNode } from "react";
@@ -97,6 +98,18 @@ function ndjson(...events: unknown[]) {
 	return new Response(
 		events.map((event) => `${JSON.stringify(event)}\n`).join(""),
 		{ headers: { "content-type": "application/x-ndjson" } },
+	);
+}
+
+async function choose(label: string, option: string) {
+	fireEvent.click(await screen.findByRole("combobox", { name: label }));
+	const item = await screen.findByRole("option", { name: option });
+	fireEvent.pointerDown(item, { pointerType: "mouse" });
+	fireEvent.click(item);
+	await waitFor(() =>
+		expect(screen.getByRole("combobox", { name: label }).textContent).toContain(
+			option,
+		),
 	);
 }
 
@@ -274,9 +287,7 @@ describe("StoryChatPage", () => {
 	it("uses the selected model", async () => {
 		renderPage();
 
-		fireEvent.change(await screen.findByRole("combobox", { name: "Model" }), {
-			target: { value: "gpt-b" },
-		});
+		await choose("Model", "GPT B");
 		fireEvent.change(screen.getByLabelText("Message"), {
 			target: { value: "Hi" },
 		});
@@ -478,16 +489,20 @@ describe("StoryChatPage", () => {
 			});
 		renderPage();
 
-		const picker = await screen.findByRole("combobox", { name: "Assistant" });
+		await screen.findByRole("combobox", { name: "Assistant" });
 		fireEvent.change(screen.getByLabelText("Message"), {
 			target: { value: "Hi" },
 		});
 		fireEvent.click(screen.getByRole("button", { name: "Send" }));
 		await screen.findByText("It is about X.");
 
-		fireEvent.change(picker, { target: { value: "claude" } });
+		await choose("Assistant", "Claude");
 
-		await screen.findByRole("option", { name: "claude" });
+		await waitFor(() =>
+			expect(
+				screen.getByRole("combobox", { name: "Model" }).textContent,
+			).toContain("claude"),
+		);
 		expect(screen.queryByText("It is about X.")).toBeNull();
 		fireEvent.change(screen.getByLabelText("Message"), {
 			target: { value: "Hello Claude" },

@@ -1,8 +1,4 @@
-import type {
-	InputHTMLAttributes,
-	SelectHTMLAttributes,
-	TextareaHTMLAttributes,
-} from "react";
+import type { InputHTMLAttributes, TextareaHTMLAttributes } from "react";
 
 const FIELD =
 	"rounded-md border border-(--chip-line) bg-(--surface-strong) text-sm text-(--sea-ink) focus-visible:outline-2 focus-visible:outline-(--lagoon)";
@@ -27,11 +23,4 @@ export function TextArea(
 			{...props}
 		/>
 	);
-}
-
-/** Native dropdown. */
-export function Select(
-	props: Omit<SelectHTMLAttributes<HTMLSelectElement>, "className" | "style">,
-) {
-	return <select className={`${FIELD} px-2 py-1`} {...props} />;
 }
