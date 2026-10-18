@@ -61,6 +61,13 @@ type FeedStoriesResult = {
 };
 
 async function fetchJson<T>(path: string, signal?: AbortSignal): Promise<T> {
+	// Preview builds answer from src/demo-data/hacker-news.ts instead of the live API.
+	// Production builds drop this branch and the fixtures entirely.
+	if (import.meta.env.VITE_DEMO_DATA === "true") {
+		const { fetchDemoHackerNewsJson } = await import("./demo-api");
+		return fetchDemoHackerNewsJson(path) as T;
+	}
+
 	const url = `${HACKER_NEWS_API_BASE_URL}${path}`;
 	let response: Response;
 
