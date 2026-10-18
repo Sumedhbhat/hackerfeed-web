@@ -1,4 +1,10 @@
-import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import {
+	cleanup,
+	fireEvent,
+	screen,
+	waitFor,
+	within,
+} from "@testing-library/react";
 import { useState } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { FavoritesPage } from "#/components/pages/FavoritesPage";
@@ -229,12 +235,16 @@ describe("FavoritesPage paper collection", () => {
 			items: [savedPaper()],
 			nextCursor: null,
 		});
-		vi.spyOn(window, "confirm").mockReturnValue(true);
 		render(<FavoritesPage activeType="papers" />);
 
 		fireEvent.click(
 			await screen.findByRole("button", { name: "Clear papers" }),
 		);
+		const dialog = await screen.findByRole("alertdialog", {
+			name: "Clear all saved papers?",
+		});
+		expect(trpcMock.paperClear).not.toHaveBeenCalled();
+		fireEvent.click(within(dialog).getByRole("button", { name: "Clear" }));
 		await waitFor(() => expect(trpcMock.paperClear).toHaveBeenCalledTimes(1));
 		expect(trpcMock.clear).not.toHaveBeenCalled();
 		expect(

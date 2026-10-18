@@ -8,6 +8,7 @@ import { PaperList } from "#/components/atoms/PaperList";
 import { Stack } from "#/components/atoms/Stack";
 import { TabPanel, Tabs } from "#/components/atoms/Tabs";
 import { Text } from "#/components/atoms/Text";
+import { ConfirmButton } from "#/components/molecules/ConfirmButton";
 import { EmptyState } from "#/components/molecules/EmptyState";
 import { InlineNotice } from "#/components/molecules/InlineNotice";
 import { SortToolbar } from "#/components/molecules/SortToolbar";
@@ -53,9 +54,7 @@ export function FavoritesPage({
 		return all;
 	}, [papers.savedPapers, sortOrder]);
 
-	function confirmClear() {
-		const label = isStories ? "saved stories" : "saved papers";
-		if (!window.confirm(`Clear all ${label}? This cannot be undone.`)) return;
+	function clearAll() {
 		if (isStories) stories.clearAllFavorites();
 		else papers.clearAll();
 	}
@@ -109,15 +108,17 @@ export function FavoritesPage({
 										value={sortOrder}
 										onChange={setSortOrder}
 										action={
-											<Button
-												variant="secondary"
-												onClick={confirmClear}
+											<ConfirmButton
+												title={`Clear all ${isStories ? "saved stories" : "saved papers"}?`}
+												description="This cannot be undone."
+												confirmLabel="Clear"
+												onConfirm={clearAll}
 												disabled={!isStories && !papers.canClear}
 											>
 												{!isStories && papers.isClearPending
 													? "Clearing..."
 													: `Clear ${isStories ? "stories" : "papers"}`}
-											</Button>
+											</ConfirmButton>
 										}
 									/>
 									{papers.error && !isStories ? (
