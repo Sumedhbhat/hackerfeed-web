@@ -6,6 +6,7 @@ import { TextLink } from "#/components/atoms/Link";
 import { PageContainer } from "#/components/atoms/PageContainer";
 import { PaperList } from "#/components/atoms/PaperList";
 import { Stack } from "#/components/atoms/Stack";
+import { TabPanel, Tabs } from "#/components/atoms/Tabs";
 import { Text } from "#/components/atoms/Text";
 import { EmptyState } from "#/components/molecules/EmptyState";
 import { InlineNotice } from "#/components/molecules/InlineNotice";
@@ -19,6 +20,8 @@ import { useViewActivity } from "#/hooks/useViewActivity";
 import type { FavoritesType } from "#/routes/favorites";
 
 type SortOrder = "newest" | "oldest" | "score";
+
+const TYPES = ["stories", "papers"] as const;
 
 type FavoritesPageProps = {
 	activeType?: FavoritesType;
@@ -61,111 +64,112 @@ export function FavoritesPage({
 
 	return (
 		<PageContainer spacing="compact">
-			<Stack gap="lg">
-				<FavoritesTabs activeType={activeType} onTypeChange={onTypeChange} />
+			<Tabs value={activeType} onValueChange={onTypeChange}>
+				<Stack gap="lg">
+					<FavoritesTabs />
 
-				<section
-					role="tabpanel"
-					id={`favorites-${activeType}-panel`}
-					aria-labelledby={`favorites-${activeType}-tab`}
-				>
-					{!isStories && papers.isLoading ? (
-						<Text as="output" tone="soft">
-							Loading saved papers...
-						</Text>
-					) : !isStories && papers.error && activeCount === 0 ? (
-						<InlineNotice
-							role="alert"
-							message="Could not load saved favorites."
-							action={
-								<Button variant="secondary" onClick={papers.refresh}>
-									<Icon icon={RefreshCw} /> Refresh saved favorites
-								</Button>
-							}
-						/>
-					) : activeCount === 0 ? (
-						<EmptyState
-							kicker="Nothing saved yet"
-							title={`Your saved ${isStories ? "stories" : "papers"} list is empty.`}
-							description={`${browseLabel} and use the star to save items here.`}
-							action={
-								<TextLink to={isStories ? "/" : "/papers"} variant="accent">
-									{browseLabel} <Icon icon={ArrowRight} />
-								</TextLink>
-							}
-						/>
-					) : (
-						<>
-							<SortToolbar
-								options={[
-									{ value: "newest", label: "Newest" },
-									{ value: "oldest", label: "Oldest" },
-									{
-										value: "score",
-										label: isStories ? "Top score" : "Upvotes",
-									},
-								]}
-								value={sortOrder}
-								onChange={setSortOrder}
-								action={
-									<Button
-										variant="secondary"
-										onClick={confirmClear}
-										disabled={!isStories && !papers.canClear}
-									>
-										{!isStories && papers.isClearPending
-											? "Clearing..."
-											: `Clear ${isStories ? "stories" : "papers"}`}
-									</Button>
-								}
-							/>
-							{papers.error && !isStories ? (
+					{TYPES.map((type) => (
+						<TabPanel key={type} value={type}>
+							{!isStories && papers.isLoading ? (
+								<Text as="output" tone="soft">
+									Loading saved papers...
+								</Text>
+							) : !isStories && papers.error && activeCount === 0 ? (
 								<InlineNotice
-									message={papers.error}
+									role="alert"
+									message="Could not load saved favorites."
 									action={
-										<Button
-											variant="icon"
-											onClick={papers.refresh}
-											aria-label="Refresh saved favorites"
-											title="Refresh saved favorites"
-										>
-											<Icon icon={RefreshCw} />
+										<Button variant="secondary" onClick={papers.refresh}>
+											<Icon icon={RefreshCw} /> Refresh saved favorites
 										</Button>
 									}
 								/>
-							) : null}
-							{isStories ? (
-								<Stack as="section" gap="md" aria-label="Saved stories">
-									{sortedStories.map((story, index) => (
-										<StoryCard
-											key={story.id}
-											story={story}
-											animationDelay={index * 50 + 60}
-										/>
-									))}
-								</Stack>
+							) : activeCount === 0 ? (
+								<EmptyState
+									kicker="Nothing saved yet"
+									title={`Your saved ${isStories ? "stories" : "papers"} list is empty.`}
+									description={`${browseLabel} and use the star to save items here.`}
+									action={
+										<TextLink to={isStories ? "/" : "/papers"} variant="accent">
+											{browseLabel} <Icon icon={ArrowRight} />
+										</TextLink>
+									}
+								/>
 							) : (
-								<PaperList aria-label="Saved papers">
-									{sortedPapers.map((paper, index) => (
-										<PaperRow
-											key={paper.arxivId}
-											paper={paper}
-											index={index}
-											canFavorite={papers.canFavorite}
-											isFavorited={papers.isFavorited(paper.arxivId)}
-											isPending={
-												papers.isPending(paper.arxivId) || papers.isClearPending
+								<>
+									<SortToolbar
+										options={[
+											{ value: "newest", label: "Newest" },
+											{ value: "oldest", label: "Oldest" },
+											{
+												value: "score",
+												label: isStories ? "Top score" : "Upvotes",
+											},
+										]}
+										value={sortOrder}
+										onChange={setSortOrder}
+										action={
+											<Button
+												variant="secondary"
+												onClick={confirmClear}
+												disabled={!isStories && !papers.canClear}
+											>
+												{!isStories && papers.isClearPending
+													? "Clearing..."
+													: `Clear ${isStories ? "stories" : "papers"}`}
+											</Button>
+										}
+									/>
+									{papers.error && !isStories ? (
+										<InlineNotice
+											message={papers.error}
+											action={
+												<Button
+													variant="icon"
+													onClick={papers.refresh}
+													aria-label="Refresh saved favorites"
+													title="Refresh saved favorites"
+												>
+													<Icon icon={RefreshCw} />
+												</Button>
 											}
-											onToggleFavorite={() => papers.toggleFavorite(paper)}
-											onView={() => recordPaperView(paper.arxivId)}
 										/>
-									))}
-								</PaperList>
+									) : null}
+									{isStories ? (
+										<Stack as="section" gap="md" aria-label="Saved stories">
+											{sortedStories.map((story, index) => (
+												<StoryCard
+													key={story.id}
+													story={story}
+													animationDelay={index * 50 + 60}
+												/>
+											))}
+										</Stack>
+									) : (
+										<PaperList aria-label="Saved papers">
+											{sortedPapers.map((paper, index) => (
+												<PaperRow
+													key={paper.arxivId}
+													paper={paper}
+													index={index}
+													canFavorite={papers.canFavorite}
+													isFavorited={papers.isFavorited(paper.arxivId)}
+													isPending={
+														papers.isPending(paper.arxivId) ||
+														papers.isClearPending
+													}
+													onToggleFavorite={() => papers.toggleFavorite(paper)}
+													onView={() => recordPaperView(paper.arxivId)}
+												/>
+											))}
+										</PaperList>
+									)}
+								</>
 							)}
-						</>
-					)}
-				</section>
-			</Stack>
+						</TabPanel>
+					))}
+				</Stack>
+			</Tabs>
 		</PageContainer>
 	);
 }

@@ -1,10 +1,11 @@
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import { useState } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { FavoritesPage } from "#/components/pages/FavoritesPage";
 import { clearAllFavorites, toggleFavorite } from "#/lib/favorites-store";
 import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
 import type { SavedPaper } from "#/lib/paper-favorites/schemas";
-import { parseFavoritesSearch } from "#/routes/favorites";
+import { type FavoritesType, parseFavoritesSearch } from "#/routes/favorites";
 import { renderWithQueryClient as render } from "#/test/renderWithQueryClient";
 
 const authMock = vi.hoisted(() => ({
@@ -260,33 +261,51 @@ describe("FavoritesPage paper collection", () => {
 		expect(screen.queryByRole("alert")).toBeNull();
 	});
 
-	it("exposes accessible URL-driven tabs", () => {
+	it("exposes accessible URL-driven tabs", async () => {
 		const onTypeChange = vi.fn();
-		render(<FavoritesPage activeType="stories" onTypeChange={onTypeChange} />);
+		function UrlDrivenFavorites() {
+			const [type, setType] = useState<FavoritesType>("stories");
+			return (
+				<FavoritesPage
+					activeType={type}
+					onTypeChange={(next) => {
+						onTypeChange(next);
+						setType(next);
+					}}
+				/>
+			);
+		}
+		render(<UrlDrivenFavorites />);
 		const stories = screen.getByRole("tab", { name: "Stories" });
 		const papers = screen.getByRole("tab", { name: "Papers" });
 		expect(stories.getAttribute("aria-selected")).toBe("true");
 		expect(stories.getAttribute("tabindex")).toBe("0");
 		expect(papers.getAttribute("tabindex")).toBe("-1");
 		expect(screen.getByRole("tabpanel").getAttribute("aria-labelledby")).toBe(
-			"favorites-stories-tab",
+			stories.id,
 		);
 		fireEvent.click(papers);
 		expect(onTypeChange).toHaveBeenCalledWith("papers");
-		fireEvent.keyDown(stories, { key: "ArrowRight" });
-		expect(onTypeChange).toHaveBeenLastCalledWith("papers");
-		expect(document.activeElement).toBe(papers);
-		fireEvent.keyDown(papers, { key: "Home" });
-		expect(onTypeChange).toHaveBeenLastCalledWith("stories");
-		expect(document.activeElement).toBe(stories);
-		fireEvent.keyDown(stories, { key: "End" });
-		expect(onTypeChange).toHaveBeenLastCalledWith("papers");
-		expect(document.activeElement).toBe(papers);
-		fireEvent.keyDown(papers, { key: "ArrowRight" });
-		expect(onTypeChange).toHaveBeenLastCalledWith("stories");
-		expect(document.activeElement).toBe(stories);
-		fireEvent.keyDown(stories, { key: "ArrowLeft" });
-		expect(onTypeChange).toHaveBeenLastCalledWith("papers");
-		expect(document.activeElement).toBe(papers);
+		await waitFor(() =>
+			expect(screen.getByRole("tabpanel").getAttribute("aria-labelledby")).toBe(
+				papers.id,
+			),
+		);
+
+		const press = async (
+			from: HTMLElement,
+			key: string,
+			to: HTMLElement,
+			type: FavoritesType,
+		) => {
+			fireEvent.keyDown(from, { key });
+			await waitFor(() => expect(document.activeElement).toBe(to));
+			await waitFor(() => expect(onTypeChange).toHaveBeenLastCalledWith(type));
+		};
+		papers.focus();
+		await press(papers, "Home", stories, "stories");
+		await press(stories, "End", papers, "papers");
+		await press(papers, "ArrowRight", stories, "stories");
+		await press(stories, "ArrowLeft", papers, "papers");
 	});
 });

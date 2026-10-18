@@ -8,8 +8,8 @@
  * so the component can be rendered outside of a full router context.
  *
  * Covers:
- *  - All three feed tabs (top / new / best) render their tab buttons
- *  - The default active tab is "top" with aria-pressed="true"
+ *  - All three feed tabs (top / new / best) render their tabs
+ *  - The default active tab is "top" with aria-selected="true"
  *  - Clicking another tab changes the active tab
  *  - Suspense fallback (skeletons) renders while feed is loading
  *  - Error boundary fallback renders when the feed query throws
@@ -138,7 +138,7 @@ afterEach(() => {
 // Tab rendering
 // ---------------------------------------------------------------------------
 
-describe("feed tab buttons", () => {
+describe("feed tabs", () => {
 	beforeEach(() => {
 		// IDs query resolves with some IDs; story queries resolve.
 		const ids = [1, 2];
@@ -146,28 +146,28 @@ describe("feed tab buttons", () => {
 		mockUseSuspenseQueries.mockReturnValue(ids.map(storyResult));
 	});
 
-	it("renders all three feed tab buttons", () => {
+	it("renders all three feed tabs", () => {
 		render(<FeedPage />, { wrapper: Wrapper });
 
-		expect(screen.getByRole("button", { name: /top/i })).toBeDefined();
-		expect(screen.getByRole("button", { name: /new/i })).toBeDefined();
-		expect(screen.getByRole("button", { name: /best/i })).toBeDefined();
+		expect(screen.getByRole("tab", { name: /top/i })).toBeDefined();
+		expect(screen.getByRole("tab", { name: /new/i })).toBeDefined();
+		expect(screen.getByRole("tab", { name: /best/i })).toBeDefined();
 	});
 
-	it("'Top' tab is active (aria-pressed=true) by default", () => {
+	it("'Top' tab is active (aria-selected=true) by default", () => {
 		render(<FeedPage />, { wrapper: Wrapper });
 
-		const topBtn = screen.getByRole("button", { name: /^top$/i });
-		expect(topBtn.getAttribute("aria-pressed")).toBe("true");
+		const topBtn = screen.getByRole("tab", { name: /^top$/i });
+		expect(topBtn.getAttribute("aria-selected")).toBe("true");
 	});
 
-	it("'New' and 'Best' tabs are inactive (aria-pressed=false) by default", () => {
+	it("'New' and 'Best' tabs are inactive (aria-selected=false) by default", () => {
 		render(<FeedPage />, { wrapper: Wrapper });
 
-		const newBtn = screen.getByRole("button", { name: /^new$/i });
-		const bestBtn = screen.getByRole("button", { name: /^best$/i });
-		expect(newBtn.getAttribute("aria-pressed")).toBe("false");
-		expect(bestBtn.getAttribute("aria-pressed")).toBe("false");
+		const newBtn = screen.getByRole("tab", { name: /^new$/i });
+		const bestBtn = screen.getByRole("tab", { name: /^best$/i });
+		expect(newBtn.getAttribute("aria-selected")).toBe("false");
+		expect(bestBtn.getAttribute("aria-selected")).toBe("false");
 	});
 });
 
@@ -185,83 +185,71 @@ describe("tab switching", () => {
 	it("clicking 'New' makes it the active tab", () => {
 		render(<FeedPage />, { wrapper: Wrapper });
 
-		fireEvent.click(screen.getByRole("button", { name: /^new$/i }));
+		fireEvent.click(screen.getByRole("tab", { name: /^new$/i }));
 
 		expect(
-			screen
-				.getByRole("button", { name: /^new$/i })
-				.getAttribute("aria-pressed"),
+			screen.getByRole("tab", { name: /^new$/i }).getAttribute("aria-selected"),
 		).toBe("true");
 	});
 
 	it("clicking 'Best' makes it the active tab", () => {
 		render(<FeedPage />, { wrapper: Wrapper });
 
-		fireEvent.click(screen.getByRole("button", { name: /^best$/i }));
+		fireEvent.click(screen.getByRole("tab", { name: /^best$/i }));
 
 		expect(
 			screen
-				.getByRole("button", { name: /^best$/i })
-				.getAttribute("aria-pressed"),
+				.getByRole("tab", { name: /^best$/i })
+				.getAttribute("aria-selected"),
 		).toBe("true");
 	});
 
 	it("switching tab deactivates the previously active tab", () => {
 		render(<FeedPage />, { wrapper: Wrapper });
 
-		fireEvent.click(screen.getByRole("button", { name: /^new$/i }));
+		fireEvent.click(screen.getByRole("tab", { name: /^new$/i }));
 
 		expect(
-			screen
-				.getByRole("button", { name: /^top$/i })
-				.getAttribute("aria-pressed"),
+			screen.getByRole("tab", { name: /^top$/i }).getAttribute("aria-selected"),
 		).toBe("false");
 	});
 
 	it("switching to 'New' deactivates other tabs", () => {
 		render(<FeedPage />, { wrapper: Wrapper });
 
-		fireEvent.click(screen.getByRole("button", { name: /^new$/i }));
+		fireEvent.click(screen.getByRole("tab", { name: /^new$/i }));
 
 		expect(
-			screen
-				.getByRole("button", { name: /^top$/i })
-				.getAttribute("aria-pressed"),
+			screen.getByRole("tab", { name: /^top$/i }).getAttribute("aria-selected"),
 		).toBe("false");
 		expect(
 			screen
-				.getByRole("button", { name: /^best$/i })
-				.getAttribute("aria-pressed"),
+				.getByRole("tab", { name: /^best$/i })
+				.getAttribute("aria-selected"),
 		).toBe("false");
 	});
 
 	it("switching to 'Best' deactivates other tabs", () => {
 		render(<FeedPage />, { wrapper: Wrapper });
 
-		fireEvent.click(screen.getByRole("button", { name: /^best$/i }));
+		fireEvent.click(screen.getByRole("tab", { name: /^best$/i }));
 
 		expect(
-			screen
-				.getByRole("button", { name: /^top$/i })
-				.getAttribute("aria-pressed"),
+			screen.getByRole("tab", { name: /^top$/i }).getAttribute("aria-selected"),
 		).toBe("false");
 		expect(
-			screen
-				.getByRole("button", { name: /^new$/i })
-				.getAttribute("aria-pressed"),
+			screen.getByRole("tab", { name: /^new$/i }).getAttribute("aria-selected"),
 		).toBe("false");
 	});
 
 	it("switching back to 'Top' reactivates it", () => {
 		render(<FeedPage />, { wrapper: Wrapper });
 
-		fireEvent.click(screen.getByRole("button", { name: /^new$/i }));
-		fireEvent.click(screen.getByRole("button", { name: /^top$/i }));
+		fireEvent.click(screen.getByRole("tab", { name: /^new$/i }));
+		fireEvent.click(screen.getByRole("tab", { name: /^top$/i }));
 
 		expect(
-			screen
-				.getByRole("button", { name: /^top$/i })
-				.getAttribute("aria-pressed"),
+			screen.getByRole("tab", { name: /^top$/i }).getAttribute("aria-selected"),
 		).toBe("true");
 	});
 });

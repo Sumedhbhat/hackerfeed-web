@@ -3,9 +3,8 @@ import { Activity, Suspense, useState, useTransition } from "react";
 import { PageContainer } from "#/components/atoms/PageContainer";
 import { PendingContent } from "#/components/atoms/PendingContent";
 import { Stack } from "#/components/atoms/Stack";
-import { Tab } from "#/components/atoms/Tab";
+import { Tab, TabList, TabPanel, Tabs } from "#/components/atoms/Tabs";
 import { StoryListSkeleton } from "#/components/molecules/StoryListSkeleton";
-import { TabList } from "#/components/molecules/TabList";
 import { FeedError } from "#/components/organisms/feed/FeedError";
 import { FeedPane } from "#/components/organisms/feed/FeedPane";
 import { feedTabs } from "#/components/organisms/feed/feedTabs";
@@ -25,41 +24,35 @@ export function FeedPage() {
 
 	return (
 		<PageContainer>
-			<Stack gap="lg">
-				<PendingContent pending={isPending}>
-					<TabList>
-						{feedTabs.map((feed) => {
-							const isActive = activeFeed === feed.key;
-							return (
-								<Tab
-									key={feed.key}
-									onClick={() => setActiveFeed(feed.key)}
-									aria-pressed={isActive}
-								>
+			<Tabs value={activeFeed} onValueChange={setActiveFeed}>
+				<Stack gap="lg">
+					<PendingContent pending={isPending}>
+						<TabList aria-label="Feeds">
+							{feedTabs.map((feed) => (
+								<Tab key={feed.key} value={feed.key}>
 									{feed.label}
 								</Tab>
-							);
-						})}
-					</TabList>
-				</PendingContent>
+							))}
+						</TabList>
+					</PendingContent>
 
-				{feedTabs.map((feed) => (
-					<Activity
-						key={feed.key}
-						mode={activeFeed === feed.key ? "visible" : "hidden"}
-					>
-						<Sentry.ErrorBoundary
-							fallback={({ resetError }) => (
-								<FeedError feed={feed} onRetry={resetError} />
-							)}
-						>
-							<Suspense fallback={<StoryListSkeleton count={PAGE_SIZE} />}>
-								<FeedPane feed={feed.key} />
-							</Suspense>
-						</Sentry.ErrorBoundary>
-					</Activity>
-				))}
-			</Stack>
+					{feedTabs.map((feed) => (
+						<TabPanel key={feed.key} value={feed.key} keepMounted>
+							<Activity mode={activeFeed === feed.key ? "visible" : "hidden"}>
+								<Sentry.ErrorBoundary
+									fallback={({ resetError }) => (
+										<FeedError feed={feed} onRetry={resetError} />
+									)}
+								>
+									<Suspense fallback={<StoryListSkeleton count={PAGE_SIZE} />}>
+										<FeedPane feed={feed.key} />
+									</Suspense>
+								</Sentry.ErrorBoundary>
+							</Activity>
+						</TabPanel>
+					))}
+				</Stack>
+			</Tabs>
 		</PageContainer>
 	);
 }
