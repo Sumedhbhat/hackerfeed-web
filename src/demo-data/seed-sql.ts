@@ -1,20 +1,12 @@
-import { readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
 import { getTableColumns, getTableName, is } from "drizzle-orm";
 import { getTableConfig, SQLiteTable } from "drizzle-orm/sqlite-core";
 import * as schema from "#/server/database/schema";
+import { databaseFixtures, type FixtureRow } from "./database";
+import { demoUser } from "./database/app-users";
 
-/** The app user whose rows are copied to every user who signs in. */
-export const DEMO_USER_ID = "demo-user";
-
-export const DATABASE_FIXTURES_DIR = join(
-	import.meta.dirname,
-	"../../fixtures/database",
-);
+export const DEMO_USER_ID = demoUser.id;
 
 type Table = SQLiteTable;
-
-export type FixtureRow = Record<string, unknown>;
 
 export const tables: Table[] = Object.values(schema).filter(
 	(value): value is Table => is(value, SQLiteTable),
@@ -33,21 +25,6 @@ export function tablesInInsertOrder(): Table[] {
 	};
 	tables.forEach(visit);
 	return ordered;
-}
-
-export function loadDatabaseFixtures(
-	dir = DATABASE_FIXTURES_DIR,
-): Map<string, FixtureRow[]> {
-	const fixtures = new Map<string, FixtureRow[]>();
-	for (const file of readdirSync(dir).filter((name) =>
-		name.endsWith(".json"),
-	)) {
-		fixtures.set(
-			file.replace(/\.json$/, ""),
-			JSON.parse(readFileSync(join(dir, file), "utf8")),
-		);
-	}
-	return fixtures;
 }
 
 const quoteIdentifier = (name: string) => `"${name.replaceAll('"', '""')}"`;
@@ -103,7 +80,7 @@ function newUserTrigger(fixtures: Map<string, FixtureRow[]>): string {
  * SQL that replaces every row in the database with the fixtures. Only for
  * preview databases: it deletes all existing data first.
  */
-export function buildDemoDataSql(fixtures = loadDatabaseFixtures()): string {
+export function buildDemoDataSql(fixtures = databaseFixtures): string {
 	const ordered = tablesInInsertOrder();
 	const statements = [...ordered]
 		.reverse()

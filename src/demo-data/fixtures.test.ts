@@ -4,17 +4,16 @@ import { DatabaseSync } from "node:sqlite";
 import { getTableColumns, getTableName } from "drizzle-orm";
 import { getTableConfig } from "drizzle-orm/sqlite-core";
 import { describe, expect, it, vi } from "vitest";
+import { databaseFixtures as fixtures } from "./database";
 import { type DemoItem, feeds, items } from "./hacker-news";
 import {
 	buildDemoDataSql,
 	DEMO_USER_ID,
-	loadDatabaseFixtures,
 	tables,
 	userOwnedTables,
 } from "./seed-sql";
 
 const MIGRATIONS_DIR = join(import.meta.dirname, "../../migrations");
-const fixtures = loadDatabaseFixtures();
 
 function columnProblem(
 	column: ReturnType<typeof getTableColumns>[string],
@@ -58,8 +57,8 @@ function applyMigrations(): DatabaseSync {
 	return database;
 }
 
-describe("fixtures/database", () => {
-	it("has one file per table", () => {
+describe("demo database rows", () => {
+	it("has rows for every table", () => {
 		expect([...fixtures.keys()].sort()).toEqual(
 			tables.map((table) => getTableName(table)).sort(),
 		);
@@ -73,7 +72,7 @@ describe("fixtures/database", () => {
 			const name = getTableName(table);
 			const columns = getTableColumns(table);
 			for (const [index, row] of (fixtures.get(name) ?? []).entries()) {
-				const where = `${name}.json row ${index + 1} (id ${row.id})`;
+				const where = `${name} row ${index + 1} (id ${row.id})`;
 				for (const [key, column] of Object.entries(columns)) {
 					if (!(key in row)) {
 						problems.push(
@@ -114,7 +113,7 @@ describe("fixtures/database", () => {
 						!targetRows.some((target) => target[to] === value)
 					) {
 						problems.push(
-							`${name}.json (id ${row.id}): ${from} ${value} not found in ${getTableName(foreignTable)}.json`,
+							`${name} (id ${row.id}): ${from} ${value} not found in ${getTableName(foreignTable)}`,
 						);
 					}
 				}
@@ -203,17 +202,6 @@ describe("demo Hacker News items", () => {
 					countDescendants(item),
 				);
 			}
-		}
-	});
-
-	it("matches the stored copies in fixtures/database/stories.json", () => {
-		for (const row of fixtures.get("stories") ?? []) {
-			const found = byId.get(row.hnStoryId as number);
-			const item = found?.type === "story" ? found : undefined;
-			expect(item, `story ${row.hnStoryId}`).toBeDefined();
-			expect(row.title).toBe(item?.title);
-			expect(row.commentCount).toBe(item?.descendants);
-			expect(JSON.parse(row.commentIds as string)).toEqual(item?.kids ?? []);
 		}
 	});
 

@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Runs the current checkout on this machine against a local D1 (SQLite)
-# database holding the dummy data in fixtures/, reachable only from devices on
+# database holding the dummy data in src/demo-data, reachable only from devices on
 # the tailnet (`tailscale serve`, never funnel). See docs/private-preview.md.
 #
 #   scripts/private-preview.sh           build, migrate, load fixtures, serve
 #   scripts/private-preview.sh --reset   same, starting from an empty database
-#   scripts/private-preview.sh seed      reload fixtures/database into a
+#   scripts/private-preview.sh seed      reload src/demo-data/database into a
 #                                        running preview
 set -euo pipefail
 
@@ -20,14 +20,14 @@ d1() {
 	bunx wrangler d1 "$@" --local --config "$CONFIG" --persist-to "$STATE_DIR"
 }
 
-# Replaces every row with the dummy data in fixtures/database.
+# Replaces every row with the dummy data in src/demo-data/database.
 seed() {
 	local sql
 	sql=$(mktemp --suffix .sql)
 	bun scripts/demo-data-sql.ts > "$sql"
 	d1 execute DB --file "$sql" > /dev/null
 	rm -f "$sql"
-	echo "Loaded fixtures/database"
+	echo "Loaded src/demo-data/database"
 }
 
 if [ "${1:-}" = "seed" ]; then
