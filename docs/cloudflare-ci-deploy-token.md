@@ -21,9 +21,9 @@ every same-repo, non-Dependabot pull request. It:
 1. Creates (or reuses) a D1 database named `hackerfeed-web-pr-<number>`,
    rebinds `DB` to it in the generated `dist/server/wrangler.json`, applies all
    migrations to it, then replaces every row with the dummy data in
-   `fixtures/database`. The PR's migrations are rehearsed there on the previous
+   `src/demo-data/database`. The PR's migrations are rehearsed there on the previous
    push's fixture rows; production data is never touched by preview code. The
-   build also serves Hacker News from `fixtures/hacker-news`.
+   build also serves Hacker News from `src/demo-data/hacker-news.ts`.
 2. Runs `wrangler versions upload --preview-alias pr-<number>`. This uploads a
    Worker version without deploying it, so production traffic is unaffected.
 3. Fails the job if the uploaded version is bound to the production database.

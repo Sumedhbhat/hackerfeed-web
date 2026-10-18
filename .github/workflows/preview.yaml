@@ -31,7 +31,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       # VITE_DEMO_DATA builds in the in-memory Hacker News API that serves
-      # fixtures/hacker-news instead of the live API. Sign-in returns to the
+      # src/demo-data/hacker-news.ts instead of the live API. Sign-in returns to the
       # PR's alias URL rather than the production one in .env.production.
       - name: Build
         run: |
@@ -62,7 +62,7 @@ jobs:
       # file with --config: `d1 migrations` ignores the build's config redirect
       # and would otherwise read wrangler.jsonc, i.e. the production database.
       # Migrations run on the previous push's fixture rows, then every row is
-      # replaced with fixtures/database.
+      # replaced with src/demo-data/database.
       - name: Prepare preview database
         run: |
           config=dist/server/wrangler.json
@@ -151,7 +151,7 @@ jobs:
           | **Commit preview** | $version_url |
           | **Commit** | \`${HEAD_SHA:0:7}\` |
 
-          Shows only the dummy data in \`fixtures/\`: its own D1 database (\`hackerfeed-web-pr-${PR_NUMBER}\`, reloaded on every push and deleted when the PR closes) and an in-memory Hacker News API. Uses production secrets."
+          Shows only the dummy data in \`src/demo-data\`: its own D1 database (\`hackerfeed-web-pr-${PR_NUMBER}\`, reloaded on every push and deleted when the PR closes) and an in-memory Hacker News API. Uses production secrets."
 
           comment_id=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" --paginate \
             --jq "map(select(.body | startswith(\"$marker\"))) | first | .id // empty")
