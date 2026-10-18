@@ -1,0 +1,22 @@
+overrides:
+  - package: esbuild
+    ecosystem: bun
+    manifest: package.json
+    override: "^0.28.2"
+    fixed_in: 0.25.0
+    advisory: GHSA-67mh-4wv8-2f99
+    parents: [drizzle-kit]
+    reason: drizzle-kit@0.31.11 depends on the deprecated @esbuild-kit/esm-loader, whose @esbuild-kit/core-utils pins esbuild ~0.18.20, which lets any website read responses from the dev server. Fixed in 0.25.0.
+    added: 2026-10-18
+    owner: "@Sumedhbhat"
+
+  - package: postcss-selector-parser
+    ecosystem: bun
+    manifest: package.json
+    override: "^7.1.6"
+    fixed_in: 7.1.6
+    advisory: GHSA-rj75-hqrm-r3gf
+    parents: ["@tailwindcss/typography"]
+    reason: "@tailwindcss/typography@0.5.20 pins postcss-selector-parser 6.0.10, which has quadratic-time parsing of flat selectors (CPU exhaustion). Fixed in 7.1.6."
+    added: 2026-10-18
+    owner: "@Sumedhbhat"
