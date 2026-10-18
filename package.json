@@ -10,7 +10,6 @@
     "build": "vite build",
     "preview": "vite preview",
     "security:audit": "bun audit --audit-level=high",
-    "security:overrides": "bun scripts/check-security-overrides.mjs",
     "test": "vitest run",
     "deploy": "bun run build && wrangler deploy",
     "cf:typegen": "wrangler types",
@@ -79,5 +78,9 @@
       "esbuild",
       "lightningcss"
     ]
+  },
+  "overrides": {
+    "esbuild": "^0.28.2",
+    "postcss-selector-parser": "^7.1.6"
   }
 }
