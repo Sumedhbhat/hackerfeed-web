@@ -93,13 +93,15 @@ an adapter next to the others.
   SQLite file, and a container, on whichever Docker daemon `DOCKER_HOST`
   points at (local, or `ssh://user@host`).
 
-State lives in any S3-compatible bucket. Each Terraform workspace is a stage:
-`prod` keeps the existing names (`hackerfeed-web`), `pr-<n>` gets its own
-Worker and D1 database loaded with `src/demo-data`.
+State lives in any Postgres database (a free Neon project works) named by
+`PG_CONN_STR`. Use a direct connection, not a pooled one, so locking works.
+Each Terraform workspace is a stage: `prod` keeps the existing names
+(`hackerfeed-web`), `pr-<n>` gets its own Worker and D1 database loaded with
+`src/demo-data`.
 
 ```bash
-cp infra/terraform/backend.hcl.example infra/terraform/backend.hcl   # then edit
-terraform -chdir=infra/terraform init -backend-config=backend.hcl
+export PG_CONN_STR=postgres://...
+terraform -chdir=infra/terraform init
 
 export TF_VAR_workos_redirect_uri=... TF_VAR_workos_client_id=... TF_VAR_ai_token_encryption_key=...
 DEPLOY_TARGET=cloudflare bun run infra plan    # build, then terraform plan in workspace $STAGE (prod)

@@ -12,9 +12,8 @@ terraform {
     }
   }
 
-  # Any S3-compatible bucket (R2, S3, MinIO...), configured at init:
-  # terraform init -backend-config=backend.hcl
-  backend "s3" {}
+  # Any Postgres database, read from PG_CONN_STR.
+  backend "pg" {}
 }
 
 # Credentials come from CLOUDFLARE_API_TOKEN and DOCKER_HOST.
