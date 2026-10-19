@@ -94,7 +94,10 @@ bun run db:generate --name descriptive_migration_name
 ```
 
 The node target applies pending migrations on start-up. On Cloudflare, the
-infrastructure code applies them to D1 before the Worker is updated.
+infrastructure code runs `bun run db migrate` with `D1_DATABASE_ID` (plus
+`CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`) before the Worker is
+updated. Without `D1_DATABASE_ID` the same script targets `DATABASE_URL`;
+`bun run db exec <file.sql>` runs a SQL file the same way.
 
 Each request gets one typed `DatabaseContext` from the platform adapter. tRPC
 contexts, services, and repositories receive that Drizzle context and never

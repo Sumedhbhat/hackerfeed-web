@@ -15,7 +15,7 @@
     "security:audit": "bun audit --audit-level=high",
     "test": "vitest run",
     "db:generate": "drizzle-kit generate",
-    "db:exec": "bun scripts/db-exec.ts",
+    "db": "bun scripts/db.ts",
     "solve:issues": "node scripts/solve-issues.mjs",
     "format": "biome format",
     "lint": "biome lint",

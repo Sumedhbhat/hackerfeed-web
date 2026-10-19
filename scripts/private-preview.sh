@@ -21,7 +21,7 @@ seed() {
 	local sql
 	sql=$(mktemp --suffix .sql)
 	bun scripts/demo-data-sql.ts > "$sql"
-	bun scripts/db-exec.ts "$sql"
+	bun scripts/db.ts exec "$sql"
 	rm -f "$sql"
 	echo "Loaded src/demo-data/database"
 }
