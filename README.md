@@ -31,7 +31,7 @@ The dev server listens on port 3000.
 bun run dev              # Start Vite dev server on port 3000
 bun run build            # Production build
 bun run preview          # Preview the production build locally
-bun run deploy           # Build and deploy the Worker
+bun run deploy           # Build and deploy the prod stage with Alchemy
 bun run test             # Run Vitest
 bun run lint             # Run Biome lint
 bun run format           # Run Biome format
@@ -93,6 +93,33 @@ bun run db:migrate:remote
 The Worker creates one typed `DatabaseContext` from its D1 binding. tRPC
 contexts, services, and repositories receive that Drizzle context; application
 code must not access `env.DB` directly outside the Worker boundary.
+
+## Infrastructure
+
+`alchemy.run.ts` declares the Worker, its D1 database and the cron trigger with
+[Alchemy](https://alchemy.run). It reads the Worker's settings (vars,
+compatibility, crons, observability) from the build's
+`dist/server/wrangler.json`, so they stay in `wrangler.jsonc`, and applies
+`migrations/` with Wrangler before each new version deploys.
+
+Each Alchemy stage is a copy of the app. `prod` is the production Worker
+(`hackerfeed-web`) and the `hackerfeed` database, taken over on its first
+deploy; the database is retained, so destroying `prod` never deletes it.
+`pr-<n>` gets its own Worker and database loaded with `src/demo-data`; CI
+deploys one per pull request and destroys it when the PR closes.
+
+State lives in a store Alchemy deploys to the Cloudflare account. Create it
+once with `bunx alchemy provider cloudflare bootstrap`.
+
+```bash
+export CLOUDFLARE_API_TOKEN=... CLOUDFLARE_ACCOUNT_ID=...
+export VITE_WORKOS_CLIENT_ID=... AI_TOKEN_ENCRYPTION_KEY=...
+
+bun run build
+bunx alchemy plan --stage prod
+bunx alchemy deploy --stage pr-42
+bunx alchemy destroy --stage pr-42
+```
 
 ## AI Assistants (bring your own subscription)
 

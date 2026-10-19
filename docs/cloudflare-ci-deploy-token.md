@@ -6,38 +6,37 @@ developer's local Wrangler OAuth session or put its credentials in GitHub.
 
 ## What the workflow does
 
-On pushes to `master` (and manual dispatch), the workflow:
+On pushes to `master` (and manual dispatch), the workflow deploys the `prod`
+stage of `alchemy.run.ts`, which:
 
-1. Applies remote D1 migrations with `wrangler d1 migrations apply DB --remote`.
-2. Uploads the Worker, its `DB` binding, the cron trigger, and Worker settings.
-3. Uploads the Worker secrets listed in the workflow.
+1. Applies remote D1 migrations with `wrangler d1 migrations apply`.
+2. Uploads and deploys the Worker with its `DB` binding, vars and secrets.
+3. Sets the cron trigger and Worker settings.
 
-The Worker is `hackerfeed-web` and its D1 database is configured as `DB` in
-`wrangler.jsonc`.
+The Worker is `hackerfeed-web` and its D1 database is `hackerfeed`, bound as
+`DB` in `wrangler.jsonc`.
 
 `.github/workflows/preview.yaml` reuses the same token and `dev` environment on
-every same-repo, non-Dependabot pull request. It:
+every same-repo, non-Dependabot pull request. It deploys a `pr-<number>`
+stage, which:
 
-1. Creates (or reuses) a D1 database named `hackerfeed-web-pr-<number>`,
-   rebinds `DB` to it in the generated `dist/server/wrangler.json`, applies all
-   migrations to it, then replaces every row with the dummy data in
-   `src/demo-data/database`. The PR's migrations are rehearsed there on the previous
-   push's fixture rows; production data is never touched by preview code. The
-   build also serves Hacker News from `src/demo-data/hacker-news.ts`.
-2. Runs `wrangler versions upload --preview-alias pr-<number>`. This uploads a
-   Worker version without deploying it, so production traffic is unaffected.
-3. Fails the job if the uploaded version is bound to the production database.
-4. Comments the preview URLs on the PR.
+1. Creates a Worker `hackerfeed-web-pr-<number>` and a D1 database of the same
+   name, applies all migrations to it, then replaces every row with the dummy
+   data in `src/demo-data/database`. The PR's migrations are rehearsed there on
+   the previous push's fixture rows; production data is never touched by
+   preview code. The build also serves Hacker News from
+   `src/demo-data/hacker-news.ts`.
+2. Comments the preview URL on the PR.
 
-`.github/workflows/preview-cleanup.yaml` deletes the PR's database when the PR
-closes. Previews still share the production Worker secrets (Sentry, the AI
-token key). Sign-in on a preview returns to its alias URL, so WorkOS must allow
-`https://pr-<number>-hackerfeed-web.kgqk4vdcfq.workers.dev/auth/callback`. The same
-data can be run locally, tailnet-only, with `docs/private-preview.md`.
+`.github/workflows/preview-cleanup.yaml` destroys the stage when the PR closes.
+Previews still share the production Worker secrets (Sentry, the AI token key).
+Sign-in on a preview returns to its own URL, so WorkOS must allow
+`https://hackerfeed-web-pr-<number>.kgqk4vdcfq.workers.dev/auth/callback`. The
+same data can be run locally, tailnet-only, with `docs/private-preview.md`.
 
-Because a preview upload makes the latest Worker version an undeployed one,
-the production deploy passes secrets with `wrangler deploy --secrets-file`.
-`wrangler secret bulk` refuses to edit secrets in that state.
+Alchemy keeps its state in a store it deploys to the same account (a Worker
+with a Durable Object, whose access token lives in the Secrets Store). Create
+it once with `bunx alchemy provider cloudflare bootstrap`.
 
 ## Create the token
 
@@ -51,6 +50,7 @@ the production deploy passes secrets with `wrangler deploy --secrets-file`.
    | --- | --- |
    | **Workers Scripts: Edit** | Deploys the Worker and updates its bindings, cron trigger, observability settings, and Worker secrets. Cloudflare may label this permission **Write** in some API documentation. |
    | **D1: Edit** | Applies the remote SQL migrations before deployment. |
+   | **Secrets Store: Edit** | Reads the token for Alchemy's state store. |
 
 5. Under **Account Resources**, include only the Cloudflare account that owns
    `hackerfeed-web` and its D1 database. Do not select all accounts.
@@ -81,7 +81,7 @@ approval.
 ## Verify without deploying
 
 Before saving the token to GitHub, Cloudflare's token summary should show only
-the two account permissions above and one account resource. After adding it,
+the three account permissions above and one account resource. After adding it,
 use **Run workflow** in the GitHub Actions UI if you want an explicit deployment
 test; do not test a CI token by setting it in a local shell.
 
@@ -99,7 +99,7 @@ copied into GitHub secrets.
 
 Rotate the token before its 90-day expiry:
 
-1. Create a replacement token with the same two permissions and account scope.
+1. Create a replacement token with the same three permissions and account scope.
 2. Replace `CLOUDFLARE_API_TOKEN` in the GitHub `dev` environment.
 3. Run the workflow and confirm it completes.
 4. Revoke the old token in Cloudflare.
