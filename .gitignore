@@ -17,3 +17,6 @@ plan.md
 *-backup.tar.gz
 docs/internal/
 .data
+
+# Alchemy local state
+.alchemy

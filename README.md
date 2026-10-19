@@ -80,6 +80,38 @@ Everything host-specific lives in `src/platform/<target>.ts`, behind the
 imports a host SDK. To add a host, add a Nitro preset to `vite.config.ts` and
 an adapter next to the others.
 
+### Infrastructure (Alchemy)
+
+`alchemy.run.ts` declares the infrastructure for both targets, and reads the
+same `DEPLOY_TARGET`:
+
+- `cloudflare`: a D1 database, the Worker (Nitro's `.output`, uploaded as
+  built), its assets, the daily Cron Trigger and its secrets. State lives in
+  the Cloudflare account.
+- `node`: the `Dockerfile` image, a volume for the SQLite file, and a
+  container, on whichever Docker daemon `DOCKER_HOST` points at (local, or
+  `ssh://user@host`). State lives in `.alchemy/`.
+
+```bash
+DEPLOY_TARGET=cloudflare bun run deploy --stage prod   # build, then alchemy deploy
+DEPLOY_TARGET=node bun run deploy --stage prod
+bunx alchemy plan --stage prod                          # preview the diff
+bun run destroy --stage pr-42
+```
+
+The stack reads `VITE_WORKOS_REDIRECT_URI`, `VITE_WORKOS_CLIENT_ID` and
+`AI_TOKEN_ENCRYPTION_KEY` from the environment (and `SENTRY_DSN`,
+`VITE_SENTRY_DSN`, `CHATGPT_CLIENT_ID`, `CHATGPT_CLIENT_SECRET` when set), and
+passes them to the Worker or container. Cloudflare also needs
+`CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
+
+Each stage is isolated. The `prod` stage keeps the existing names
+(`hackerfeed-web`); `pr-<n>` stages get their own Worker and D1 database,
+loaded with `src/demo-data`. CI deploys `prod` on push to `master`, a stage per
+PR, and destroys it when the PR closes. Set the `DEPLOY_TARGET` repository
+variable to `node` (and the `DOCKER_HOST` secret) to deploy the container
+instead; PR previews stay Cloudflare-only.
+
 ## Database
 
 Persistent data is SQLite on every target. Tables are defined in

@@ -16,6 +16,7 @@ bun run dev          # Start dev server on port 3000
 bun run build        # Production build
 DEPLOY_TARGET=cloudflare bun run build   # Build for Workers instead of node
 bun run start        # Run a node build
+DEPLOY_TARGET=cloudflare bun run deploy --stage prod   # Build, then apply alchemy.run.ts
 
 # Testing
 bun run test         # Run all tests (vitest)
@@ -31,7 +32,7 @@ bun run check        # Biome check (lint + format together)
 
 **Framework stack:** TanStack Start (SSR React framework) + TanStack Router (file-based routing) + TanStack Query (data fetching) + TanStack Store (client state). Built by Nitro for the host named in `DEPLOY_TARGET` (`node` by default, or `cloudflare`).
 
-**Deploy targets:** host-specific code lives only in `src/platform/<target>.ts` (database driver, Sentry SDK), behind `ServerPlatform` in `src/platform/types.ts`. Never import `cloudflare:*`, `@sentry/cloudflare`, `@sentry/node` or a database driver anywhere else; take the database from `getDatabaseContext()` (requests) or `platform.openDatabase()` (tasks). Scheduled work is a Nitro task registered in `vite.config.ts`, not a Worker `scheduled` handler.
+**Deploy targets:** host-specific code lives only in `src/platform/<target>.ts` (database driver, Sentry SDK), behind `ServerPlatform` in `src/platform/types.ts`. Never import `cloudflare:*`, `@sentry/cloudflare`, `@sentry/node` or a database driver anywhere else; take the database from `getDatabaseContext()` (requests) or `platform.openDatabase()` (tasks). Scheduled work is a Nitro task registered in `vite.config.ts`, not a Worker `scheduled` handler. Infrastructure for every target is declared in `alchemy.run.ts`; there is no `wrangler.jsonc`.
 
 **Path alias:** `#/*` maps to `src/*` (configured in `package.json` `imports` and `tsconfig.json`).
 
