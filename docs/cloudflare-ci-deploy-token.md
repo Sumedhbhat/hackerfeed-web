@@ -6,38 +6,37 @@ developer's local Wrangler OAuth session or put its credentials in GitHub.
 
 ## What the workflow does
 
-On pushes to `master` (and manual dispatch), the workflow:
+On pushes to `master` (and manual dispatch), the workflow applies the `prod`
+workspace of `infra/terraform`, which:
 
-1. Applies remote D1 migrations with `wrangler d1 migrations apply DB --remote`.
-2. Uploads the Worker, its `DB` binding, the cron trigger, and Worker settings.
-3. Uploads the Worker secrets listed in the workflow.
+1. Applies remote D1 migrations with `wrangler d1 migrations apply`.
+2. Uploads and deploys a Worker version with its `DB` binding, vars and secrets.
+3. Sets the cron trigger and Worker settings.
 
-The Worker is `hackerfeed-web` and its D1 database is configured as `DB` in
-`wrangler.jsonc`.
+The Worker is `hackerfeed-web` and its D1 database is `hackerfeed`, bound as
+`DB` in `wrangler.jsonc`.
 
 `.github/workflows/preview.yaml` reuses the same token and `dev` environment on
-every same-repo, non-Dependabot pull request. It:
+every same-repo, non-Dependabot pull request. It applies a `pr-<number>`
+workspace, which:
 
-1. Creates (or reuses) a D1 database named `hackerfeed-web-pr-<number>`,
-   rebinds `DB` to it in the generated `dist/server/wrangler.json`, applies all
-   migrations to it, then replaces every row with the dummy data in
-   `src/demo-data/database`. The PR's migrations are rehearsed there on the previous
-   push's fixture rows; production data is never touched by preview code. The
-   build also serves Hacker News from `src/demo-data/hacker-news.ts`.
-2. Runs `wrangler versions upload --preview-alias pr-<number>`. This uploads a
-   Worker version without deploying it, so production traffic is unaffected.
-3. Fails the job if the uploaded version is bound to the production database.
-4. Comments the preview URLs on the PR.
+1. Creates a Worker `hackerfeed-web-pr-<number>` and a D1 database of the same
+   name, applies all migrations to it, then replaces every row with the dummy
+   data in `src/demo-data/database`. The PR's migrations are rehearsed there on
+   the previous push's fixture rows; production data is never touched by
+   preview code. The build also serves Hacker News from
+   `src/demo-data/hacker-news.ts`.
+2. Comments the preview URL on the PR.
 
-`.github/workflows/preview-cleanup.yaml` deletes the PR's database when the PR
+`.github/workflows/preview-cleanup.yaml` destroys the workspace when the PR
 closes. Previews still share the production Worker secrets (Sentry, the AI
-token key). Sign-in on a preview returns to its alias URL, so WorkOS must allow
-`https://pr-<number>-hackerfeed-web.kgqk4vdcfq.workers.dev/auth/callback`. The same
-data can be run locally, tailnet-only, with `docs/private-preview.md`.
+token key). Sign-in on a preview returns to its own URL, so WorkOS must allow
+`https://hackerfeed-web-pr-<number>.kgqk4vdcfq.workers.dev/auth/callback`. The
+same data can be run locally, tailnet-only, with `docs/private-preview.md`.
 
-Because a preview upload makes the latest Worker version an undeployed one,
-the production deploy passes secrets with `wrangler deploy --secrets-file`.
-`wrangler secret bulk` refuses to edit secrets in that state.
+Terraform keeps its state in the Postgres database named by the
+`TF_STATE_PG_CONN_STR` secret. The state holds the Worker secrets, so keep that
+database private.
 
 ## Create the token
 
@@ -72,9 +71,11 @@ read-all permissions unless the workflow is changed to use those services.
 3. Confirm `CLOUDFLARE_ACCOUNT_ID` is also present in the same `dev`
    environment. It is an identifier, not a secret, but keeping it alongside the
    deployment configuration is fine.
-4. Do not commit either value to `.env*`, `.dev.vars`, or the repository.
+4. Add `TF_STATE_PG_CONN_STR`: the Terraform state database's direct (not
+   pooled) Postgres connection string.
+5. Do not commit any of these values to `.env*`, `.dev.vars`, or the repository.
 
-The workflow reads both values from the `dev` GitHub environment. Configure
+The workflow reads these values from the `dev` GitHub environment. Configure
 GitHub environment protection rules there if deployments should require an
 approval.
 

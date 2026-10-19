@@ -31,7 +31,8 @@ The dev server listens on port 3000.
 bun run dev              # Start Vite dev server on port 3000
 bun run build            # Production build
 bun run preview          # Preview the production build locally
-bun run deploy           # Build and deploy the Worker
+bun run deploy           # Build and apply the prod stage with Terraform
+bun run infra plan       # Build and plan the stage named by STAGE (default prod)
 bun run test             # Run Vitest
 bun run lint             # Run Biome lint
 bun run format           # Run Biome format
@@ -93,6 +94,35 @@ bun run db:migrate:remote
 The Worker creates one typed `DatabaseContext` from its D1 binding. tRPC
 contexts, services, and repositories receive that Drizzle context; application
 code must not access `env.DB` directly outside the Worker boundary.
+
+## Infrastructure
+
+Terraform in `infra/terraform` owns the Worker, its D1 database and the cron
+trigger. It reads the Worker's settings (vars, compatibility, crons,
+observability) from the build's `dist/server/wrangler.json`, so they stay in
+`wrangler.jsonc`, and applies `migrations/` with Wrangler before each new
+version deploys.
+
+Each Terraform workspace is a stage. `prod` is the production Worker
+(`hackerfeed-web`) and the `hackerfeed` database, adopted on its first apply.
+`pr-<n>` gets its own Worker and database loaded with `src/demo-data`; CI
+creates one per pull request and destroys it when the PR closes.
+
+State lives in Postgres (a free Neon project works), named by `PG_CONN_STR`.
+Use a direct connection, not a pooled one, so locking works.
+
+```bash
+export PG_CONN_STR=postgres://... CLOUDFLARE_API_TOKEN=... CLOUDFLARE_ACCOUNT_ID=...
+export TF_VAR_cloudflare_account_id=$CLOUDFLARE_ACCOUNT_ID
+export TF_VAR_workos_client_id=... TF_VAR_ai_token_encryption_key=...
+terraform -chdir=infra/terraform init
+
+bun run infra plan              # prod
+STAGE=pr-42 bun run infra apply
+STAGE=pr-42 bun run infra destroy
+```
+
+`bun run infra destroy` refuses to run on `prod`.
 
 ## AI Assistants (bring your own subscription)
 
