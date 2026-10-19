@@ -20,6 +20,8 @@ jobs:
       github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     environment: dev
+    env:
+      STAGE: pr-${{ github.event.pull_request.number }}
     steps:
       - uses: actions/checkout@v4
 
@@ -30,21 +32,26 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      # VITE_DEMO_DATA builds in the in-memory Hacker News API that serves
-      # src/demo-data/hacker-news.ts instead of the live API. Sign-in returns to the
-      # PR's alias URL rather than the production one in .env.production.
-      - name: Build
+      # The stage's Worker is hackerfeed-web-pr-<n>, so its workers.dev host is
+      # the production host with that name swapped in.
+      - name: Set preview URL
         run: |
           prod_host=$(sed -n 's|^VITE_WORKOS_REDIRECT_URI=https://\([^/]*\)/.*|\1|p' .env.production)
           if [ -z "$prod_host" ]; then
             echo "No production redirect URI in .env.production" >&2
             exit 1
           fi
-          export VITE_WORKOS_REDIRECT_URI="https://pr-${PR_NUMBER}-${prod_host}/auth/callback"
-          echo "Sign-in redirect: ${VITE_WORKOS_REDIRECT_URI}"
-          bun run build
+          preview_url="https://hackerfeed-web-${STAGE}.${prod_host#*.}"
+          {
+            echo "PREVIEW_URL=${preview_url}"
+            echo "VITE_WORKOS_REDIRECT_URI=${preview_url}/auth/callback"
+          } >> "$GITHUB_ENV"
+
+      # VITE_DEMO_DATA builds in the in-memory Hacker News API that serves
+      # src/demo-data/hacker-news.ts instead of the live API.
+      - name: Build
+        run: bun run build
         env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
           VITE_DEMO_DATA: "true"
           VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
           VITE_WORKOS_CLIENT_ID: ${{ secrets.VITE_WORKOS_CLIENT_ID }}
@@ -57,101 +64,31 @@ jobs:
             exit 1
           fi
 
-      # Each PR gets its own D1 database, bound as DB in the generated
-      # dist/server/wrangler.json. Every wrangler command below passes that
-      # file with --config: `d1 migrations` ignores the build's config redirect
-      # and would otherwise read wrangler.jsonc, i.e. the production database.
-      # Migrations run on the previous push's fixture rows, then every row is
-      # replaced with src/demo-data/database.
-      - name: Prepare preview database
-        run: |
-          config=dist/server/wrangler.json
-          prod_db_id=$(jq -r '.d1_databases[] | select(.binding == "DB") | .database_id' "$config")
-          db_name="hackerfeed-web-pr-${PR_NUMBER}"
-          find_db() {
-            bunx wrangler d1 list --json | jq -r --arg name "$db_name" '.[] | select(.name == $name) | .uuid'
-          }
-
-          db_id=$(find_db)
-          if [ -z "$db_id" ]; then
-            bunx wrangler d1 create "$db_name" --update-config=false
-            db_id=$(find_db)
-          fi
-          if [ -z "$db_id" ] || [ "$db_id" = "$prod_db_id" ]; then
-            echo "Preview database id '${db_id}' is missing or is the production database" >&2
-            exit 1
-          fi
-
-          jq --arg id "$db_id" --arg name "$db_name" \
-            '(.d1_databases[] | select(.binding == "DB")) |= (.database_id = $id | .database_name = $name)' \
-            "$config" > "$config.tmp"
-          mv "$config.tmp" "$config"
-          echo "PROD_DB_ID=$prod_db_id" >> "$GITHUB_ENV"
-
-          bunx wrangler d1 migrations apply DB --remote --config "$config"
-
-          expected=$(find migrations -maxdepth 1 -name '*.sql' | wc -l)
-          applied=$(bunx wrangler d1 execute "$db_name" --remote --json \
-            --command "SELECT COUNT(*) AS n FROM d1_migrations" | jq -r '.[0].results[0].n')
-          if [ "$applied" != "$expected" ]; then
-            echo "Preview database has ${applied} migrations applied, expected ${expected}" >&2
-            exit 1
-          fi
-
-          bun scripts/demo-data-sql.ts > "$RUNNER_TEMP/demo-data.sql"
-          bunx wrangler d1 execute DB --remote --config "$config" --file "$RUNNER_TEMP/demo-data.sql"
+      # The stage has its own Worker and D1 database. Migrations run on the
+      # previous push's fixture rows, then every row is replaced with
+      # src/demo-data/database.
+      - name: Deploy preview stage
+        run: bunx alchemy deploy --stage "$STAGE" --no-input --yes
         env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
+          VITE_WORKOS_CLIENT_ID: ${{ secrets.VITE_WORKOS_CLIENT_ID }}
+          AI_TOKEN_ENCRYPTION_KEY: ${{ secrets.AI_TOKEN_ENCRYPTION_KEY }}
+          SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
+          SENTRY_RELEASE: ${{ github.event.pull_request.head.sha }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-
-      # Uploads a Worker version without promoting it to production, and
-      # aliases it to a stable per-PR URL.
-      - name: Upload preview version
-        run: |
-          bunx wrangler versions upload --config dist/server/wrangler.json --preview-alias "pr-${PR_NUMBER}" --message "PR #${PR_NUMBER} @ ${HEAD_SHA}"
-        env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          WRANGLER_OUTPUT_FILE_PATH: ${{ runner.temp }}/wrangler-output.ndjson
-
-      - name: Verify preview is not bound to production database
-        run: |
-          version_id=$(jq -r 'select(.type == "version-upload") | .version_id' "$WRANGLER_OUTPUT_FILE_PATH" | tail -n1)
-          bound_db_id=$(bunx wrangler versions view "$version_id" --json --config dist/server/wrangler.json \
-            | jq -r '.resources.bindings[] | select(.type == "d1" and .name == "DB") | .id')
-          if [ -z "$bound_db_id" ] || [ "$bound_db_id" = "$PROD_DB_ID" ]; then
-            echo "Preview version ${version_id} is bound to '${bound_db_id}', not an isolated database" >&2
-            exit 1
-          fi
-          echo "Preview version ${version_id} uses database ${bound_db_id}"
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          WRANGLER_OUTPUT_FILE_PATH: ${{ runner.temp }}/wrangler-output.ndjson
 
       - name: Comment preview URL on PR
         run: |
-          alias_url=$(jq -r 'select(.type == "version-upload") | .preview_alias_url // empty' "$WRANGLER_OUTPUT_FILE_PATH" | tail -n1)
-          version_url=$(jq -r 'select(.type == "version-upload") | .preview_url // empty' "$WRANGLER_OUTPUT_FILE_PATH" | tail -n1)
-          if [ -z "$alias_url" ]; then
-            echo "No preview alias URL found in wrangler output" >&2
-            exit 1
-          fi
-
           marker='<!-- cloudflare-preview -->'
           body="$marker
           ## Cloudflare preview
 
           | | |
           |-|-|
-          | **Branch preview** | $alias_url |
-          | **Commit preview** | $version_url |
+          | **Preview** | $PREVIEW_URL |
           | **Commit** | \`${HEAD_SHA:0:7}\` |
 
-          Shows only the dummy data in \`src/demo-data\`: its own D1 database (\`hackerfeed-web-pr-${PR_NUMBER}\`, reloaded on every push and deleted when the PR closes) and an in-memory Hacker News API. Uses production secrets."
+          Shows only the dummy data in \`src/demo-data\`: its own Worker and D1 database (Alchemy stage \`${STAGE}\`, reloaded on every push and destroyed when the PR closes) and an in-memory Hacker News API. Uses production secrets."
 
           comment_id=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" --paginate \
             --jq "map(select(.body | startswith(\"$marker\"))) | first | .id // empty")
@@ -164,4 +101,3 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          WRANGLER_OUTPUT_FILE_PATH: ${{ runner.temp }}/wrangler-output.ndjson
