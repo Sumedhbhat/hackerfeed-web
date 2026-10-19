@@ -112,6 +112,10 @@ PR, and destroys it when the PR closes. Set the `DEPLOY_TARGET` repository
 variable to `node` (and the `DOCKER_HOST` secret) to deploy the container
 instead; PR previews stay Cloudflare-only.
 
+The production Worker and D1 database already exist under those names. The
+database is picked up by name; if the first `prod` deploy reports the Worker
+as owned by someone else, run it once with `--adopt`.
+
 ## Database
 
 Persistent data is SQLite on every target. Tables are defined in
