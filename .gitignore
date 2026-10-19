@@ -17,3 +17,9 @@ plan.md
 *-backup.tar.gz
 docs/internal/
 .data
+
+# Terraform
+.terraform
+*.tfstate
+*.tfstate.*
+backend.hcl

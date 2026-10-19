@@ -80,6 +80,53 @@ Everything host-specific lives in `src/platform/<target>.ts`, behind the
 imports a host SDK. To add a host, add a Nitro preset to `vite.config.ts` and
 an adapter next to the others.
 
+### Infrastructure (Terraform)
+
+`infra/terraform` declares the infrastructure for both targets. Its
+`deploy_target` variable takes the same values as `DEPLOY_TARGET`:
+
+- `cloudflare` (`infra/terraform/cloudflare`): a D1 database, the Worker
+  (`cloudflare_worker` + a `cloudflare_worker_version` made of Nitro's
+  `.output` modules and assets), its bindings and secrets, and the daily Cron
+  Trigger. `bun run db migrate` runs against D1 before the new version deploys.
+- `node` (`infra/terraform/node`): the `Dockerfile` image, a volume for the
+  SQLite file, and a container, on whichever Docker daemon `DOCKER_HOST`
+  points at (local, or `ssh://user@host`).
+
+State lives in any S3-compatible bucket. Each Terraform workspace is a stage:
+`prod` keeps the existing names (`hackerfeed-web`), `pr-<n>` gets its own
+Worker and D1 database loaded with `src/demo-data`.
+
+```bash
+cp infra/terraform/backend.hcl.example infra/terraform/backend.hcl   # then edit
+terraform -chdir=infra/terraform init -backend-config=backend.hcl
+
+export TF_VAR_workos_redirect_uri=... TF_VAR_workos_client_id=... TF_VAR_ai_token_encryption_key=...
+DEPLOY_TARGET=cloudflare bun run infra plan    # build, then terraform plan in workspace $STAGE (prod)
+DEPLOY_TARGET=cloudflare bun run infra apply
+DEPLOY_TARGET=node bun run infra apply
+STAGE=pr-42 DEPLOY_TARGET=cloudflare bun run infra destroy
+```
+
+Cloudflare also needs `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` and
+`TF_VAR_cloudflare_account_id`; optional settings are the `sentry_dsn`,
+`sentry_release`, `chatgpt_client_id`, `chatgpt_client_secret` and `port`
+variables. CI applies `prod` on push to `master`, a workspace per PR, and
+destroys it when the PR closes. Set the `DEPLOY_TARGET` repository variable to
+`node` (and the `DOCKER_HOST` secret) to deploy the container instead; PR
+previews stay Cloudflare-only.
+
+The production Worker and D1 database already exist, so import them into the
+`prod` workspace once before the first apply:
+
+```bash
+terraform -chdir=infra/terraform workspace select -or-create prod
+terraform -chdir=infra/terraform import -var deploy_target=cloudflare \
+  'module.cloudflare[0].cloudflare_d1_database.this' "$CLOUDFLARE_ACCOUNT_ID/61e6cb7a-29b4-43b6-85af-e82d735a9ed8"
+terraform -chdir=infra/terraform import -var deploy_target=cloudflare \
+  'module.cloudflare[0].cloudflare_worker.this' "$CLOUDFLARE_ACCOUNT_ID/hackerfeed-web"
+```
+
 ## Database
 
 Persistent data is SQLite on every target. Tables are defined in

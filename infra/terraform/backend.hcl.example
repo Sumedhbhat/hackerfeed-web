@@ -1,0 +1,11 @@
+# Cloudflare R2 shown; any S3-compatible bucket works.
+bucket                      = "hackerfeed-terraform-state"
+key                         = "hackerfeed-web.tfstate"
+region                      = "auto"
+endpoints                   = { s3 = "https://<account-id>.r2.cloudflarestorage.com" }
+use_path_style              = true
+skip_credentials_validation = true
+skip_region_validation      = true
+skip_requesting_account_id  = true
+skip_s3_checksum            = true
+use_lockfile                = true
