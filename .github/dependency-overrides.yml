@@ -20,3 +20,36 @@ overrides:
     reason: "@tailwindcss/typography@0.5.20 pins postcss-selector-parser 6.0.10, which has quadratic-time parsing of flat selectors (CPU exhaustion). Fixed in 7.1.6."
     added: 2026-10-18
     owner: "@Sumedhbhat"
+
+  - package: "@hono/node-server"
+    ecosystem: bun
+    manifest: package.json
+    override: "^1.19.10"
+    fixed_in: 1.19.10
+    advisory: GHSA-wc8c-qw6v-h7f6
+    parents: [alchemy]
+    reason: "alchemy@2.0.0-beta.81 depends on @prisma/dev@0.20.0, which pins @hono/node-server 1.19.9, whose static file middleware lets encoded slashes bypass path authorization. Fixed in 1.19.10."
+    added: 2026-10-19
+    owner: "@Sumedhbhat"
+
+  - package: hono
+    ecosystem: bun
+    manifest: package.json
+    override: "^4.12.4"
+    fixed_in: 4.12.4
+    advisory: GHSA-q5qw-h33p-qvwr
+    parents: [alchemy]
+    reason: "alchemy@2.0.0-beta.81 depends on @prisma/dev@0.20.0, which pins hono 4.11.4, whose serveStatic allows arbitrary file access and whose CORS middleware reflects any origin with credentials (GHSA-88fw-hqm2-52qc). Fixed in 4.12.4."
+    added: 2026-10-19
+    owner: "@Sumedhbhat"
+
+  - package: lodash
+    ecosystem: bun
+    manifest: package.json
+    override: "^4.18.0"
+    fixed_in: 4.18.0
+    advisory: GHSA-r5fr-rjxr-66jc
+    parents: [alchemy]
+    reason: "alchemy@2.0.0-beta.81 reaches lodash 4.17.21 through @prisma/dev and chevrotain, whose _.template allows code injection through imports key names. Fixed in 4.18.0."
+    added: 2026-10-19
+    owner: "@Sumedhbhat"
