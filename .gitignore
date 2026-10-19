@@ -16,3 +16,6 @@ todos.json
 plan.md
 *-backup.tar.gz
 docs/internal/
+
+# Alchemy local state
+.alchemy
