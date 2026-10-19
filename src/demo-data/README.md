@@ -3,7 +3,7 @@
 Dummy data that previews show instead of anything real. Nothing here comes
 from production, Hacker News or Hugging Face.
 
-- `database/<table>.ts`: every row of every D1 table, typed from
+- `database/<table>.ts`: every row of every table, typed from
   `src/server/database/schema.ts`. `database/index.ts` lists them all.
 - `hacker-news.ts`: stories, comments and feed orderings, in the Hacker News
   API's response shape. Preview builds (`VITE_DEMO_DATA=true`) answer Hacker
@@ -39,7 +39,7 @@ row lists. Shared dates and timestamp helpers live in `defaults.ts`.
 
 ## Where it is used
 
-- **Cloudflare PR previews** (`.github/workflows/preview.yaml`): each push
+- **PR previews** (`.github/workflows/preview.yaml`): each push
   applies the PR's migrations to the PR's database, then replaces every row
   with `database/`. The Hacker News data is built into the preview.
 - **Private preview** (`bun run preview:private`): the same, on a local

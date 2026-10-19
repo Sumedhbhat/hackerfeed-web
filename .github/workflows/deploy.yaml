@@ -46,7 +46,7 @@ jobs:
 
       - name: Verify build has no demo data
         run: |
-          if grep -rlF hackerfeed-demo-data dist; then
+          if grep -rlF hackerfeed-demo-data .output; then
             echo "Production build includes fixtures; VITE_DEMO_DATA must not be set" >&2
             exit 1
           fi

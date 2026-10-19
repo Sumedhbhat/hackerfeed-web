@@ -14,7 +14,8 @@ bun run dev          # Start dev server on port 3000
 
 # Build & deploy
 bun run build        # Production build
-bun run deploy       # Build + deploy to Cloudflare Workers (wrangler)
+DEPLOY_TARGET=cloudflare bun run build   # Build for Workers instead of node
+bun run start        # Run a node build
 
 # Testing
 bun run test         # Run all tests (vitest)
@@ -28,7 +29,9 @@ bun run check        # Biome check (lint + format together)
 
 ## Architecture
 
-**Framework stack:** TanStack Start (SSR React framework) + TanStack Router (file-based routing) + TanStack Query (data fetching) + TanStack Store (client state). Deployed to Cloudflare Workers via `@cloudflare/vite-plugin`.
+**Framework stack:** TanStack Start (SSR React framework) + TanStack Router (file-based routing) + TanStack Query (data fetching) + TanStack Store (client state). Built by Nitro for the host named in `DEPLOY_TARGET` (`node` by default, or `cloudflare`).
+
+**Deploy targets:** host-specific code lives only in `src/platform/<target>.ts` (database driver, Sentry SDK), behind `ServerPlatform` in `src/platform/types.ts`. Never import `cloudflare:*`, `@sentry/cloudflare`, `@sentry/node` or a database driver anywhere else; take the database from `getDatabaseContext()` (requests) or `platform.openDatabase()` (tasks). Scheduled work is a Nitro task registered in `vite.config.ts`, not a Worker `scheduled` handler.
 
 **Path alias:** `#/*` maps to `src/*` (configured in `package.json` `imports` and `tsconfig.json`).
 
