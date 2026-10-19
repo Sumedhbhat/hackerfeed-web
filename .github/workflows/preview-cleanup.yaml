@@ -1,4 +1,4 @@
-name: Clean up Cloudflare preview
+name: Clean up preview
 
 on:
   pull_request:
@@ -9,37 +9,52 @@ permissions:
   contents: read
 
 # Shares the preview workflow's group so closing a PR cancels an in-flight
-# preview before its database is deleted.
+# preview before its workspace is destroyed.
 concurrency:
-  group: cloudflare-preview-${{ github.event.pull_request.number }}
+  group: preview-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 jobs:
   cleanup:
     if: >-
       github.event.pull_request.head.repo.full_name == github.repository &&
-      github.actor != 'dependabot[bot]'
+      github.actor != 'dependabot[bot]' &&
+      (vars.DEPLOY_TARGET || 'cloudflare') == 'cloudflare'
     runs-on: ubuntu-latest
     environment: dev
+    env:
+      STAGE: pr-${{ github.event.pull_request.number }}
     steps:
       - uses: actions/checkout@v4
 
-      - uses: oven-sh/setup-bun@v2
+      - uses: hashicorp/setup-terraform@v3
         with:
-          bun-version: 1.3.0
+          terraform_version: 1.13.4
+          terraform_wrapper: false
 
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
-
-      - name: Delete preview database
+      - name: Initialise Terraform
         run: |
-          db_name="hackerfeed-web-pr-${PR_NUMBER}"
-          if bunx wrangler d1 list --json | jq -e --arg name "$db_name" 'any(.[]; .name == $name)' > /dev/null; then
-            bunx wrangler d1 delete "$db_name" --skip-confirmation
-          else
-            echo "No preview database named ${db_name}"
-          fi
+          printf '%s\n' "$TF_BACKEND_CONFIG" > infra/terraform/backend.hcl
+          terraform -chdir=infra/terraform init -input=false -backend-config=backend.hcl
         env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
+          TF_BACKEND_CONFIG: ${{ secrets.TF_BACKEND_CONFIG }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.TF_STATE_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.TF_STATE_SECRET_ACCESS_KEY }}
+
+      # The values below only satisfy required variables; nothing is deployed.
+      - name: Destroy preview workspace
+        run: |
+          if ! terraform -chdir=infra/terraform workspace select "$STAGE"; then
+            echo "No workspace named ${STAGE}"
+            exit 0
+          fi
+          terraform -chdir=infra/terraform destroy -input=false -auto-approve \
+            -var deploy_target=cloudflare -var workos_redirect_uri=unused \
+            -var workos_client_id=unused -var ai_token_encryption_key=unused
+          terraform -chdir=infra/terraform workspace select default
+          terraform -chdir=infra/terraform workspace delete "$STAGE"
+        env:
+          TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.TF_STATE_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.TF_STATE_SECRET_ACCESS_KEY }}
