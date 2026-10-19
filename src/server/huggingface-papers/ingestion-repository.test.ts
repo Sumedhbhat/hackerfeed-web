@@ -1,8 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import {
-	createDatabaseContext,
-	type D1DatabaseBinding,
-} from "#/server/database/client";
+import { createD1Database, type D1DatabaseBinding } from "#/platform/d1";
 import { createHuggingFaceIngestionRepository } from "./ingestion-repository";
 import type { HuggingFaceDailyPaper } from "./schema";
 
@@ -28,7 +25,7 @@ function createDatabase() {
 		},
 	} as unknown as D1DatabaseBinding;
 
-	return { database: createDatabaseContext(binding), batches };
+	return { database: createD1Database(binding), batches };
 }
 
 function paper(): HuggingFaceDailyPaper {

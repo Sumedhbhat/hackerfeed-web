@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-	createDatabaseContext,
-	type D1DatabaseBinding,
-} from "#/server/database/client";
+import { createD1Database, type D1DatabaseBinding } from "#/platform/d1";
 import { createPaperFavoriteRepository } from "./repository";
 
 type CapturedStatement = { sql: string; values: unknown[] };
@@ -71,7 +68,7 @@ function createDatabase() {
 		},
 	} as unknown as D1DatabaseBinding;
 
-	return { database: createDatabaseContext(binding), statements };
+	return { database: createD1Database(binding), statements };
 }
 
 describe("paper favorite repository", () => {

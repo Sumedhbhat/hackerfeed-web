@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-	createDatabaseContext,
-	type D1DatabaseBinding,
-} from "#/server/database/client";
+import { createD1Database, type D1DatabaseBinding } from "#/platform/d1";
 import { createFavoriteRepository } from "./repository";
 
 describe("favorite repository", () => {
@@ -18,7 +15,7 @@ describe("favorite repository", () => {
 				};
 			},
 		} as unknown as D1DatabaseBinding;
-		const repository = createFavoriteRepository(createDatabaseContext(binding));
+		const repository = createFavoriteRepository(createD1Database(binding));
 
 		await repository.listFavorites("user-1");
 

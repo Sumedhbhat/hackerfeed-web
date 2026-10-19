@@ -1,15 +1,19 @@
 import "@tanstack/react-start/server-only";
 
-import { drizzle } from "drizzle-orm/d1";
-import * as schema from "./schema";
+import type { LibSQLDatabase } from "drizzle-orm/libsql";
+import type { BaseSQLiteDatabase } from "drizzle-orm/sqlite-core";
+import type * as schema from "./schema";
 
-export type D1DatabaseBinding = Env["DB"];
-
-export function createDatabaseContext(binding: D1DatabaseBinding) {
-	return drizzle(binding, { schema });
-}
-
-export type DatabaseContext = ReturnType<typeof createDatabaseContext>;
+/**
+ * The app's SQLite database, whichever driver the deploy target opens it with
+ * (`src/platform`). Repositories only see this type.
+ */
+export type DatabaseContext = BaseSQLiteDatabase<
+	"async",
+	unknown,
+	typeof schema
+> &
+	Pick<LibSQLDatabase<typeof schema>, "batch">;
 
 const globalForDatabase = globalThis as typeof globalThis & {
 	hackerfeedDatabase?: DatabaseContext;

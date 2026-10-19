@@ -1,8 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import {
-	createDatabaseContext,
-	type D1DatabaseBinding,
-} from "#/server/database/client";
+import { createD1Database, type D1DatabaseBinding } from "#/platform/d1";
 import { createAiProviderRepository } from "./repository";
 
 type CapturedStatement = { sql: string; values: unknown[] };
@@ -27,7 +24,7 @@ function createDatabase(rows: unknown[][] = []) {
 		},
 	} as unknown as D1DatabaseBinding;
 
-	return { database: createDatabaseContext(binding), statements };
+	return { database: createD1Database(binding), statements };
 }
 
 const providerRow = [

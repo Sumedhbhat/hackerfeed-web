@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-	createDatabaseContext,
-	type D1DatabaseBinding,
-} from "#/server/database/client";
+import { createD1Database, type D1DatabaseBinding } from "#/platform/d1";
 import { createHuggingFacePaperFeedRepository } from "./feed-repository";
 
 type Run = {
@@ -48,7 +45,7 @@ function createDatabase(runs: Run[]) {
 		},
 	} as unknown as D1DatabaseBinding;
 
-	return { database: createDatabaseContext(binding), statements };
+	return { database: createD1Database(binding), statements };
 }
 
 describe("Hugging Face paper feed repository", () => {

@@ -3,7 +3,7 @@
  *
  * Every call goes to two places:
  *  - Sentry Logs, as structured attributes linked to the active trace.
- *  - The console, so `wrangler tail`, Workers Logs and devtools still show it.
+ *  - The console, so host logs (Workers Logs, container logs) and devtools show it.
  *
  * Pass the caught value as `error` and `logger.error` also records a Sentry
  * issue with its stack trace. Every error returns the trace ID; show it to the

@@ -1,6 +1,6 @@
 import "@tanstack/react-start/server-only";
 
-import * as Sentry from "@sentry/cloudflare";
+import * as Sentry from "@sentry/core/server";
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import {

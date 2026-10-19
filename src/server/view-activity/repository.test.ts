@@ -1,9 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
-import {
-	createDatabaseContext,
-	type D1DatabaseBinding,
-} from "#/server/database/client";
+import { createD1Database, type D1DatabaseBinding } from "#/platform/d1";
 import { createViewActivityRepository } from "./repository";
 
 type CapturedStatement = { sql: string; values: unknown[] };
@@ -53,7 +50,7 @@ function createDatabase() {
 
 	return {
 		batches,
-		database: createDatabaseContext(binding),
+		database: createD1Database(binding),
 		statements,
 	};
 }
