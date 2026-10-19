@@ -23,6 +23,11 @@ jobs:
         with:
           bun-version: 1.3.0
 
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.13.4
+          terraform_wrapper: false
+
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
@@ -51,26 +56,19 @@ jobs:
             exit 1
           fi
 
-      # Secrets are uploaded with the deploy rather than via `wrangler secret
-      # bulk`, which refuses to run while a PR preview version is the latest
-      # (undeployed) version.
-      - name: Write Worker secrets file
+      # The first apply adopts the existing Worker and database; see
+      # infra/terraform/main.tf.
+      - name: Deploy with Terraform
         run: |
-          jq -n 'env | {SENTRY_DSN, VITE_SENTRY_DSN, VITE_WORKOS_CLIENT_ID, AI_TOKEN_ENCRYPTION_KEY}' \
-            > "$RUNNER_TEMP/worker-secrets.json"
+          terraform -chdir=infra/terraform init -input=false
+          terraform -chdir=infra/terraform workspace select -or-create prod
+          terraform -chdir=infra/terraform apply -input=false -auto-approve
         env:
-          SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
-          VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
-          VITE_WORKOS_CLIENT_ID: ${{ secrets.VITE_WORKOS_CLIENT_ID }}
-          AI_TOKEN_ENCRYPTION_KEY: ${{ secrets.AI_TOKEN_ENCRYPTION_KEY }}
-
-      - name: Deploy to Cloudflare Workers
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy --secrets-file ${{ runner.temp }}/worker-secrets.json --var SENTRY_RELEASE:${{ github.sha }}
-          preCommands: wrangler d1 migrations apply DB --remote
-        env:
+          PG_CONN_STR: ${{ secrets.TF_STATE_PG_CONN_STR }}
+          TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          TF_VAR_workos_client_id: ${{ secrets.VITE_WORKOS_CLIENT_ID }}
+          TF_VAR_ai_token_encryption_key: ${{ secrets.AI_TOKEN_ENCRYPTION_KEY }}
+          TF_VAR_sentry_dsn: ${{ secrets.VITE_SENTRY_DSN }}
+          TF_VAR_sentry_release: ${{ github.sha }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
