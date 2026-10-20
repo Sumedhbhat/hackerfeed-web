@@ -77,8 +77,8 @@ jobs:
             exit 1
           fi
 
-      # The workspace gets its own D1 database, migrated and loaded with
-      # src/demo-data/database.
+      # The workspace is a Worker with no database binding or cron trigger; the
+      # build serves src/demo-data from memory.
       - name: Apply preview workspace
         run: |
           terraform -chdir=infra/terraform workspace select -or-create "$STAGE"
@@ -103,7 +103,7 @@ jobs:
           | **URL** | $PREVIEW_URL |
           | **Commit** | \`${HEAD_SHA:0:7}\` |
 
-          Shows only the dummy data in \`src/demo-data\`: its own D1 database (workspace \`${STAGE}\`, destroyed when the PR closes) and an in-memory Hacker News API. Uses production secrets."
+          Shows only the dummy data in \`src/demo-data\`: its own Worker (workspace \`${STAGE}\`, destroyed when the PR closes) with an in-memory database and Hacker News API, reset whenever Cloudflare recycles the Worker. No D1 database or cron. Uses production secrets."
 
           comment_id=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" --paginate \
             --jq "map(select(.body | startswith(\"$marker\"))) | first | .id // empty")

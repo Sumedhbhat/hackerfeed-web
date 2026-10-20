@@ -85,10 +85,12 @@ an adapter next to the others.
 `infra/terraform` declares the infrastructure for both targets. Its
 `deploy_target` variable takes the same values as `DEPLOY_TARGET`:
 
-- `cloudflare` (`infra/terraform/cloudflare`): a D1 database, the Worker
-  (`cloudflare_worker` + a `cloudflare_worker_version` made of Nitro's
-  `.output` modules and assets), its bindings and secrets, and the daily Cron
-  Trigger. `bun run db migrate` runs against D1 before the new version deploys.
+- `cloudflare` (`infra/terraform/cloudflare`): the Worker (`cloudflare_worker`
+  + a `cloudflare_worker_version` made of Nitro's `.output` modules and
+  assets), its bindings and secrets and, on `prod` only, the `hackerfeed` D1
+  database and the daily Cron Trigger. `bun run db migrate` runs against D1
+  before the new version deploys. The database has `prevent_destroy`, so
+  Terraform refuses any plan that would delete it.
 - `node` (`infra/terraform/node`): the `Dockerfile` image, a volume for the
   SQLite file, and a container, on whichever Docker daemon `DOCKER_HOST`
   points at (local, or `ssh://user@host`).
@@ -96,8 +98,8 @@ an adapter next to the others.
 State lives in any Postgres database (a free Neon project works) named by
 `PG_CONN_STR`. Use a direct connection, not a pooled one, so locking works.
 Each Terraform workspace is a stage: `prod` keeps the existing names
-(`hackerfeed-web`), `pr-<n>` gets its own Worker and D1 database loaded with
-`src/demo-data`.
+(`hackerfeed-web`), `pr-<n>` is only a Worker: no database binding and no cron.
+Its build serves `src/demo-data` from memory (see `src/demo-data/README.md`).
 
 ```bash
 export PG_CONN_STR=postgres://...
@@ -124,7 +126,7 @@ The production Worker and D1 database already exist, so import them into the
 ```bash
 terraform -chdir=infra/terraform workspace select -or-create prod
 terraform -chdir=infra/terraform import -var deploy_target=cloudflare \
-  'module.cloudflare[0].cloudflare_d1_database.this' "$CLOUDFLARE_ACCOUNT_ID/61e6cb7a-29b4-43b6-85af-e82d735a9ed8"
+  'module.cloudflare[0].cloudflare_d1_database.this[0]' "$CLOUDFLARE_ACCOUNT_ID/61e6cb7a-29b4-43b6-85af-e82d735a9ed8"
 terraform -chdir=infra/terraform import -var deploy_target=cloudflare \
   'module.cloudflare[0].cloudflare_worker.this' "$CLOUDFLARE_ACCOUNT_ID/hackerfeed-web"
 ```

@@ -23,7 +23,9 @@ variable "secrets" {
   sensitive = true
 }
 
-variable "seed_demo_data" {
+# Only production has a D1 database and the cron trigger. A preview is a
+# Worker whose build serves src/demo-data from memory.
+variable "prod" {
   type = bool
 }
 
@@ -31,35 +33,30 @@ locals {
   root       = abspath("${path.module}/../../..")
   server     = "${local.root}/.output/server"
   migrations = sha256(join("", [for file in sort(fileset(local.root, "migrations/*.sql")) : filesha256("${local.root}/${file}")]))
-  demo_data  = sha256(join("", [for file in sort(fileset(local.root, "src/demo-data/**")) : filesha256("${local.root}/${file}")]))
 }
 
+# The production database predates Terraform and is named hackerfeed.
 resource "cloudflare_d1_database" "this" {
+  count            = var.prod ? 1 : 0
   account_id       = var.account_id
-  name             = var.name
+  name             = "hackerfeed"
   read_replication = { mode = "disabled" }
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # scripts/db.ts keeps the d1_migrations ledger the node target reads, so the
 # database stays portable. Needs CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN.
 resource "terraform_data" "migrate" {
-  triggers_replace = [cloudflare_d1_database.this.id, local.migrations]
+  count            = var.prod ? 1 : 0
+  triggers_replace = [cloudflare_d1_database.this[0].id, local.migrations]
 
   provisioner "local-exec" {
     command     = "bun scripts/db.ts migrate"
     working_dir = local.root
-    environment = { D1_DATABASE_ID = cloudflare_d1_database.this.id }
-  }
-}
-
-resource "terraform_data" "seed_demo_data" {
-  count            = var.seed_demo_data ? 1 : 0
-  triggers_replace = [terraform_data.migrate.id, local.demo_data]
-
-  provisioner "local-exec" {
-    command     = "bun scripts/demo-data-sql.ts > .output/demo-data.sql && bun scripts/db.ts exec .output/demo-data.sql"
-    working_dir = local.root
-    environment = { D1_DATABASE_ID = cloudflare_d1_database.this.id }
+    environment = { D1_DATABASE_ID = cloudflare_d1_database.this[0].id }
   }
 }
 
@@ -75,7 +72,8 @@ resource "cloudflare_worker" "this" {
   }
 }
 
-# Nitro's .output, uploaded module by module as built.
+# Nitro's .output, uploaded module by module as built. Preview builds also hold
+# sql.js's WebAssembly module.
 resource "cloudflare_worker_version" "this" {
   account_id          = var.account_id
   worker_id           = cloudflare_worker.this.id
@@ -85,9 +83,9 @@ resource "cloudflare_worker_version" "this" {
   deploy              = true
 
   modules = [
-    for file in fileset(local.server, "**/*.mjs") : {
+    for file in fileset(local.server, "**/*.{mjs,wasm}") : {
       name         = file
-      content_type = "application/javascript+module"
+      content_type = endswith(file, ".wasm") ? "application/wasm" : "application/javascript+module"
       content_file = "${local.server}/${file}"
     }
   ]
@@ -95,10 +93,8 @@ resource "cloudflare_worker_version" "this" {
   assets = { directory = "${local.root}/.output/public" }
 
   bindings = concat(
-    [
-      { type = "d1", name = "DB", id = cloudflare_d1_database.this.id },
-      { type = "assets", name = "ASSETS" },
-    ],
+    [{ type = "assets", name = "ASSETS" }],
+    [for db in cloudflare_d1_database.this : { type = "d1", name = "DB", id = db.id }],
     [for key, value in var.env : { type = "plain_text", name = key, text = value }],
     [for key, value in var.secrets : { type = "secret_text", name = key, text = value }],
   )
@@ -107,6 +103,7 @@ resource "cloudflare_worker_version" "this" {
 }
 
 resource "cloudflare_workers_cron_trigger" "this" {
+  count       = var.prod ? 1 : 0
   account_id  = var.account_id
   script_name = cloudflare_worker.this.name
   schedules   = [{ cron = "30 23 * * *" }]

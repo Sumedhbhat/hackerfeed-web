@@ -53,11 +53,11 @@ module "cloudflare" {
   source = "./cloudflare"
   count  = var.deploy_target == "cloudflare" ? 1 : 0
 
-  account_id     = var.cloudflare_account_id
-  name           = local.name
-  env            = local.env
-  secrets        = local.secrets
-  seed_demo_data = startswith(local.stage, "pr-")
+  account_id = var.cloudflare_account_id
+  name       = local.name
+  env        = local.env
+  secrets    = local.secrets
+  prod       = local.stage == "prod"
 }
 
 module "node" {
