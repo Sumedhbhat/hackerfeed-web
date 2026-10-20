@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-start/server";
 import { createServerEntry } from "@tanstack/react-start/server-entry";
 import { logger } from "#/lib/logger";
+import { sentryDataCollection } from "#/lib/sentry-data-collection";
 import {
 	createDatabaseContext,
 	type D1DatabaseBinding,
@@ -62,7 +63,7 @@ function renderErrorResponse(request: Request, traceId: string | undefined) {
 }
 
 function createWorkerDatabaseContext(env: WorkerEnv) {
-	return createDatabaseContext(Sentry.instrumentD1WithSentry(env.DB));
+	return createDatabaseContext(env.DB);
 }
 
 async function handleAppFetch(request: Request, env: WorkerEnv) {
@@ -107,9 +108,7 @@ const instrumentedWorker = Sentry.withSentry((env: WorkerEnv) => {
 		dsn: env.SENTRY_DSN,
 		environment: env.SENTRY_ENVIRONMENT ?? "production",
 		tracesSampleRate: getSentrySampleRate(env.SENTRY_TRACES_SAMPLE_RATE, 0.1),
-		// Logs come from `#/lib/logger`, which also writes the console line.
-		enableLogs: true,
-		sendDefaultPii: false,
+		dataCollection: sentryDataCollection,
 	};
 }, worker);
 

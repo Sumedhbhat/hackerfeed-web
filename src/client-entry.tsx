@@ -4,6 +4,7 @@ import { StrictMode, startTransition } from "react";
 import { hydrateRoot } from "react-dom/client";
 import { env } from "#/env";
 import { getTraceId } from "#/lib/logger";
+import { sentryDataCollection } from "#/lib/sentry-data-collection";
 
 const sentryDsn = env.VITE_SENTRY_DSN;
 
@@ -12,9 +13,7 @@ if (sentryDsn) {
 		dsn: sentryDsn,
 		environment: env.VITE_SENTRY_ENVIRONMENT,
 		tracesSampleRate: env.VITE_SENTRY_TRACES_SAMPLE_RATE,
-		// Logs come from `#/lib/logger`, which also writes the console line.
-		enableLogs: true,
-		sendDefaultPii: false,
+		dataCollection: sentryDataCollection,
 		// Same-origin API calls carry the trace, so browser and Worker spans,
 		// logs and issues share one trace ID.
 		integrations: [Sentry.browserTracingIntegration()],
