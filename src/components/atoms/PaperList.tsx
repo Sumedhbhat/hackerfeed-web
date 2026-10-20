@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 
-/** Vertical list of PaperCards. */
 export function PaperList({
 	children,
 	"aria-label": ariaLabel,
