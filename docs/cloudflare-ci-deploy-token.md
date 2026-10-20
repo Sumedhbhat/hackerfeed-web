@@ -8,29 +8,36 @@ developer's local Wrangler OAuth session or put its credentials in GitHub.
 
 On pushes to `master` (and manual dispatch), the workflow:
 
-1. Applies remote D1 migrations with `wrangler d1 migrations apply DB --remote`.
-2. Uploads the Worker, its `DB` binding, the cron trigger, and Worker settings.
-3. Uploads the Worker secrets listed in the workflow.
+1. Applies the `prod` workspace of `infra/terraform` when the push changes
+   `infra/` (manual runs always apply). It stops if the plan would delete or
+   replace the production D1 database.
+2. Applies remote D1 migrations with `wrangler d1 migrations apply DB --remote`.
+3. Uploads the Worker, its `DB` binding, the cron trigger, and Worker settings.
+4. Uploads the Worker secrets listed in the workflow.
 
-The Worker is `hackerfeed-web` and its D1 database is configured as `DB` in
-`wrangler.jsonc`.
+The Worker is `hackerfeed-web` and its D1 database is `hackerfeed`, bound as
+`DB` in `wrangler.jsonc`.
 
 `.github/workflows/preview.yaml` reuses the same token and `dev` environment on
 every same-repo, non-Dependabot pull request. It:
 
-1. Creates (or reuses) a D1 database named `hackerfeed-web-pr-<number>`,
-   rebinds `DB` to it in the generated `dist/server/wrangler.json`, applies all
-   migrations to it, then replaces every row with the dummy data in
-   `src/demo-data/database`. The PR's migrations are rehearsed there on the previous
-   push's fixture rows; production data is never touched by preview code. The
-   build also serves Hacker News from `src/demo-data/hacker-news.ts`.
-2. Runs `wrangler versions upload --preview-alias pr-<number>`. This uploads a
+1. Applies the `pr-<number>` Terraform workspace on the PR's first push, and
+   again whenever the PR changes `infra/`. That workspace is a D1 database
+   named `hackerfeed-web-pr-<number>`. A PR that changes `infra/` also plans
+   `prod` and shows the plan in its job summary.
+2. Rebinds `DB` to the PR's database in the generated
+   `dist/server/wrangler.json`, applies all migrations to it, then replaces
+   every row with the dummy data in `src/demo-data/database`. The PR's
+   migrations are rehearsed there on the previous push's fixture rows;
+   production data is never touched by preview code. The build also serves
+   Hacker News from `src/demo-data/hacker-news.ts`.
+3. Runs `wrangler versions upload --preview-alias pr-<number>`. This uploads a
    Worker version without deploying it, so production traffic is unaffected.
-3. Fails the job if the uploaded version is bound to the production database.
-4. Comments the preview URLs on the PR.
+4. Fails the job if the uploaded version is bound to the production database.
+5. Comments the preview URLs on the PR.
 
-`.github/workflows/preview-cleanup.yaml` deletes the PR's database when the PR
-closes. Previews still share the production Worker secrets (Sentry, the AI
+`.github/workflows/preview-cleanup.yaml` destroys the PR's workspace when the
+PR closes. Previews still share the production Worker secrets (Sentry, the AI
 token key). Sign-in on a preview returns to its alias URL, so WorkOS must allow
 `https://pr-<number>-hackerfeed-web.kgqk4vdcfq.workers.dev/auth/callback`. The same
 data can be run locally, tailnet-only, with `docs/private-preview.md`.
@@ -50,7 +57,7 @@ the production deploy passes secrets with `wrangler deploy --secrets-file`.
    | Permission | Why it is needed |
    | --- | --- |
    | **Workers Scripts: Edit** | Deploys the Worker and updates its bindings, cron trigger, observability settings, and Worker secrets. Cloudflare may label this permission **Write** in some API documentation. |
-   | **D1: Edit** | Applies the remote SQL migrations before deployment. |
+   | **D1: Edit** | Creates and deletes the D1 databases through Terraform, and applies the remote SQL migrations before deployment. |
 
 5. Under **Account Resources**, include only the Cloudflare account that owns
    `hackerfeed-web` and its D1 database. Do not select all accounts.
@@ -72,9 +79,12 @@ read-all permissions unless the workflow is changed to use those services.
 3. Confirm `CLOUDFLARE_ACCOUNT_ID` is also present in the same `dev`
    environment. It is an identifier, not a secret, but keeping it alongside the
    deployment configuration is fine.
-4. Do not commit either value to `.env*`, `.dev.vars`, or the repository.
+4. Add `TF_STATE_PG_CONN_STR`: the Terraform state database's direct (not
+   pooled) Postgres connection string.
+5. Do not commit any of these values to `.env*`, `.dev.vars`, or the
+   repository.
 
-The workflow reads both values from the `dev` GitHub environment. Configure
+The workflows read these values from the `dev` GitHub environment. Configure
 GitHub environment protection rules there if deployments should require an
 approval.
 

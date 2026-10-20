@@ -32,6 +32,7 @@ bun run dev              # Start Vite dev server on port 3000
 bun run build            # Production build
 bun run preview          # Preview the production build locally
 bun run deploy           # Build and deploy the Worker
+bun run infra plan       # Terraform plan for the stage named by STAGE (default prod)
 bun run test             # Run Vitest
 bun run lint             # Run Biome lint
 bun run format           # Run Biome format
@@ -93,6 +94,36 @@ bun run db:migrate:remote
 The Worker creates one typed `DatabaseContext` from its D1 binding. tRPC
 contexts, services, and repositories receive that Drizzle context; application
 code must not access `env.DB` directly outside the Worker boundary.
+
+## Infrastructure
+
+`infra/terraform` creates the Cloudflare resources the app runs on: today, the
+D1 databases. It creates resources and nothing else. Wrangler deploys the
+Worker and its settings from `wrangler.jsonc`, and CI applies `migrations/` in
+its own step.
+
+Each Terraform workspace is a stage. `prod` is the production database
+(`hackerfeed`, adopted on its first apply); `pr-<n>` is a pull request's
+preview database. CI applies `prod` only when a push to master changes
+`infra/`, after checking the plan neither deletes nor replaces the production
+database. A pull request that changes `infra/` shows that production plan in
+its job summary.
+
+State lives in Postgres (a free Neon project works), named by `PG_CONN_STR`.
+Use a direct connection, not a pooled one, so locking works. The state holds
+no secrets today, but keep that database private.
+
+```bash
+export PG_CONN_STR=postgres://... CLOUDFLARE_API_TOKEN=...
+export TF_VAR_cloudflare_account_id=...
+terraform -chdir=infra/terraform init
+
+bun run infra plan              # prod
+STAGE=pr-42 bun run infra apply
+STAGE=pr-42 bun run infra destroy
+```
+
+`bun run infra destroy` refuses to run on `prod`.
 
 ## AI Assistants (bring your own subscription)
 

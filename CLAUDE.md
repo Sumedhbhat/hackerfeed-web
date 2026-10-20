@@ -32,6 +32,10 @@ bun run check        # Biome check (lint + format together)
 
 **Path alias:** `#/*` maps to `src/*` (configured in `package.json` `imports` and `tsconfig.json`).
 
+### Infrastructure
+
+`infra/terraform` creates Cloudflare resources (today, one D1 database per stage: `prod`, or `pr-<n>` for a PR preview) and nothing else. It must not deploy code or run migrations: the Worker is deployed by wrangler from `wrangler.jsonc`, and migrations run in their own CI step. CI applies Terraform only when `infra/` changes. See README > Infrastructure.
+
 ### Data flow
 
 The feed page (`src/routes/index.tsx`) uses a two-layer query model:
