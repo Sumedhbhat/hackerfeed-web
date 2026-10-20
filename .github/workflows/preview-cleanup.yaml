@@ -38,8 +38,9 @@ jobs:
 
       - name: Destroy preview infrastructure
         run: |
-          resources=$(infra/terraform.sh "$STAGE" state list)
-          if [ -z "$resources" ]; then
+          # `state list` fails on a stage with no state yet; `show` doesn't.
+          state=$(infra/terraform.sh "$STAGE" show -json)
+          if [ "$(jq '[.values.root_module.resources[]?] | length' <<< "$state")" = 0 ]; then
             echo "Nothing to destroy for ${STAGE}"
           else
             infra/terraform.sh "$STAGE" destroy -input=false -auto-approve

@@ -52,8 +52,9 @@ jobs:
           else
             echo "infra=true" >> "$GITHUB_OUTPUT"
           fi
-          resources=$(infra/terraform.sh "$STAGE" state list)
-          if [ -z "$resources" ]; then
+          # `state list` fails on a stage with no state yet; `show` doesn't.
+          state=$(infra/terraform.sh "$STAGE" show -json)
+          if [ "$(jq '[.values.root_module.resources[]?] | length' <<< "$state")" = 0 ]; then
             echo "exists=false" >> "$GITHUB_OUTPUT"
           else
             echo "exists=true" >> "$GITHUB_OUTPUT"
