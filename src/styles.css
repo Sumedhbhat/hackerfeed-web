@@ -154,7 +154,6 @@ pre code {
   font-weight: 600;
 }
 
-/* Clean card — replaces the glassmorphism island */
 .island-shell {
   border: 1px solid var(--line);
   background: var(--surface-strong);
