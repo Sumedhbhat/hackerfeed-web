@@ -32,7 +32,6 @@ bun run dev              # Start Vite dev server on port 3000
 bun run build            # Production build
 bun run preview          # Preview the production build locally
 bun run deploy           # Build and deploy the Worker
-bun run infra plan       # Terraform plan for the stage named by STAGE (default prod)
 bun run test             # Run Vitest
 bun run lint             # Run Biome lint
 bun run format           # Run Biome format
@@ -102,28 +101,32 @@ D1 databases. It creates resources and nothing else. Wrangler deploys the
 Worker and its settings from `wrangler.jsonc`, and CI applies `migrations/` in
 its own step.
 
-Each Terraform workspace is a stage. `prod` is the production database
-(`hackerfeed`, adopted on its first apply); `pr-<n>` is a pull request's
-preview database. CI applies `prod` only when a push to master changes
-`infra/`, after checking the plan neither deletes nor replaces the production
-database. A pull request that changes `infra/` shows that production plan in
-its job summary.
+Each stage has its own state: `prod` is the production database (`hackerfeed`,
+adopted on its first apply), and `pr-<n>` is a pull request's preview
+database. CI applies `prod` only when a push to master changes `infra/`, after
+checking the plan neither deletes nor replaces the production database. A pull
+request that changes `infra/` shows that production plan in its job summary.
 
-State lives in Postgres (a free Neon project works), named by `PG_CONN_STR`.
-Use a direct connection, not a pooled one, so locking works. The state holds
-no secrets today, but keep that database private.
+### State and sign-in
 
-```bash
-export PG_CONN_STR=postgres://... CLOUDFLARE_API_TOKEN=...
-export TF_VAR_cloudflare_account_id=...
-terraform -chdir=infra/terraform init
+Terraform state lives in `infra/state-backend`, a small Worker on the free plan
+(`hackerfeed-terraform-state`) that stores state and locks in its own D1
+database. There is no stored password: each CI job requests a GitHub OIDC
+token, and the Worker verifies it against GitHub's keys and this repository's
+id. The job's GitHub environment decides what it may touch:
 
-bun run infra plan              # prod
-STAGE=pr-42 bun run infra apply
-STAGE=pr-42 bun run infra destroy
-```
+| Environment | `prod` state | `pr-<n>` states |
+|---|---|---|
+| `production` (master only) | read, write, lock | none |
+| `preview` (pull requests) | read only, for PR plans | read, write, lock, delete |
 
-`bun run infra destroy` refuses to run on `prod`.
+Every Terraform command goes through `infra/terraform.sh`, which fetches the
+token and points Terraform at the stage's state. GitHub only issues these
+tokens inside Actions, so Terraform runs in CI, not locally; use **Run
+workflow** on the deploy workflow for a manual apply. The state server sits
+below Terraform, so the deploy workflow deploys it with wrangler when
+`infra/state-backend` changes. Its D1 database was created once with
+`wrangler d1 create hackerfeed-terraform-state`.
 
 ## AI Assistants (bring your own subscription)
 

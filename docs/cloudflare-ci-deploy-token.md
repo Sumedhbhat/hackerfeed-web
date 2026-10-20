@@ -8,21 +8,23 @@ developer's local Wrangler OAuth session or put its credentials in GitHub.
 
 On pushes to `master` (and manual dispatch), the workflow:
 
-1. Applies the `prod` workspace of `infra/terraform` when the push changes
+1. Deploys the Terraform state server (`infra/state-backend`) with wrangler
+   when the push changes it.
+2. Applies the `prod` stage of `infra/terraform` when the push changes
    `infra/` (manual runs always apply). It stops if the plan would delete or
    replace the production D1 database.
-2. Applies remote D1 migrations with `wrangler d1 migrations apply DB --remote`.
-3. Uploads the Worker, its `DB` binding, the cron trigger, and Worker settings.
-4. Uploads the Worker secrets listed in the workflow.
+3. Applies remote D1 migrations with `wrangler d1 migrations apply DB --remote`.
+4. Uploads the Worker, its `DB` binding, the cron trigger, and Worker settings.
+5. Uploads the Worker secrets listed in the workflow.
 
 The Worker is `hackerfeed-web` and its D1 database is `hackerfeed`, bound as
 `DB` in `wrangler.jsonc`.
 
-`.github/workflows/preview.yaml` reuses the same token and `dev` environment on
-every same-repo, non-Dependabot pull request. It:
+`.github/workflows/preview.yaml` uses the `preview` environment on every
+same-repo, non-Dependabot pull request. It:
 
-1. Applies the `pr-<number>` Terraform workspace on the PR's first push, and
-   again whenever the PR changes `infra/`. That workspace is a D1 database
+1. Applies the `pr-<number>` Terraform stage on the PR's first push, and
+   again whenever the PR changes `infra/`. That stage is a D1 database
    named `hackerfeed-web-pr-<number>`. A PR that changes `infra/` also plans
    `prod` and shows the plan in its job summary.
 2. Rebinds `DB` to the PR's database in the generated
@@ -36,8 +38,8 @@ every same-repo, non-Dependabot pull request. It:
 4. Fails the job if the uploaded version is bound to the production database.
 5. Comments the preview URLs on the PR.
 
-`.github/workflows/preview-cleanup.yaml` destroys the PR's workspace when the
-PR closes. Previews still share the production Worker secrets (Sentry, the AI
+`.github/workflows/preview-cleanup.yaml` destroys the PR's stage and deletes
+its Terraform state when the PR closes. Previews still share the production Worker secrets (Sentry, the AI
 token key). Sign-in on a preview returns to its alias URL, so WorkOS must allow
 `https://pr-<number>-hackerfeed-web.kgqk4vdcfq.workers.dev/auth/callback`. The same
 data can be run locally, tailnet-only, with `docs/private-preview.md`.
@@ -73,20 +75,24 @@ read-all permissions unless the workflow is changed to use those services.
 
 ## Store it in GitHub
 
-1. In GitHub, open this repository's **Settings** > **Environments** > `dev`.
-2. Add or update the environment secret named `CLOUDFLARE_API_TOKEN` with the
-   token value.
-3. Confirm `CLOUDFLARE_ACCOUNT_ID` is also present in the same `dev`
-   environment. It is an identifier, not a secret, but keeping it alongside the
-   deployment configuration is fine.
-4. Add `TF_STATE_PG_CONN_STR`: the Terraform state database's direct (not
-   pooled) Postgres connection string.
-5. Do not commit any of these values to `.env*`, `.dev.vars`, or the
+The workflows use two GitHub environments:
+
+- `production`: `deploy.yaml`. Only `master` may deploy from it.
+- `preview`: `preview.yaml` and `preview-cleanup.yaml`, for pull requests.
+
+1. In GitHub, open this repository's **Settings** > **Environments**.
+2. In each environment, add or update the secret `CLOUDFLARE_API_TOKEN` with
+   the token value, and `CLOUDFLARE_ACCOUNT_ID`. The account id is an
+   identifier, not a secret, but keeping it alongside the deployment
+   configuration is fine.
+3. Both environments also need `VITE_SENTRY_DSN`, `VITE_WORKOS_CLIENT_ID` and
+   `AI_TOKEN_ENCRYPTION_KEY`; `production` also needs `SENTRY_AUTH_TOKEN`.
+4. Do not commit any of these values to `.env*`, `.dev.vars`, or the
    repository.
 
-The workflows read these values from the `dev` GitHub environment. Configure
-GitHub environment protection rules there if deployments should require an
-approval.
+Terraform state needs no secret: CI signs in to the state server with a GitHub
+OIDC token (see README > Infrastructure). Configure environment protection
+rules on `production` if deployments should require an approval.
 
 ## Verify without deploying
 
@@ -110,7 +116,8 @@ copied into GitHub secrets.
 Rotate the token before its 90-day expiry:
 
 1. Create a replacement token with the same two permissions and account scope.
-2. Replace `CLOUDFLARE_API_TOKEN` in the GitHub `dev` environment.
+2. Replace `CLOUDFLARE_API_TOKEN` in the GitHub `production` and `preview`
+   environments.
 3. Run the workflow and confirm it completes.
 4. Revoke the old token in Cloudflare.
 
