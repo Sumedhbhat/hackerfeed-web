@@ -8,8 +8,13 @@ terraform {
     }
   }
 
-  # Any Postgres database, read from PG_CONN_STR.
-  backend "pg" {}
+  # The state server in infra/state-backend. infra/terraform.sh sets the
+  # stage's address and signs in with the job's GitHub OIDC token.
+  backend "http" {
+    lock_method   = "POST"
+    unlock_method = "DELETE"
+    username      = "github"
+  }
 }
 
 # Credentials come from CLOUDFLARE_API_TOKEN.
@@ -17,10 +22,8 @@ provider "cloudflare" {}
 
 # Terraform creates resources only. Wrangler deploys the Worker and its
 # settings from wrangler.jsonc, and CI applies migrations.
-#
-# Each workspace is a stage: prod, or a pull request's preview such as pr-42.
 locals {
-  stage = terraform.workspace
+  stage = var.stage
   # The production database predates Terraform and is named hackerfeed.
   database_name = local.stage == "prod" ? "hackerfeed" : "hackerfeed-web-${local.stage}"
 }
