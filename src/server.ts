@@ -61,12 +61,25 @@ function renderErrorResponse(request: Request, traceId: string | undefined) {
 	return new Response(renderServerErrorPage(traceId), { status: 500, headers });
 }
 
-function createWorkerDatabaseContext(env: WorkerEnv) {
-	return createDatabaseContext(Sentry.instrumentD1WithSentry(env.DB));
+function createWorkerDatabaseContext(binding: D1DatabaseBinding) {
+	return createDatabaseContext(Sentry.instrumentD1WithSentry(binding));
+}
+
+// Preview builds have no D1 database; they serve src/demo-data from memory.
+async function getDatabaseBinding(env: WorkerEnv) {
+	if (import.meta.env.VITE_DEMO_DATA === "true") {
+		const { getDemoDatabaseBinding } = await import(
+			"#/server/database/demo-database"
+		);
+		return getDemoDatabaseBinding();
+	}
+	return env.DB;
 }
 
 async function handleAppFetch(request: Request, env: WorkerEnv) {
-	setDatabaseContext(createWorkerDatabaseContext(env));
+	setDatabaseContext(
+		createWorkerDatabaseContext(await getDatabaseBinding(env)),
+	);
 
 	try {
 		return await startFetch(request);
@@ -93,7 +106,7 @@ const worker = {
 		env: WorkerEnv,
 		context: ExecutionContext,
 	) {
-		const database = createWorkerDatabaseContext(env);
+		const database = createWorkerDatabaseContext(env.DB);
 		const ingestion = runHuggingFaceDailyPapersIngestion(database);
 		context.waitUntil(ingestion);
 		return ingestion;

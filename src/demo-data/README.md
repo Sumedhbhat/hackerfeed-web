@@ -39,11 +39,16 @@ row lists. Shared dates and timestamp helpers live in `defaults.ts`.
 
 ## Where it is used
 
-- **Cloudflare PR previews** (`.github/workflows/preview.yaml`): each push
-  applies the PR's migrations to the PR's database, then replaces every row
-  with `database/`. The Hacker News data is built into the preview.
-- **Private preview** (`bun run preview:private`): the same, on a local
-  database. See `docs/private-preview.md`.
+Preview builds (`VITE_DEMO_DATA=true`) have no D1 database. Each Worker
+isolate builds an in-memory SQLite database (sql.js) from `migrations/` and
+`database/` on its first request (`src/server/database/demo-database.ts`).
+Changes made in a preview, such as a new favorite, last only until Cloudflare
+recycles the isolate.
+
+- **Cloudflare PR previews** (`.github/workflows/preview.yaml`): a Worker per
+  PR with no database binding and no cron trigger.
+- **Private preview** (`bun run preview:private`): the same build, served on
+  your tailnet. See `docs/private-preview.md`.
 
 Production builds never include this data; `build.yaml` and `deploy.yaml`
 fail if they do.
