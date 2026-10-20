@@ -13,18 +13,20 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Creates the PR's database (Terraform workspace pr-<n>) on its first push,
-  # and re-applies it when the PR changes infra/.
+  # Creates the PR's database (Terraform stage pr-<n>) on its first push, and
+  # re-applies it when the PR changes infra/.
   infrastructure:
-    # Fork and Dependabot PRs cannot read the `dev` environment secrets.
+    # Fork and Dependabot PRs cannot read the `preview` environment secrets.
     if: >-
       github.event.pull_request.head.repo.full_name == github.repository &&
       github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
-    environment: dev
+    environment: preview
+    permissions:
+      contents: read
+      id-token: write
     env:
       STAGE: pr-${{ github.event.pull_request.number }}
-      PG_CONN_STR: ${{ secrets.TF_STATE_PG_CONN_STR }}
       TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
     outputs:
@@ -45,14 +47,13 @@ jobs:
       - name: Detect infrastructure changes
         id: changes
         run: |
-          terraform -chdir=infra/terraform init -input=false
-          terraform -chdir=infra/terraform workspace select -or-create "$STAGE"
           if git diff --quiet HEAD^1 HEAD -- infra/; then
             echo "infra=false" >> "$GITHUB_OUTPUT"
           else
             echo "infra=true" >> "$GITHUB_OUTPUT"
           fi
-          if [ -z "$(terraform -chdir=infra/terraform state list)" ]; then
+          resources=$(infra/terraform.sh "$STAGE" state list)
+          if [ -z "$resources" ]; then
             echo "exists=false" >> "$GITHUB_OUTPUT"
           else
             echo "exists=true" >> "$GITHUB_OUTPUT"
@@ -60,24 +61,28 @@ jobs:
 
       - name: Apply preview infrastructure
         if: steps.changes.outputs.infra == 'true' || steps.changes.outputs.exists == 'false'
-        run: terraform -chdir=infra/terraform apply -input=false -auto-approve
+        run: infra/terraform.sh "$STAGE" apply -input=false -auto-approve
 
       - name: Read preview database
         id: database
         run: |
           {
-            echo "id=$(terraform -chdir=infra/terraform output -raw database_id)"
-            echo "name=$(terraform -chdir=infra/terraform output -raw database_name)"
+            echo "id=$(infra/terraform.sh "$STAGE" output -raw database_id)"
+            echo "name=$(infra/terraform.sh "$STAGE" output -raw database_name)"
           } >> "$GITHUB_OUTPUT"
 
   # Shows what merging would do to production; the deploy workflow applies it.
+  # The preview environment may only read the prod state, so this plan does
+  # not take the lock.
   plan-production:
     needs: infrastructure
     if: needs.infrastructure.outputs.infra == 'true'
     runs-on: ubuntu-latest
-    environment: dev
+    environment: preview
+    permissions:
+      contents: read
+      id-token: write
     env:
-      PG_CONN_STR: ${{ secrets.TF_STATE_PG_CONN_STR }}
       TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
     steps:
@@ -88,19 +93,16 @@ jobs:
           terraform_version: 1.13.4
           terraform_wrapper: false
 
-      # Waits rather than fails while a deploy holds the production state lock.
       - name: Plan production infrastructure
         run: |
-          terraform -chdir=infra/terraform init -input=false
-          terraform -chdir=infra/terraform workspace select -or-create prod
-          terraform -chdir=infra/terraform plan -input=false -lock-timeout=10m -out=tfplan
+          infra/terraform.sh prod plan -input=false -lock=false -out=tfplan
           {
             echo '### Production infrastructure plan'
             echo '```'
-            terraform -chdir=infra/terraform show -no-color tfplan
+            infra/terraform.sh prod show -no-color tfplan
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-          if terraform -chdir=infra/terraform show -json tfplan | jq -e \
+          if infra/terraform.sh prod show -json tfplan | jq -e \
             '[.resource_changes[]? | select(.type == "cloudflare_d1_database" and (.change.actions | index("delete")))] | length > 0' > /dev/null; then
             echo "Merging would delete or replace the production D1 database" >&2
             exit 1
@@ -109,7 +111,7 @@ jobs:
   preview:
     needs: infrastructure
     runs-on: ubuntu-latest
-    environment: dev
+    environment: preview
     steps:
       - uses: actions/checkout@v7
 
@@ -240,7 +242,7 @@ jobs:
           | **Commit preview** | $version_url |
           | **Commit** | \`${HEAD_SHA:0:7}\` |
 
-          Shows only the dummy data in \`src/demo-data\`: its own D1 database (\`hackerfeed-web-pr-${PR_NUMBER}\`, Terraform workspace \`pr-${PR_NUMBER}\`, reloaded on every push and destroyed when the PR closes) and an in-memory Hacker News API. Uses production secrets."
+          Shows only the dummy data in \`src/demo-data\`: its own D1 database (\`hackerfeed-web-pr-${PR_NUMBER}\`, Terraform stage \`pr-${PR_NUMBER}\`, reloaded on every push and destroyed when the PR closes) and an in-memory Hacker News API. Uses production secrets."
 
           comment_id=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" --paginate \
             --jq "map(select(.body | startswith(\"$marker\"))) | first | .id // empty")

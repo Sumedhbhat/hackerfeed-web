@@ -20,10 +20,12 @@ jobs:
       github.event.pull_request.head.repo.full_name == github.repository &&
       github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
-    environment: dev
+    environment: preview
+    permissions:
+      contents: read
+      id-token: write
     env:
       STAGE: pr-${{ github.event.pull_request.number }}
-      PG_CONN_STR: ${{ secrets.TF_STATE_PG_CONN_STR }}
       TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
     steps:
@@ -36,11 +38,10 @@ jobs:
 
       - name: Destroy preview infrastructure
         run: |
-          terraform -chdir=infra/terraform init -input=false
-          if ! terraform -chdir=infra/terraform workspace select "$STAGE"; then
-            echo "No workspace named ${STAGE}"
-            exit 0
+          resources=$(infra/terraform.sh "$STAGE" state list)
+          if [ -z "$resources" ]; then
+            echo "Nothing to destroy for ${STAGE}"
+          else
+            infra/terraform.sh "$STAGE" destroy -input=false -auto-approve
           fi
-          terraform -chdir=infra/terraform destroy -input=false -auto-approve
-          terraform -chdir=infra/terraform workspace select default
-          terraform -chdir=infra/terraform workspace delete "$STAGE"
+          infra/terraform.sh "$STAGE" delete-state
