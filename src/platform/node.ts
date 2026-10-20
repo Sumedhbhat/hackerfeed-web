@@ -53,7 +53,7 @@ const sentryOptions = getSentryServerOptions(process.env);
 if (sentryOptions && !Sentry.isInitialized()) Sentry.init(sentryOptions);
 
 export const platform: ServerPlatform = {
-	openDatabase: () => database,
+	openDatabase: async () => database,
 	async traceRequest(request, handle) {
 		await migrated;
 		if (!sentryOptions) return handle();

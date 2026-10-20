@@ -23,9 +23,20 @@ function trace(request: Request, handle: () => Promise<Response>) {
 	return Sentry.wrapRequestHandler({ options, request, context }, handle);
 }
 
+// Preview builds have no D1 database; they serve src/demo-data from memory.
+async function getDatabaseBinding() {
+	if (import.meta.env.VITE_DEMO_DATA === "true") {
+		const { getDemoDatabaseBinding } = await import("./demo-database");
+		return getDemoDatabaseBinding();
+	}
+	return workerEnv.DB;
+}
+
 export const platform: ServerPlatform = {
-	openDatabase() {
-		return createD1Database(Sentry.instrumentD1WithSentry(workerEnv.DB));
+	async openDatabase() {
+		return createD1Database(
+			Sentry.instrumentD1WithSentry(await getDatabaseBinding()),
+		);
 	},
 	traceRequest: trace,
 	async traceTask(name, run) {

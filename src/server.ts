@@ -44,7 +44,7 @@ function renderErrorResponse(request: Request, traceId: string | undefined) {
 
 async function handleAppFetch(request: Request) {
 	const platform = await getPlatform();
-	setDatabaseContext(platform.openDatabase());
+	setDatabaseContext(await platform.openDatabase());
 
 	return platform.traceRequest(request, async () => {
 		try {

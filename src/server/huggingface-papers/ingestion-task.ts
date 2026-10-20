@@ -10,8 +10,8 @@ export default defineTask({
 	},
 	async run() {
 		const platform = await getPlatform();
-		const result = await platform.traceTask("papers:ingest", () =>
-			runHuggingFaceDailyPapersIngestion(platform.openDatabase()),
+		const result = await platform.traceTask("papers:ingest", async () =>
+			runHuggingFaceDailyPapersIngestion(await platform.openDatabase()),
 		);
 		return { result };
 	},

@@ -6,7 +6,7 @@ import type { DatabaseContext } from "#/server/database/client";
  * target it is on.
  */
 export type ServerPlatform = {
-	openDatabase(): DatabaseContext;
+	openDatabase(): Promise<DatabaseContext>;
 	/** Runs one request inside the target's Sentry request scope. */
 	traceRequest(
 		request: Request,

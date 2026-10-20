@@ -36,8 +36,13 @@ const config = defineConfig({
 		tsconfigPaths: true,
 	},
 	environments: {
-		// Runtime modules such as `cloudflare:workers`; Nitro bundles for the host.
-		ssr: { build: { rolldownOptions: { external: [/^cloudflare:/] } } },
+		// Runtime modules such as `cloudflare:workers`, and WebAssembly modules;
+		// Nitro bundles them for the host.
+		ssr: {
+			build: {
+				rolldownOptions: { external: [/^cloudflare:/, /\.wasm\?module$/] },
+			},
+		},
 	},
 	plugins: [
 		devtools(),
