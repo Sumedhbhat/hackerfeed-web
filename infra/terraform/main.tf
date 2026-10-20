@@ -15,13 +15,14 @@ terraform {
 # Credentials come from CLOUDFLARE_API_TOKEN.
 provider "cloudflare" {}
 
-# Each workspace is a stage: prod, or an isolated copy such as pr-42.
+# Each workspace is a stage: prod, or a PR preview such as pr-42. Only prod
+# has a database and a cron trigger; previews are a Worker serving the demo
+# data built into it (src/demo-data/README.md).
 locals {
   stage = terraform.workspace
-  name  = local.stage == "prod" ? "hackerfeed-web" : "hackerfeed-web-${local.stage}"
-  # The production database predates Terraform and is named hackerfeed.
-  db_name = local.stage == "prod" ? "hackerfeed" : local.name
-  root    = abspath("${path.module}/../..")
+  prod  = local.stage == "prod"
+  name  = local.prod ? "hackerfeed-web" : "hackerfeed-web-${local.stage}"
+  root  = abspath("${path.module}/../..")
 
   # `bun run build` writes the Worker to dist/server and wrangler.jsonc's
   # settings to dist/server/wrangler.json, so wrangler.jsonc stays the one
@@ -44,61 +45,42 @@ locals {
   }
 
   migrations = sha256(join("", [for file in sort(fileset(local.root, "migrations/*.sql")) : filesha256("${local.root}/${file}")]))
-  demo_data  = sha256(join("", [for file in sort(fileset(local.root, "src/demo-data/**")) : filesha256("${local.root}/${file}")]))
-
-  # wrangler.json with DB pointed at this stage's database, for wrangler d1.
-  d1_config = "${local.server}/wrangler.${local.stage}.json"
-  d1_env = {
-    DB_ID   = cloudflare_d1_database.this.id
-    DB_NAME = local.db_name
-    CONFIG  = local.d1_config
-  }
-  write_d1_config = <<-EOT
-    jq --arg id "$DB_ID" --arg name "$DB_NAME" \
-      '(.d1_databases[] | select(.binding == "DB")) |= (.database_id = $id | .database_name = $name)' \
-      dist/server/wrangler.json > "$CONFIG"
-  EOT
 }
 
 # Production existed before Terraform; these adopt it on the first prod apply.
 import {
-  for_each = local.stage == "prod" ? toset(["prod"]) : toset([])
-  to       = cloudflare_d1_database.this
+  for_each = local.prod ? toset(["prod"]) : toset([])
+  to       = cloudflare_d1_database.prod[0]
   id       = "${var.cloudflare_account_id}/${local.prod_db}"
 }
 
 import {
-  for_each = local.stage == "prod" ? toset(["prod"]) : toset([])
+  for_each = local.prod ? toset(["prod"]) : toset([])
   to       = cloudflare_worker.this
   id       = "${var.cloudflare_account_id}/hackerfeed-web"
 }
 
-resource "cloudflare_d1_database" "this" {
+# The production database predates Terraform and is named hackerfeed.
+resource "cloudflare_d1_database" "prod" {
+  count            = local.prod ? 1 : 0
   account_id       = var.cloudflare_account_id
-  name             = local.db_name
+  name             = "hackerfeed"
   read_replication = { mode = "disabled" }
-}
 
-# Needs CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID.
-resource "terraform_data" "migrate" {
-  triggers_replace = [cloudflare_d1_database.this.id, local.migrations]
-
-  provisioner "local-exec" {
-    command     = "${local.write_d1_config} bunx wrangler d1 migrations apply DB --remote --config \"$CONFIG\""
-    working_dir = local.root
-    environment = local.d1_env
+  lifecycle {
+    prevent_destroy = true
   }
 }
 
-# PR stages replace every row with the dummy data in src/demo-data/database.
-resource "terraform_data" "seed_demo_data" {
-  count            = startswith(local.stage, "pr-") ? 1 : 0
-  triggers_replace = [terraform_data.migrate.id, local.demo_data]
+# wrangler.jsonc binds DB to the production database. Needs
+# CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID.
+resource "terraform_data" "migrate" {
+  count            = local.prod ? 1 : 0
+  triggers_replace = [cloudflare_d1_database.prod[0].id, local.migrations]
 
   provisioner "local-exec" {
-    command     = "${local.write_d1_config} bun scripts/demo-data-sql.ts > dist/demo-data.sql && bunx wrangler d1 execute DB --remote --config \"$CONFIG\" --file dist/demo-data.sql"
+    command     = "bunx wrangler d1 migrations apply DB --remote"
     working_dir = local.root
-    environment = local.d1_env
   }
 }
 
@@ -123,10 +105,11 @@ resource "cloudflare_worker_version" "this" {
   main_module         = local.wrangler.main
   deploy              = true
 
+  # Preview builds also hold sql.js's WebAssembly module.
   modules = [
-    for file in fileset(local.server, "**/*.js") : {
+    for file in fileset(local.server, "**/*.{js,wasm}") : {
       name         = file
-      content_type = "application/javascript+module"
+      content_type = endswith(file, ".wasm") ? "application/wasm" : "application/javascript+module"
       content_file = "${local.server}/${file}"
     }
   ]
@@ -134,7 +117,7 @@ resource "cloudflare_worker_version" "this" {
   assets = { directory = "${local.root}/dist/client" }
 
   bindings = concat(
-    [{ type = "d1", name = "DB", id = cloudflare_d1_database.this.id }],
+    [for db in cloudflare_d1_database.prod : { type = "d1", name = "DB", id = db.id }],
     [for key, value in local.vars : { type = "plain_text", name = key, text = value }],
     [for key, value in local.secrets : { type = "secret_text", name = key, text = value }],
   )
@@ -142,9 +125,8 @@ resource "cloudflare_worker_version" "this" {
   depends_on = [terraform_data.migrate]
 }
 
-# Only production runs the scheduled ingestion.
 resource "cloudflare_workers_cron_trigger" "this" {
-  count       = local.stage == "prod" ? 1 : 0
+  count       = local.prod ? 1 : 0
   account_id  = var.cloudflare_account_id
   script_name = cloudflare_worker.this.name
   schedules   = [for cron in local.wrangler.triggers.crons : { cron = cron }]

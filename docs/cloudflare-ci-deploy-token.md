@@ -20,12 +20,11 @@ The Worker is `hackerfeed-web` and its D1 database is `hackerfeed`, bound as
 every same-repo, non-Dependabot pull request. It applies a `pr-<number>`
 workspace, which:
 
-1. Creates a Worker `hackerfeed-web-pr-<number>` and a D1 database of the same
-   name, applies all migrations to it, then replaces every row with the dummy
-   data in `src/demo-data/database`. The PR's migrations are rehearsed there on
-   the previous push's fixture rows; production data is never touched by
-   preview code. The build also serves Hacker News from
-   `src/demo-data/hacker-news.ts`.
+1. Creates a Worker `hackerfeed-web-pr-<number>` with no D1 binding and no
+   cron trigger. The preview build serves the dummy data in `src/demo-data`
+   from an in-memory database and Hacker News from
+   `src/demo-data/hacker-news.ts`, so preview code never reaches a D1
+   database.
 2. Comments the preview URL on the PR.
 
 `.github/workflows/preview-cleanup.yaml` destroys the workspace when the PR

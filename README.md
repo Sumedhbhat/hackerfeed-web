@@ -97,16 +97,18 @@ code must not access `env.DB` directly outside the Worker boundary.
 
 ## Infrastructure
 
-Terraform in `infra/terraform` owns the Worker, its D1 database and the cron
-trigger. It reads the Worker's settings (vars, compatibility, crons,
+Terraform in `infra/terraform` owns the Worker, the production D1 database and
+the cron trigger. It reads the Worker's settings (vars, compatibility, crons,
 observability) from the build's `dist/server/wrangler.json`, so they stay in
 `wrangler.jsonc`, and applies `migrations/` with Wrangler before each new
 version deploys.
 
 Each Terraform workspace is a stage. `prod` is the production Worker
 (`hackerfeed-web`) and the `hackerfeed` database, adopted on its first apply.
-`pr-<n>` gets its own Worker and database loaded with `src/demo-data`; CI
-creates one per pull request and destroys it when the PR closes.
+`pr-<n>` is only a Worker: no database binding and no cron. Its build serves
+`src/demo-data` from memory (see `src/demo-data/README.md`). CI creates one per
+pull request and destroys it when the PR closes. The production database has
+`prevent_destroy`, so Terraform refuses any plan that would delete it.
 
 State lives in Postgres (a free Neon project works), named by `PG_CONN_STR`.
 Use a direct connection, not a pooled one, so locking works.
