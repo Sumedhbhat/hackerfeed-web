@@ -18,7 +18,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Overrides and ledger match
         run: |
           diff -u \
@@ -38,7 +38,7 @@ jobs:
     permissions:
       contents: read                # writes go through DEPS_BOT_TOKEN
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           token: ${{ secrets.DEPS_BOT_TOKEN }}
       - uses: oven-sh/setup-bun@v2
