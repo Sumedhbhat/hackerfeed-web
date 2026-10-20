@@ -1,16 +1,3 @@
-/**
- * StoryCard component tests.
- *
- * Environment: jsdom (auto-applied via vitest.config.ts environmentMatchGlobs).
- *
- * Covers:
- *  - Basic rendering of story metadata (title, domain, author, score, comments)
- *  - Rank badge display and absence
- *  - Primary "Read article" / "Open post" action calls openLink
- *  - "Open discussion" action calls openLink with the HN discussion URL
- *  - Favorite toggle updates aria-pressed and aria-label
- *  - Favorite toggle integrates with favoritesStore
- */
 import {
 	cleanup,
 	fireEvent,
@@ -38,10 +25,6 @@ const trpcMock = vi.hoisted(() => ({
 	remove: vi.fn(),
 	viewStory: vi.fn(),
 }));
-
-// ---------------------------------------------------------------------------
-// Mock openLink so tests don't actually open browser windows
-// ---------------------------------------------------------------------------
 
 vi.mock("#/lib/open-link", () => ({
 	openLink: vi.fn(),
@@ -102,12 +85,7 @@ vi.mock("@tanstack/react-router", async (importOriginal) => {
 	};
 });
 
-// We import the mock AFTER vi.mock so vitest hoists it correctly.
 import { openLink } from "#/lib/open-link";
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 
 function makeStory(
 	overrides: Partial<HackerNewsStoryRecord> = {},
@@ -126,10 +104,6 @@ function makeStory(
 		kids: overrides.kids ?? [],
 	};
 }
-
-// ---------------------------------------------------------------------------
-// Setup / teardown
-// ---------------------------------------------------------------------------
 
 beforeEach(() => {
 	authMock.isLoading = false;
@@ -153,22 +127,13 @@ afterEach(() => {
 	clearAllFavorites();
 });
 
-// ---------------------------------------------------------------------------
-// StoryCardSkeleton
-// ---------------------------------------------------------------------------
-
 describe("StoryCardSkeleton", () => {
 	it("renders without throwing", () => {
 		render(<StoryCardSkeleton />);
-		// The skeleton renders an article element with an animate-pulse child.
 		const article = document.querySelector("article");
 		expect(article).not.toBeNull();
 	});
 });
-
-// ---------------------------------------------------------------------------
-// StoryCard — rendering
-// ---------------------------------------------------------------------------
 
 describe("StoryCard rendering", () => {
 	it("renders the story title", () => {
@@ -220,10 +185,6 @@ describe("StoryCard rendering", () => {
 		expect(screen.getByRole("button", { name: /open post/i })).toBeDefined();
 	});
 });
-
-// ---------------------------------------------------------------------------
-// StoryCard — link actions
-// ---------------------------------------------------------------------------
 
 describe("StoryCard link actions", () => {
 	it("'Read article' calls openLink with the story URL", () => {
@@ -296,10 +257,6 @@ describe("StoryCard link actions", () => {
 	});
 });
 
-// ---------------------------------------------------------------------------
-// StoryCard — favorite toggle
-// ---------------------------------------------------------------------------
-
 describe("StoryCard favorite toggle", () => {
 	it("renders with 'Save to favorites' aria-label when not yet saved", () => {
 		render(<StoryCard story={makeStory()} />);
@@ -338,11 +295,9 @@ describe("StoryCard favorite toggle", () => {
 		const story = makeStory({ id: 888 });
 		render(<StoryCard story={story} />);
 
-		// Save
 		fireEvent.click(screen.getByRole("button", { name: /save to favorites/i }));
 		expect(isFavorited(888)).toBe(true);
 
-		// Remove
 		fireEvent.click(
 			screen.getByRole("button", { name: /save to favorites/i, pressed: true }),
 		);
