@@ -13,11 +13,101 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  preview:
+  # Creates the PR's database (Terraform workspace pr-<n>) on its first push,
+  # and re-applies it when the PR changes infra/.
+  infrastructure:
     # Fork and Dependabot PRs cannot read the `dev` environment secrets.
     if: >-
       github.event.pull_request.head.repo.full_name == github.repository &&
       github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    environment: dev
+    env:
+      STAGE: pr-${{ github.event.pull_request.number }}
+      PG_CONN_STR: ${{ secrets.TF_STATE_PG_CONN_STR }}
+      TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    outputs:
+      infra: ${{ steps.changes.outputs.infra }}
+      database_id: ${{ steps.database.outputs.id }}
+      database_name: ${{ steps.database.outputs.name }}
+    steps:
+      # The checkout is the PR merged into master; its first parent is master.
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.13.4
+          terraform_wrapper: false
+
+      - name: Detect infrastructure changes
+        id: changes
+        run: |
+          terraform -chdir=infra/terraform init -input=false
+          terraform -chdir=infra/terraform workspace select -or-create "$STAGE"
+          if git diff --quiet HEAD^1 HEAD -- infra/; then
+            echo "infra=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "infra=true" >> "$GITHUB_OUTPUT"
+          fi
+          if [ -z "$(terraform -chdir=infra/terraform state list)" ]; then
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Apply preview infrastructure
+        if: steps.changes.outputs.infra == 'true' || steps.changes.outputs.exists == 'false'
+        run: terraform -chdir=infra/terraform apply -input=false -auto-approve
+
+      - name: Read preview database
+        id: database
+        run: |
+          {
+            echo "id=$(terraform -chdir=infra/terraform output -raw database_id)"
+            echo "name=$(terraform -chdir=infra/terraform output -raw database_name)"
+          } >> "$GITHUB_OUTPUT"
+
+  # Shows what merging would do to production; the deploy workflow applies it.
+  plan-production:
+    needs: infrastructure
+    if: needs.infrastructure.outputs.infra == 'true'
+    runs-on: ubuntu-latest
+    environment: dev
+    env:
+      PG_CONN_STR: ${{ secrets.TF_STATE_PG_CONN_STR }}
+      TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.13.4
+          terraform_wrapper: false
+
+      # Waits rather than fails while a deploy holds the production state lock.
+      - name: Plan production infrastructure
+        run: |
+          terraform -chdir=infra/terraform init -input=false
+          terraform -chdir=infra/terraform workspace select -or-create prod
+          terraform -chdir=infra/terraform plan -input=false -lock-timeout=10m -out=tfplan
+          {
+            echo '### Production infrastructure plan'
+            echo '```'
+            terraform -chdir=infra/terraform show -no-color tfplan
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          if terraform -chdir=infra/terraform show -json tfplan | jq -e \
+            '[.resource_changes[]? | select(.type == "cloudflare_d1_database" and (.change.actions | index("delete")))] | length > 0' > /dev/null; then
+            echo "Merging would delete or replace the production D1 database" >&2
+            exit 1
+          fi
+
+  preview:
+    needs: infrastructure
     runs-on: ubuntu-latest
     environment: dev
     steps:
@@ -58,32 +148,21 @@ jobs:
             exit 1
           fi
 
-      # Each PR gets its own D1 database, bound as DB in the generated
-      # dist/server/wrangler.json. Every wrangler command below passes that
-      # file with --config: `d1 migrations` ignores the build's config redirect
-      # and would otherwise read wrangler.jsonc, i.e. the production database.
-      # Migrations run on the previous push's fixture rows, then every row is
-      # replaced with src/demo-data/database.
-      - name: Prepare preview database
+      # The PR's database, from the infrastructure job, is bound as DB in the
+      # generated dist/server/wrangler.json. Every wrangler command below passes
+      # that file with --config: `d1 migrations` ignores the build's config
+      # redirect and would otherwise read wrangler.jsonc, i.e. the production
+      # database. Migrations run on the previous push's fixture rows.
+      - name: Apply database migrations
         run: |
           config=dist/server/wrangler.json
           prod_db_id=$(jq -r '.d1_databases[] | select(.binding == "DB") | .database_id' "$config")
-          db_name="hackerfeed-web-pr-${PR_NUMBER}"
-          find_db() {
-            bunx wrangler d1 list --json | jq -r --arg name "$db_name" '.[] | select(.name == $name) | .uuid'
-          }
-
-          db_id=$(find_db)
-          if [ -z "$db_id" ]; then
-            bunx wrangler d1 create "$db_name" --update-config=false
-            db_id=$(find_db)
-          fi
-          if [ -z "$db_id" ] || [ "$db_id" = "$prod_db_id" ]; then
-            echo "Preview database id '${db_id}' is missing or is the production database" >&2
+          if [ -z "$DB_ID" ] || [ "$DB_ID" = "$prod_db_id" ]; then
+            echo "Preview database id '${DB_ID}' is missing or is the production database" >&2
             exit 1
           fi
 
-          jq --arg id "$db_id" --arg name "$db_name" \
+          jq --arg id "$DB_ID" --arg name "$DB_NAME" \
             '(.d1_databases[] | select(.binding == "DB")) |= (.database_id = $id | .database_name = $name)' \
             "$config" > "$config.tmp"
           mv "$config.tmp" "$config"
@@ -92,17 +171,24 @@ jobs:
           bunx wrangler d1 migrations apply DB --remote --config "$config"
 
           expected=$(find migrations -maxdepth 1 -name '*.sql' | wc -l)
-          applied=$(bunx wrangler d1 execute "$db_name" --remote --json \
+          applied=$(bunx wrangler d1 execute DB --remote --config "$config" --json \
             --command "SELECT COUNT(*) AS n FROM d1_migrations" | jq -r '.[0].results[0].n')
           if [ "$applied" != "$expected" ]; then
             echo "Preview database has ${applied} migrations applied, expected ${expected}" >&2
             exit 1
           fi
-
-          bun scripts/demo-data-sql.ts > "$RUNNER_TEMP/demo-data.sql"
-          bunx wrangler d1 execute DB --remote --config "$config" --file "$RUNNER_TEMP/demo-data.sql"
         env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
+          DB_ID: ${{ needs.infrastructure.outputs.database_id }}
+          DB_NAME: ${{ needs.infrastructure.outputs.database_name }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      # Replaces every row with src/demo-data/database.
+      - name: Load demo data
+        run: |
+          bun scripts/demo-data-sql.ts > "$RUNNER_TEMP/demo-data.sql"
+          bunx wrangler d1 execute DB --remote --config dist/server/wrangler.json --file "$RUNNER_TEMP/demo-data.sql"
+        env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
@@ -154,7 +240,7 @@ jobs:
           | **Commit preview** | $version_url |
           | **Commit** | \`${HEAD_SHA:0:7}\` |
 
-          Shows only the dummy data in \`src/demo-data\`: its own D1 database (\`hackerfeed-web-pr-${PR_NUMBER}\`, reloaded on every push and deleted when the PR closes) and an in-memory Hacker News API. Uses production secrets."
+          Shows only the dummy data in \`src/demo-data\`: its own D1 database (\`hackerfeed-web-pr-${PR_NUMBER}\`, Terraform workspace \`pr-${PR_NUMBER}\`, reloaded on every push and destroyed when the PR closes) and an in-memory Hacker News API. Uses production secrets."
 
           comment_id=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" --paginate \
             --jq "map(select(.body | startswith(\"$marker\"))) | first | .id // empty")
