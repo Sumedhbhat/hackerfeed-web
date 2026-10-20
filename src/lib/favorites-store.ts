@@ -3,10 +3,6 @@ import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
 
 const STORAGE_KEY = "hackerfeed:favorites";
 
-// ---------------------------------------------------------------------------
-// Persistence helpers
-// ---------------------------------------------------------------------------
-
 function loadFromStorage(): Map<number, HackerNewsStoryRecord> {
 	if (typeof window === "undefined") return new Map();
 	try {
@@ -31,12 +27,7 @@ function saveToStorage(map: Map<number, HackerNewsStoryRecord>): void {
 	}
 }
 
-// ---------------------------------------------------------------------------
-// Store
-// ---------------------------------------------------------------------------
-
 export type FavoritesState = {
-	/** Keyed by story id for O(1) lookup. */
 	items: Map<number, HackerNewsStoryRecord>;
 };
 
@@ -44,14 +35,9 @@ export const favoritesStore = new Store<FavoritesState>({
 	items: loadFromStorage(),
 });
 
-// Keep localStorage in sync whenever the store changes.
 favoritesStore.subscribe(() => {
 	saveToStorage(favoritesStore.state.items);
 });
-
-// ---------------------------------------------------------------------------
-// Actions
-// ---------------------------------------------------------------------------
 
 export function toggleFavorite(story: HackerNewsStoryRecord): void {
 	favoritesStore.setState((prev) => {

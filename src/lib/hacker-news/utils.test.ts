@@ -8,10 +8,6 @@ import {
 	stripHtml,
 } from "#/lib/hacker-news/utils";
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
 function makeStory(
 	overrides: Partial<HackerNewsStoryRecord> = {},
 ): HackerNewsStoryRecord {
@@ -29,10 +25,6 @@ function makeStory(
 		...overrides,
 	};
 }
-
-// ---------------------------------------------------------------------------
-// stripHtml
-// ---------------------------------------------------------------------------
 
 describe("stripHtml", () => {
 	it("returns empty string for null input", () => {
@@ -52,10 +44,6 @@ describe("stripHtml", () => {
 	});
 });
 
-// ---------------------------------------------------------------------------
-// getDiscussionUrl
-// ---------------------------------------------------------------------------
-
 describe("getDiscussionUrl", () => {
 	it("returns the correct HN item URL", () => {
 		expect(getDiscussionUrl(12345)).toBe(
@@ -63,10 +51,6 @@ describe("getDiscussionUrl", () => {
 		);
 	});
 });
-
-// ---------------------------------------------------------------------------
-// getStoryDomain
-// ---------------------------------------------------------------------------
 
 describe("getStoryDomain", () => {
 	it("returns HN domain for null URL", () => {
@@ -90,10 +74,6 @@ describe("getStoryDomain", () => {
 	});
 });
 
-// ---------------------------------------------------------------------------
-// getStoryTitle
-// ---------------------------------------------------------------------------
-
 describe("getStoryTitle", () => {
 	it("returns the story title when present", () => {
 		const story = makeStory({ title: "My Title" });
@@ -110,10 +90,6 @@ describe("getStoryTitle", () => {
 		expect(getStoryTitle(story)).toBe("Untitled Hacker News story");
 	});
 });
-
-// ---------------------------------------------------------------------------
-// formatStoryAge
-// ---------------------------------------------------------------------------
 
 describe("formatStoryAge", () => {
 	it("returns 'Fresh' for null time", () => {

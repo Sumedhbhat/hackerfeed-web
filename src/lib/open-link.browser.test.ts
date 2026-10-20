@@ -1,11 +1,4 @@
 // @vitest-environment happy-dom
-/**
- * openLink — centralised external-link utility.
- *
- * Verifies that the abstraction delegates to window.open with the expected
- * arguments and that the call-site API stays stable so future swap-outs
- * (e.g. Capacitor in-app browser) don't inadvertently change visible behavior.
- */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { openLink } from "#/lib/open-link";
 

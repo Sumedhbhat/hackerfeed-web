@@ -6,7 +6,6 @@ export default defineConfig({
 	},
 	test: {
 		projects: [
-			// Pure utility / store tests — no DOM needed.
 			{
 				extends: true,
 				test: {
@@ -19,7 +18,6 @@ export default defineConfig({
 					],
 				},
 			},
-			// Component and browser-API tests — use happy-dom.
 			{
 				extends: true,
 				test: {

@@ -12,15 +12,11 @@ import { createTrpcClient } from "#/lib/trpc/client";
 import { useAuthSession } from "./useAuthSession";
 
 export type UseFavoritesReturn = {
-	/** Reactive count of saved stories. */
 	count: number;
-	/** Whether a given story ID is currently favorited. */
 	isFavorited: (id: number) => boolean;
-	/** Toggle favorite status for a story. */
 	toggleFavorite: (story: HackerNewsStoryRecord) => void;
-	/** All favorited stories (most-recent-first). */
+	/** Most recent first. */
 	getFavorites: () => HackerNewsStoryRecord[];
-	/** Remove every saved story. */
 	clearAllFavorites: () => void;
 };
 
@@ -38,7 +34,6 @@ let loadingUserId: string | null = null;
 
 export function useFavorites(): UseFavoritesReturn {
 	const { user } = useAuthSession();
-	// Subscribe to the store so components re-render when favorites change.
 	const items = useStore(favoritesStore, (state) => state.items);
 	const backendFavorites = useStore(backendFavoritesStore, (state) => state);
 	const workosUserId = user?.id;

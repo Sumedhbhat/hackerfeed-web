@@ -1,18 +1,6 @@
-/**
- * useIntersectionObserver hook tests.
- *
- * Environment: browser (happy-dom, via .browser.test.ts suffix).
- *
- * These tests verify the IntersectionObserver hook behaviour using a manual
- * mock of IntersectionObserver.
- */
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useIntersectionObserver } from "#/hooks/useIntersectionObserver";
-
-// ---------------------------------------------------------------------------
-// IntersectionObserver mock
-// ---------------------------------------------------------------------------
 
 type MockObserverCallback = (entries: IntersectionObserverEntry[]) => void;
 
@@ -40,17 +28,12 @@ beforeEach(() => {
 	mockDisconnect.mockClear();
 	mockObserve.mockClear();
 	MockIntersectionObserver.mockClear();
-	// Install mock on global
 	vi.stubGlobal("IntersectionObserver", MockIntersectionObserver);
 });
 
 afterEach(() => {
 	vi.unstubAllGlobals();
 });
-
-// ---------------------------------------------------------------------------
-// Helper: fire an intersection event
-// ---------------------------------------------------------------------------
 
 function fireIntersection(isIntersecting: boolean) {
 	if (!observerCallback) throw new Error("No observer callback registered");
@@ -59,10 +42,6 @@ function fireIntersection(isIntersecting: boolean) {
 		cb([{ isIntersecting } as IntersectionObserverEntry]);
 	});
 }
-
-// ---------------------------------------------------------------------------
-// Tests
-// ---------------------------------------------------------------------------
 
 describe("useIntersectionObserver", () => {
 	it("calls the callback when the observed node becomes visible", () => {
@@ -132,7 +111,6 @@ describe("useIntersectionObserver", () => {
 		});
 
 		expect(mockDisconnect).toHaveBeenCalledTimes(1);
-		// Observe should only have been called once (for the real node)
 		expect(mockObserve).toHaveBeenCalledTimes(1);
 	});
 
@@ -150,14 +128,12 @@ describe("useIntersectionObserver", () => {
 			result.current(div);
 		});
 
-		// Switch to callback2 via rerender
 		currentCallback = callback2;
 		rerender();
 
 		// Observer should NOT have been recreated (stable ref pattern)
 		expect(mockObserve).toHaveBeenCalledTimes(1);
 
-		// Firing intersection now should invoke the new callback
 		fireIntersection(true);
 
 		expect(callback1).not.toHaveBeenCalled();

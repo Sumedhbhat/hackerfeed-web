@@ -1,10 +1,4 @@
 // @vitest-environment happy-dom
-/**
- * Favorites store — persistence, toggle, and clear behavior.
- *
- * Uses jsdom so that localStorage is available, mirroring the real browser
- * runtime the store is designed for.
- */
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
 	clearAllFavorites,
@@ -13,10 +7,6 @@ import {
 	toggleFavorite,
 } from "#/lib/favorites-store";
 import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 
 function makeStory(
 	id: number,
@@ -37,12 +27,7 @@ function makeStory(
 	};
 }
 
-// ---------------------------------------------------------------------------
-// Setup / teardown
-// ---------------------------------------------------------------------------
-
 beforeEach(() => {
-	// Start every test with a clean localStorage and empty store state.
 	localStorage.clear();
 	clearAllFavorites();
 });
@@ -51,10 +36,6 @@ afterEach(() => {
 	localStorage.clear();
 	clearAllFavorites();
 });
-
-// ---------------------------------------------------------------------------
-// toggleFavorite
-// ---------------------------------------------------------------------------
 
 describe("toggleFavorite", () => {
 	it("adds a story that is not yet favorited", () => {
@@ -92,10 +73,6 @@ describe("toggleFavorite", () => {
 	});
 });
 
-// ---------------------------------------------------------------------------
-// getFavorites
-// ---------------------------------------------------------------------------
-
 describe("getFavorites", () => {
 	it("returns an empty array when nothing is saved", () => {
 		expect(getFavorites()).toEqual([]);
@@ -113,10 +90,6 @@ describe("getFavorites", () => {
 		expect(favorites.map((s) => s.id)).toEqual([22, 21, 20]);
 	});
 });
-
-// ---------------------------------------------------------------------------
-// clearAllFavorites
-// ---------------------------------------------------------------------------
 
 describe("clearAllFavorites", () => {
 	it("removes all saved stories", () => {
@@ -142,10 +115,6 @@ describe("clearAllFavorites", () => {
 		}
 	});
 });
-
-// ---------------------------------------------------------------------------
-// localStorage persistence
-// ---------------------------------------------------------------------------
 
 describe("localStorage persistence", () => {
 	it("persists a saved story to localStorage", () => {
@@ -178,17 +147,11 @@ describe("localStorage persistence", () => {
 		const story = makeStory(42);
 		toggleFavorite(story);
 
-		// Deliberately corrupt the persisted data.
 		localStorage.setItem("hackerfeed:favorites", "CORRUPT");
 
-		// The in-memory store still has the story.
 		expect(isFavorited(42)).toBe(true);
 	});
 });
-
-// ---------------------------------------------------------------------------
-// isFavorited
-// ---------------------------------------------------------------------------
 
 describe("isFavorited", () => {
 	it("returns false for an id that was never added", () => {

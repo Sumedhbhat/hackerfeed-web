@@ -26,7 +26,6 @@ export function useIntersectionObserver(
 			}, options);
 			observerRef.current.observe(node);
 		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 		// options should be stable (pass a literal or useMemo'd object)
 		[options],
 	);

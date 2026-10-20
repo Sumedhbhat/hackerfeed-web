@@ -89,10 +89,6 @@ function isPublicPath(pathname: string) {
 	return pathname === "/auth/callback" || pathname === "/auth/signed-out";
 }
 
-// ---------------------------------------------------------------------------
-// RootError — top-level error boundary shown when any loader throws
-// ---------------------------------------------------------------------------
-
 function RootError({ error }: { error: unknown }) {
 	const traceId = useErrorReport("Root error boundary triggered", error);
 
