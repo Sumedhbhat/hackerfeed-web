@@ -38,7 +38,7 @@
       },
       "devDependencies": {
         "@biomejs/biome": "2.5.15",
-        "@sentry/vite-plugin": "5.4.0",
+        "@sentry/vite-plugin": "5.4.1",
         "@tailwindcss/typography": "^0.5.20",
         "@tanstack/devtools-event-client": "latest",
         "@tanstack/devtools-vite": "^0.8.5",
@@ -420,7 +420,7 @@
 
     "@sentry/server-utils": ["@sentry/server-utils@11.4.0", "", { "dependencies": { "@opentelemetry/api": "^1.9.1", "@sentry/conventions": "^0.25.0", "@sentry/core": "11.4.0" } }, "sha512-GA4RvjRXyKFawD7Zi5AlgHPvm9Q8d9VeWer6g9qj4mDavi+VuNFhRmhgsv1qU1l3hlUeMYCpbKhpDOaOH/TcoQ=="],
 
-    "@sentry/vite-plugin": ["@sentry/vite-plugin@5.4.0", "", { "dependencies": { "@sentry/bundler-plugins": "^10.64.0" } }, "sha512-fFJgCxs5hDyAm9BbZJ+LbA+LK2tjX5OoD0v0ARU4StR6KQmGUduoPs69yJ9AfqZ0om3Rlp5JDliiwFcNkasORA=="],
+    "@sentry/vite-plugin": ["@sentry/vite-plugin@5.4.1", "", { "dependencies": { "@sentry/bundler-plugins": "^10.76.0" } }, "sha512-poFfn3sQbSFaZpXH8CG27D0eNtDD64wFEniQCb853e7huko9vOl4UP3BjT3vsrnmVuRqagnbxItza10MOC7ysA=="],
 
     "@sindresorhus/is": ["@sindresorhus/is@7.2.0", "", {}, "sha512-P1Cz1dWaFfR4IR+U13mqqiGsLFf1KbayybWwdd2vfctdV6hDpUkgCY0nKOLLTMSoRd/jJNjtbqzf13K8DCCXQw=="],
 
