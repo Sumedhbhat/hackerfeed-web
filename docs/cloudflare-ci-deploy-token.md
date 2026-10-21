@@ -85,8 +85,9 @@ The workflows use two GitHub environments:
    the token value, and `CLOUDFLARE_ACCOUNT_ID`. The account id is an
    identifier, not a secret, but keeping it alongside the deployment
    configuration is fine.
-3. Both environments also need `VITE_SENTRY_DSN`, `VITE_WORKOS_CLIENT_ID` and
-   `AI_TOKEN_ENCRYPTION_KEY`; `production` also needs `SENTRY_AUTH_TOKEN`.
+3. Both environments also need `VITE_SENTRY_DSN` and `VITE_WORKOS_CLIENT_ID`;
+   `production` also needs `SENTRY_AUTH_TOKEN`. `AI_TOKEN_ENCRYPTION_KEY` is a
+   repository secret, so every job already has it.
 4. Do not commit any of these values to `.env*`, `.dev.vars`, or the
    repository.
 
