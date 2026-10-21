@@ -46,6 +46,7 @@ jobs:
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           VITE_DEMO_DATA: "true"
+          VITE_SENTRY_ENVIRONMENT: preview
           VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
           VITE_WORKOS_CLIENT_ID: ${{ secrets.VITE_WORKOS_CLIENT_ID }}
           AI_TOKEN_ENCRYPTION_KEY: ${{ secrets.AI_TOKEN_ENCRYPTION_KEY }}
@@ -106,10 +107,12 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       # Uploads a Worker version without promoting it to production, and
-      # aliases it to a stable per-PR URL.
+      # aliases it to a stable per-PR URL. Its Sentry events are tagged with
+      # the preview environment rather than production.
       - name: Upload preview version
         run: |
-          bunx wrangler versions upload --config dist/server/wrangler.json --preview-alias "pr-${PR_NUMBER}" --message "PR #${PR_NUMBER} @ ${HEAD_SHA}"
+          bunx wrangler versions upload --config dist/server/wrangler.json --preview-alias "pr-${PR_NUMBER}" --message "PR #${PR_NUMBER} @ ${HEAD_SHA}" \
+            --var SENTRY_ENVIRONMENT:preview
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
