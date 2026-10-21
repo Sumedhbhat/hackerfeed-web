@@ -107,8 +107,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       # Uploads a Worker version without promoting it to production, and
-      # aliases it to a stable per-PR URL. Its Sentry events are tagged with
-      # the preview environment rather than production.
+      # aliases it to a stable per-PR URL.
       - name: Upload preview version
         run: |
           bunx wrangler versions upload --config dist/server/wrangler.json --preview-alias "pr-${PR_NUMBER}" --message "PR #${PR_NUMBER} @ ${HEAD_SHA}" \
