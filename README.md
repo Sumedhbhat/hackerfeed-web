@@ -132,8 +132,23 @@ Each production run deploys the state server with wrangler before running
 Terraform. Its D1 database was created once with
 `wrangler d1 create hackerfeed-terraform-state`.
 
-If Terraform cannot save remote state, CI encrypts `errored.tfstate` before
-uploading an Actions artifact with one day retention. Encryption uses OpenSSL
+The proxy owns HTTP retries: normally it makes up to three attempts with 1s/2s
+backoff, with a 60s total deadline per attempt. Terraform's separate HTTP retry
+loop is disabled. On step cancellation the proxy stops retries and shares a 3s
+network budget across state and OIDC requests, including requests already in
+flight. Terraform receives only one termination signal, allowing it to write
+`errored.tfstate` when remote persistence fails; the wrapper then encrypts that
+file locally before exiting. An abandoned request has an unknown remote outcome,
+so the proxy refuses further requests, including unlock. Reconcile the remote
+state and retained lock before recovering or running another apply.
+
+CI attempts to upload encrypted recovery files as an Actions artifact with one
+day retention, including after cancellation. Upload is not guaranteed on a
+cancelled job or runner loss; the bounded network wait protects local recovery,
+not artifact delivery. Providers must also finish graceful cancellation in time
+for state export and encryption before the runner's hard kill (normally 10s
+after the first signal). A hung provider, disk/encryption failure, or abrupt
+runner loss can still prevent recovery. Encryption uses OpenSSL
 AES-256-CBC with PBKDF2 and a separate HMAC-SHA256 check. The key is the job's
 existing `CLOUDFLARE_API_TOKEN`, so retain that credential until recovery is done.
 Download both `.enc` and `.hmac` files promptly. In a secure environment with the

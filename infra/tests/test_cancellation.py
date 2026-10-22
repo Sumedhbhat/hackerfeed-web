@@ -60,13 +60,18 @@ class CancellationTests(unittest.TestCase):
         wrapper.write_text(wrapper.read_text().replace("/state_proxy.py", "/local.py"))
         (infra / "local.py").write_text('''import base64, json, os, sys, time
 from pathlib import Path
+from urllib.error import URLError
 import state_proxy as p
-real_tokens, real_server = p.Tokens, p.make_server
+real_server = p.make_server
 root = Path(os.environ["RUNNER_TEMP"])
 def issue(*args, **kwargs):
+    if os.environ.get("FAIL_SAVE") == "oidc-stall" and (root / "infra/terraform/ready").exists(): time.sleep(30)
     claims = base64.urlsafe_b64encode(json.dumps({"exp":time.time()+300,"aud":p.STATE_URL}).encode()).decode().rstrip("=")
+    if os.environ.get("FAIL_SAVE") == "oidc-stall":
+        claims = base64.urlsafe_b64encode(json.dumps({"exp":time.time()+1,"aud":p.STATE_URL}).encode()).decode().rstrip("=")
     return 200, {}, json.dumps({"value":"header."+claims+".signature"}).encode()
 def send(url, method="GET", data=None, **kwargs):
+    if ".actions.githubusercontent.com/" in url: return issue()
     with (root / "events").open("a") as out:
         out.write(json.dumps({"method":method,"url":url})+"\\n")
     if url.endswith("/lock"):
@@ -75,17 +80,26 @@ def send(url, method="GET", data=None, **kwargs):
         if method == "DELETE": lock.unlink(missing_ok=True)
         return 200, {}, b""
     state = root / "saved-state"
+    failure = os.environ.get("FAIL_SAVE")
+    if failure == "get-stall" and method == "GET" and (root / "infra/terraform/ready").exists(): time.sleep(30)
     if method == "POST":
-        if os.environ.get("FAIL_SAVE") == "true": return 403, {}, b"unavailable"
+        if failure == "true": return 403, {}, b"unavailable"
+        if failure == "500": return 500, {}, b"unavailable"
+        if failure == "unavailable": raise URLError("connection refused")
+        if failure == "timeout": raise TimeoutError("timed out")
+        if failure == "inflight-stall":
+            (root / "infra/terraform/ready").touch()
+            time.sleep(30)
+        if failure == "stall": time.sleep(30)
         state.write_bytes(data)
         return 200, {}, b""
     if method == "DELETE":
         state.unlink(missing_ok=True)
         return 200, {}, b""
     return (200, {}, state.read_bytes()) if state.exists() else (404, {}, b"")
-p.Tokens = lambda url, credential: real_tokens(url, credential, send=issue)
-def server(stage, password, tokens):
-    instance = real_server(stage, password, tokens, send=send)
+p.request = send
+def server(stage, password, tokens, **kwargs):
+    instance = real_server(stage, password, tokens, **kwargs)
     (root / "port").write_text(str(instance.server_port))
     return instance
 p.make_server = server
@@ -109,9 +123,10 @@ if __name__ == "__main__":'''))
                 "ACTIONS_ID_TOKEN_REQUEST_TOKEN": "disposable-local-oidc",
                 "GITHUB_OUTPUT": str(directory / "output"),
                 "GITHUB_STEP_SUMMARY": str(directory / "summary"),
-                "CHECKPOINT_DISABLE": "1", "TF_HTTP_RETRY_MAX": "0"}
+                # A hostile/inherited retry value must not lengthen cleanup.
+                "CHECKPOINT_DISABLE": "1", "TF_HTTP_RETRY_MAX": "99"}
 
-    def cancel(self, directory, env, workflow, step, signum):
+    def cancel(self, directory, env, workflow, step, signum, *, runner_deadline=False):
         script = directory / "step.sh"
         script.write_text(workflow_step(workflow, step) + 'touch "$RUNNER_TEMP/continued"\n')
         child = subprocess.Popen(["bash", "--noprofile", "--norc", "-e", "-o", "pipefail", str(script)],
@@ -125,12 +140,22 @@ if __name__ == "__main__":'''))
                 self.assertLess(time.monotonic(), deadline, "Terraform did not become ready")
                 time.sleep(.02)
             pids = descendants(child.pid)
+            started = time.monotonic()
             child.send_signal(signum)
-            # Simulate the runner's INT -> TERM escalation during graceful exit.
-            time.sleep(.1)
-            if child.poll() is None:
-                child.send_signal(signal.SIGTERM)
-            stdout, stderr = child.communicate(timeout=7)
+            if runner_deadline:
+                # Actual runner budget: INT, then TERM at 7.5s, kill at 10s.
+                try:
+                    stdout, stderr = child.communicate(timeout=7.5)
+                except subprocess.TimeoutExpired:
+                    child.send_signal(signal.SIGTERM)
+                    stdout, stderr = child.communicate(timeout=2.5)
+                self.assertLess(time.monotonic() - started, 10)
+            else:
+                # Exercise ignored escalation even when cleanup is very fast.
+                time.sleep(.1)
+                if child.poll() is None:
+                    child.send_signal(signal.SIGTERM)
+                stdout, stderr = child.communicate(timeout=7)
             self.assertNotEqual(child.returncode, 0, stdout + stderr)
             self.assertFalse((directory / "continued").exists())
             for pid in pids:
@@ -162,6 +187,7 @@ if __name__ == "__main__":'''))
             self.assertEqual(restored.read_text(), expected)
         else:
             self.assertTrue(json.loads(restored.read_text())["resources"])
+        return restored
 
     def test_cancellation_during_recovery_finishes_encryption_before_exit(self):
         for signum in (signal.SIGINT, signal.SIGTERM):
@@ -278,3 +304,63 @@ resource "terraform_data" "local" {
                         else:
                             self.assertTrue(json.loads((directory / "saved-state").read_text())["resources"])
                             self.assertFalse((directory / "infra/terraform/errored.tfstate").exists())
+
+    @unittest.skipUnless(shutil.which("terraform"), "terraform executable required")
+    def test_retryable_and_stalled_network_recover_within_runner_deadline(self):
+        cases = [(False, failure) for failure in
+                 ("500", "unavailable", "timeout", "stall", "inflight-stall", "get-stall", "oidc-stall")]
+        cases.append((True, "500"))
+        for destroy, failure in cases:
+            for signum in (signal.SIGINT, signal.SIGTERM):
+                with self.subTest(destroy=destroy, failure=failure, signum=signum), tempfile.TemporaryDirectory() as temporary:
+                    directory = Path(temporary)
+                    env = self.fixture(directory)
+                    config = '''terraform {
+ backend "http" {
+  lock_method = "POST"
+  unlock_method = "DELETE"
+  username = "github"
+ }
+}
+resource "terraform_data" "local" {
+ input = "local-only"
+ provisioner "local-exec" {
+  WHEN
+  command = "COMMAND"
+ }
+}
+'''.replace("WHEN", "when = destroy" if destroy else "").replace(
+                        "COMMAND", "true" if failure == "inflight-stall" else "touch ready; sleep 30")
+                    if destroy:
+                        config += '''resource "terraform_data" "earlier" {
+ input = "delete-first"
+ depends_on = [terraform_data.local]
+}
+'''
+                    (directory / "infra/terraform/main.tf").write_text(config)
+                    if destroy:
+                        result = subprocess.run(["infra/terraform.sh", "pr-42", "apply", "-input=false", "-auto-approve"],
+                                                cwd=directory, env=env, capture_output=True, timeout=15)
+                        self.assertEqual(result.returncode, 0, result.stderr)
+                    env["FAIL_SAVE"] = failure
+                    code = self.cancel(directory, env,
+                                       "preview-cleanup.yaml" if destroy else "preview.yaml",
+                                       "Destroy preview infrastructure" if destroy else "Apply preview infrastructure", signum,
+                                       runner_deadline=True)
+                    self.assertEqual(code, 128 + signum)
+                    restored = self.assert_recovery(directory)
+                    original = directory / "infra/terraform/errored.tfstate"
+                    self.assertEqual(restored.read_bytes(), original.read_bytes())
+                    # Timed-out requests have an unknown remote outcome. Keep
+                    # the lock rather than letting a pending write race unlock.
+                    self.assertEqual((directory / "locked").exists(), "stall" in failure)
+                    # Locally model operator reconciliation, then prove the
+                    # decrypted file is accepted by real Terraform state push.
+                    (directory / "locked").unlink(missing_ok=True)
+                    original.rename(directory / "acknowledged-error.tfstate")
+                    env.pop("FAIL_SAVE")
+                    result = subprocess.run(["infra/terraform.sh", "pr-42", "state", "push", str(restored)],
+                                            cwd=directory, env=env, capture_output=True, timeout=15)
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    self.assertEqual(json.loads((directory / "saved-state").read_bytes())["resources"],
+                                     json.loads(restored.read_bytes())["resources"])

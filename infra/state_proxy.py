@@ -47,6 +47,68 @@ def request(url, *, headers=None, data=None, method="GET"):
         return response.status, response.headers, response.read()
 
 
+class Network:
+    """Own retries so cancellation can bound *all* state and OIDC requests.
+
+    urllib's socket timeout is not a total deadline (DNS and slow response
+    bodies can exceed it). Daemon workers isolate those waits from Terraform's
+    local backend. After abandoning a request, fail closed for the remainder
+    of this invocation: in particular, never unlock ahead of a pending write.
+    """
+    def __init__(self, send=None, *, timeout=60, cancellation_grace=3):
+        self.send = send or request
+        self.timeout, self.cancellation_grace = timeout, cancellation_grace
+        self.cancelled = threading.Event()
+        self.deadline = math.inf
+        self.abandoned = False
+
+    def cancel(self):
+        self.deadline = time.monotonic() + self.cancellation_grace
+        self.cancelled.set()
+
+    def attempt(self, url, kwargs):
+        if self.abandoned or time.monotonic() >= self.deadline:
+            raise RunnerError("State/OIDC network deadline exceeded")
+        done = threading.Event()
+        outcome = []
+
+        def send():
+            try:
+                outcome.append(self.send(url, **kwargs))
+            except Exception as error:
+                outcome.append(error)
+            finally:
+                done.set()
+
+        threading.Thread(target=send, daemon=True).start()
+        deadline = time.monotonic() + self.timeout
+        while not done.wait(.02):
+            if time.monotonic() >= min(deadline, self.deadline):
+                self.abandoned = True
+                print("State/OIDC request timed out; reconcile remote state and any retained lock before retrying.",
+                      file=sys.stderr)
+                raise RunnerError("State/OIDC network deadline exceeded")
+        if isinstance(outcome[0], Exception):
+            raise outcome[0]
+        return outcome[0]
+
+    def __call__(self, url, **kwargs):
+        for attempt in range(3):
+            try:
+                response = self.attempt(url, kwargs)
+            except OSError:
+                if attempt == 2 or self.cancelled.is_set():
+                    raise
+            else:
+                status = response[0]
+                if (status != 429 and status < 500) or attempt == 2 or self.cancelled.is_set():
+                    return response
+            # Preserve normal transient retries, but never sleep through step
+            # cancellation. Terraform itself must not add another retry loop.
+            if self.cancelled.wait(2 ** attempt):
+                raise RunnerError("State/OIDC retry interrupted")
+
+
 class Tokens:
     def __init__(self, url, credential, audience=STATE_URL, clock=time.time, send=request):
         parts = urlsplit(url)
@@ -146,7 +208,7 @@ def preserve_recovery(directory, stage):
         # Unique files avoid overwriting an earlier failure in this job.
         filename = target / ("errored-" + secrets.token_hex(12) + ".tfstate.enc")
         crypt(recovery, filename)
-        print("Encrypted Terraform recovery state saved for CI artifact (1 day retention).", file=sys.stderr)
+        print("Encrypted Terraform recovery state saved locally for CI artifact upload.", file=sys.stderr)
 
 
 def main():
@@ -156,9 +218,11 @@ def main():
     if (os.environ.get("GITHUB_ACTIONS") != "true" or not os.environ.get("RUNNER_TEMP") or
             not os.environ.get("ACTIONS_ID_TOKEN_REQUEST_TOKEN")):
         raise RunnerError("Run in GitHub Actions with id-token: write")
-    tokens = Tokens(os.environ["ACTIONS_ID_TOKEN_REQUEST_URL"], os.environ["ACTIONS_ID_TOKEN_REQUEST_TOKEN"])
+    network = Network()
+    tokens = Tokens(os.environ["ACTIONS_ID_TOKEN_REQUEST_URL"], os.environ["ACTIONS_ID_TOKEN_REQUEST_TOKEN"],
+                    send=network)
     password = secrets.token_urlsafe(32)
-    server = make_server(stage, password, tokens)
+    server = make_server(stage, password, tokens, send=network)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     address = f"http://127.0.0.1:{server.server_port}/states/{stage}"
@@ -166,9 +230,9 @@ def main():
            not key.startswith("ACTIONS_ID_TOKEN_REQUEST_")}
     env.update(TF_HTTP_PASSWORD=password, TF_HTTP_USERNAME="github", TF_VAR_stage=stage,
                TF_HTTP_ADDRESS=address, TF_HTTP_LOCK_ADDRESS=address + "/lock",
-               TF_HTTP_UNLOCK_ADDRESS=address + "/lock")
+               TF_HTTP_UNLOCK_ADDRESS=address + "/lock", TF_HTTP_RETRY_MAX="0")
     directory = Path(__file__).resolve().parent / "terraform"
-    with Commands() as commands:
+    with Commands(on_interrupt=network.cancel) as commands:
         try:
             if (directory / "errored.tfstate").exists():
                 raise RunnerError("Existing errored.tfstate requires recovery before another Terraform command")

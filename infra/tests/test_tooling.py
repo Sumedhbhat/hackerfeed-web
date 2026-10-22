@@ -172,6 +172,94 @@ class ProxyTests(unittest.TestCase):
             instance.server_close()
             thread.join()
 
+    def test_network_retries_transient_failures_but_not_auth_failures(self):
+        calls = []
+        def send(url, **kwargs):
+            calls.append((url, kwargs))
+            if len(calls) == 1:
+                raise TimeoutError("fixture timeout")
+            return (500 if len(calls) == 2 else 200), {}, b"state"
+        network = proxy.Network(send)
+        self.assertEqual(network(proxy.STATE_URL, headers=AUTH)[0], 200)
+        self.assertEqual(len(calls), 3)
+        self.assertTrue(all(call == (proxy.STATE_URL, {"headers": AUTH}) for call in calls))
+        for status in (401, 403, 409):
+            calls.clear()
+            def rejected(url, **kwargs):
+                calls.append(url)
+                return status, {}, b""
+            self.assertEqual(proxy.Network(rejected)(proxy.STATE_URL)[0], status)
+            self.assertEqual(len(calls), 1)
+
+    def test_cancellation_wakes_retry_backoff(self):
+        called = threading.Event()
+        calls = []
+        def send(url, **kwargs):
+            calls.append(url)
+            called.set()
+            return 500, {}, b""
+        network = proxy.Network(send)
+        with ThreadPoolExecutor(max_workers=1) as pool:
+            result = pool.submit(network, proxy.STATE_URL)
+            self.assertTrue(called.wait(1))
+            started = time.monotonic()
+            network.cancel()
+            try:
+                self.assertEqual(result.result(timeout=.5)[0], 500)
+            except proxy.RunnerError:
+                pass  # Cancellation can arrive before or during the backoff.
+            self.assertLess(time.monotonic() - started, .5)
+        self.assertEqual(len(calls), 1)
+
+    def test_total_deadline_bounds_slow_headers_and_body_and_retains_lock(self):
+        from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+        for slow_body, cancel in ((False, False), (True, False), (False, True), (True, True)):
+            with self.subTest(slow_body=slow_body, cancel=cancel):
+                entered, release = threading.Event(), threading.Event()
+                hits = []
+                class Handler(BaseHTTPRequestHandler):
+                    def log_message(self, *args):
+                        pass
+                    def do_POST(self):
+                        hits.append(self.path)
+                        entered.set()
+                        if not slow_body:
+                            release.wait(3)
+                        self.send_response(200)
+                        self.send_header("Content-Length", "2")
+                        self.end_headers()
+                        if slow_body:
+                            self.wfile.write(b"{")
+                            self.wfile.flush()
+                            release.wait(3)
+                            self.wfile.write(b"}")
+                        else:
+                            self.wfile.write(b"{}")
+                instance = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+                thread = threading.Thread(target=instance.serve_forever, daemon=True)
+                thread.start()
+                network = proxy.Network(timeout=60 if cancel else .1, cancellation_grace=.1)
+                base = f"http://127.0.0.1:{instance.server_port}"
+                try:
+                    with ThreadPoolExecutor(max_workers=1) as pool:
+                        pending = pool.submit(network, base + "/states/pr-42", method="POST", data=b"state")
+                        self.assertTrue(entered.wait(1))
+                        if cancel:
+                            network.cancel()
+                        with self.assertRaises(proxy.RunnerError):
+                            pending.result(timeout=.5)
+                        # Even if the old worker eventually returns, a new
+                        # unlock cannot overtake an ambiguous remote write.
+                        release.set()
+                        with self.assertRaises(proxy.RunnerError):
+                            network(base + "/states/pr-42/lock", method="DELETE")
+                        self.assertEqual(hits, ["/states/pr-42"])
+                finally:
+                    release.set()
+                    instance.shutdown()
+                    instance.server_close()
+                    thread.join()
+
     def test_non_ci_runner_and_secure_recovery(self):
         with patch.dict(os.environ, {}, clear=True), patch.object(proxy.sys, "argv", ["runner", "pr-42", "apply"]):
             with self.assertRaises(proxy.RunnerError):

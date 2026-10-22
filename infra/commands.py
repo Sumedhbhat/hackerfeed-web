@@ -5,6 +5,9 @@ import subprocess
 
 
 class Commands:
+    def __init__(self, on_interrupt=None):
+        self.on_interrupt = on_interrupt
+
     def __enter__(self):
         self.child = None
         self.interrupted = 0
@@ -21,6 +24,8 @@ class Commands:
         if self.interrupted:
             return
         self.interrupted = signum
+        if self.on_interrupt:
+            self.on_interrupt()
         self.forward()
         if self.child is None and not self.finishing and not self.spawning:
             raise SystemExit(128 + signum)
