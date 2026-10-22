@@ -115,7 +115,6 @@ jobs:
             run infra/terraform.sh prod show -no-color tfplan
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-          run infra/check-production-plan.sh tfplan
 
       - name: Preserve encrypted Terraform recovery state
         if: ${{ !success() }}

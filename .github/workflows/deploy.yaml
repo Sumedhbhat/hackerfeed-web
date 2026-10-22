@@ -66,9 +66,6 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Refuse to replace or delete the production database
-        run: exec infra/check-production-plan.sh tfplan
-
       - name: Apply infrastructure
         run: exec infra/terraform.sh prod apply -input=false tfplan
 

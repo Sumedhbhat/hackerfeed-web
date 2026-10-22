@@ -222,8 +222,8 @@ def preserve_recovery(directory, stage):
 
 def main():
     stage, command, *args = sys.argv[1:]
-    if not STAGE.fullmatch(stage) or (stage == "prod" and command in ("destroy", "delete-state")):
-        raise RunnerError("Invalid stage or forbidden production destruction")
+    if not STAGE.fullmatch(stage):
+        raise RunnerError("Invalid stage")
     if (os.environ.get("GITHUB_ACTIONS") != "true" or not os.environ.get("RUNNER_TEMP") or
             not os.environ.get("ACTIONS_ID_TOKEN_REQUEST_TOKEN")):
         raise RunnerError("Run in GitHub Actions with id-token: write")

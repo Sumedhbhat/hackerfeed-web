@@ -6,7 +6,7 @@ ci_stop() {
   trap '' INT TERM HUP
   if [ -n "$ci_child" ]; then
     # Bash starts asynchronous commands with SIGINT ignored. TERM works for
-    # both nested shell guards and Python, which forwards it to Terraform.
+    # both nested shell callers and Python, which forwards it to Terraform.
     kill -TERM "$ci_child" 2>/dev/null || true
     wait "$ci_child" || true
   fi

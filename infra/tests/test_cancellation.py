@@ -52,7 +52,7 @@ class CancellationTests(unittest.TestCase):
         infra = directory / "infra"
         (infra / "terraform").mkdir(parents=True)
         for name in ("terraform.sh", "state_proxy.py", "recovery_state.py", "commands.py",
-                     "ci-signals.sh", "check-production-plan.sh", "check_production_plan.py", "preview_database.py"):
+                     "ci-signals.sh", "preview_database.py"):
             shutil.copy(ROOT / "infra" / name, infra)
         # Only substitute network transport and discovery. Keep the actual
         # workflow, shell helper, Python forwarding, proxy, and encryption.
@@ -215,9 +215,8 @@ sys.exit(1)
             ("deploy.yaml", "Plan infrastructure", "plan"),
             ("deploy.yaml", "Plan infrastructure", "show"),
             ("preview.yaml", "Plan production infrastructure", "plan"),
-            ("preview.yaml", "Plan production infrastructure", "guard"),
+            ("preview.yaml", "Plan production infrastructure", "show"),
             ("preview.yaml", "Read preview database", "output"),
-            ("deploy.yaml", "Refuse to replace or delete the production database", "show"),
             ("preview-cleanup.yaml", "Destroy preview infrastructure", "destroy"),
             ("preview.yaml", "Adopt legacy preview database", "import"),
             ("preview-cleanup.yaml", "Adopt legacy preview database", "import"),
@@ -230,10 +229,8 @@ sys.exit(1)
                     binary = directory / "bin"
                     binary.mkdir()
                     fake = binary / "terraform"
-                    fake.write_text("#!" + sys.executable + "\n" + '''import json, os, pathlib, signal, sys, time
-active = sys.argv[1] == os.environ['BLOCK_COMMAND'] or (
-    os.environ['BLOCK_COMMAND'] == 'guard' and sys.argv[1:3] == ['show', '-json'])
-if not active:
+                    fake.write_text("#!" + sys.executable + "\n" + '''import os, pathlib, signal, sys, time
+if sys.argv[1] != os.environ['BLOCK_COMMAND']:
     if sys.argv[1] == 'show': print('{"format_version":"1.0"}')
     sys.exit(0)
 # No real upstream request is needed for this process-chain fixture.

@@ -105,9 +105,8 @@ Each stage has its own state: `prod` is the production database (`hackerfeed`,
 adopted on its first apply), and `pr-<n>` is a pull request's preview
 database. Existing databases from the older preview workflow are imported by
 exact PR name before apply or cleanup. CI reconciles the state server and
-`prod` on every production run, after checking the plan neither deletes nor
-replaces the production database. A pull request that changes `infra/` shows
-that production plan in its job summary.
+`prod` on every production run. Production deploys and pull requests that
+change `infra/` show the production plan in their job summaries for review.
 
 ### State and sign-in
 

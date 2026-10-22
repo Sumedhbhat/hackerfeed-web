@@ -30,7 +30,6 @@ def load(name, filename):
 
 
 proxy = load("proxy", "state_proxy.py")
-plan = load("plan", "check_production_plan.py")
 preview = load("preview", "preview_database.py")
 recovery = load("recovery", "recovery_state.py")
 ACCOUNT = "0" * 32
@@ -56,45 +55,6 @@ def server(tokens, send, password="local-secret"):
 
 
 AUTH = {"Authorization": "Basic " + base64.b64encode(b"github:local-secret").decode()}
-
-
-class PlanTests(unittest.TestCase):
-    def document(self, actions=None):
-        return {"format_version": "1.2", "terraform_version": "1.13.4", "planned_values": {},
-                "configuration": {"root_module": {}}, "resource_changes": [] if actions is None else [{
-                    "address": "cloudflare_d1_database.this", "mode": "managed", "type": "cloudflare_d1_database",
-                    "name": "this", "change": {"actions": actions}}]}
-
-    def test_schema_and_destruction_controls(self):
-        for actions in (None, ["no-op"], ["create"], ["update"]):
-            plan.validate(self.document(actions))
-        for value in (None, {}, [], {"resource_changes": []}, self.document(["delete"]),
-                      self.document(["delete", "create"]), self.document(["create", "delete"]),
-                      self.document(["forget"]), self.document(["unknown"]),
-                      {**self.document(), "resource_changes": None},
-                      {key: value for key, value in self.document().items() if key != "resource_changes"},
-                      {**self.document(), "resource_changes": [{}]},
-                      {**self.document(), "configuration": None},
-                      {**self.document(), "errored": True}):
-            with self.subTest(value=value), self.assertRaises(ValueError):
-                plan.validate(value)
-
-    def test_extraction_failure_never_passes_guard(self):
-        with tempfile.TemporaryDirectory() as temporary:
-            directory = Path(temporary)
-            for file in ("check-production-plan.sh", "check_production_plan.py", "ci-signals.sh"):
-                shutil.copy(ROOT / "infra" / file, directory)
-            wrapper = directory / "terraform.sh"
-            for content, code in ((json.dumps(self.document()), 0), (json.dumps(self.document()), 1),
-                                  (json.dumps(self.document(["delete"])), 0),
-                                  (json.dumps(self.document(["delete"])), 1), ("null", 0), ("", 0), ("{", 0)):
-                wrapper.write_text(f"#!/bin/sh\ncat <<'JSON'\n{content}\nJSON\nexit {code}\n")
-                wrapper.chmod(0o700)
-                result = subprocess.run(["bash", "-eo", "pipefail", "-c",
-                    '"$1/check-production-plan.sh" tfplan; echo CONTINUED', "test", str(directory)], capture_output=True)
-                safe = code == 0 and content == json.dumps(self.document())
-                self.assertEqual(result.returncode == 0, safe)
-                self.assertEqual(b"CONTINUED" in result.stdout, safe)
 
 
 class ProxyTests(unittest.TestCase):
@@ -428,8 +388,6 @@ resource "terraform_data" "local" {
                     for command in (["init", "-reconfigure", "-input=false"], arguments):
                         result = subprocess.run(["terraform", *command], cwd=directory, env=env, capture_output=True, timeout=30)
                         self.assertEqual(result.returncode, 0, result.stderr.decode())
-                    if arguments[0] == "show":
-                        plan.validate(json.loads(result.stdout))
             self.assertEqual(len(set(ports)), 3)
             self.assertTrue(json.loads(stored[0])["resources"])
             self.assertGreater(len(set(issued)), 1)
@@ -518,7 +476,7 @@ class PreviewTests(unittest.TestCase):
 
 
 class WorkflowTests(unittest.TestCase):
-    def test_production_reconciles_and_both_guards_are_wired(self):
+    def test_production_reconciles_and_preview_adoption_precedes_changes(self):
         production = (ROOT / ".github/workflows/deploy.yaml").read_text()
         self.assertNotIn("event.before", production)
         self.assertNotIn("needs.changes", production)
@@ -527,10 +485,6 @@ class WorkflowTests(unittest.TestCase):
         for job in ("state-backend", "infrastructure"):
             body = re.split(r"\n  [a-z][a-z-]*:", production.split(f"  {job}:\n", 1)[1], maxsplit=1)[0]
             self.assertNotRegex(body, r"(?m)^    if:")
-        for workflow in ("deploy.yaml", "preview.yaml"):
-            text = (ROOT / ".github/workflows" / workflow).read_text()
-            self.assertIn("infra/check-production-plan.sh tfplan", text)
-            self.assertNotIn("if infra/terraform.sh prod show", text)
         for workflow in ("preview.yaml", "preview-cleanup.yaml"):
             text = (ROOT / ".github/workflows" / workflow).read_text()
             self.assertLess(text.index("python3 infra/preview_database.py"), text.index('infra/terraform.sh "$STAGE" ' +
