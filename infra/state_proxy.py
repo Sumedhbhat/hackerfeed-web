@@ -36,6 +36,9 @@ class NoRedirect(HTTPRedirectHandler):
 
 # Neither job credentials nor backend credentials may follow redirects or proxies.
 HTTP = build_opener(ProxyHandler({}), NoRedirect())
+# Cloudflare rejects urllib's default User-Agent with HTTP 403 / error 1010
+# before the state Worker can verify OIDC. Identify this client explicitly.
+HTTP.addheaders = [("User-Agent", "hackerfeed-infra/1.0")]
 
 
 def request(url, *, headers=None, data=None, method="GET"):

@@ -58,6 +58,11 @@ const server = Bun.serve({
 				value: await token("preview", Math.floor(Date.now() / 1000) + 2),
 			});
 		}
+		// The deployed workers.dev edge rejects urllib's default User-Agent
+		// with 403 / error 1010 before the Worker can authenticate the request.
+		if (request.headers.get("user-agent")?.startsWith("Python-urllib/")) {
+			return new Response("error code: 1010\n", { status: 403 });
+		}
 		const response = await handler.fetch(request, env);
 		if (
 			loseCommitResponse &&
