@@ -52,16 +52,13 @@ jobs:
           else
             echo "infra=true" >> "$GITHUB_OUTPUT"
           fi
-          # `state list` fails on a stage with no state yet; `show` doesn't.
-          state=$(infra/terraform.sh "$STAGE" show -json)
-          if [ "$(jq '[.values.root_module.resources[]?] | length' <<< "$state")" = 0 ]; then
-            echo "exists=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "exists=true" >> "$GITHUB_OUTPUT"
-          fi
+
+      - name: Adopt legacy preview database
+        id: database_state
+        run: python3 infra/preview_database.py "$STAGE"
 
       - name: Apply preview infrastructure
-        if: steps.changes.outputs.infra == 'true' || steps.changes.outputs.exists == 'false'
+        if: steps.changes.outputs.infra == 'true' || steps.database_state.outputs.exists == 'false' || steps.database_state.outputs.imported == 'true'
         run: infra/terraform.sh "$STAGE" apply -input=false -auto-approve
 
       - name: Read preview database
@@ -71,6 +68,17 @@ jobs:
             echo "id=$(infra/terraform.sh "$STAGE" output -raw database_id)"
             echo "name=$(infra/terraform.sh "$STAGE" output -raw database_name)"
           } >> "$GITHUB_OUTPUT"
+
+      - name: Preserve encrypted Terraform recovery state
+        if: ${{ !success() }}
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: terraform-recovery-preview
+          path: |
+            ${{ runner.temp }}/terraform-recovery/**/*.enc
+            ${{ runner.temp }}/terraform-recovery/**/*.hmac
+          retention-days: 1
+          if-no-files-found: ignore
 
   # Shows what merging would do to production; the deploy workflow applies it.
   # The preview environment may only read the prod state, so this plan does
@@ -103,11 +111,18 @@ jobs:
             infra/terraform.sh prod show -no-color tfplan
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-          if infra/terraform.sh prod show -json tfplan | jq -e \
-            '[.resource_changes[]? | select(.type == "cloudflare_d1_database" and (.change.actions | index("delete")))] | length > 0' > /dev/null; then
-            echo "Merging would delete or replace the production D1 database" >&2
-            exit 1
-          fi
+          infra/check-production-plan.sh tfplan
+
+      - name: Preserve encrypted Terraform recovery state
+        if: ${{ !success() }}
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: terraform-recovery-preview-production-plan
+          path: |
+            ${{ runner.temp }}/terraform-recovery/**/*.enc
+            ${{ runner.temp }}/terraform-recovery/**/*.hmac
+          retention-days: 1
+          if-no-files-found: ignore
 
   preview:
     needs: infrastructure

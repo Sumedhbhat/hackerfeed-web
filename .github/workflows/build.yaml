@@ -35,6 +35,16 @@ jobs:
           bash <(curl -sSfL https://raw.githubusercontent.com/rhysd/actionlint/v1.7.12/scripts/download-actionlint.bash) 1.7.12
           ./actionlint -color
 
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.13.4
+          terraform_wrapper: false
+
+      - name: Test infrastructure tooling (local only)
+        run: |
+          python3 -m unittest discover -s infra/tests -p 'test_*.py' -v
+          bun test infra/tests/state-backend.test.js
+
       - name: Run tests
         run: bun run test
 
@@ -56,12 +66,6 @@ jobs:
           else
             echo "infra=true" >> "$GITHUB_OUTPUT"
           fi
-
-      - uses: hashicorp/setup-terraform@v3
-        if: steps.changes.outputs.infra == 'true'
-        with:
-          terraform_version: 1.13.4
-          terraform_wrapper: false
 
       - name: Check Terraform
         if: steps.changes.outputs.infra == 'true'

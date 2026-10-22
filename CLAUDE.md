@@ -34,7 +34,7 @@ bun run check        # Biome check (lint + format together)
 
 ### Infrastructure
 
-`infra/terraform` creates Cloudflare resources (today, one D1 database per stage: `prod`, or `pr-<n>` for a PR preview) and nothing else. It must not deploy code or run migrations: the Worker is deployed by wrangler from `wrangler.jsonc`, and migrations run in their own CI step. CI applies Terraform only when `infra/` changes, always through `infra/terraform.sh`: state lives in the `infra/state-backend` Worker, which signs CI in with GitHub OIDC, so there is no state password and Terraform runs only in CI. See README > Infrastructure.
+`infra/terraform` creates Cloudflare resources (today, one D1 database per stage: `prod`, or `pr-<n>` for a PR preview) and nothing else. It must not deploy code or run migrations: the Worker is deployed by wrangler from `wrangler.jsonc`, and migrations run in their own CI step. CI reconciles production infrastructure and the state server on every production run, always through `infra/terraform.sh`: state lives in the `infra/state-backend` Worker, which signs CI in with GitHub OIDC, so there is no state password and Terraform runs only in CI. See README > Infrastructure.
 
 ### Data flow
 

@@ -13,35 +13,10 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Which parts of infra/ the push changed. Manual runs, and pushes whose
-  # previous commit is unknown, count as changing everything.
-  changes:
-    runs-on: ubuntu-latest
-    outputs:
-      infra: ${{ steps.diff.outputs.infra }}
-      state_backend: ${{ steps.diff.outputs.state_backend }}
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-
-      - name: Detect infrastructure changes
-        id: diff
-        run: |
-          changed() {
-            ! { [ "$EVENT" = push ] && git cat-file -e "${BEFORE}^{commit}" 2>/dev/null &&
-              git diff --quiet "$BEFORE" "$GITHUB_SHA" -- "$1"; }
-          }
-          if changed infra/; then echo "infra=true"; else echo "infra=false"; fi >> "$GITHUB_OUTPUT"
-          if changed infra/state-backend/; then echo "state_backend=true"; else echo "state_backend=false"; fi >> "$GITHUB_OUTPUT"
-        env:
-          EVENT: ${{ github.event_name }}
-          BEFORE: ${{ github.event.before }}
-
-  # The Terraform state server sits below Terraform, so wrangler deploys it.
+  # Reconcile every production run, including changes missed by failed or
+  # superseded runs and shared root dependency updates. The state server sits
+  # below Terraform, so wrangler deploys it first.
   state-backend:
-    needs: changes
-    if: needs.changes.outputs.state_backend == 'true'
     runs-on: ubuntu-latest
     environment: production
     env:
@@ -63,8 +38,7 @@ jobs:
           bunx wrangler deploy -c infra/state-backend/wrangler.jsonc
 
   infrastructure:
-    needs: [changes, state-backend]
-    if: ${{ !failure() && !cancelled() && needs.changes.outputs.infra == 'true' }}
+    needs: state-backend
     runs-on: ubuntu-latest
     environment: production
     permissions:
@@ -92,19 +66,24 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Refuse to replace or delete the production database
-        run: |
-          if infra/terraform.sh prod show -json tfplan | jq -e \
-            '[.resource_changes[]? | select(.type == "cloudflare_d1_database" and (.change.actions | index("delete")))] | length > 0' > /dev/null; then
-            echo "The plan deletes or replaces the production D1 database" >&2
-            exit 1
-          fi
+        run: infra/check-production-plan.sh tfplan
 
       - name: Apply infrastructure
         run: infra/terraform.sh prod apply -input=false tfplan
 
+      - name: Preserve encrypted Terraform recovery state
+        if: ${{ !success() }}
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: terraform-recovery-prod
+          path: |
+            ${{ runner.temp }}/terraform-recovery/**/*.enc
+            ${{ runner.temp }}/terraform-recovery/**/*.hmac
+          retention-days: 1
+          if-no-files-found: ignore
+
   deploy:
     needs: infrastructure
-    if: ${{ !failure() && !cancelled() }}
     runs-on: ubuntu-latest
     environment: production
     steps:

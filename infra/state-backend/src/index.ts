@@ -152,11 +152,14 @@ async function handleLock(request: Request, db: D1Database, name: string) {
 
 	switch (request.method) {
 		case "POST": {
+			// A retry after a lost commit response must succeed for the same ID.
+			// Preserve its original metadata while excluding every other owner.
 			const result = await db
 				.prepare(
 					`INSERT INTO states (name, lock_id, lock_info) VALUES (?1, ?2, ?3)
-					ON CONFLICT (name) DO UPDATE SET lock_id = excluded.lock_id, lock_info = excluded.lock_info
-					WHERE states.lock_id IS NULL`,
+					ON CONFLICT (name) DO UPDATE SET lock_id = excluded.lock_id,
+					lock_info = CASE WHEN states.lock_id IS NULL THEN excluded.lock_info ELSE states.lock_info END
+					WHERE states.lock_id IS NULL OR states.lock_id = excluded.lock_id`,
 				)
 				.bind(name, lockId, lockInfo)
 				.run();

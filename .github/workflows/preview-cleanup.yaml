@@ -36,13 +36,30 @@ jobs:
           terraform_version: 1.13.4
           terraform_wrapper: false
 
+      - name: Adopt legacy preview database
+        id: database_state
+        run: python3 infra/preview_database.py "$STAGE"
+
       - name: Destroy preview infrastructure
         run: |
-          # `state list` fails on a stage with no state yet; `show` doesn't.
-          state=$(infra/terraform.sh "$STAGE" show -json)
-          if [ "$(jq '[.values.root_module.resources[]?] | length' <<< "$state")" = 0 ]; then
-            echo "Nothing to destroy for ${STAGE}"
-          else
+          if [ "$EXISTS" != true ] && [ "$EXISTS" != false ]; then
+            echo "Preview database discovery did not return a valid result" >&2
+            exit 1
+          fi
+          if [ "$EXISTS" = true ]; then
             infra/terraform.sh "$STAGE" destroy -input=false -auto-approve
           fi
           infra/terraform.sh "$STAGE" delete-state
+        env:
+          EXISTS: ${{ steps.database_state.outputs.exists }}
+
+      - name: Preserve encrypted Terraform recovery state
+        if: ${{ !success() }}
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: terraform-recovery-preview-cleanup
+          path: |
+            ${{ runner.temp }}/terraform-recovery/**/*.enc
+            ${{ runner.temp }}/terraform-recovery/**/*.hmac
+          retention-days: 1
+          if-no-files-found: ignore

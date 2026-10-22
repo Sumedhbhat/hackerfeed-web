@@ -103,9 +103,11 @@ its own step.
 
 Each stage has its own state: `prod` is the production database (`hackerfeed`,
 adopted on its first apply), and `pr-<n>` is a pull request's preview
-database. CI applies `prod` only when a push to master changes `infra/`, after
-checking the plan neither deletes nor replaces the production database. A pull
-request that changes `infra/` shows that production plan in its job summary.
+database. Existing databases from the older preview workflow are imported by
+exact PR name before apply or cleanup. CI reconciles the state server and
+`prod` on every production run, after checking the plan neither deletes nor
+replaces the production database. A pull request that changes `infra/` shows
+that production plan in its job summary.
 
 ### State and sign-in
 
@@ -120,13 +122,28 @@ id. The job's GitHub environment decides what it may touch:
 | `production` (master only) | read, write, lock | none |
 | `preview` (pull requests) | read only, for PR plans | read, write, lock, delete |
 
-Every Terraform command goes through `infra/terraform.sh`, which fetches the
-token and points Terraform at the stage's state. GitHub only issues these
-tokens inside Actions, so Terraform runs in CI, not locally; use **Run
-workflow** on the deploy workflow for a manual apply. The state server sits
-below Terraform, so the deploy workflow deploys it with wrangler when
-`infra/state-backend` changes. Its D1 database was created once with
+Every Terraform command goes through `infra/terraform.sh`. A Python 3 loopback
+proxy requests and refreshes OIDC credentials while Terraform runs, so a long
+apply can still save state and release its lock. Each invocation has its own
+port and password; the proxy forwards only that stage to the fixed state
+server. GitHub only issues these tokens inside Actions, so Terraform runs in
+CI, not locally; use **Run workflow** on the deploy workflow for a manual apply.
+Each production run deploys the state server with wrangler before running
+Terraform. Its D1 database was created once with
 `wrangler d1 create hackerfeed-terraform-state`.
+
+If Terraform cannot save remote state, CI encrypts `errored.tfstate` before
+uploading an Actions artifact with one day retention. Encryption uses OpenSSL
+AES-256-CBC with PBKDF2 and a separate HMAC-SHA256 check. The key is the job's
+existing `CLOUDFLARE_API_TOKEN`, so retain that credential until recovery is done.
+Download both `.enc` and `.hmac` files promptly. In a secure environment with the
+original credential set, run
+`python3 infra/recovery_state.py <file.tfstate.enc> <recovered.tfstate>`. Recover
+remote state through an authorized CI job before applying again. Do not paste
+state into logs, comments, or issues. Local regression tests run with
+`python3 -m unittest discover -s infra/tests -p 'test_*.py' -v` and
+`bun test infra/tests/state-backend.test.js`; they do not write live
+infrastructure. Put Terraform 1.13.4 on `PATH` to run the integration cases.
 
 ## AI Assistants (bring your own subscription)
 

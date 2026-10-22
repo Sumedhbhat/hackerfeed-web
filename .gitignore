@@ -21,3 +21,6 @@ docs/internal/
 .terraform
 *.tfstate
 *.tfstate.*
+
+# Python infrastructure tooling
+__pycache__/
