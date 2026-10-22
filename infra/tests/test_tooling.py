@@ -1,7 +1,8 @@
 import base64
 from concurrent.futures import ThreadPoolExecutor
-from contextlib import contextmanager
+from contextlib import contextmanager, redirect_stderr
 import importlib.util
+import io
 import json
 import os
 import re
@@ -15,6 +16,7 @@ import threading
 import time
 import unittest
 from unittest.mock import patch
+from urllib.parse import parse_qs, urlsplit
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "infra"))
@@ -130,6 +132,47 @@ class ProxyTests(unittest.TestCase):
                                   send=lambda *args, **kwargs: (200, {}, json.dumps(body).encode()))
             with self.assertRaises((ValueError, KeyError)):
                 tokens.get()
+
+    def test_job_oidc_url_preserves_query_and_encodes_audience_once(self):
+        # Actions runner supplies an idtoken endpoint with an existing query.
+        # Its audience must decode to the same value used by the deployed Worker.
+        url = ("https://pipelinesghubeus2.actions.githubusercontent.com/tenant/"
+               "_apis/distributedtask/hubs/build/plans/plan/jobs/job/idtoken?"
+               "api-version=2.0&scope=build%2Fjob&audience=old")
+        calls = []
+        def issue(target, **kwargs):
+            calls.append((target, kwargs))
+            return 200, {}, json.dumps({"value": jwt(2000)}).encode()
+        tokens = proxy.Tokens(url, "disposable-job-secret", clock=lambda: 1000, send=issue)
+        self.assertEqual(tokens.get(), jwt(2000))
+        target, kwargs = calls[0]
+        self.assertEqual(urlsplit(target).path, urlsplit(url).path)
+        self.assertEqual(parse_qs(urlsplit(target).query), {
+            "api-version": ["2.0"], "scope": ["build/job"], "audience": [proxy.STATE_URL]})
+        self.assertEqual(target.count("audience="), 1)
+        self.assertNotIn("%253A", target)
+        self.assertEqual(kwargs, {"headers": {"Authorization": "bearer disposable-job-secret"}})
+
+    def test_auth_failure_diagnostics_distinguish_boundaries_without_credentials(self):
+        tokens, calls = self.tokens([1000])
+        upstream = []
+        def reject(url, **kwargs):
+            upstream.append(url)
+            return 401, {}, b"disposable-upstream-response"
+        diagnostics = io.StringIO()
+        with redirect_stderr(diagnostics), server(tokens, reject) as (base, _):
+            self.assertEqual(proxy.request(base + "/states/pr-42")[0], 401)
+            self.assertIn("Terraform loopback authentication rejected", diagnostics.getvalue())
+            self.assertFalse(calls)
+            diagnostics.seek(0)
+            diagnostics.truncate()
+            self.assertEqual(proxy.request(base + "/states/pr-42", headers=AUTH)[0], 401)
+            self.assertEqual(len(calls), 2)
+            self.assertEqual(len(upstream), 2)
+            self.assertIn("Remote state endpoint returned HTTP 401 after GitHub OIDC token refresh", diagnostics.getvalue())
+            self.assertNotIn("Terraform loopback", diagnostics.getvalue())
+        for sensitive in ("job-secret", "local-secret", jwt(1060), "disposable-upstream-response"):
+            self.assertNotIn(sensitive, diagnostics.getvalue())
 
     def test_proxy_boundary_and_401_refresh(self):
         tokens, calls = self.tokens([1000])

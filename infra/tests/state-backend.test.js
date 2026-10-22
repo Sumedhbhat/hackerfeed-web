@@ -46,8 +46,13 @@ const server = Bun.serve({
 	async fetch(request) {
 		if (new URL(request.url).pathname === "/jwks")
 			return Response.json({ keys: [key] });
-		if (new URL(request.url).pathname === "/oidc") {
+		if (new URL(request.url).pathname.endsWith("/idtoken")) {
 			expect(new URL(request.url).searchParams.get("audience")).toBe(audience);
+			expect(new URL(request.url).searchParams.get("api-version")).toBe("2.0");
+			expect(new URL(request.url).searchParams.get("scope")).toBe("build/job");
+			expect(request.headers.get("authorization")).toBe(
+				"bearer disposable-job-secret",
+			);
 			issuedTokens++;
 			return Response.json({
 				value: await token("preview", Math.floor(Date.now() / 1000) + 2),
@@ -79,6 +84,8 @@ async function token(
 		.setProtectedHeader({ alg: "RS256", kid: key.kid })
 		.setIssuer("https://token.actions.githubusercontent.com")
 		.setAudience(audience)
+		.setSubject(`repo:Sumedhbhat/hackerfeed-web:environment:${environment}`)
+		.setNotBefore(Math.floor(Date.now() / 1000) - 1)
 		.setIssuedAt()
 		.setExpirationTime(expiry)
 		.sign(privateKey);
@@ -261,8 +268,9 @@ resource "terraform_data" "local" {
 }
 `,
 			);
-			// Replace transport only in this subprocess fixture. Production URLs,
-			// token audience, runner, proxy and signed Worker verification stay intact.
+			// Replace transport only. The Worker's signature/issuer/audience/repo
+			// verification and stage permissions are unchanged from deployed f026dee.
+			// Exercise the runner's job URL shape, including its existing query.
 			await writeFile(
 				join(infra, "local.py"),
 				`import sys
@@ -273,8 +281,8 @@ original = runner.HTTP
 class LocalOnly:
     def open(self, req, **kwargs):
         url = urlsplit(req.full_url)
-        if url.hostname == "job.actions.githubusercontent.com":
-            target = "${base}/oidc?" + url.query
+        if url.hostname == "pipelinesghubeus2.actions.githubusercontent.com":
+            target = "${base}" + url.path + "?" + url.query
         elif req.full_url.startswith(runner.STATE_URL + "/states/pr-45"):
             target = "${base}" + url.path + ("?" + url.query if url.query else "")
         else:
@@ -292,7 +300,7 @@ sys.exit(runner.main())
 					GITHUB_ACTIONS: "true",
 					RUNNER_TEMP: directory,
 					ACTIONS_ID_TOKEN_REQUEST_URL:
-						"https://job.actions.githubusercontent.com/token?job=local",
+						"https://pipelinesghubeus2.actions.githubusercontent.com/tenant/_apis/distributedtask/hubs/build/plans/plan/jobs/job/idtoken?api-version=2.0&scope=build%2Fjob",
 					ACTIONS_ID_TOKEN_REQUEST_TOKEN: "disposable-job-secret",
 					CHECKPOINT_DISABLE: "1",
 				},

@@ -155,6 +155,7 @@ def make_server(stage, password, tokens, send=request):
 
         def handle_request(self):
             if not hmac.compare_digest(self.headers.get("Authorization", "").encode(), authorization.encode()):
+                print("Terraform loopback authentication rejected (HTTP 401).", file=sys.stderr)
                 self.send_error(401)
                 return
             url = urlsplit(self.path)
@@ -182,6 +183,11 @@ def make_server(stage, password, tokens, send=request):
                     if status != 401 or attempt:
                         break
                     token = tokens.get(rejected=token)
+                if status == 401:
+                    # Terraform reports the same error for both auth boundaries.
+                    # Log only the boundary, never headers, claims or responses.
+                    print("Remote state endpoint returned HTTP 401 after GitHub OIDC token refresh.",
+                          file=sys.stderr)
                 # Do not forward Location, cookies, or any other upstream headers.
                 self.send_response(502 if 300 <= status < 400 else status)
                 self.send_header("Content-Type", headers.get("Content-Type", "application/json"))
