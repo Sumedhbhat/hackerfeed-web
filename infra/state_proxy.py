@@ -8,7 +8,6 @@ import math
 import os
 import re
 import secrets
-import signal
 import subprocess
 import sys
 import threading
@@ -20,6 +19,7 @@ from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 from urllib.request import HTTPRedirectHandler, ProxyHandler, Request, build_opener
 
 from recovery_state import crypt
+from commands import Commands
 
 STATE_URL = "https://hackerfeed-terraform-state.kgqk4vdcfq.workers.dev"
 STAGE = re.compile(r"^(prod|pr-[1-9][0-9]*)$")
@@ -168,47 +168,29 @@ def main():
                TF_HTTP_ADDRESS=address, TF_HTTP_LOCK_ADDRESS=address + "/lock",
                TF_HTTP_UNLOCK_ADDRESS=address + "/lock")
     directory = Path(__file__).resolve().parent / "terraform"
-    child = None
-    interrupted = 0
-
-    def stop(signum, _frame):
-        nonlocal interrupted
-        interrupted = signum
-        # Terraform handles the first signal gracefully, persisting state and unlocking.
-        if child is not None and child.poll() is None:
-            child.send_signal(signum)
-        else:
-            raise SystemExit(128 + signum)
-
-    for sig in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP):
-        signal.signal(sig, stop)
-
-    def run(arguments, **kwargs):
-        nonlocal child
-        child = subprocess.Popen(["terraform", *arguments], cwd=directory, env=env, **kwargs)
-        result = child.wait()
-        return 128 + interrupted if interrupted else result
-
-    try:
-        if (directory / "errored.tfstate").exists():
-            raise RunnerError("Existing errored.tfstate requires recovery before another Terraform command")
-        if command == "delete-state":
-            auth = base64.b64encode(f"github:{password}".encode()).decode()
-            status, _, _ = request(address, method="DELETE", headers={"Authorization": "Basic " + auth})
-            return 0 if status == 200 else 1
-        # Environment-only addresses stay out of saved plans, which another
-        # invocation applies through a new ephemeral port and password.
-        result = run(["init", "-input=false", "-reconfigure"], stdout=subprocess.DEVNULL)
-        if result:
-            return result
-        return run([command, *args])
-    finally:
+    with Commands() as commands:
         try:
-            preserve_recovery(directory, stage)
+            if (directory / "errored.tfstate").exists():
+                raise RunnerError("Existing errored.tfstate requires recovery before another Terraform command")
+            if command == "delete-state":
+                auth = base64.b64encode(f"github:{password}".encode()).decode()
+                status, _, _ = request(address, method="DELETE", headers={"Authorization": "Basic " + auth})
+                return 0 if status == 200 else 1
+            # Environment-only addresses stay out of saved plans, which another
+            # invocation applies through a new ephemeral port and password.
+            result = commands.run(["terraform", "init", "-input=false", "-reconfigure"],
+                                  cwd=directory, env=env, stdout=subprocess.DEVNULL)
+            if result.returncode:
+                return result.returncode
+            return commands.run(["terraform", command, *args], cwd=directory, env=env).returncode
         finally:
-            server.shutdown()
-            server.server_close()
-            thread.join()
+            commands.finishing = True
+            try:
+                preserve_recovery(directory, stage)
+            finally:
+                server.shutdown()
+                server.server_close()
+                thread.join()
 
 
 if __name__ == "__main__":

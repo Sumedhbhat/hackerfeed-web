@@ -57,19 +57,20 @@ jobs:
 
       - name: Plan infrastructure
         run: |
-          infra/terraform.sh prod plan -input=false -out=tfplan
+          source infra/ci-signals.sh
+          run infra/terraform.sh prod plan -input=false -out=tfplan
           {
             echo '### Production infrastructure plan'
             echo '```'
-            infra/terraform.sh prod show -no-color tfplan
+            run infra/terraform.sh prod show -no-color tfplan
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Refuse to replace or delete the production database
-        run: infra/check-production-plan.sh tfplan
+        run: exec infra/check-production-plan.sh tfplan
 
       - name: Apply infrastructure
-        run: infra/terraform.sh prod apply -input=false tfplan
+        run: exec infra/terraform.sh prod apply -input=false tfplan
 
       - name: Preserve encrypted Terraform recovery state
         if: ${{ !success() }}

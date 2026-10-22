@@ -55,18 +55,21 @@ jobs:
 
       - name: Adopt legacy preview database
         id: database_state
-        run: python3 infra/preview_database.py "$STAGE"
+        run: exec python3 infra/preview_database.py "$STAGE"
 
       - name: Apply preview infrastructure
         if: steps.changes.outputs.infra == 'true' || steps.database_state.outputs.exists == 'false' || steps.database_state.outputs.imported == 'true'
-        run: infra/terraform.sh "$STAGE" apply -input=false -auto-approve
+        run: exec infra/terraform.sh "$STAGE" apply -input=false -auto-approve
 
       - name: Read preview database
         id: database
         run: |
+          source infra/ci-signals.sh
+          run infra/terraform.sh "$STAGE" output -raw database_id > "$RUNNER_TEMP/database-id"
+          run infra/terraform.sh "$STAGE" output -raw database_name > "$RUNNER_TEMP/database-name"
           {
-            echo "id=$(infra/terraform.sh "$STAGE" output -raw database_id)"
-            echo "name=$(infra/terraform.sh "$STAGE" output -raw database_name)"
+            echo "id=$(cat "$RUNNER_TEMP/database-id")"
+            echo "name=$(cat "$RUNNER_TEMP/database-name")"
           } >> "$GITHUB_OUTPUT"
 
       - name: Preserve encrypted Terraform recovery state
@@ -104,14 +107,15 @@ jobs:
 
       - name: Plan production infrastructure
         run: |
-          infra/terraform.sh prod plan -input=false -lock=false -out=tfplan
+          source infra/ci-signals.sh
+          run infra/terraform.sh prod plan -input=false -lock=false -out=tfplan
           {
             echo '### Production infrastructure plan'
             echo '```'
-            infra/terraform.sh prod show -no-color tfplan
+            run infra/terraform.sh prod show -no-color tfplan
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-          infra/check-production-plan.sh tfplan
+          run infra/check-production-plan.sh tfplan
 
       - name: Preserve encrypted Terraform recovery state
         if: ${{ !success() }}

@@ -80,7 +80,7 @@ class PlanTests(unittest.TestCase):
     def test_extraction_failure_never_passes_guard(self):
         with tempfile.TemporaryDirectory() as temporary:
             directory = Path(temporary)
-            for file in ("check-production-plan.sh", "check_production_plan.py"):
+            for file in ("check-production-plan.sh", "check_production_plan.py", "ci-signals.sh"):
                 shutil.copy(ROOT / "infra" / file, directory)
             wrapper = directory / "terraform.sh"
             for content, code in ((json.dumps(self.document()), 0), (json.dumps(self.document()), 1),
@@ -201,7 +201,7 @@ class ProxyTests(unittest.TestCase):
                 directory = Path(temporary)
                 infra = directory / "infra"
                 (infra / "terraform").mkdir(parents=True)
-                for filename in ("terraform.sh", "state_proxy.py", "recovery_state.py"):
+                for filename in ("terraform.sh", "state_proxy.py", "recovery_state.py", "commands.py"):
                     shutil.copy(ROOT / "infra" / filename, infra)
                 binary = directory / "bin"
                 binary.mkdir()
@@ -358,7 +358,7 @@ class PreviewTests(unittest.TestCase):
                 with patch.dict(os.environ, {"TF_VAR_cloudflare_account_id": ACCOUNT,
                         "CLOUDFLARE_API_TOKEN": "test", "GITHUB_OUTPUT": str(output)}), \
                         patch.object(preview.sys, "argv", ["preview", "pr-42"]), \
-                        patch.object(preview.subprocess, "check_output", side_effect=responses), \
+                        patch.object(preview.Commands, "output", side_effect=responses), \
                         patch.object(preview, "discover", return_value=IDENTIFIER), \
                         self.assertRaises((ValueError, subprocess.CalledProcessError)):
                     preview.main()
@@ -373,7 +373,7 @@ class PreviewTests(unittest.TestCase):
                     responses.extend([b"Imported", json.dumps(self.state()).encode()])
                 with patch.dict(os.environ, {"TF_VAR_cloudflare_account_id": ACCOUNT, "CLOUDFLARE_API_TOKEN": "test", "GITHUB_OUTPUT": str(output)}), \
                         patch.object(preview.sys, "argv", ["preview", "pr-42"]), \
-                        patch.object(preview.subprocess, "check_output", side_effect=responses) as command, \
+                        patch.object(preview.Commands, "output", side_effect=responses) as command, \
                         patch.object(preview, "discover", return_value=identifier) as inventory:
                     preview.main()
                     self.assertEqual(command.call_count, 3 if identifier else 1)

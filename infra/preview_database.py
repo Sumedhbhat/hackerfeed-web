@@ -3,13 +3,13 @@
 import json
 import os
 import re
-import subprocess
 import sys
 from pathlib import Path
 from urllib.parse import urlencode
 
 # Reuse the redirect-free HTTP client; never forward the Cloudflare API token.
 from state_proxy import request
+from commands import Commands
 
 DATABASE = "cloudflare_d1_database.this"
 UUID = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
@@ -74,13 +74,18 @@ def discover(stage, account, token, send=request):
 
 
 def main():
+    with Commands() as commands:
+        adopt(commands)
+
+
+def adopt(commands):
     stage = sys.argv[1]
     account = os.environ["TF_VAR_cloudflare_account_id"]
     if not re.fullmatch(r"pr-[1-9][0-9]*", stage) or not re.fullmatch(r"[0-9a-f]{32}", account):
         raise ValueError("Expected an exact PR stage and Cloudflare account ID")
     wrapper = str(Path(__file__).with_name("terraform.sh"))
     def terraform(*args):
-        return subprocess.check_output([wrapper, stage, *args])
+        return commands.output([wrapper, stage, *args])
     exists = managed_database(json.loads(terraform("show", "-json")), stage, account)
     imported = False
     if not exists:

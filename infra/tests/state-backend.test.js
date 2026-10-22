@@ -243,7 +243,7 @@ resource "terraform_data" "local" { input = "local-only" }
 		try {
 			const infra = join(directory, "infra");
 			await mkdir(join(infra, "terraform"), { recursive: true });
-			for (const file of ["state_proxy.py", "recovery_state.py"]) {
+			for (const file of ["state_proxy.py", "recovery_state.py", "commands.py"]) {
 				await cp(new URL("../" + file, import.meta.url), join(infra, file));
 			}
 			await writeFile(

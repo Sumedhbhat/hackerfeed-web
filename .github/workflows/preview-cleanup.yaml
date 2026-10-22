@@ -38,18 +38,19 @@ jobs:
 
       - name: Adopt legacy preview database
         id: database_state
-        run: python3 infra/preview_database.py "$STAGE"
+        run: exec python3 infra/preview_database.py "$STAGE"
 
       - name: Destroy preview infrastructure
         run: |
+          source infra/ci-signals.sh
           if [ "$EXISTS" != true ] && [ "$EXISTS" != false ]; then
             echo "Preview database discovery did not return a valid result" >&2
             exit 1
           fi
           if [ "$EXISTS" = true ]; then
-            infra/terraform.sh "$STAGE" destroy -input=false -auto-approve
+            run infra/terraform.sh "$STAGE" destroy -input=false -auto-approve
           fi
-          infra/terraform.sh "$STAGE" delete-state
+          run infra/terraform.sh "$STAGE" delete-state
         env:
           EXISTS: ${{ steps.database_state.outputs.exists }}
 
