@@ -2,7 +2,7 @@ import type { appUsers } from "#/server/database/schema";
 
 type AppUser = typeof appUsers.$inferSelect;
 
-/** Rows owned by this user are copied to everyone who signs in to a preview. */
+/** The fixed demo session owns these fixture rows. */
 export const demoUser: AppUser = {
 	id: "demo-user",
 	workosUserId: "demo-workos-user",

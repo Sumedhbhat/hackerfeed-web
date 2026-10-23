@@ -10,6 +10,7 @@ const featureFlagsResponseSchema = z.object({
 });
 
 export async function fetchFeatureFlags(): Promise<Partial<FeatureFlags>> {
+	if (import.meta.env.VITE_DEMO_DATA === "true") return { aiChat: false };
 	const response = await fetch("/api/feature-flags", {
 		headers: { accept: "application/json", ...(await getAuthHeaders()) },
 	});

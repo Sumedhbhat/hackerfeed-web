@@ -47,6 +47,9 @@ jobs:
     env:
       TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    outputs:
+      database_id: ${{ steps.database.outputs.id }}
+      database_name: ${{ steps.database.outputs.name }}
     steps:
       - uses: actions/checkout@v7
 
@@ -68,6 +71,17 @@ jobs:
 
       - name: Apply infrastructure
         run: exec infra/terraform.sh prod apply -input=false tfplan
+
+      - name: Read production database
+        id: database
+        run: |
+          source infra/ci-signals.sh
+          run infra/terraform.sh prod output -raw database_id > "$RUNNER_TEMP/database-id"
+          run infra/terraform.sh prod output -raw database_name > "$RUNNER_TEMP/database-name"
+          {
+            echo "id=$(cat "$RUNNER_TEMP/database-id")"
+            echo "name=$(cat "$RUNNER_TEMP/database-name")"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Preserve encrypted Terraform recovery state
         if: ${{ !success() }}
@@ -103,6 +117,17 @@ jobs:
       - name: Run tests
         run: bun run test
 
+      - name: Configure production database from Terraform
+        run: |
+          test -n "$DB_ID" && test -n "$DB_NAME"
+          jq --arg id "$DB_ID" --arg name "$DB_NAME" \
+            '(.d1_databases[] | select(.binding == "DB")) |= (.database_id = $id | .database_name = $name)' \
+            wrangler.jsonc > "$RUNNER_TEMP/wrangler.json"
+          mv "$RUNNER_TEMP/wrangler.json" wrangler.jsonc
+        env:
+          DB_ID: ${{ needs.infrastructure.outputs.database_id }}
+          DB_NAME: ${{ needs.infrastructure.outputs.database_name }}
+
       - name: Build
         run: bun run build
         env:
@@ -121,14 +146,12 @@ jobs:
           fi
 
       - name: Apply database migrations
-        run: bunx wrangler d1 migrations apply DB --remote
+        run: bunx wrangler d1 migrations apply DB --remote --config dist/server/wrangler.json
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
-      # Secrets are uploaded with the deploy rather than via `wrangler secret
-      # bulk`, which refuses to run while a PR preview version is the latest
-      # (undeployed) version.
+      # Upload secrets with the same production config as the Worker.
       - name: Write Worker secrets file
         run: |
           jq -n 'env | {SENTRY_DSN, VITE_SENTRY_DSN, VITE_WORKOS_CLIENT_ID, AI_TOKEN_ENCRYPTION_KEY}' \
@@ -144,7 +167,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy --secrets-file ${{ runner.temp }}/worker-secrets.json --var SENTRY_RELEASE:${{ github.sha }}
+          command: deploy --config dist/server/wrangler.json --secrets-file ${{ runner.temp }}/worker-secrets.json --var SENTRY_RELEASE:${{ github.sha }}
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

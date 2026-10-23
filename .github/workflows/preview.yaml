@@ -13,82 +13,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Creates the PR's database (Terraform stage pr-<n>) on its first push, and
-  # re-applies it when the PR changes infra/.
-  infrastructure:
-    # Fork and Dependabot PRs cannot read the `preview` environment secrets.
+  plan-production:
     if: >-
       github.event.pull_request.head.repo.full_name == github.repository &&
       github.actor != 'dependabot[bot]'
-    runs-on: ubuntu-latest
-    environment: preview
-    permissions:
-      contents: read
-      id-token: write
-    env:
-      STAGE: pr-${{ github.event.pull_request.number }}
-      TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-    outputs:
-      infra: ${{ steps.changes.outputs.infra }}
-      database_id: ${{ steps.database.outputs.id }}
-      database_name: ${{ steps.database.outputs.name }}
-    steps:
-      # The checkout is the PR merged into master; its first parent is master.
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 2
-
-      - uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.13.4
-          terraform_wrapper: false
-
-      - name: Detect infrastructure changes
-        id: changes
-        run: |
-          if git diff --quiet HEAD^1 HEAD -- infra/; then
-            echo "infra=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "infra=true" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Adopt legacy preview database
-        id: database_state
-        run: exec python3 infra/preview_database.py "$STAGE"
-
-      - name: Apply preview infrastructure
-        if: steps.changes.outputs.infra == 'true' || steps.database_state.outputs.exists == 'false' || steps.database_state.outputs.imported == 'true'
-        run: exec infra/terraform.sh "$STAGE" apply -input=false -auto-approve
-
-      - name: Read preview database
-        id: database
-        run: |
-          source infra/ci-signals.sh
-          run infra/terraform.sh "$STAGE" output -raw database_id > "$RUNNER_TEMP/database-id"
-          run infra/terraform.sh "$STAGE" output -raw database_name > "$RUNNER_TEMP/database-name"
-          {
-            echo "id=$(cat "$RUNNER_TEMP/database-id")"
-            echo "name=$(cat "$RUNNER_TEMP/database-name")"
-          } >> "$GITHUB_OUTPUT"
-
-      - name: Preserve encrypted Terraform recovery state
-        if: ${{ !success() }}
-        uses: actions/upload-artifact@v7.0.2
-        with:
-          name: terraform-recovery-preview
-          path: |
-            ${{ runner.temp }}/terraform-recovery/**/*.enc
-            ${{ runner.temp }}/terraform-recovery/**/*.hmac
-          retention-days: 1
-          if-no-files-found: ignore
-
-  # Shows what merging would do to production; the deploy workflow applies it.
-  # The preview environment may only read the prod state, so this plan does
-  # not take the lock.
-  plan-production:
-    needs: infrastructure
-    if: needs.infrastructure.outputs.infra == 'true'
     runs-on: ubuntu-latest
     environment: preview
     permissions:
@@ -128,7 +56,9 @@ jobs:
           if-no-files-found: ignore
 
   preview:
-    needs: infrastructure
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     environment: preview
     steps:
@@ -141,103 +71,26 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      # VITE_DEMO_DATA builds in the in-memory Hacker News API that serves
-      # src/demo-data/hacker-news.ts instead of the live API. Sign-in returns to the
-      # PR's alias URL rather than the production one in .env.production.
-      - name: Build
-        run: |
-          prod_host=$(sed -n 's|^VITE_WORKOS_REDIRECT_URI=https://\([^/]*\)/.*|\1|p' .env.production)
-          if [ -z "$prod_host" ]; then
-            echo "No production redirect URI in .env.production" >&2
-            exit 1
-          fi
-          export VITE_WORKOS_REDIRECT_URI="https://pr-${PR_NUMBER}-${prod_host}/auth/callback"
-          echo "Sign-in redirect: ${VITE_WORKOS_REDIRECT_URI}"
-          bun run build
-        env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          VITE_DEMO_DATA: "true"
-          VITE_SENTRY_ENVIRONMENT: preview
-          VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
-          VITE_WORKOS_CLIENT_ID: ${{ secrets.VITE_WORKOS_CLIENT_ID }}
-          AI_TOKEN_ENCRYPTION_KEY: ${{ secrets.AI_TOKEN_ENCRYPTION_KEY }}
+      - name: Build static demo
+        run: bun run build:demo
 
-      - name: Verify build serves demo data
+      - name: Verify static demo
         run: |
-          if ! grep -rqF hackerfeed-demo-data dist; then
-            echo "Preview build does not include the demo Hacker News API" >&2
+          test -s dist/client/index.html
+          if ! grep -rqF hackerfeed-demo-data dist/client; then
+            echo "Demo fixtures are missing from the static client" >&2
             exit 1
           fi
 
-      # The PR's database, from the infrastructure job, is bound as DB in the
-      # generated dist/server/wrangler.json. Every wrangler command below passes
-      # that file with --config: `d1 migrations` ignores the build's config
-      # redirect and would otherwise read wrangler.jsonc, i.e. the production
-      # database. Migrations run on the previous push's fixture rows.
-      - name: Apply database migrations
-        run: |
-          config=dist/server/wrangler.json
-          prod_db_id=$(jq -r '.d1_databases[] | select(.binding == "DB") | .database_id' "$config")
-          if [ -z "$DB_ID" ] || [ "$DB_ID" = "$prod_db_id" ]; then
-            echo "Preview database id '${DB_ID}' is missing or is the production database" >&2
-            exit 1
-          fi
-
-          jq --arg id "$DB_ID" --arg name "$DB_NAME" \
-            '(.d1_databases[] | select(.binding == "DB")) |= (.database_id = $id | .database_name = $name)' \
-            "$config" > "$config.tmp"
-          mv "$config.tmp" "$config"
-          echo "PROD_DB_ID=$prod_db_id" >> "$GITHUB_ENV"
-
-          bunx wrangler d1 migrations apply DB --remote --config "$config"
-
-          expected=$(find migrations -maxdepth 1 -name '*.sql' | wc -l)
-          applied=$(bunx wrangler d1 execute DB --remote --config "$config" --json \
-            --command "SELECT COUNT(*) AS n FROM d1_migrations" | jq -r '.[0].results[0].n')
-          if [ "$applied" != "$expected" ]; then
-            echo "Preview database has ${applied} migrations applied, expected ${expected}" >&2
-            exit 1
-          fi
-        env:
-          DB_ID: ${{ needs.infrastructure.outputs.database_id }}
-          DB_NAME: ${{ needs.infrastructure.outputs.database_name }}
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-
-      # Replaces every row with src/demo-data/database.
-      - name: Load demo data
-        run: |
-          bun scripts/demo-data-sql.ts > "$RUNNER_TEMP/demo-data.sql"
-          bunx wrangler d1 execute DB --remote --config dist/server/wrangler.json --file "$RUNNER_TEMP/demo-data.sql"
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-
-      # Uploads a Worker version without promoting it to production, and
-      # aliases it to a stable per-PR URL. Its Sentry events are tagged with
-      # the preview environment rather than production.
+      # versions upload requires an existing Worker. Deploying this assets-only
+      # config also bootstraps it on the first run; it never targets production.
       - name: Upload preview version
         run: |
-          bunx wrangler versions upload --config dist/server/wrangler.json --preview-alias "pr-${PR_NUMBER}" --message "PR #${PR_NUMBER} @ ${HEAD_SHA}" \
-            --var SENTRY_ENVIRONMENT:preview
+          bunx wrangler deploy --config wrangler.preview.jsonc
+          bunx wrangler versions upload --config wrangler.preview.jsonc --preview-alias "pr-${PR_NUMBER}" --message "PR #${PR_NUMBER} @ ${HEAD_SHA}"
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          WRANGLER_OUTPUT_FILE_PATH: ${{ runner.temp }}/wrangler-output.ndjson
-
-      - name: Verify preview is not bound to production database
-        run: |
-          version_id=$(jq -r 'select(.type == "version-upload") | .version_id' "$WRANGLER_OUTPUT_FILE_PATH" | tail -n1)
-          bound_db_id=$(bunx wrangler versions view "$version_id" --json --config dist/server/wrangler.json \
-            | jq -r '.resources.bindings[] | select(.type == "d1" and .name == "DB") | .id')
-          if [ -z "$bound_db_id" ] || [ "$bound_db_id" = "$PROD_DB_ID" ]; then
-            echo "Preview version ${version_id} is bound to '${bound_db_id}', not an isolated database" >&2
-            exit 1
-          fi
-          echo "Preview version ${version_id} uses database ${bound_db_id}"
-        env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           WRANGLER_OUTPUT_FILE_PATH: ${{ runner.temp }}/wrangler-output.ndjson
@@ -246,8 +99,8 @@ jobs:
         run: |
           alias_url=$(jq -r 'select(.type == "version-upload") | .preview_alias_url // empty' "$WRANGLER_OUTPUT_FILE_PATH" | tail -n1)
           version_url=$(jq -r 'select(.type == "version-upload") | .preview_url // empty' "$WRANGLER_OUTPUT_FILE_PATH" | tail -n1)
-          if [ -z "$alias_url" ]; then
-            echo "No preview alias URL found in wrangler output" >&2
+          if [ -z "$alias_url" ] || [ -z "$version_url" ]; then
+            echo "Missing preview URLs in wrangler output" >&2
             exit 1
           fi
 
@@ -261,7 +114,7 @@ jobs:
           | **Commit preview** | $version_url |
           | **Commit** | \`${HEAD_SHA:0:7}\` |
 
-          Shows only the dummy data in \`src/demo-data\`: its own D1 database (\`hackerfeed-web-pr-${PR_NUMBER}\`, Terraform stage \`pr-${PR_NUMBER}\`, reloaded on every push and destroyed when the PR closes) and an in-memory Hacker News API. Uses production secrets."
+          Fixture-backed static demo. Fixed demo session; favorites and views reset on refresh. No database, real sign-in, or AI connections. Does not validate migrations or backend behavior."
 
           comment_id=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" --paginate \
             --jq "map(select(.body | startswith(\"$marker\"))) | first | .id // empty")

@@ -24,7 +24,7 @@ export const smallModels = paper({
 });
 ```
 
-Rows that reference other rows take the row, not its id, so the files import
+Rows that reference other rows take the row, rather than its id, so the files import
 each other and the data stays linked:
 
 ```ts
@@ -39,20 +39,25 @@ row lists. Shared dates and timestamp helpers live in `defaults.ts`.
 
 ## Where it is used
 
-- **Cloudflare PR previews** (`.github/workflows/preview.yaml`): each push
-  applies the PR's migrations to the PR's database, then replaces every row
-  with `database/`. The Hacker News data is built into the preview.
-- **Private preview** (`bun run preview:private`): the same, on a local
-  database. See `docs/private-preview.md`.
+Cloudflare PR previews and `bun run preview:private` build a static SPA with
+`VITE_DEMO_DATA=true`. The demo tRPC link (`src/lib/trpc/demo.ts`) projects
+these rows into the same API shapes used by the app. Hacker News requests
+use `src/lib/hacker-news/demo-api.ts`.
 
-Production builds never include this data; `build.yaml` and `deploy.yaml`
-fail if they do.
+Every page starts as Demo Reader (`demo@example.com`) with seeded story and
+paper favorites. Changes live in browser memory, shared across client
+instances on that page. Refreshing or choosing **Reset demo** restores the
+fixtures. There is no WorkOS sign-in, database, browser SQL engine, or AI
+connection. AI stays disabled. Local favorites from an earlier app session
+are not imported.
 
-## The demo user
+Only `dist/client` is deployed, using `wrangler.preview.jsonc`. Its SPA
+fallback supports direct links to stories, papers, favorites, and profiles.
+Production keeps SSR, WorkOS, and D1; production builds exclude demo fixtures.
 
-Rows for `demoUser` (`database/app-users.ts`) are copied to anyone who signs in
-to a preview, so a new account starts with favorites, saved papers and history.
-Give every per-user table at least one `demoUser` row.
+These previews check UI behavior with fixed data. They do not rehearse
+migrations, validate D1 queries, or test authentication and AI providers.
+Run the backend tests and review the production Terraform plan separately.
 
 ## When the schema changes
 
@@ -65,8 +70,7 @@ and fails, naming the table, row and column, when:
 - a value has the wrong type, is not one of an enum's values, or is not a
   date in a `...At` / `...Date` column,
 - a row references a row that does not exist,
-- a table is missing from `database/index.ts`,
-- the rows cannot be loaded into a database built from `migrations/`.
+- a table is missing from `database/index.ts`.
 
 So adding a column usually means adding a default to that table's factory, and
 overriding it on the rows that should show the feature off.

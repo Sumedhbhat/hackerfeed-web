@@ -97,7 +97,7 @@ function RootError({ error }: { error: unknown }) {
 
 function AppLayout() {
 	useEffect(() => {
-		if (import.meta.env.DEV) {
+		if (import.meta.env.DEV || import.meta.env.VITE_DEMO_DATA === "true") {
 			navigator.serviceWorker
 				?.getRegistrations()
 				.then((registrations) =>
@@ -131,7 +131,9 @@ function AppLayout() {
 	return (
 		<AuthProvider>
 			<TanStackQueryProvider>
-				<LocalFavoritesMigration />
+				{import.meta.env.VITE_DEMO_DATA !== "true" && (
+					<LocalFavoritesMigration />
+				)}
 				<AppShell header={<SiteHeader />} footer={<SiteFooter />}>
 					<SessionGate>
 						<Outlet />

@@ -52,9 +52,9 @@ class CancellationTests(unittest.TestCase):
         infra = directory / "infra"
         (infra / "terraform").mkdir(parents=True)
         for name in ("terraform.sh", "state_proxy.py", "recovery_state.py", "commands.py",
-                     "ci-signals.sh", "preview_database.py"):
+                     "ci-signals.sh"):
             shutil.copy(ROOT / "infra" / name, infra)
-        # Only substitute network transport and discovery. Keep the actual
+        # Only substitute network transport. Keep the actual
         # workflow, shell helper, Python forwarding, proxy, and encryption.
         wrapper = infra / "terraform.sh"
         wrapper.write_text(wrapper.read_text().replace("/state_proxy.py", "/local.py"))
@@ -112,12 +112,8 @@ if os.environ.get("SLOW_RECOVERY") == "true":
     p.preserve_recovery = preserve
 sys.exit(p.main())
 ''')
-        preview = infra / "preview_database.py"
-        preview.write_text(preview.read_text().replace('if __name__ == "__main__":', '''# Local test inventory, no Cloudflare request.
-discover = lambda *args: "11111111-1111-1111-1111-111111111111"
-if __name__ == "__main__":'''))
         return {**os.environ, "GITHUB_ACTIONS": "true", "RUNNER_TEMP": str(directory),
-                "CLOUDFLARE_API_TOKEN": SECRET, "STAGE": "pr-42", "EXISTS": "true",
+                "CLOUDFLARE_API_TOKEN": SECRET,
                 "TF_VAR_cloudflare_account_id": "0" * 32,
                 "ACTIONS_ID_TOKEN_REQUEST_URL": "https://job.actions.githubusercontent.com/token",
                 "ACTIONS_ID_TOKEN_REQUEST_TOKEN": "disposable-local-oidc",
@@ -126,9 +122,9 @@ if __name__ == "__main__":'''))
                 # A hostile/inherited retry value must not lengthen cleanup.
                 "CHECKPOINT_DISABLE": "1", "TF_HTTP_RETRY_MAX": "99"}
 
-    def cancel(self, directory, env, workflow, step, signum, *, runner_deadline=False):
+    def cancel(self, directory, env, workflow, step, signum, *, runner_deadline=False, command=None):
         script = directory / "step.sh"
-        script.write_text(workflow_step(workflow, step) + 'touch "$RUNNER_TEMP/continued"\n')
+        script.write_text((command or workflow_step(workflow, step)) + 'touch "$RUNNER_TEMP/continued"\n')
         child = subprocess.Popen(["bash", "--noprofile", "--norc", "-e", "-o", "pipefail", str(script)],
                                  cwd=directory, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         pids = {child.pid}
@@ -204,22 +200,19 @@ sys.exit(1)
 ''')
                 fake.chmod(0o700)
                 env.update(PATH=str(binary) + os.pathsep + env["PATH"], SLOW_RECOVERY="true")
-                code = self.cancel(directory, env, "preview.yaml", "Apply preview infrastructure", signum)
+                code = self.cancel(directory, env, "deploy.yaml", "Apply infrastructure", signum)
                 self.assertEqual(code, 128 + signum)
                 self.assert_recovery(directory, "confidential-recovery-state")
 
     def test_workflow_shells_forward_through_every_nested_caller(self):
         cases = [
-            ("preview.yaml", "Apply preview infrastructure", "apply"),
+            ("deploy.yaml", "Apply infrastructure", "apply"),
             ("deploy.yaml", "Apply infrastructure", "init"),
             ("deploy.yaml", "Plan infrastructure", "plan"),
             ("deploy.yaml", "Plan infrastructure", "show"),
             ("preview.yaml", "Plan production infrastructure", "plan"),
             ("preview.yaml", "Plan production infrastructure", "show"),
-            ("preview.yaml", "Read preview database", "output"),
-            ("preview-cleanup.yaml", "Destroy preview infrastructure", "destroy"),
-            ("preview.yaml", "Adopt legacy preview database", "import"),
-            ("preview-cleanup.yaml", "Adopt legacy preview database", "import"),
+            ("deploy.yaml", "Read production database", "output"),
         ]
         for workflow, step, command in cases:
             for signum in (signal.SIGINT, signal.SIGTERM):
@@ -283,14 +276,18 @@ resource "terraform_data" "local" {
 '''
                         (directory / "infra/terraform/main.tf").write_text(config)
                         if destroy:
-                            result = subprocess.run(["infra/terraform.sh", "pr-42", "apply", "-input=false", "-auto-approve"],
+                            result = subprocess.run(["infra/terraform.sh", "prod", "apply", "-input=false", "-auto-approve"],
                                                     cwd=directory, env=env, capture_output=True, timeout=15)
                             self.assertEqual(result.returncode, 0, result.stderr)
                             (directory / "events").unlink()
+                        if not destroy:
+                            result = subprocess.run(["infra/terraform.sh", "prod", "plan", "-input=false", "-out=tfplan"],
+                                                    cwd=directory, env=env, capture_output=True, timeout=15)
+                            self.assertEqual(result.returncode, 0, result.stderr)
                         env["FAIL_SAVE"] = str(fail_save).lower()
                         self.cancel(directory, env,
-                                    "preview-cleanup.yaml" if destroy else "preview.yaml",
-                                    "Destroy preview infrastructure" if destroy else "Apply preview infrastructure", signum)
+                                    "deploy.yaml", "Apply infrastructure", signum,
+                                    command="exec infra/terraform.sh prod destroy -input=false -auto-approve\n" if destroy else None)
                         events = [json.loads(line) for line in (directory / "events").read_text().splitlines()]
                         self.assertTrue(any(event["method"] == "POST" and not event["url"].endswith("/lock") for event in events))
                         self.assertEqual(events[-1]["method"], "DELETE")
@@ -336,14 +333,18 @@ resource "terraform_data" "local" {
 '''
                     (directory / "infra/terraform/main.tf").write_text(config)
                     if destroy:
-                        result = subprocess.run(["infra/terraform.sh", "pr-42", "apply", "-input=false", "-auto-approve"],
+                        result = subprocess.run(["infra/terraform.sh", "prod", "apply", "-input=false", "-auto-approve"],
+                                                cwd=directory, env=env, capture_output=True, timeout=15)
+                        self.assertEqual(result.returncode, 0, result.stderr)
+                    if not destroy:
+                        result = subprocess.run(["infra/terraform.sh", "prod", "plan", "-input=false", "-out=tfplan"],
                                                 cwd=directory, env=env, capture_output=True, timeout=15)
                         self.assertEqual(result.returncode, 0, result.stderr)
                     env["FAIL_SAVE"] = failure
                     code = self.cancel(directory, env,
-                                       "preview-cleanup.yaml" if destroy else "preview.yaml",
-                                       "Destroy preview infrastructure" if destroy else "Apply preview infrastructure", signum,
-                                       runner_deadline=True)
+                                       "deploy.yaml", "Apply infrastructure", signum,
+                                       runner_deadline=True,
+                                       command="exec infra/terraform.sh prod destroy -input=false -auto-approve\n" if destroy else None)
                     self.assertEqual(code, 128 + signum)
                     restored = self.assert_recovery(directory)
                     original = directory / "infra/terraform/errored.tfstate"
@@ -356,7 +357,7 @@ resource "terraform_data" "local" {
                     (directory / "locked").unlink(missing_ok=True)
                     original.rename(directory / "acknowledged-error.tfstate")
                     env.pop("FAIL_SAVE")
-                    result = subprocess.run(["infra/terraform.sh", "pr-42", "state", "push", str(restored)],
+                    result = subprocess.run(["infra/terraform.sh", "prod", "state", "push", str(restored)],
                                             cwd=directory, env=env, capture_output=True, timeout=15)
                     self.assertEqual(result.returncode, 0, result.stderr)
                     self.assertEqual(json.loads((directory / "saved-state").read_bytes())["resources"],

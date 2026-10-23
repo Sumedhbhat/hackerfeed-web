@@ -8,7 +8,23 @@ type AuthSessionState = {
 	user: AuthSessionUser | null;
 };
 
-export function useAuthSession(): AuthSessionState {
+export const useAuthSession =
+	import.meta.env.VITE_DEMO_DATA === "true" ? useDemoSession : useWorkosSession;
+
+function useDemoSession(): AuthSessionState {
+	return {
+		isLoading: false,
+		user: {
+			id: "demo-user",
+			email: "demo@example.com",
+			firstName: "Demo",
+			lastName: "Reader",
+			profilePictureUrl: null,
+		},
+	};
+}
+
+function useWorkosSession(): AuthSessionState {
 	const { isLoading, user } = useAuth();
 	return { isLoading, user };
 }

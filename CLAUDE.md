@@ -14,7 +14,7 @@ bun run dev          # Start dev server on port 3000
 
 # Build & deploy
 bun run build        # Production build
-bun run deploy       # Build + deploy to Cloudflare Workers (wrangler)
+gh workflow run deploy.yaml  # Deploy with Terraform outputs in CI
 
 # Testing
 bun run test         # Run all tests (vitest)
@@ -34,7 +34,7 @@ bun run check        # Biome check (lint + format together)
 
 ### Infrastructure
 
-`infra/terraform` creates Cloudflare resources (today, one D1 database per stage: `prod`, or `pr-<n>` for a PR preview) and nothing else. It must not deploy code or run migrations: the Worker is deployed by wrangler from `wrangler.jsonc`, and migrations run in their own CI step. CI reconciles production infrastructure and the state server on every production run, always through `infra/terraform.sh`: state lives in the `infra/state-backend` Worker, which signs CI in with GitHub OIDC, so there is no state password and Terraform runs only in CI. See README > Infrastructure.
+`infra/terraform` creates Cloudflare resources (today, the production D1 database `hackerfeed`) and nothing else. It must not deploy code or run migrations: the Worker is deployed by wrangler from `wrangler.jsonc`, and migrations run in their own CI step. CI reconciles production infrastructure and the state server on every production run, always through `infra/terraform.sh`: state lives in the `infra/state-backend` Worker, which signs CI in with GitHub OIDC, so there is no state password and Terraform runs only in CI. CI reads its database identity from Terraform outputs before building and migrating. PR demos deploy static assets with browser-memory fixtures through `wrangler.preview.jsonc`. See README > Infrastructure.
 
 ### Data flow
 

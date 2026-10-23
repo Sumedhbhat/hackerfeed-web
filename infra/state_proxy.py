@@ -22,7 +22,7 @@ from recovery_state import crypt
 from commands import Commands
 
 STATE_URL = "https://hackerfeed-terraform-state.kgqk4vdcfq.workers.dev"
-STAGE = re.compile(r"^(prod|pr-[1-9][0-9]*)$")
+STAGE = re.compile(r"^prod$")
 
 
 class RunnerError(Exception):
@@ -237,7 +237,7 @@ def main():
     address = f"http://127.0.0.1:{server.server_port}/states/{stage}"
     env = {key: value for key, value in os.environ.items() if not key.startswith("TF_HTTP_") and
            not key.startswith("ACTIONS_ID_TOKEN_REQUEST_")}
-    env.update(TF_HTTP_PASSWORD=password, TF_HTTP_USERNAME="github", TF_VAR_stage=stage,
+    env.update(TF_HTTP_PASSWORD=password, TF_HTTP_USERNAME="github",
                TF_HTTP_ADDRESS=address, TF_HTTP_LOCK_ADDRESS=address + "/lock",
                TF_HTTP_UNLOCK_ADDRESS=address + "/lock", TF_HTTP_RETRY_MAX="0")
     directory = Path(__file__).resolve().parent / "terraform"
@@ -245,10 +245,6 @@ def main():
         try:
             if (directory / "errored.tfstate").exists():
                 raise RunnerError("Existing errored.tfstate requires recovery before another Terraform command")
-            if command == "delete-state":
-                auth = base64.b64encode(f"github:{password}".encode()).decode()
-                status, _, _ = request(address, method="DELETE", headers={"Authorization": "Basic " + auth})
-                return 0 if status == 200 else 1
             # Environment-only addresses stay out of saved plans, which another
             # invocation applies through a new ephemeral port and password.
             result = commands.run(["terraform", "init", "-input=false", "-reconfigure"],

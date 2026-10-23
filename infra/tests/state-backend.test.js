@@ -55,7 +55,7 @@ const server = Bun.serve({
 			);
 			issuedTokens++;
 			return Response.json({
-				value: await token("preview", Math.floor(Date.now() / 1000) + 2),
+				value: await token("production", Math.floor(Date.now() / 1000) + 2),
 			});
 		}
 		// The deployed workers.dev edge rejects urllib's default User-Agent
@@ -81,7 +81,7 @@ const server = Bun.serve({
 const base = `http://127.0.0.1:${server.port}`;
 env.JWKS_URL = base + "/jwks";
 async function token(
-	environment = "preview",
+	environment = "production",
 	expiry = "1h",
 	repository = env.GITHUB_REPOSITORY_ID,
 ) {
@@ -95,8 +95,8 @@ async function token(
 		.setExpirationTime(expiry)
 		.sign(privateKey);
 }
-const preview = await token();
-async function request(stage, method, body, jwt = preview, suffix = "/lock") {
+const production = await token();
+async function request(stage, method, body, jwt = production, suffix = "/lock") {
 	return fetch(`${base}/states/${stage}${suffix}`, {
 		method,
 		body: body === undefined ? undefined : JSON.stringify(body),
@@ -114,7 +114,7 @@ test("post-commit retry preserves metadata and excludes 19 concurrent owners", a
 			{ length: 20 },
 			async (_, i) =>
 				(
-					await request("pr-42", "POST", {
+					await request("prod", "POST", {
 						ID: `owner-${i}`,
 						Info: `original-${i}`,
 					})
@@ -125,70 +125,77 @@ test("post-commit retry preserves metadata and excludes 19 concurrent owners", a
 	expect(statuses.filter((status) => status === 423)).toHaveLength(19);
 	const held = sqlite
 		.query("SELECT lock_id, lock_info FROM states WHERE name = ?")
-		.get("pr-42");
+		.get("prod");
 	expect(
-		(await request("pr-42", "POST", { ID: held.lock_id, Info: "changed" }))
+		(await request("prod", "POST", { ID: held.lock_id, Info: "changed" }))
 			.status,
 	).toBe(200);
 	expect(
-		sqlite.query("SELECT lock_info FROM states WHERE name = ?").get("pr-42")
+		sqlite.query("SELECT lock_info FROM states WHERE name = ?").get("prod")
 			.lock_info,
 	).toBe(held.lock_info);
-	expect((await request("pr-42", "POST", { ID: "intruder" })).status).toBe(423);
-	expect((await request("pr-42", "DELETE", { ID: "intruder" })).status).toBe(
+	expect((await request("prod", "POST", { ID: "intruder" })).status).toBe(423);
+	expect((await request("prod", "DELETE", { ID: "intruder" })).status).toBe(
 		423,
 	);
 	expect(
-		(await request("pr-42", "POST", { version: 4 }, preview, "?ID=intruder"))
+		(await request("prod", "POST", { version: 4 }, production, "?ID=intruder"))
 			.status,
 	).toBe(423);
 	expect(
 		(
 			await request(
-				"pr-42",
+				"prod",
 				"POST",
 				{ version: 4 },
-				preview,
+				production,
 				`?ID=${held.lock_id}`,
 			)
 		).status,
 	).toBe(200);
-	expect((await request("pr-42", "DELETE", { ID: held.lock_id })).status).toBe(
+	expect((await request("prod", "DELETE", { ID: held.lock_id })).status).toBe(
 		200,
 	);
-	expect((await request("pr-42", "POST", { ID: "next" })).status).toBe(200);
+	expect((await request("prod", "POST", { ID: "next" })).status).toBe(200);
+	await request("prod", "DELETE", { ID: "next" });
 });
 
 test("authentication, expiry, repository and environment restrictions remain enforced", async () => {
-	expect((await request("pr-43", "POST", { ID: "x" }, "invalid")).status).toBe(
+	expect((await request("prod", "POST", { ID: "x" }, "invalid")).status).toBe(
 		401,
 	);
 	expect(
-		(await request("pr-43", "POST", { ID: "x" }, await token("preview", -1)))
+		(await request("prod", "POST", { ID: "x" }, await token("preview", -1)))
 			.status,
 	).toBe(401);
 	expect(
 		(
 			await request(
-				"pr-43",
+				"prod",
 				"POST",
 				{ ID: "x" },
 				await token("preview", "1h", "other"),
 			)
 		).status,
 	).toBe(401);
-	expect((await request("prod", "POST", { ID: "x" })).status).toBe(403);
+	expect(
+		(await request("prod", "POST", { ID: "x" }, await token("preview"))).status,
+	).toBe(403);
+	expect(
+		(await request("prod", "GET", undefined, await token("preview"), "")).status,
+	).toBe(200);
 	expect(
 		(await request("pr-43", "POST", { ID: "x" }, await token("production")))
 			.status,
-	).toBe(403);
-	expect((await request("pr-43", "POST", { ID: 4 })).status).toBe(400);
+	).toBe(404);
+	expect((await request("prod", "POST", { ID: 4 })).status).toBe(400);
 });
 
 const terraform = Bun.which("terraform");
 (terraform ? test : test.skip)(
 	"Terraform retries a lost committed lock response and saves/unlocks successfully",
 	async () => {
+		sqlite.exec("DELETE FROM states");
 		const directory = await mkdtemp(join(tmpdir(), "hackerfeed-lock-"));
 		try {
 			await writeFile(
@@ -206,10 +213,10 @@ resource "terraform_data" "local" { input = "local-only" }
 			const env = {
 				...process.env,
 				CHECKPOINT_DISABLE: "1",
-				TF_HTTP_ADDRESS: base + "/states/pr-44",
-				TF_HTTP_LOCK_ADDRESS: base + "/states/pr-44/lock",
-				TF_HTTP_UNLOCK_ADDRESS: base + "/states/pr-44/lock",
-				TF_HTTP_PASSWORD: preview,
+				TF_HTTP_ADDRESS: base + "/states/prod",
+				TF_HTTP_LOCK_ADDRESS: base + "/states/prod/lock",
+				TF_HTTP_UNLOCK_ADDRESS: base + "/states/prod/lock",
+				TF_HTTP_PASSWORD: production,
 				TF_HTTP_RETRY_WAIT_MIN: "1",
 			};
 			async function run(args) {
@@ -235,7 +242,7 @@ resource "terraform_data" "local" { input = "local-only" }
 			expect(events.slice(start)).not.toContain(423);
 			const state = sqlite
 				.query("SELECT lock_id, state FROM states WHERE name = ?")
-				.get("pr-44");
+				.get("prod");
 			expect(state.lock_id).toBeNull();
 			expect(JSON.parse(state.state).resources).toHaveLength(1);
 			expect(await Bun.file(join(directory, "errored.tfstate")).exists()).toBe(
@@ -251,6 +258,7 @@ resource "terraform_data" "local" { input = "local-only" }
 (terraform ? test : test.skip)(
 	"runner renews real signed JWTs during Terraform apply and the Worker still saves state/unlocks",
 	async () => {
+		sqlite.exec("DELETE FROM states");
 		const directory = await mkdtemp(join(tmpdir(), "hackerfeed-proxy-"));
 		try {
 			const infra = join(directory, "infra");
@@ -274,7 +282,7 @@ resource "terraform_data" "local" {
 `,
 			);
 			// Replace transport only. The Worker's signature/issuer/audience/repo
-			// verification and stage permissions are unchanged from deployed f026dee.
+			// verification and production/preview permissions remain real.
 			// Exercise the runner's job URL shape, including its existing query.
 			await writeFile(
 				join(infra, "local.py"),
@@ -288,13 +296,13 @@ class LocalOnly:
         url = urlsplit(req.full_url)
         if url.hostname == "pipelinesghubeus2.actions.githubusercontent.com":
             target = "${base}" + url.path + "?" + url.query
-        elif req.full_url.startswith(runner.STATE_URL + "/states/pr-45"):
+        elif req.full_url.startswith(runner.STATE_URL + "/states/prod"):
             target = "${base}" + url.path + ("?" + url.query if url.query else "")
         else:
             raise ValueError("Unexpected nonlocal test destination")
         return original.open(Request(target, data=req.data, headers=dict(req.headers), method=req.method), **kwargs)
 runner.HTTP = LocalOnly()
-sys.argv = ["runner", "pr-45", "apply", "-auto-approve", "-input=false", "-no-color"]
+sys.argv = ["runner", "prod", "apply", "-auto-approve", "-input=false", "-no-color"]
 sys.exit(runner.main())
 `,
 			);
@@ -322,7 +330,7 @@ sys.exit(runner.main())
 			expect(issuedTokens - start).toBeGreaterThan(1);
 			const state = sqlite
 				.query("SELECT lock_id, state FROM states WHERE name = ?")
-				.get("pr-45");
+				.get("prod");
 			expect(state.lock_id).toBeNull();
 			expect(JSON.parse(state.state).resources).toHaveLength(1);
 			expect(

@@ -10,6 +10,7 @@ import { logger, setLogUser } from "#/lib/logger";
  * short-lived access token on its own.
  */
 export function AuthProvider({ children }: { children: ReactNode }) {
+	if (import.meta.env.VITE_DEMO_DATA === "true") return children;
 	return (
 		<AuthKitProvider
 			clientId={env.VITE_WORKOS_CLIENT_ID}

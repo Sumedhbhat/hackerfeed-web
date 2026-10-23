@@ -8,45 +8,28 @@ developer's local Wrangler OAuth session or put its credentials in GitHub.
 
 On pushes to `master` (and manual dispatch), the workflow:
 
-1. Deploys the Terraform state server (`infra/state-backend`) with wrangler
-   when the push changes it.
-2. Applies the `prod` stage of `infra/terraform` when the push changes
-   `infra/` (manual runs always apply). It stops if the plan would delete or
-   replace the production D1 database.
-3. Applies remote D1 migrations with `wrangler d1 migrations apply DB --remote`.
-4. Uploads the Worker, its `DB` binding, the cron trigger, and Worker settings.
-5. Uploads the Worker secrets listed in the workflow.
+1. Deploys the Terraform state server (`infra/state-backend`) with Wrangler.
+2. Plans and applies the production database `hackerfeed` through Terraform.
+3. Reads the database identity from Terraform outputs and configures Wrangler
+   before building the app.
+4. Applies remote migrations with the generated `dist/server/wrangler.json`.
+5. Deploys `hackerfeed-web` with the same config and its production secrets.
 
-The Worker is `hackerfeed-web` and its D1 database is `hackerfeed`, bound as
-`DB` in `wrangler.jsonc`.
+`.github/workflows/preview.yaml` uses the `preview` environment for same-repo,
+non-Dependabot pull requests. It builds a static fixture demo and deploys only
+`dist/client` to the separate `hackerfeed-demo` Worker using
+`wrangler.preview.jsonc`. A deploy bootstraps this assets-only Worker because
+`versions upload` requires it to exist. The following version upload returns a
+stable PR alias and immutable commit URL, which CI reports on the PR.
 
-`.github/workflows/preview.yaml` uses the `preview` environment on every
-same-repo, non-Dependabot pull request. It:
+The demo has no Worker script, database bindings, auth secrets, or AI keys.
+It uses a fixed demo session and browser memory that resets on refresh.
+It does not validate migrations, database queries, or real sign-in. A separate
+read-only production Terraform plan appears in the workflow summary.
 
-1. Applies the `pr-<number>` Terraform stage on the PR's first push, and
-   again whenever the PR changes `infra/`. That stage is a D1 database
-   named `hackerfeed-web-pr-<number>`. A PR that changes `infra/` also plans
-   `prod` and shows the plan in its job summary.
-2. Rebinds `DB` to the PR's database in the generated
-   `dist/server/wrangler.json`, applies all migrations to it, then replaces
-   every row with the dummy data in `src/demo-data/database`. The PR's
-   migrations are rehearsed there on the previous push's fixture rows;
-   production data is never touched by preview code. The build also serves
-   Hacker News from `src/demo-data/hacker-news.ts`.
-3. Runs `wrangler versions upload --preview-alias pr-<number>`. This uploads a
-   Worker version without deploying it, so production traffic is unaffected.
-4. Fails the job if the uploaded version is bound to the production database.
-5. Comments the preview URLs on the PR.
-
-`.github/workflows/preview-cleanup.yaml` destroys the PR's stage and deletes
-its Terraform state when the PR closes. Previews still share the production Worker secrets (Sentry, the AI
-token key). Sign-in on a preview returns to its alias URL, so WorkOS must allow
-`https://pr-<number>-hackerfeed-web.kgqk4vdcfq.workers.dev/auth/callback`. The same
-data can be run locally, tailnet-only, with `docs/private-preview.md`.
-
-Because a preview upload makes the latest Worker version an undeployed one,
-the production deploy passes secrets with `wrangler deploy --secrets-file`.
-`wrangler secret bulk` refuses to edit secrets in that state.
+Legacy preview databases and state remain untouched. Their retirement requires
+a separate operation; there is no preview database cleanup workflow now.
+See [private previews](private-preview.md) to run the same static demo locally.
 
 ## Create the token
 
@@ -78,16 +61,18 @@ read-all permissions unless the workflow is changed to use those services.
 The workflows use two GitHub environments:
 
 - `production`: `deploy.yaml`. Only `master` may deploy from it.
-- `preview`: `preview.yaml` and `preview-cleanup.yaml`, for pull requests.
+- `preview`: `preview.yaml`, for pull requests.
 
 1. In GitHub, open this repository's **Settings** > **Environments**.
 2. In each environment, add or update the secret `CLOUDFLARE_API_TOKEN` with
    the token value, and `CLOUDFLARE_ACCOUNT_ID`. The account id is an
    identifier, not a secret, but keeping it alongside the deployment
    configuration is fine.
-3. Both environments also need `VITE_SENTRY_DSN` and `VITE_WORKOS_CLIENT_ID`;
-   `production` also needs `SENTRY_AUTH_TOKEN`. `AI_TOKEN_ENCRYPTION_KEY` is a
-   repository secret, so every job already has it.
+3. Only `production` needs `VITE_SENTRY_DSN`, `VITE_WORKOS_CLIENT_ID`,
+   `SENTRY_AUTH_TOKEN`, and `AI_TOKEN_ENCRYPTION_KEY`. Preview builds receive
+   none of these secrets. The preview Cloudflare token needs Workers Scripts
+   Edit for the demo Worker and D1 Read for the production plan; production
+   needs D1 Edit as described above.
 4. Do not commit any of these values to `.env*`, `.dev.vars`, or the
    repository.
 
@@ -114,9 +99,9 @@ copied into GitHub secrets.
 
 ## Rotate or revoke
 
-Rotate the token before its 90-day expiry:
+Rotate each token before its 90-day expiry:
 
-1. Create a replacement token with the same two permissions and account scope.
+1. Create a replacement token with the same permissions and account scope.
 2. Replace `CLOUDFLARE_API_TOKEN` in the GitHub `production` and `preview`
    environments.
 3. Run the workflow and confirm it completes.

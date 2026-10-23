@@ -30,10 +30,7 @@ def load(name, filename):
 
 
 proxy = load("proxy", "state_proxy.py")
-preview = load("preview", "preview_database.py")
 recovery = load("recovery", "recovery_state.py")
-ACCOUNT = "0" * 32
-IDENTIFIER = "11111111-1111-1111-1111-111111111111"
 
 
 def jwt(expiry, audience=proxy.STATE_URL):
@@ -43,7 +40,7 @@ def jwt(expiry, audience=proxy.STATE_URL):
 
 @contextmanager
 def server(tokens, send, password="local-secret"):
-    instance = proxy.make_server("pr-42", password, tokens, send)
+    instance = proxy.make_server("prod", password, tokens, send)
     thread = threading.Thread(target=instance.serve_forever, daemon=True)
     thread.start()
     try:
@@ -121,12 +118,12 @@ class ProxyTests(unittest.TestCase):
             return 401, {}, b"disposable-upstream-response"
         diagnostics = io.StringIO()
         with redirect_stderr(diagnostics), server(tokens, reject) as (base, _):
-            self.assertEqual(proxy.request(base + "/states/pr-42")[0], 401)
+            self.assertEqual(proxy.request(base + "/states/prod")[0], 401)
             self.assertIn("Terraform loopback authentication rejected", diagnostics.getvalue())
             self.assertFalse(calls)
             diagnostics.seek(0)
             diagnostics.truncate()
-            self.assertEqual(proxy.request(base + "/states/pr-42", headers=AUTH)[0], 401)
+            self.assertEqual(proxy.request(base + "/states/prod", headers=AUTH)[0], 401)
             self.assertEqual(len(calls), 2)
             self.assertEqual(len(upstream), 2)
             self.assertIn("Remote state endpoint returned HTTP 401 after GitHub OIDC token refresh", diagnostics.getvalue())
@@ -142,16 +139,16 @@ class ProxyTests(unittest.TestCase):
             return (401 if len(upstream) == 1 else 200), {"Location": "https://evil.invalid", "Set-Cookie": "secret"}, b"{}"
         with server(tokens, send) as (base, instance):
             self.assertEqual(instance.server_address[0], "127.0.0.1")
-            self.assertEqual(proxy.request(base + "/states/pr-42", headers=AUTH)[0], 200)
+            self.assertEqual(proxy.request(base + "/states/prod", headers=AUTH)[0], 200)
             self.assertEqual(len(calls), 2)
-            for path in ("/states/prod", "/states/pr-43", "/states/pr-42?target=evil", "/states/pr-42/../prod"):
+            for path in ("/states/other", "/states/pr-43", "/states/prod?target=evil", "/states/prod/../prod"):
                 self.assertEqual(proxy.request(base + path, headers=AUTH)[0], 400)
-            self.assertEqual(proxy.request(base + "/states/pr-42")[0], 401)
+            self.assertEqual(proxy.request(base + "/states/prod")[0], 401)
             self.assertEqual(len(upstream), 2)
-            self.assertTrue(all(url == proxy.STATE_URL + "/states/pr-42" for url, _ in upstream))
+            self.assertTrue(all(url == proxy.STATE_URL + "/states/prod" for url, _ in upstream))
             self.assertNotIn("local-secret", upstream[0][1]["headers"]["Authorization"])
         with server(tokens, lambda *args, **kwargs: (307, {"Location": "https://evil.invalid"}, b"")) as (base, _):
-            self.assertEqual(proxy.request(base + "/states/pr-42", headers=AUTH)[0], 502)
+            self.assertEqual(proxy.request(base + "/states/prod", headers=AUTH)[0], 502)
 
     def test_http_client_never_follows_redirects(self):
         from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -245,7 +242,7 @@ class ProxyTests(unittest.TestCase):
                 base = f"http://127.0.0.1:{instance.server_port}"
                 try:
                     with ThreadPoolExecutor(max_workers=1) as pool:
-                        pending = pool.submit(network, base + "/states/pr-42", method="POST", data=b"state")
+                        pending = pool.submit(network, base + "/states/prod", method="POST", data=b"state")
                         self.assertTrue(entered.wait(1))
                         if cancel:
                             network.cancel()
@@ -255,8 +252,8 @@ class ProxyTests(unittest.TestCase):
                         # unlock cannot overtake an ambiguous remote write.
                         release.set()
                         with self.assertRaises(proxy.RunnerError):
-                            network(base + "/states/pr-42/lock", method="DELETE")
-                        self.assertEqual(hits, ["/states/pr-42"])
+                            network(base + "/states/prod/lock", method="DELETE")
+                        self.assertEqual(hits, ["/states/prod"])
                 finally:
                     release.set()
                     instance.shutdown()
@@ -264,15 +261,15 @@ class ProxyTests(unittest.TestCase):
                     thread.join()
 
     def test_non_ci_runner_and_secure_recovery(self):
-        with patch.dict(os.environ, {}, clear=True), patch.object(proxy.sys, "argv", ["runner", "pr-42", "apply"]):
+        with patch.dict(os.environ, {}, clear=True), patch.object(proxy.sys, "argv", ["runner", "prod", "apply"]):
             with self.assertRaises(proxy.RunnerError):
                 proxy.main()
         with tempfile.TemporaryDirectory() as temporary, patch.dict(os.environ, {"RUNNER_TEMP": temporary, "CLOUDFLARE_API_TOKEN": "local-recovery-secret"}):
             directory = Path(temporary) / "terraform"
             directory.mkdir()
             (directory / "errored.tfstate").write_text("sensitive-state")
-            proxy.preserve_recovery(directory, "pr-42")
-            artifact = next((Path(temporary) / "terraform-recovery/pr-42").glob("*.enc"))
+            proxy.preserve_recovery(directory, "prod")
+            artifact = next((Path(temporary) / "terraform-recovery/prod").glob("*.enc"))
             self.assertNotIn(b"sensitive-state", artifact.read_bytes())
             restored = Path(temporary) / "restored.tfstate"
             recovery.crypt(artifact, restored, decrypt=True)
@@ -316,7 +313,7 @@ else: fail()
                        "GITHUB_ACTIONS": "true", "RUNNER_TEMP": temporary, "CLOUDFLARE_API_TOKEN": "test-encryption-credential",
                        "ACTIONS_ID_TOKEN_REQUEST_URL": "https://job.actions.githubusercontent.com/token",
                        "ACTIONS_ID_TOKEN_REQUEST_TOKEN": "test-job-credential", "INTERRUPT": str(interrupted).lower()}
-                child = subprocess.Popen(["bash", str(infra / "terraform.sh"), "pr-42", "apply"], env=env,
+                child = subprocess.Popen(["bash", str(infra / "terraform.sh"), "prod", "apply"], env=env,
                                          stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 try:
                     if interrupted:
@@ -330,7 +327,7 @@ else: fail()
                     self.assertNotEqual(child.returncode, 0)
                     for secret in (b"confidential-recovery-state", b"test-encryption-credential", b"test-job-credential"):
                         self.assertNotIn(secret, stdout + stderr)
-                    encrypted = next((directory / "terraform-recovery/pr-42").glob("*.enc"))
+                    encrypted = next((directory / "terraform-recovery/prod").glob("*.enc"))
                     with patch.dict(os.environ, {"CLOUDFLARE_API_TOKEN": "test-encryption-credential"}):
                         restored = directory / "restored.tfstate"
                         recovery.crypt(encrypted, restored, decrypt=True)
@@ -383,8 +380,8 @@ resource "terraform_data" "local" {
                 password = "ephemeral-password-" + arguments[0]
                 with server(tokens, backend, password) as (base, instance):
                     ports.append(instance.server_port)
-                    env = {**os.environ, "TF_HTTP_ADDRESS": base + "/states/pr-42", "TF_HTTP_LOCK_ADDRESS": base + "/states/pr-42/lock",
-                           "TF_HTTP_UNLOCK_ADDRESS": base + "/states/pr-42/lock", "TF_HTTP_PASSWORD": password, "CHECKPOINT_DISABLE": "1"}
+                    env = {**os.environ, "TF_HTTP_ADDRESS": base + "/states/prod", "TF_HTTP_LOCK_ADDRESS": base + "/states/prod/lock",
+                           "TF_HTTP_UNLOCK_ADDRESS": base + "/states/prod/lock", "TF_HTTP_PASSWORD": password, "CHECKPOINT_DISABLE": "1"}
                     for command in (["init", "-reconfigure", "-input=false"], arguments):
                         result = subprocess.run(["terraform", *command], cwd=directory, env=env, capture_output=True, timeout=30)
                         self.assertEqual(result.returncode, 0, result.stderr.decode())
@@ -393,90 +390,10 @@ resource "terraform_data" "local" {
             self.assertGreater(len(set(issued)), 1)
             self.assertEqual(requests[-1][0], "DELETE")
             self.assertFalse((directory / "errored.tfstate").exists())
-            # A retried cleanup after destroy must recognize Terraform's real
-            # empty-state shape rather than treating it as a read failure.
-            with server(tokens, backend) as (base, _):
-                env.update(TF_HTTP_ADDRESS=base + "/states/pr-42",
-                           TF_HTTP_LOCK_ADDRESS=base + "/states/pr-42/lock",
-                           TF_HTTP_UNLOCK_ADDRESS=base + "/states/pr-42/lock", TF_HTTP_PASSWORD="local-secret")
-                for command in (["init", "-reconfigure", "-input=false"],
-                                ["destroy", "-input=false", "-auto-approve"], ["show", "-json"]):
-                    result = subprocess.run(["terraform", *command], cwd=directory, env=env, capture_output=True, timeout=30)
-                    self.assertEqual(result.returncode, 0, result.stderr.decode())
-                self.assertFalse(preview.managed_database(json.loads(result.stdout), "pr-42", ACCOUNT))
-
-
-class PreviewTests(unittest.TestCase):
-    def state(self, stage="pr-42"):
-        return {"format_version": "1.0", "values": {"root_module": {"resources": [{
-            "address": preview.DATABASE, "mode": "managed", "type": "cloudflare_d1_database", "values": {
-                "name": f"hackerfeed-web-{stage}", "account_id": ACCOUNT, "id": IDENTIFIER}}]}}}
-
-    def test_exact_state_and_absence_controls(self):
-        self.assertFalse(preview.managed_database({"format_version": "1.0"}, "pr-42", ACCOUNT))
-        self.assertTrue(preview.managed_database(self.state(), "pr-42", ACCOUNT))
-        for state in (None, {}, {"format_version": "1.0", "values": None}, self.state("pr-43"),
-                      {"format_version": "1.0", "values": {}}):
-            with self.assertRaises((ValueError, TypeError)):
-                preview.managed_database(state, "pr-42", ACCOUNT)
-
-    def test_inventory_pagination_exact_name_errors_and_duplicates(self):
-        row = {"name": "hackerfeed-web-pr-42", "uuid": IDENTIFIER}
-        def response(rows, success=True, status=200):
-            return status, {}, json.dumps({"success": success, "result": rows}).encode()
-        self.assertEqual(preview.discover("pr-42", ACCOUNT, "secret", lambda *a, **k: response([row])), IDENTIFIER)
-        self.assertIsNone(preview.discover("pr-42", ACCOUNT, "secret", lambda *a, **k: response([
-            {**row, "name": "hackerfeed-web-pr-420"}, {**row, "name": "hackerfeed"}])))
-        pages = [response([{**row, "name": "unrelated"}] * 100), response([row])]
-        self.assertEqual(preview.discover("pr-42", ACCOUNT, "secret", lambda *a, **k: pages.pop(0)), IDENTIFIER)
-        for result in (response([], False), response([], status=503), response(None), response([row, row]),
-                       response([{**row, "uuid": next(iter(preview.PROTECTED_IDS))}])):
-            with self.assertRaises(ValueError):
-                preview.discover("pr-42", ACCOUNT, "secret", lambda *a, **k: result)
-        pages = [response([row] * 100), response([], status=503)]
-        with self.assertRaises(ValueError):
-            preview.discover("pr-42", ACCOUNT, "secret", lambda *a, **k: pages.pop(0))
-
-    def test_adoption_errors_never_become_absence_or_publish_outputs(self):
-        scenarios = ([subprocess.CalledProcessError(1, "show")],
-                     [b"null"],
-                     [b'{"format_version":"1.0"}', subprocess.CalledProcessError(1, "import")])
-        for responses in scenarios:
-            with self.subTest(responses=responses), tempfile.TemporaryDirectory() as temporary:
-                output = Path(temporary) / "output"
-                with patch.dict(os.environ, {"TF_VAR_cloudflare_account_id": ACCOUNT,
-                        "CLOUDFLARE_API_TOKEN": "test", "GITHUB_OUTPUT": str(output)}), \
-                        patch.object(preview.sys, "argv", ["preview", "pr-42"]), \
-                        patch.object(preview.Commands, "output", side_effect=responses), \
-                        patch.object(preview, "discover", return_value=IDENTIFIER), \
-                        self.assertRaises((ValueError, subprocess.CalledProcessError)):
-                    preview.main()
-                self.assertFalse(output.exists())
-
-    def test_adoption_and_cleanup_contract(self):
-        for exists, identifier in ((True, None), (False, IDENTIFIER), (False, None)):
-            with tempfile.TemporaryDirectory() as temporary:
-                output = Path(temporary) / "output"
-                responses = [json.dumps(self.state() if exists else {"format_version": "1.0"}).encode()]
-                if identifier:
-                    responses.extend([b"Imported", json.dumps(self.state()).encode()])
-                with patch.dict(os.environ, {"TF_VAR_cloudflare_account_id": ACCOUNT, "CLOUDFLARE_API_TOKEN": "test", "GITHUB_OUTPUT": str(output)}), \
-                        patch.object(preview.sys, "argv", ["preview", "pr-42"]), \
-                        patch.object(preview.Commands, "output", side_effect=responses) as command, \
-                        patch.object(preview, "discover", return_value=identifier) as inventory:
-                    preview.main()
-                    self.assertEqual(command.call_count, 3 if identifier else 1)
-                    self.assertEqual(inventory.call_count, 0 if exists else 1)
-                    if identifier:
-                        self.assertEqual(command.call_args_list[1].args[0][-4:], ["import", "-input=false", preview.DATABASE, ACCOUNT + "/" + IDENTIFIER])
-                    self.assertEqual(output.read_text(), f"exists={str(exists or bool(identifier)).lower()}\nimported={str(bool(identifier)).lower()}\n")
-        with patch.object(preview.sys, "argv", ["preview", "prod"]), patch.dict(os.environ, {"TF_VAR_cloudflare_account_id": ACCOUNT}), \
-                self.assertRaises(ValueError):
-            preview.main()
 
 
 class WorkflowTests(unittest.TestCase):
-    def test_production_reconciles_and_preview_adoption_precedes_changes(self):
+    def test_production_reconciles_and_previews_are_static(self):
         production = (ROOT / ".github/workflows/deploy.yaml").read_text()
         self.assertNotIn("event.before", production)
         self.assertNotIn("needs.changes", production)
@@ -485,12 +402,15 @@ class WorkflowTests(unittest.TestCase):
         for job in ("state-backend", "infrastructure"):
             body = re.split(r"\n  [a-z][a-z-]*:", production.split(f"  {job}:\n", 1)[1], maxsplit=1)[0]
             self.assertNotRegex(body, r"(?m)^    if:")
-        for workflow in ("preview.yaml", "preview-cleanup.yaml"):
-            text = (ROOT / ".github/workflows" / workflow).read_text()
-            self.assertLess(text.index("python3 infra/preview_database.py"), text.index('infra/terraform.sh "$STAGE" ' +
-                            ("destroy" if "cleanup" in workflow else "apply")))
-        for workflow in ("deploy.yaml", "preview.yaml", "preview-cleanup.yaml"):
-            text = (ROOT / ".github/workflows" / workflow).read_text()
+        preview = (ROOT / ".github/workflows/preview.yaml").read_text()
+        self.assertNotIn("d1 ", preview)
+        self.assertNotIn("AI_TOKEN_ENCRYPTION_KEY", preview)
+        self.assertNotIn("VITE_WORKOS_CLIENT_ID", preview)
+        self.assertIn("--config wrangler.preview.jsonc", preview)
+        self.assertIn("needs.infrastructure.outputs.database_id", production)
+        self.assertIn("needs.infrastructure.outputs.database_name", production)
+        self.assertIn("--config dist/server/wrangler.json", production)
+        for text in (production, preview):
             self.assertIn("terraform-recovery/**/*.enc", text)
             self.assertIn("terraform-recovery/**/*.hmac", text)
             self.assertIn("retention-days: 1", text)

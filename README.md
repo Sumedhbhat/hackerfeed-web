@@ -31,7 +31,7 @@ The dev server listens on port 3000.
 bun run dev              # Start Vite dev server on port 3000
 bun run build            # Production build
 bun run preview          # Preview the production build locally
-bun run deploy           # Build and deploy the Worker
+gh workflow run deploy.yaml  # Deploy with Terraform outputs in CI
 bun run test             # Run Vitest
 bun run lint             # Run Biome lint
 bun run format           # Run Biome format
@@ -87,7 +87,7 @@ bun run db:generate --name descriptive_migration_name
 
 # Apply generated migrations
 bun run db:migrate:local
-bun run db:migrate:remote
+gh workflow run deploy.yaml
 ```
 
 The Worker creates one typed `DatabaseContext` from its D1 binding. tRPC
@@ -101,12 +101,24 @@ D1 databases. It creates resources and nothing else. Wrangler deploys the
 Worker and its settings from `wrangler.jsonc`, and CI applies `migrations/` in
 its own step.
 
-Each stage has its own state: `prod` is the production database (`hackerfeed`,
-adopted on its first apply), and `pr-<n>` is a pull request's preview
-database. Existing databases from the older preview workflow are imported by
-exact PR name before apply or cleanup. CI reconciles the state server and
-`prod` on every production run. Production deploys and pull requests that
-change `infra/` show the production plan in their job summaries for review.
+Terraform owns the production database `hackerfeed` in the `prod` state. The
+import block adopts the existing database on the first apply. Its UUID appears
+only there for bootstrap. CI reconciles it on every production run, reads
+`database_id` and `database_name`, and configures Wrangler from those outputs
+before building. Both migrations and deployment use that generated config.
+The checked-in Wrangler binding uses `local-hackerfeed` for local development;
+it is not a remote database identity. Run remote migrations through CI.
+
+PR previews are static fixture demos deployed to the separate `hackerfeed-demo`
+Worker using `wrangler.preview.jsonc`. Branch aliases and immutable commit URLs
+are reported on the PR. Every browser page gets a fixed demo session; favorites
+and views reset on refresh. No D1, WorkOS, AI connections, or production secrets
+are used. Previews do not validate migrations or backend behavior. Run
+`bun run dev:demo` locally, or see [private previews](docs/private-preview.md).
+
+Old preview databases and their state are left untouched. Retiring those live
+resources is a separate operation; this change removes automatic creation and
+cleanup. PRs also show a read-only production Terraform plan.
 
 ### State and sign-in
 
@@ -116,10 +128,10 @@ database. There is no stored password: each CI job requests a GitHub OIDC
 token, and the Worker verifies it against GitHub's keys and this repository's
 id. The job's GitHub environment decides what it may touch:
 
-| Environment | `prod` state | `pr-<n>` states |
-|---|---|---|
-| `production` (master only) | read, write, lock | none |
-| `preview` (pull requests) | read only, for PR plans | read, write, lock, delete |
+| Environment | `prod` state |
+|---|---|
+| `production` (master only) | read, write, lock |
+| `preview` (pull requests) | read only, for PR plans |
 
 Every Terraform command goes through `infra/terraform.sh`. A Python 3 loopback
 proxy requests and refreshes OIDC credentials while Terraform runs, so a long
