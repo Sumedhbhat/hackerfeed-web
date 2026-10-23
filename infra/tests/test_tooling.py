@@ -407,6 +407,7 @@ class WorkflowTests(unittest.TestCase):
         self.assertNotIn("AI_TOKEN_ENCRYPTION_KEY", preview)
         self.assertNotIn("VITE_WORKOS_CLIENT_ID", preview)
         self.assertIn("--config wrangler.preview.jsonc", preview)
+        self.assertNotIn("wrangler deploy", preview)
         self.assertIn("needs.infrastructure.outputs.database_id", production)
         self.assertIn("needs.infrastructure.outputs.database_name", production)
         self.assertIn("--config dist/server/wrangler.json", production)

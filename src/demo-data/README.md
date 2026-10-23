@@ -51,7 +51,8 @@ fixtures. There is no WorkOS sign-in, database, browser SQL engine, or AI
 connection. AI stays disabled. Local favorites from an earlier app session
 are not imported.
 
-Only `dist/client` is deployed, using `wrangler.preview.jsonc`. Its SPA
+Only `dist/client` is uploaded, as an undeployed version of `hackerfeed-web`
+using `wrangler.preview.jsonc`. Its SPA
 fallback supports direct links to stories, papers, favorites, and profiles.
 Production keeps SSR, WorkOS, and D1; production builds exclude demo fixtures.
 

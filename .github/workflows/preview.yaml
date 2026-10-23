@@ -82,11 +82,8 @@ jobs:
             exit 1
           fi
 
-      # versions upload requires an existing Worker. Deploying this assets-only
-      # config also bootstraps it on the first run; it never targets production.
       - name: Upload preview version
         run: |
-          bunx wrangler deploy --config wrangler.preview.jsonc
           bunx wrangler versions upload --config wrangler.preview.jsonc --preview-alias "pr-${PR_NUMBER}" --message "PR #${PR_NUMBER} @ ${HEAD_SHA}"
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}

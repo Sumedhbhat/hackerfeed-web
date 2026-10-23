@@ -109,9 +109,12 @@ before building. Both migrations and deployment use that generated config.
 The checked-in Wrangler binding uses `local-hackerfeed` for local development;
 it is not a remote database identity. Run remote migrations through CI.
 
-PR previews are static fixture demos deployed to the separate `hackerfeed-demo`
-Worker using `wrangler.preview.jsonc`. Branch aliases and immutable commit URLs
-are reported on the PR. Every browser page gets a fixed demo session; favorites
+PR previews are static fixture demos uploaded as versions of `hackerfeed-web`
+using `wrangler.preview.jsonc`, without deploying them. Branch aliases and
+immutable commit URLs are reported on the PR. Because those uploads are newer
+than the last release, roll back from the dashboard's deployment list or with
+`wrangler rollback <version-id>`: a bare `wrangler rollback` targets the
+previous upload, which may be a PR demo. Every browser page gets a fixed demo session; favorites
 and views reset on refresh. No D1, WorkOS, AI connections, or production secrets
 are used. Previews do not validate migrations or backend behavior. Run
 `bun run dev:demo` locally, or see [private previews](docs/private-preview.md).

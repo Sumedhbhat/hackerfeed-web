@@ -1,8 +1,9 @@
+// Preview versions are uploaded to the production Worker but never deployed.
+// Never run `wrangler deploy` with this config: it would replace production.
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "hackerfeed-demo",
+	"name": "hackerfeed-web",
 	"compatibility_date": "2025-09-02",
-	"preview_urls": true,
 	"assets": {
 		"directory": "./dist/client",
 		"not_found_handling": "single-page-application"

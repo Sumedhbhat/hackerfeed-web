@@ -16,13 +16,13 @@ On pushes to `master` (and manual dispatch), the workflow:
 5. Deploys `hackerfeed-web` with the same config and its production secrets.
 
 `.github/workflows/preview.yaml` uses the `preview` environment for same-repo,
-non-Dependabot pull requests. It builds a static fixture demo and deploys only
-`dist/client` to the separate `hackerfeed-demo` Worker using
-`wrangler.preview.jsonc`. A deploy bootstraps this assets-only Worker because
-`versions upload` requires it to exist. The following version upload returns a
-stable PR alias and immutable commit URL, which CI reports on the PR.
+non-Dependabot pull requests. It builds a static fixture demo and uploads only
+`dist/client` as a version of `hackerfeed-web` using `wrangler.preview.jsonc`.
+The version is never deployed; the upload returns a stable PR alias and
+immutable commit URL, which CI reports on the PR.
 
-The demo has no Worker script, database bindings, auth secrets, or AI keys.
+The demo version has no Worker script or database bindings, so it cannot read
+the Worker's secrets.
 It uses a fixed demo session and browser memory that resets on refresh.
 It does not validate migrations, database queries, or real sign-in. A separate
 read-only production Terraform plan appears in the workflow summary.
@@ -71,8 +71,8 @@ The workflows use two GitHub environments:
 3. Only `production` needs `VITE_SENTRY_DSN`, `VITE_WORKOS_CLIENT_ID`,
    `SENTRY_AUTH_TOKEN`, and `AI_TOKEN_ENCRYPTION_KEY`. Preview builds receive
    none of these secrets. The preview Cloudflare token needs Workers Scripts
-   Edit for the demo Worker and D1 Read for the production plan; production
-   needs D1 Edit as described above.
+   Edit to upload versions of `hackerfeed-web` and D1 Read for the production
+   plan; production needs D1 Edit as described above.
 4. Do not commit any of these values to `.env*`, `.dev.vars`, or the
    repository.
 
