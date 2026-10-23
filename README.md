@@ -104,8 +104,10 @@ its own step.
 Terraform owns the production database `hackerfeed` in the `prod` state. The
 import block adopts the existing database on the first apply. Its UUID appears
 only there for bootstrap. CI reconciles it on every production run, reads
-`database_id` and `database_name`, and configures Wrangler from those outputs
-before building. Both migrations and deployment use that generated config.
+`database_id` and `database_name`, and passes them to the build as
+`D1_DATABASE_ID` and `D1_DATABASE_NAME`. `vite.config.ts` writes them into the
+`DB` binding of the generated `dist/server/wrangler.json`, which migrations and
+deployment both use.
 The checked-in Wrangler binding uses `local-hackerfeed` for local development;
 it is not a remote database identity. Run remote migrations through CI.
 

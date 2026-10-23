@@ -117,20 +117,14 @@ jobs:
       - name: Run tests
         run: bun run test
 
-      - name: Configure production database from Terraform
-        run: |
-          test -n "$DB_ID" && test -n "$DB_NAME"
-          jq --arg id "$DB_ID" --arg name "$DB_NAME" \
-            '(.d1_databases[] | select(.binding == "DB")) |= (.database_id = $id | .database_name = $name)' \
-            wrangler.jsonc > "$RUNNER_TEMP/wrangler.json"
-          mv "$RUNNER_TEMP/wrangler.json" wrangler.jsonc
-        env:
-          DB_ID: ${{ needs.infrastructure.outputs.database_id }}
-          DB_NAME: ${{ needs.infrastructure.outputs.database_name }}
-
       - name: Build
-        run: bun run build
+        run: |
+          test -n "$D1_DATABASE_ID"
+          test -n "$D1_DATABASE_NAME"
+          bun run build
         env:
+          D1_DATABASE_ID: ${{ needs.infrastructure.outputs.database_id }}
+          D1_DATABASE_NAME: ${{ needs.infrastructure.outputs.database_name }}
           VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
           VITE_SENTRY_ENVIRONMENT: production
           VITE_WORKOS_CLIENT_ID: ${{ secrets.VITE_WORKOS_CLIENT_ID }}
@@ -138,12 +132,19 @@ jobs:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_RELEASE: ${{ github.sha }}
 
-      - name: Verify build has no demo data
+      - name: Verify build
         run: |
           if grep -rlF hackerfeed-demo-data dist; then
             echo "Production build includes fixtures; VITE_DEMO_DATA must not be set" >&2
             exit 1
           fi
+          bound=$(jq -r '.d1_databases[] | select(.binding == "DB") | .database_id' dist/server/wrangler.json)
+          if [ "$bound" != "$D1_DATABASE_ID" ]; then
+            echo "Build binds DB to '${bound}', not Terraform's database" >&2
+            exit 1
+          fi
+        env:
+          D1_DATABASE_ID: ${{ needs.infrastructure.outputs.database_id }}
 
       - name: Apply database migrations
         run: bunx wrangler d1 migrations apply DB --remote --config dist/server/wrangler.json

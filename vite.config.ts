@@ -10,6 +10,10 @@ import { defineConfig } from "vite";
 
 const demo = process.env.VITE_DEMO_DATA === "true";
 const sentryAuthToken = process.env.SENTRY_AUTH_TOKEN;
+const { D1_DATABASE_ID, D1_DATABASE_NAME } = process.env;
+if (!D1_DATABASE_ID !== !D1_DATABASE_NAME) {
+	throw new Error("Set both D1_DATABASE_ID and D1_DATABASE_NAME, or neither");
+}
 
 const config = defineConfig({
 	build: {
@@ -20,7 +24,19 @@ const config = defineConfig({
 	},
 	plugins: [
 		devtools(),
-		!demo && cloudflare({ viteEnvironment: { name: "ssr" } }),
+		!demo &&
+			cloudflare({
+				viteEnvironment: { name: "ssr" },
+				config: (worker) => {
+					if (!D1_DATABASE_ID || !D1_DATABASE_NAME) return;
+					for (const database of worker.d1_databases) {
+						if (database.binding === "DB") {
+							database.database_id = D1_DATABASE_ID;
+							database.database_name = D1_DATABASE_NAME;
+						}
+					}
+				},
+			}),
 
 		tailwindcss(),
 		tanstackStart({
