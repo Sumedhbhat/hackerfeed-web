@@ -4,8 +4,10 @@
  *
  * Callers sign in with a GitHub Actions OIDC token as the basic-auth password.
  * The token's GitHub environment decides what it may touch:
- *   production: the prod state.
- *   preview:    read-only access to prod for PR plans.
+ *   production: the prod and deploy states.
+ *   preview:    read-only access to prod for PR plans and the preview token.
+ *
+ * deploy holds production-only tokens, so PR jobs must never read it.
  *
  *   GET    /states/:name         read
  *   POST   /states/:name?ID=...  write (ID is the caller's lock)
@@ -30,7 +32,7 @@ type GitHubClaims = JWTPayload & {
 };
 
 const ISSUER = "https://token.actions.githubusercontent.com";
-const STATE_NAME = /^prod$/;
+const STATE_NAME = /^(prod|deploy)$/;
 
 let jwks: ReturnType<typeof createRemoteJWKSet> | undefined;
 
@@ -45,6 +47,7 @@ function allowed(
 			(environment === "preview" && access === "read")
 		);
 	}
+	if (name === "deploy") return environment === "production";
 	return false;
 }
 
