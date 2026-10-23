@@ -21,3 +21,11 @@ updates:
     cooldown:
       default-days: 14
     labels: [dependencies]
+
+  - package-ecosystem: terraform
+    directory: /infra/terraform
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 14
+    labels: [dependencies]

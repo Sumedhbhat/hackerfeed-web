@@ -7,6 +7,8 @@ const runtimeEnv =
 		: { ...import.meta.env, ...process.env };
 
 export const env = createEnv({
+	// Static demos never initialize WorkOS or server services.
+	skipValidation: import.meta.env.VITE_DEMO_DATA === "true",
 	server: {
 		SERVER_URL: z.url().optional(),
 		// Encrypts stored AI provider tokens and the provider sign-in flow cookie.

@@ -11,7 +11,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      # The checkout is the PR merged into master; its first parent is master.
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -32,6 +35,16 @@ jobs:
           bash <(curl -sSfL https://raw.githubusercontent.com/rhysd/actionlint/v1.7.12/scripts/download-actionlint.bash) 1.7.12
           ./actionlint -color
 
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.13.4
+          terraform_wrapper: false
+
+      - name: Test infrastructure tooling (local only)
+        run: |
+          python3 -m unittest discover -s infra/tests -p 'test_*.py' -v
+          bun test infra/tests/state-backend.test.js
+
       - name: Run tests
         run: bun run test
 
@@ -44,3 +57,19 @@ jobs:
             echo "Production build includes fixtures; VITE_DEMO_DATA must not be set" >&2
             exit 1
           fi
+
+      - name: Detect infrastructure changes
+        id: changes
+        run: |
+          if git diff --quiet HEAD^1 HEAD -- infra/; then
+            echo "infra=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "infra=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check Terraform
+        if: steps.changes.outputs.infra == 'true'
+        run: |
+          terraform -chdir=infra/terraform fmt -check
+          terraform -chdir=infra/terraform init -backend=false -input=false
+          terraform -chdir=infra/terraform validate

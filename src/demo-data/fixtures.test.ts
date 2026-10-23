@@ -1,19 +1,13 @@
-import { readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
-import { DatabaseSync } from "node:sqlite";
-import { getTableColumns, getTableName } from "drizzle-orm";
-import { getTableConfig } from "drizzle-orm/sqlite-core";
+import { getTableColumns, getTableName, is } from "drizzle-orm";
+import { getTableConfig, SQLiteTable } from "drizzle-orm/sqlite-core";
 import { describe, expect, it, vi } from "vitest";
+import * as schema from "#/server/database/schema";
 import { databaseFixtures as fixtures } from "./database";
 import { type DemoItem, feeds, items } from "./hacker-news";
-import {
-	buildDemoDataSql,
-	DEMO_USER_ID,
-	tables,
-	userOwnedTables,
-} from "./seed-sql";
 
-const MIGRATIONS_DIR = join(import.meta.dirname, "../../migrations");
+const tables: SQLiteTable[] = Object.values(schema).filter((value) =>
+	is(value, SQLiteTable),
+);
 
 function columnProblem(
 	column: ReturnType<typeof getTableColumns>[string],
@@ -44,17 +38,6 @@ function columnProblem(
 		return `should be a date, got ${JSON.stringify(value)}`;
 	}
 	return null;
-}
-
-function applyMigrations(): DatabaseSync {
-	const database = new DatabaseSync(":memory:");
-	database.exec("PRAGMA foreign_keys = ON");
-	for (const file of readdirSync(MIGRATIONS_DIR)
-		.filter((name) => name.endsWith(".sql"))
-		.sort()) {
-		database.exec(readFileSync(join(MIGRATIONS_DIR, file), "utf8"));
-	}
-	return database;
 }
 
 describe("demo database rows", () => {
@@ -120,56 +103,6 @@ describe("demo database rows", () => {
 			}
 		}
 		expect(problems).toEqual([]);
-	});
-
-	it("gives the demo user rows in every per-user table except AI connections", () => {
-		const empty = userOwnedTables()
-			.map((table) => getTableName(table))
-			.filter((name) => name !== "ai_provider_connections")
-			.filter(
-				(name) =>
-					!fixtures.get(name)?.some((row) => row.appUserId === DEMO_USER_ID),
-			);
-		expect(empty).toEqual([]);
-	});
-
-	it("loads into a database migrated to the latest schema, repeatably", () => {
-		const database = applyMigrations();
-		const sql = buildDemoDataSql(fixtures);
-		database.exec(sql);
-		database.exec(sql);
-
-		expect(database.prepare("PRAGMA foreign_key_check").all()).toEqual([]);
-		for (const [name, rows] of fixtures) {
-			expect(
-				database.prepare(`SELECT COUNT(*) AS n FROM "${name}"`).get(),
-				name,
-			).toEqual({ n: rows.length });
-		}
-	});
-
-	it("copies the demo user's rows to a user who signs in", () => {
-		const database = applyMigrations();
-		database.exec(buildDemoDataSql(fixtures));
-		database.exec(
-			`INSERT INTO app_users (id, workosUserId) VALUES ('new-user', 'user_new')`,
-		);
-
-		for (const table of userOwnedTables()) {
-			const name = getTableName(table);
-			const count = (userId: string) =>
-				database
-					.prepare(`SELECT COUNT(*) AS n FROM "${name}" WHERE appUserId = ?`)
-					.get(userId);
-			expect(count("new-user"), name).toEqual(count(DEMO_USER_ID));
-		}
-		expect(
-			database
-				.prepare(
-					"SELECT DISTINCT lastUpdatedBy FROM story_views WHERE appUserId = 'new-user'",
-				)
-				.all(),
-		).toEqual([{ lastUpdatedBy: "new-user" }]);
 	});
 });
 

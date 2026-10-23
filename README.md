@@ -31,7 +31,7 @@ The dev server listens on port 3000.
 bun run dev              # Start Vite dev server on port 3000
 bun run build            # Production build
 bun run preview          # Preview the production build locally
-bun run deploy           # Build and deploy the Worker
+gh workflow run deploy.yaml  # Deploy with Terraform outputs in CI
 bun run test             # Run Vitest
 bun run lint             # Run Biome lint
 bun run format           # Run Biome format
@@ -87,12 +87,94 @@ bun run db:generate --name descriptive_migration_name
 
 # Apply generated migrations
 bun run db:migrate:local
-bun run db:migrate:remote
+gh workflow run deploy.yaml
 ```
 
 The Worker creates one typed `DatabaseContext` from its D1 binding. tRPC
 contexts, services, and repositories receive that Drizzle context; application
 code must not access `env.DB` directly outside the Worker boundary.
+
+## Infrastructure
+
+`infra/terraform` creates the Cloudflare resources the app runs on: today, the
+D1 databases. It creates resources and nothing else. Wrangler deploys the
+Worker and its settings from `wrangler.jsonc`, and CI applies `migrations/` in
+its own step.
+
+Terraform owns the production database `hackerfeed` in the `prod` state. The
+import block adopts the existing database on the first apply. Its UUID appears
+only there for bootstrap. CI reconciles it on every production run, reads
+`database_id` and `database_name`, and passes them to the build as
+`D1_DATABASE_ID` and `D1_DATABASE_NAME`. `vite.config.ts` writes them into the
+`DB` binding of the generated `dist/server/wrangler.json`, which migrations and
+deployment both use.
+The checked-in Wrangler binding uses `local-hackerfeed` for local development;
+it is not a remote database identity. Run remote migrations through CI.
+
+PR previews are static fixture demos uploaded as versions of `hackerfeed-web`
+using `wrangler.preview.jsonc`, without deploying them. Branch aliases and
+immutable commit URLs are reported on the PR. Because those uploads are newer
+than the last release, roll back from the dashboard's deployment list or with
+`wrangler rollback <version-id>`: a bare `wrangler rollback` targets the
+previous upload, which may be a PR demo. Every browser page gets a fixed demo session; favorites
+and views reset on refresh. No D1, WorkOS, AI connections, or production secrets
+are used. Previews do not validate migrations or backend behavior. Run
+`bun run dev:demo` locally, or see [private previews](docs/private-preview.md).
+
+Old preview databases and their state are left untouched. Retiring those live
+resources is a separate operation; this change removes automatic creation and
+cleanup. PRs also show a read-only production Terraform plan.
+
+### State and sign-in
+
+Terraform state lives in `infra/state-backend`, a small Worker on the free plan
+(`hackerfeed-terraform-state`) that stores state and locks in its own D1
+database. There is no stored password: each CI job requests a GitHub OIDC
+token, and the Worker verifies it against GitHub's keys and this repository's
+id. The job's GitHub environment decides what it may touch:
+
+| Environment | `prod` state |
+|---|---|
+| `production` (master only) | read, write, lock |
+| `preview` (pull requests) | read only, for PR plans |
+
+Every Terraform command goes through `infra/terraform.sh`. A Python 3 loopback
+proxy requests and refreshes OIDC credentials while Terraform runs, so a long
+apply can still save state and release its lock. Each invocation has its own
+port and password; the proxy forwards only that stage to the fixed state
+server. GitHub only issues these tokens inside Actions, so Terraform runs in
+CI, not locally; use **Run workflow** on the deploy workflow for a manual apply.
+Each production run deploys the state server with wrangler before running
+Terraform. Its D1 database was created once with
+`wrangler d1 create hackerfeed-terraform-state`.
+
+The proxy owns HTTP retries: normally it makes up to three attempts with 1s/2s
+backoff, with a 60s total deadline per attempt. Terraform's separate HTTP retry
+loop is disabled. On step cancellation the proxy stops retries and shares a 3s
+network budget across state and OIDC requests, including requests already in
+flight. Terraform receives only one termination signal, allowing it to write
+`errored.tfstate` when remote persistence fails; the wrapper then encrypts that
+file locally before exiting. An abandoned request has an unknown remote outcome,
+so the proxy refuses further requests, including unlock. Reconcile the remote
+state and retained lock before recovering or running another apply.
+
+CI attempts to upload encrypted recovery files as an Actions artifact with one
+day retention, including after cancellation. Upload is not guaranteed on a
+cancelled job or runner loss; the bounded network wait protects local recovery,
+not artifact delivery. Providers must also finish graceful cancellation in time
+for state export and encryption before the runner's hard kill (normally 10s
+after the first signal). A hung provider, disk/encryption failure, or abrupt
+runner loss can still prevent recovery. Encryption uses OpenSSL
+AES-256-CBC with PBKDF2 and a separate HMAC-SHA256 check. The key is the job's
+existing `CLOUDFLARE_API_TOKEN`, so retain that credential until recovery is done.
+Download both `.enc` and `.hmac` files promptly. In a secure environment with the
+original credential set, run
+`python3 infra/recovery_state.py <file.tfstate.enc> <recovered.tfstate>`. Recover
+remote state through an authorized CI job before applying again. Do not paste
+state into logs, comments, or issues. Local regression tests run with
+`python3 -m unittest discover -s infra/tests -p 'test_*.py' -v` and
+`bun test infra/tests/state-backend.test.js`; they do not write live
+infrastructure. Put Terraform 1.13.4 on `PATH` to run the integration cases.
 
 ## AI Assistants (bring your own subscription)
 

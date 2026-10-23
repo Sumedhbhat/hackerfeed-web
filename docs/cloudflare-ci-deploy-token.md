@@ -8,36 +8,28 @@ developer's local Wrangler OAuth session or put its credentials in GitHub.
 
 On pushes to `master` (and manual dispatch), the workflow:
 
-1. Applies remote D1 migrations with `wrangler d1 migrations apply DB --remote`.
-2. Uploads the Worker, its `DB` binding, the cron trigger, and Worker settings.
-3. Uploads the Worker secrets listed in the workflow.
+1. Deploys the Terraform state server (`infra/state-backend`) with Wrangler.
+2. Plans and applies the production database `hackerfeed` through Terraform.
+3. Reads the database identity from Terraform outputs and configures Wrangler
+   before building the app.
+4. Applies remote migrations with the generated `dist/server/wrangler.json`.
+5. Deploys `hackerfeed-web` with the same config and its production secrets.
 
-The Worker is `hackerfeed-web` and its D1 database is configured as `DB` in
-`wrangler.jsonc`.
+`.github/workflows/preview.yaml` uses the `preview` environment for same-repo,
+non-Dependabot pull requests. It builds a static fixture demo and uploads only
+`dist/client` as a version of `hackerfeed-web` using `wrangler.preview.jsonc`.
+The version is never deployed; the upload returns a stable PR alias and
+immutable commit URL, which CI reports on the PR.
 
-`.github/workflows/preview.yaml` reuses the same token and `dev` environment on
-every same-repo, non-Dependabot pull request. It:
+The demo version has no Worker script or database bindings, so it cannot read
+the Worker's secrets.
+It uses a fixed demo session and browser memory that resets on refresh.
+It does not validate migrations, database queries, or real sign-in. A separate
+read-only production Terraform plan appears in the workflow summary.
 
-1. Creates (or reuses) a D1 database named `hackerfeed-web-pr-<number>`,
-   rebinds `DB` to it in the generated `dist/server/wrangler.json`, applies all
-   migrations to it, then replaces every row with the dummy data in
-   `src/demo-data/database`. The PR's migrations are rehearsed there on the previous
-   push's fixture rows; production data is never touched by preview code. The
-   build also serves Hacker News from `src/demo-data/hacker-news.ts`.
-2. Runs `wrangler versions upload --preview-alias pr-<number>`. This uploads a
-   Worker version without deploying it, so production traffic is unaffected.
-3. Fails the job if the uploaded version is bound to the production database.
-4. Comments the preview URLs on the PR.
-
-`.github/workflows/preview-cleanup.yaml` deletes the PR's database when the PR
-closes. Previews still share the production Worker secrets (Sentry, the AI
-token key). Sign-in on a preview returns to its alias URL, so WorkOS must allow
-`https://pr-<number>-hackerfeed-web.kgqk4vdcfq.workers.dev/auth/callback`. The same
-data can be run locally, tailnet-only, with `docs/private-preview.md`.
-
-Because a preview upload makes the latest Worker version an undeployed one,
-the production deploy passes secrets with `wrangler deploy --secrets-file`.
-`wrangler secret bulk` refuses to edit secrets in that state.
+Legacy preview databases and state remain untouched. Their retirement requires
+a separate operation; there is no preview database cleanup workflow now.
+See [private previews](private-preview.md) to run the same static demo locally.
 
 ## Create the token
 
@@ -50,7 +42,7 @@ the production deploy passes secrets with `wrangler deploy --secrets-file`.
    | Permission | Why it is needed |
    | --- | --- |
    | **Workers Scripts: Edit** | Deploys the Worker and updates its bindings, cron trigger, observability settings, and Worker secrets. Cloudflare may label this permission **Write** in some API documentation. |
-   | **D1: Edit** | Applies the remote SQL migrations before deployment. |
+   | **D1: Edit** | Creates and deletes the D1 databases through Terraform, and applies the remote SQL migrations before deployment. |
 
 5. Under **Account Resources**, include only the Cloudflare account that owns
    `hackerfeed-web` and its D1 database. Do not select all accounts.
@@ -66,17 +58,27 @@ read-all permissions unless the workflow is changed to use those services.
 
 ## Store it in GitHub
 
-1. In GitHub, open this repository's **Settings** > **Environments** > `dev`.
-2. Add or update the environment secret named `CLOUDFLARE_API_TOKEN` with the
-   token value.
-3. Confirm `CLOUDFLARE_ACCOUNT_ID` is also present in the same `dev`
-   environment. It is an identifier, not a secret, but keeping it alongside the
-   deployment configuration is fine.
-4. Do not commit either value to `.env*`, `.dev.vars`, or the repository.
+The workflows use two GitHub environments:
 
-The workflow reads both values from the `dev` GitHub environment. Configure
-GitHub environment protection rules there if deployments should require an
-approval.
+- `production`: `deploy.yaml`. Only `master` may deploy from it.
+- `preview`: `preview.yaml`, for pull requests.
+
+1. In GitHub, open this repository's **Settings** > **Environments**.
+2. In each environment, add or update the secret `CLOUDFLARE_API_TOKEN` with
+   the token value, and `CLOUDFLARE_ACCOUNT_ID`. The account id is an
+   identifier, not a secret, but keeping it alongside the deployment
+   configuration is fine.
+3. Only `production` needs `VITE_SENTRY_DSN`, `VITE_WORKOS_CLIENT_ID`,
+   `SENTRY_AUTH_TOKEN`, and `AI_TOKEN_ENCRYPTION_KEY`. Preview builds receive
+   none of these secrets. The preview Cloudflare token needs Workers Scripts
+   Edit to upload versions of `hackerfeed-web` and D1 Read for the production
+   plan; production needs D1 Edit as described above.
+4. Do not commit any of these values to `.env*`, `.dev.vars`, or the
+   repository.
+
+Terraform state needs no secret: CI signs in to the state server with a GitHub
+OIDC token (see README > Infrastructure). Configure environment protection
+rules on `production` if deployments should require an approval.
 
 ## Verify without deploying
 
@@ -97,10 +99,11 @@ copied into GitHub secrets.
 
 ## Rotate or revoke
 
-Rotate the token before its 90-day expiry:
+Rotate each token before its 90-day expiry:
 
-1. Create a replacement token with the same two permissions and account scope.
-2. Replace `CLOUDFLARE_API_TOKEN` in the GitHub `dev` environment.
+1. Create a replacement token with the same permissions and account scope.
+2. Replace `CLOUDFLARE_API_TOKEN` in the GitHub `production` and `preview`
+   environments.
 3. Run the workflow and confirm it completes.
 4. Revoke the old token in Cloudflare.
 

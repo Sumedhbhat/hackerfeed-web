@@ -58,7 +58,7 @@ export default function UserMenu() {
 			</MenuLinkItem>
 			<MenuItem onClick={() => signOut()}>
 				<LogOut size={15} aria-hidden="true" />
-				Log out
+				{import.meta.env.VITE_DEMO_DATA === "true" ? "Reset demo" : "Log out"}
 			</MenuItem>
 		</DropdownMenu>
 	);

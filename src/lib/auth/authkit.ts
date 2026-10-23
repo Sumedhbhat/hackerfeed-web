@@ -29,6 +29,10 @@ export function signIn(
 }
 
 export function signOut() {
+	if (import.meta.env.VITE_DEMO_DATA === "true") {
+		window.location.reload();
+		return;
+	}
 	const returnTo = `${window.location.origin}/auth/signed-out`;
 	try {
 		authKit?.signOut({ returnTo });

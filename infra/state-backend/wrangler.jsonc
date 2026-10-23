@@ -1,0 +1,25 @@
+{
+	"$schema": "../../node_modules/wrangler/config-schema.json",
+	"name": "hackerfeed-terraform-state",
+	"main": "src/index.ts",
+	"compatibility_date": "2025-09-02",
+	"observability": {
+		"enabled": true
+	},
+	"vars": {
+		// The OIDC token audience CI requests: this Worker's URL.
+		"AUDIENCE": "https://hackerfeed-terraform-state.kgqk4vdcfq.workers.dev",
+		// Sumedhbhat/hackerfeed-web. The id, not the name, survives renames and
+		// can't be claimed by a new repository.
+		"GITHUB_REPOSITORY_ID": "1207731765",
+		"JWKS_URL": "https://token.actions.githubusercontent.com/.well-known/jwks"
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "hackerfeed-terraform-state",
+			"database_id": "4089bb3b-d856-46c8-87af-7bdbef8eefd8",
+			"migrations_dir": "migrations"
+		}
+	]
+}
