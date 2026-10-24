@@ -52,7 +52,7 @@ All HN API calls go through `src/lib/hacker-news/queries.ts` (direct calls to `h
 
 ### Auth
 
-WorkOS AuthKit owns the session entirely in the browser (`src/integrations/workos/provider.tsx`, `devMode` keeps the refresh token in localStorage). There are no HackerFeed session cookies. `SessionGate` in `__root.tsx` sends signed-out users to WorkOS; only `/auth/callback` and `/auth/signed-out` are public. API calls (tRPC, `src/lib/ai/client.ts`) send `Authorization: Bearer <access token>` via `getAuthHeaders()` in `src/lib/auth/authkit.ts`; the server verifies it against WorkOS's JWKS with `getRequestUser()` in `src/server/auth/workos-access-token.ts`.
+WorkOS AuthKit owns the session entirely in the browser (`src/integrations/workos/provider.tsx`, `devMode` keeps the refresh token in localStorage). There are no HackerFeed session cookies. `SessionGate` in `__root.tsx` sends signed-out users to WorkOS; only `/auth/callback` and `/auth/signed-out` are public. API calls (tRPC, `src/lib/ai/client.ts`) send `Authorization: Bearer <access token>` via `getApiHeaders()` in `src/lib/auth/authkit.ts`; the server verifies it against WorkOS's JWKS with `getRequestUser()` in `src/server/auth/workos-access-token.ts`.
 
 ### Feature flags
 
@@ -60,7 +60,7 @@ Flags are code, not a service. `src/server/feature-flags/config.ts` defines them
 
 ### Logging and debugging
 
-Use `logger` from `#/lib/logger` everywhere (browser and Worker), never `console.*`. Each call goes to Sentry Logs (structured, linked to the trace) and the console. Pass the caught value as `error`: `logger.error(msg, { error })` also creates a Sentry issue. Use `warn` where you log and rethrow, so only the code that handles the error reports it. Error screens show the trace ID (`useErrorReport` + `TraceIdNote`). To debug a report, search `trace:<id>` in Sentry for the issue, logs and browser→Worker spans.
+Use `logger` from `#/lib/logger` everywhere (browser and Worker), never `console.*`. Each call goes to Sentry Logs (structured, linked to the trace) and the console. Pass the caught value as `error`: `logger.error(msg, { error })` also creates a Sentry issue. Use `warn` where you log and rethrow, so only the code that handles the error reports it. Error screens show the trace ID (`useErrorReport` + `TraceIdNote`). To debug a report, search `trace:<id>` in Sentry for the issue, logs and spans. Browser and Worker traces are separate: the Worker never continues incoming trace headers, links the browser's `x-client-trace` instead, and returns its own ID in `x-sentry-trace-id` (README > Observability).
 
 ### Routing
 

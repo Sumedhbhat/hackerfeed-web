@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { getAuthHeaders } from "#/lib/auth/authkit";
+import { getApiHeaders } from "#/lib/auth/authkit";
 import type { FeatureFlags } from "#/server/feature-flags/service";
 
 export type { FeatureFlags };
@@ -12,7 +12,7 @@ const featureFlagsResponseSchema = z.object({
 export async function fetchFeatureFlags(): Promise<Partial<FeatureFlags>> {
 	if (import.meta.env.VITE_DEMO_DATA === "true") return { aiChat: false };
 	const response = await fetch("/api/feature-flags", {
-		headers: { accept: "application/json", ...(await getAuthHeaders()) },
+		headers: { accept: "application/json", ...(await getApiHeaders()) },
 	});
 	if (!response.ok) {
 		throw new Error(`Feature flags request failed with ${response.status}`);

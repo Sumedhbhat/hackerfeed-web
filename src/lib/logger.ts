@@ -8,7 +8,8 @@
  * Pass the caught value as `error` and `logger.error` also records a Sentry
  * issue with its stack trace. Every error returns the trace ID; show it to the
  * user (see `FatalErrorView`) and search `trace:<id>` in Sentry to find the
- * issue, its logs, and the request spans across browser and server.
+ * issue, its logs, and its spans. Browser and Worker traces are separate and
+ * linked; see README > Observability.
  *
  * Usage:
  *   import { logger } from "#/lib/logger";

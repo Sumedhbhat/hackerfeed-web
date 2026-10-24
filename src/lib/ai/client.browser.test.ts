@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const authMock = vi.hoisted(() => ({
-	getAuthHeaders: vi.fn(async () => ({ Authorization: "Bearer token-1" })),
+	getApiHeaders: vi.fn(async () => ({ Authorization: "Bearer token-1" })),
 	signIn: vi.fn(),
 }));
 

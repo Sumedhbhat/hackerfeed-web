@@ -1,10 +1,8 @@
 import * as Sentry from "@sentry/core";
-
-/** Browser trace context, sent by our client as a claim, never continued. */
-export const CLIENT_TRACE_HEADER = "x-client-trace";
-
-/** The Worker's own trace ID, on every response, so the client can show it. */
-export const SERVER_TRACE_ID_HEADER = "x-sentry-trace-id";
+import {
+	CLIENT_TRACE_HEADER,
+	SERVER_TRACE_ID_HEADER,
+} from "#/lib/tracing/headers";
 
 const INCOMING_TRACE_HEADERS = [
 	"sentry-trace",

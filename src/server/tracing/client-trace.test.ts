@@ -2,9 +2,11 @@ import * as Sentry from "@sentry/core";
 import { beforeAll, describe, expect, it } from "vitest";
 import {
 	CLIENT_TRACE_HEADER,
+	SERVER_TRACE_ID_HEADER,
+} from "#/lib/tracing/headers";
+import {
 	linkClientTrace,
 	parseClientTrace,
-	SERVER_TRACE_ID_HEADER,
 	withoutIncomingTrace,
 	withServerTraceId,
 } from "./client-trace";

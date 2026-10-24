@@ -8,6 +8,7 @@ import {
 import { createServerEntry } from "@tanstack/react-start/server-entry";
 import { getTraceId, logger } from "#/lib/logger";
 import { sentryDataCollection } from "#/lib/sentry-data-collection";
+import { SERVER_TRACE_ID_HEADER } from "#/lib/tracing/headers";
 import {
 	createDatabaseContext,
 	type D1DatabaseBinding,
@@ -17,7 +18,6 @@ import { renderServerErrorPage } from "#/server/errors/server-error-page";
 import { runHuggingFaceDailyPapersIngestion } from "#/server/huggingface-papers/ingestion";
 import {
 	linkClientTrace,
-	SERVER_TRACE_ID_HEADER,
 	withoutIncomingTrace,
 	withServerTraceId,
 } from "#/server/tracing/client-trace";
@@ -114,7 +114,7 @@ const instrumentedWorker = Sentry.withSentry((env: WorkerEnv) => {
 	return {
 		dsn: env.SENTRY_DSN,
 		environment: env.SENTRY_ENVIRONMENT ?? "production",
-		tracesSampleRate: getSentrySampleRate(env.SENTRY_TRACES_SAMPLE_RATE, 0.1),
+		tracesSampleRate: getSentrySampleRate(env.SENTRY_TRACES_SAMPLE_RATE, 1),
 		dataCollection: sentryDataCollection,
 	};
 }, worker);

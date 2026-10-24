@@ -1,4 +1,4 @@
-import { getAuthHeaders, signIn } from "#/lib/auth/authkit";
+import { getApiHeaders, signIn } from "#/lib/auth/authkit";
 import type {
 	AiApiError,
 	AiModel,
@@ -41,7 +41,7 @@ async function toRequestError(response: Response): Promise<AiRequestError> {
 
 async function getJson<T>(path: string): Promise<T> {
 	const response = await fetch(path, {
-		headers: { accept: "application/json", ...(await getAuthHeaders()) },
+		headers: { accept: "application/json", ...(await getApiHeaders()) },
 	});
 	if (!response.ok) throw await toRequestError(response);
 	return (await response.json()) as T;
@@ -64,7 +64,7 @@ export async function fetchAiModels(providerId: string): Promise<AiModel[]> {
 export async function disconnectAiProvider(providerId: string): Promise<void> {
 	const response = await fetch(
 		`/api/ai/providers/${encodeURIComponent(providerId)}/disconnect`,
-		{ method: "POST", headers: await getAuthHeaders() },
+		{ method: "POST", headers: await getApiHeaders() },
 	);
 	if (!response.ok) throw await toRequestError(response);
 }
@@ -80,7 +80,7 @@ export async function connectAiProvider(
 ): Promise<void> {
 	const response = await fetch(getAiConnectUrl(providerId, returnTo), {
 		method: "POST",
-		headers: await getAuthHeaders(),
+		headers: await getApiHeaders(),
 	});
 	if (response.status === 401) return signIn(returnTo);
 	if (!response.ok) throw await toRequestError(response);
@@ -104,7 +104,7 @@ export async function streamStoryChat(
 		headers: {
 			accept: "application/x-ndjson",
 			"content-type": "application/json",
-			...(await getAuthHeaders()),
+			...(await getApiHeaders()),
 		},
 		body: JSON.stringify(request),
 		signal,
