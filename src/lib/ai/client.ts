@@ -1,4 +1,5 @@
 import { getApiHeaders, signIn } from "#/lib/auth/authkit";
+import { readServerTraceId } from "#/lib/tracing/headers";
 import type {
 	AiApiError,
 	AiModel,
@@ -11,16 +12,19 @@ export class AiRequestError extends Error {
 	readonly code: string;
 	readonly retryable: boolean;
 	readonly status: number;
+	/** The Worker's trace for the failed request, when it got that far. */
+	readonly traceId?: string;
 
 	constructor(
 		{ code, message, retryable = false }: AiApiError,
-		status: number,
+		response: Response,
 	) {
 		super(message);
 		this.name = "AiRequestError";
 		this.code = code;
 		this.retryable = retryable;
-		this.status = status;
+		this.status = response.status;
+		this.traceId = readServerTraceId(response);
 	}
 }
 
@@ -35,7 +39,7 @@ async function toRequestError(response: Response): Promise<AiRequestError> {
 						"Something went wrong talking to the AI provider. Try again.",
 					retryable: true,
 				},
-		response.status,
+		response,
 	);
 }
 
@@ -117,7 +121,7 @@ export async function streamStoryChat(
 				message: "No response was received.",
 				retryable: true,
 			},
-			response.status,
+			response,
 		);
 	}
 
@@ -129,7 +133,7 @@ export async function streamStoryChat(
 		const event = JSON.parse(line) as ChatStreamEvent;
 		if (event.type === "delta") onDelta(event.text);
 		if (event.type === "error") {
-			throw new AiRequestError(event, response.status);
+			throw new AiRequestError(event, response);
 		}
 		return event.type === "done";
 	};
@@ -152,6 +156,6 @@ export async function streamStoryChat(
 			message: "The response ended early. Try again.",
 			retryable: true,
 		},
-		response.status,
+		response,
 	);
 }

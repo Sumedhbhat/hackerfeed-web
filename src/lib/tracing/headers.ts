@@ -10,3 +10,7 @@ export function getClientTraceHeaders(): Record<string, string> {
 	const sentryTrace = Sentry.getTraceData()["sentry-trace"];
 	return sentryTrace ? { [CLIENT_TRACE_HEADER]: sentryTrace } : {};
 }
+
+export function readServerTraceId(response: Response): string | undefined {
+	return response.headers.get(SERVER_TRACE_ID_HEADER) ?? undefined;
+}
