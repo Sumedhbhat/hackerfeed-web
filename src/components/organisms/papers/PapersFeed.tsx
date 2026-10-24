@@ -107,7 +107,7 @@ export function PapersFeed({
 								isPending={favorites.isPending(paper.arxivId)}
 								key={paper.arxivId}
 								onToggleFavorite={() => favorites.toggleFavorite(paper)}
-								onView={() => recordPaperView(paper.arxivId)}
+								onView={(action) => recordPaperView(paper.arxivId, action)}
 								paper={paper}
 							/>
 						))}

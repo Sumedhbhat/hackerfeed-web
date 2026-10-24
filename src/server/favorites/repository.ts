@@ -1,9 +1,11 @@
 import "@tanstack/react-start/server-only";
 
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray, notExists, type SQL } from "drizzle-orm";
 import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
+import { activityEventSelection } from "../activity/events";
 import type { DatabaseContext } from "../database/client";
 import {
+	activityEvents,
 	favorites as favoritesTable,
 	stories as storiesTable,
 } from "../database/schema";
@@ -99,6 +101,31 @@ async function getFavorite(
 }
 
 export function createFavoriteRepository(database: DatabaseContext) {
+	async function removeFavorites(appUserId: string, where: SQL | undefined) {
+		await database.batch([
+			database.insert(activityEvents).select(
+				database
+					.select(
+						activityEventSelection(appUserId, "story.unfavorited", {
+							storyId: favoritesTable.storyId,
+						}),
+					)
+					.from(favoritesTable)
+					.where(where),
+			),
+			database.delete(favoritesTable).where(where),
+		]);
+	}
+
+	async function getSavedFavorite(appUserId: string, storyId: string) {
+		const favorite = await getFavorite(database, appUserId, storyId);
+		if (!favorite) {
+			throw new Error("D1 favorite upsert failed");
+		}
+
+		return mapFavoriteRow(favorite);
+	}
+
 	return {
 		async upsertStoryFromHackerNews(story: HackerNewsStoryRecord) {
 			const mappedStory = mapHackerNewsStory(story);
@@ -140,6 +167,44 @@ export function createFavoriteRepository(database: DatabaseContext) {
 			return mapStoryRow(sharedStory);
 		},
 
+		async addFavorite(appUserId: string, storyId: string) {
+			const recordEvent = database.insert(activityEvents).select(
+				database
+					.select(
+						activityEventSelection(appUserId, "story.favorited", {
+							storyId: storiesTable.id,
+						}),
+					)
+					.from(storiesTable)
+					.where(
+						and(
+							eq(storiesTable.id, storyId),
+							notExists(
+								database
+									.select({ id: favoritesTable.id })
+									.from(favoritesTable)
+									.where(
+										and(
+											eq(favoritesTable.appUserId, appUserId),
+											eq(favoritesTable.storyId, storyId),
+										),
+									),
+							),
+						),
+					),
+			);
+			const insertFavorite = database
+				.insert(favoritesTable)
+				.values({ appUserId, storyId })
+				.onConflictDoNothing({
+					target: [favoritesTable.appUserId, favoritesTable.storyId],
+				});
+
+			await database.batch([recordEvent, insertFavorite]);
+
+			return getSavedFavorite(appUserId, storyId);
+		},
+
 		async createFavoriteIfMissing(appUserId: string, storyId: string) {
 			await database
 				.insert(favoritesTable)
@@ -149,36 +214,26 @@ export function createFavoriteRepository(database: DatabaseContext) {
 				})
 				.run();
 
-			const favorite = await getFavorite(database, appUserId, storyId);
-			if (!favorite) {
-				throw new Error("D1 favorite upsert failed");
-			}
-
-			return mapFavoriteRow(favorite);
+			return getSavedFavorite(appUserId, storyId);
 		},
 
-		removeFavorite(appUserId: string, hnStoryId: number) {
+		async removeFavorite(appUserId: string, hnStoryId: number) {
 			const storyIds = database
 				.select({ id: storiesTable.id })
 				.from(storiesTable)
 				.where(eq(storiesTable.hnStoryId, hnStoryId));
 
-			return database
-				.delete(favoritesTable)
-				.where(
-					and(
-						eq(favoritesTable.appUserId, appUserId),
-						inArray(favoritesTable.storyId, storyIds),
-					),
-				)
-				.run();
+			await removeFavorites(
+				appUserId,
+				and(
+					eq(favoritesTable.appUserId, appUserId),
+					inArray(favoritesTable.storyId, storyIds),
+				),
+			);
 		},
 
-		clearFavorites(appUserId: string) {
-			return database
-				.delete(favoritesTable)
-				.where(eq(favoritesTable.appUserId, appUserId))
-				.run();
+		async clearFavorites(appUserId: string) {
+			await removeFavorites(appUserId, eq(favoritesTable.appUserId, appUserId));
 		},
 
 		async listFavorites(appUserId: string) {

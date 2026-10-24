@@ -6,11 +6,13 @@ export function PaperLinks({
 	discussUrl,
 	projectPage,
 	githubRepo,
+	onDiscuss,
 }: {
 	title: string;
 	discussUrl: string;
 	projectPage: string | null;
 	githubRepo: string | null;
+	onDiscuss?: () => void;
 }) {
 	return (
 		<div className="papers-external-links is-compact">
@@ -20,6 +22,7 @@ export function PaperLinks({
 				target="_blank"
 				rel="noreferrer"
 				aria-label={`Discuss ${title} in ChatGPT`}
+				onClick={onDiscuss}
 			>
 				<MessageCircle size={14} aria-hidden="true" />
 				Discuss

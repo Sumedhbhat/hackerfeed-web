@@ -22,7 +22,12 @@ import {
 	paperEditionInputSchema,
 	paperEditionOutputSchema,
 } from "#/lib/papers/schemas";
-import { paperViewInputSchema } from "#/lib/view-activity/schemas";
+import {
+	type PaperViewAction,
+	paperViewInputSchema,
+	type StoryViewAction,
+	storyViewInputSchema,
+} from "#/lib/view-activity/schemas";
 import { createFavoriteServiceFromDatabase } from "#/server/favorites/service";
 import { createHuggingFacePaperFeedServiceFromDatabase } from "#/server/huggingface-papers/feed";
 import {
@@ -82,8 +87,13 @@ type ViewActivityApiService = {
 	recordStoryView(
 		user: TrpcContext["user"],
 		story: HackerNewsStoryRecord,
+		action: StoryViewAction,
 	): Promise<void>;
-	recordPaperView(user: TrpcContext["user"], arxivId: string): Promise<void>;
+	recordPaperView(
+		user: TrpcContext["user"],
+		arxivId: string,
+		action: PaperViewAction,
+	): Promise<void>;
 };
 
 const t = initTRPC.context<TrpcContext>().create({
@@ -290,10 +300,10 @@ export function createAppRouter(
 		}),
 		views: t.router({
 			story: protectedProcedure
-				.input(hackerNewsStorySchema)
+				.input(storyViewInputSchema)
 				.mutation(async ({ ctx, input }) => {
 					const service = getViewActivityApiService(ctx.database, viewActivity);
-					await service.recordStoryView(ctx.user, input);
+					await service.recordStoryView(ctx.user, input.story, input.action);
 				}),
 
 			paper: protectedProcedure
@@ -302,7 +312,11 @@ export function createAppRouter(
 					const service = getViewActivityApiService(ctx.database, viewActivity);
 
 					try {
-						await service.recordPaperView(ctx.user, input.arxivId);
+						await service.recordPaperView(
+							ctx.user,
+							input.arxivId,
+							input.action,
+						);
 					} catch (error) {
 						return mapViewActivityError(error);
 					}

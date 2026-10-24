@@ -1,8 +1,22 @@
 import "@tanstack/react-start/server-only";
 
-import { and, desc, eq, inArray, lt, or } from "drizzle-orm";
+import {
+	and,
+	desc,
+	eq,
+	inArray,
+	lt,
+	notExists,
+	or,
+	type SQL,
+} from "drizzle-orm";
+import { activityEventSelection } from "#/server/activity/events";
 import type { DatabaseContext } from "#/server/database/client";
-import { hfPapers, paperFavorites } from "#/server/database/schema";
+import {
+	activityEvents,
+	hfPapers,
+	paperFavorites,
+} from "#/server/database/schema";
 import { loadPaperMetadata } from "#/server/huggingface-papers/paper-metadata";
 
 export type PaperFavoriteCursor = {
@@ -44,6 +58,22 @@ async function getFavorite(
 }
 
 export function createPaperFavoriteRepository(database: DatabaseContext) {
+	async function removeFavorites(appUserId: string, where: SQL | undefined) {
+		await database.batch([
+			database.insert(activityEvents).select(
+				database
+					.select(
+						activityEventSelection(appUserId, "paper.unfavorited", {
+							paperId: paperFavorites.paperId,
+						}),
+					)
+					.from(paperFavorites)
+					.where(where),
+			),
+			database.delete(paperFavorites).where(where),
+		]);
+	}
+
 	return {
 		async findPaperByArxivId(arxivId: string) {
 			const [paper] = await database
@@ -55,14 +85,40 @@ export function createPaperFavoriteRepository(database: DatabaseContext) {
 			return paper ?? null;
 		},
 
-		async createFavoriteIfMissing(appUserId: string, paperId: string) {
-			await database
+		async addFavorite(appUserId: string, paperId: string) {
+			const recordEvent = database.insert(activityEvents).select(
+				database
+					.select(
+						activityEventSelection(appUserId, "paper.favorited", {
+							paperId: hfPapers.id,
+						}),
+					)
+					.from(hfPapers)
+					.where(
+						and(
+							eq(hfPapers.id, paperId),
+							notExists(
+								database
+									.select({ id: paperFavorites.id })
+									.from(paperFavorites)
+									.where(
+										and(
+											eq(paperFavorites.appUserId, appUserId),
+											eq(paperFavorites.paperId, paperId),
+										),
+									),
+							),
+						),
+					),
+			);
+			const insertFavorite = database
 				.insert(paperFavorites)
 				.values({ appUserId, paperId })
 				.onConflictDoNothing({
 					target: [paperFavorites.appUserId, paperFavorites.paperId],
-				})
-				.run();
+				});
+
+			await database.batch([recordEvent, insertFavorite]);
 
 			const favorite = await getFavorite(database, appUserId, paperId);
 			if (!favorite) {
@@ -72,28 +128,23 @@ export function createPaperFavoriteRepository(database: DatabaseContext) {
 			return favorite;
 		},
 
-		removeFavorite(appUserId: string, arxivId: string) {
+		async removeFavorite(appUserId: string, arxivId: string) {
 			const paperIds = database
 				.select({ id: hfPapers.id })
 				.from(hfPapers)
 				.where(eq(hfPapers.arxivId, arxivId));
 
-			return database
-				.delete(paperFavorites)
-				.where(
-					and(
-						eq(paperFavorites.appUserId, appUserId),
-						inArray(paperFavorites.paperId, paperIds),
-					),
-				)
-				.run();
+			await removeFavorites(
+				appUserId,
+				and(
+					eq(paperFavorites.appUserId, appUserId),
+					inArray(paperFavorites.paperId, paperIds),
+				),
+			);
 		},
 
-		clearFavorites(appUserId: string) {
-			return database
-				.delete(paperFavorites)
-				.where(eq(paperFavorites.appUserId, appUserId))
-				.run();
+		async clearFavorites(appUserId: string) {
+			await removeFavorites(appUserId, eq(paperFavorites.appUserId, appUserId));
 		},
 
 		async listFavorites(

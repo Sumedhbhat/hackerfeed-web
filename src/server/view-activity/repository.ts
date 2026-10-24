@@ -2,13 +2,12 @@ import "@tanstack/react-start/server-only";
 
 import { eq, sql } from "drizzle-orm";
 import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
+import type {
+	PaperViewAction,
+	StoryViewAction,
+} from "#/lib/view-activity/schemas";
 import type { DatabaseContext } from "#/server/database/client";
-import {
-	hfPapers,
-	paperViews,
-	stories,
-	storyViews,
-} from "#/server/database/schema";
+import { activityEvents, hfPapers, stories } from "#/server/database/schema";
 import { mapHackerNewsStory } from "#/server/stories/persistence";
 
 export function createViewActivityRepository(database: DatabaseContext) {
@@ -16,6 +15,7 @@ export function createViewActivityRepository(database: DatabaseContext) {
 		async recordStoryView(
 			appUserId: string,
 			story: HackerNewsStoryRecord,
+			action: StoryViewAction,
 		): Promise<void> {
 			const mappedStory = mapHackerNewsStory(story);
 			const upsertStory = database
@@ -25,8 +25,9 @@ export function createViewActivityRepository(database: DatabaseContext) {
 					target: stories.hnStoryId,
 					set: mappedStory,
 				});
-			const insertView = database.insert(storyViews).values({
+			const insertView = database.insert(activityEvents).values({
 				appUserId,
+				action: `story.${action}`,
 				storyId: sql`(select ${stories.id} from ${stories} where ${stories.hnStoryId} = ${story.id})`,
 				lastUpdatedBy: appUserId,
 			});
@@ -44,11 +45,16 @@ export function createViewActivityRepository(database: DatabaseContext) {
 			return paper ?? null;
 		},
 
-		async recordPaperView(appUserId: string, paperId: string): Promise<void> {
+		async recordPaperView(
+			appUserId: string,
+			paperId: string,
+			action: PaperViewAction,
+		): Promise<void> {
 			await database
-				.insert(paperViews)
+				.insert(activityEvents)
 				.values({
 					appUserId,
+					action: `paper.${action}`,
 					paperId,
 					lastUpdatedBy: appUserId,
 				})

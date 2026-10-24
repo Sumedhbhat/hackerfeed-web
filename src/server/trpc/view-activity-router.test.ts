@@ -23,15 +23,24 @@ const story: HackerNewsStoryRecord = {
 function createHarness() {
 	const database = {} as DatabaseContext;
 	const calls: Array<
-		| { name: "story"; user: unknown; story: HackerNewsStoryRecord }
-		| { name: "paper"; user: unknown; arxivId: string }
+		| {
+				name: "story";
+				user: unknown;
+				story: HackerNewsStoryRecord;
+				action: string;
+		  }
+		| { name: "paper"; user: unknown; arxivId: string; action: string }
 	> = [];
 	const views = {
-		async recordStoryView(user: unknown, viewedStory: HackerNewsStoryRecord) {
-			calls.push({ name: "story", user, story: viewedStory });
+		async recordStoryView(
+			user: unknown,
+			viewedStory: HackerNewsStoryRecord,
+			action: string,
+		) {
+			calls.push({ name: "story", user, story: viewedStory, action });
 		},
-		async recordPaperView(user: unknown, arxivId: string) {
-			calls.push({ name: "paper", user, arxivId });
+		async recordPaperView(user: unknown, arxivId: string, action: string) {
+			calls.push({ name: "paper", user, arxivId, action });
 			if (arxivId === "2607.99999") {
 				throw new ViewedPaperNotFoundError(arxivId);
 			}
@@ -50,23 +59,35 @@ describe("view activity tRPC router", () => {
 		const { database, router } = createHarness();
 		const caller = router.createCaller(createTrpcContext({ database }));
 
-		await expect(caller.views.story(story)).rejects.toMatchObject({
+		await expect(
+			caller.views.story({ action: "read", story }),
+		).rejects.toMatchObject({
 			code: "UNAUTHORIZED",
 		});
 		await expect(
-			caller.views.paper({ arxivId: "2607.00001" }),
+			caller.views.paper({ action: "read", arxivId: "2607.00001" }),
 		).rejects.toMatchObject({ code: "UNAUTHORIZED" });
 	});
 
 	it("delegates validated inputs with authenticated identity", async () => {
 		const { caller, calls } = createHarness();
 
-		await caller.views.story(story);
-		await caller.views.paper({ arxivId: "2607.00001" });
+		await caller.views.story({ action: "discussion_opened", story });
+		await caller.views.paper({ action: "chat_opened", arxivId: "2607.00001" });
 
 		expect(calls).toEqual([
-			{ name: "story", user: currentUser, story },
-			{ name: "paper", user: currentUser, arxivId: "2607.00001" },
+			{
+				name: "story",
+				user: currentUser,
+				story,
+				action: "discussion_opened",
+			},
+			{
+				name: "paper",
+				user: currentUser,
+				arxivId: "2607.00001",
+				action: "chat_opened",
+			},
 		]);
 	});
 
@@ -75,12 +96,19 @@ describe("view activity tRPC router", () => {
 
 		await expect(
 			caller.views.paper({
+				action: "read",
 				arxivId: "2607.00001",
 				appUserId: "forged-user",
-			} as { arxivId: string }),
+			} as { action: "read"; arxivId: string }),
 		).rejects.toBeInstanceOf(TRPCError);
 		await expect(
-			caller.views.paper({ arxivId: "not-an-arxiv-id" }),
+			caller.views.paper({ action: "read", arxivId: "not-an-arxiv-id" }),
+		).rejects.toBeInstanceOf(TRPCError);
+		await expect(
+			caller.views.story({ action: "favorited", story } as unknown as {
+				action: "read";
+				story: HackerNewsStoryRecord;
+			}),
 		).rejects.toBeInstanceOf(TRPCError);
 		expect(calls).toEqual([]);
 	});
@@ -89,7 +117,7 @@ describe("view activity tRPC router", () => {
 		const { caller } = createHarness();
 
 		await expect(
-			caller.views.paper({ arxivId: "2607.99999" }),
+			caller.views.paper({ action: "read", arxivId: "2607.99999" }),
 		).rejects.toMatchObject({
 			code: "NOT_FOUND",
 			message: "Paper 2607.99999 was not found",

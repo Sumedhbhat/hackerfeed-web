@@ -36,7 +36,7 @@ describe("fixture demo", () => {
 		expect(await first.favorites.list.query()).toEqual([]);
 		await second.favorites.importLocal.mutate({ stories: [seed[0], seed[0]] });
 		expect(await first.favorites.list.query()).toEqual([seed[0]]);
-		await first.views.story.mutate(seed[0]);
+		await first.views.story.mutate({ action: "read", story: seed[0] });
 		expect(createDemoApi()("favorites.list", undefined)).toHaveLength(3);
 		expect(fetch).not.toHaveBeenCalled();
 		fetch.mockRestore();
@@ -74,7 +74,7 @@ describe("fixture demo", () => {
 			paperFavoritesListOutputSchema.parse(api("paperFavorites.list", {}))
 				.items,
 		).toHaveLength(3);
-		api("views.paper", added);
+		api("views.paper", { ...added, action: "read" });
 		api("paperFavorites.remove", added);
 		expect(
 			paperFavoritesListOutputSchema.parse(api("paperFavorites.list", {}))
