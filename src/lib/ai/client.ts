@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/core";
 import { getApiHeaders, signIn } from "#/lib/auth/authkit";
 import { readServerTraceId } from "#/lib/tracing/headers";
 import type {
@@ -92,16 +93,51 @@ export async function connectAiProvider(
 	window.location.assign(url);
 }
 
+type StreamOptions = {
+	onDelta: (text: string) => void;
+	signal?: AbortSignal;
+};
+
 /**
  * Streams a story chat reply. Resolves when the reply completes; rejects with
  * AiRequestError on failure (after any partial text was delivered).
+ *
+ * The whole reply is one span, failed if the stream breaks after its 200,
+ * cancelled if the user stops it.
  */
-export async function streamStoryChat(
+export function streamStoryChat(
 	request: StoryChatRequest,
-	{
-		onDelta,
-		signal,
-	}: { onDelta: (text: string) => void; signal?: AbortSignal },
+	options: StreamOptions,
+): Promise<void> {
+	return Sentry.startSpan(
+		{
+			name: "Story chat reply",
+			op: "ai.chat",
+			attributes: {
+				"ai.provider": request.providerId,
+				"ai.model": request.model,
+			},
+		},
+		async (span) => {
+			try {
+				await readStoryChat(request, options);
+			} catch (error) {
+				span.setStatus({
+					code: Sentry.SPAN_STATUS_ERROR,
+					message: options.signal?.aborted ? "cancelled" : "internal_error",
+				});
+				if (error instanceof AiRequestError) {
+					span.setAttribute("ai.error_code", error.code);
+				}
+				throw error;
+			}
+		},
+	);
+}
+
+async function readStoryChat(
+	request: StoryChatRequest,
+	{ onDelta, signal }: StreamOptions,
 ): Promise<void> {
 	const response = await fetch("/api/ai/chat", {
 		method: "POST",

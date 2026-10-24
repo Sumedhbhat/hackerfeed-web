@@ -291,6 +291,13 @@ the other in Sentry, search `client.trace_id:<browser trace ID>` for the
 server trace, or open the server trace and follow its link. Services added
 behind the Worker should continue the Worker's trace, never the browser's.
 
+Story chat streams its reply after a `200`, so HTTP status alone would call a
+broken stream a success. The Worker runs the stream in an `AI chat stream`
+span and the browser wraps the reply in a `Story chat reply` span. When the
+stream fails midway, both, and the Worker's request span, are marked as errors
+with an `ai.error_code` attribute. A reply the user stops is `cancelled`,
+which Sentry does not count as an error.
+
 Sentry ingests warning and error logs. Trace volume is controlled by
 `SENTRY_TRACES_SAMPLE_RATE` and `VITE_SENTRY_TRACES_SAMPLE_RATE`; both default to
 `0.1`, while error events are captured independently of trace sampling. The
