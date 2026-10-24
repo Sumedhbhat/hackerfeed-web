@@ -45,6 +45,7 @@ function createHarness() {
 	const appUsers: AppUserRecord[] = [];
 	const stories: StoryRecord[] = [];
 	const favorites: FavoriteRecord[] = [];
+	const favoriteActivity: string[] = [];
 	let nextUserId = 1;
 	let nextStoryId = 1;
 	let nextFavoriteId = 1;
@@ -123,6 +124,11 @@ function createHarness() {
 			return sharedStory;
 		},
 
+		async addFavorite(appUserId: string, storyId: string) {
+			favoriteActivity.push(storyId);
+			return repository.createFavoriteIfMissing(appUserId, storyId);
+		},
+
 		async createFavoriteIfMissing(appUserId: string, storyId: string) {
 			let favorite = favorites.find(
 				(existingFavorite) =>
@@ -191,6 +197,7 @@ function createHarness() {
 
 	return {
 		appUsers,
+		favoriteActivity,
 		favorites,
 		repository,
 		service: createFavoriteService(repository, users),
@@ -362,6 +369,17 @@ describe("favorite service", () => {
 			"story-1",
 			"story-2",
 		]);
+	});
+
+	it("logs favorite activity for user adds but not for local imports", async () => {
+		const { favoriteActivity, service } = createHarness();
+
+		await service.addFavorite({ workosUserId: "workos-user-1" }, createStory());
+		await service.importLocalFavorites({ workosUserId: "workos-user-1" }, [
+			createStory({ id: 456 }),
+		]);
+
+		expect(favoriteActivity).toEqual(["story-1"]);
 	});
 
 	it("is safe to retry local favorite imports", async () => {

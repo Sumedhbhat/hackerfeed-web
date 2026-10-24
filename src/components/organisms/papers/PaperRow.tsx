@@ -14,6 +14,7 @@ import {
 	formatPaperDate,
 	type PaperPresentation,
 } from "#/lib/papers/presentation";
+import type { PaperViewAction } from "#/lib/view-activity/schemas";
 import { PaperSummary } from "./PaperSummary";
 
 type PaperRowProps = {
@@ -22,7 +23,7 @@ type PaperRowProps = {
 	isFavorited: boolean;
 	isPending: boolean;
 	onToggleFavorite: () => void;
-	onView: () => void;
+	onView: (action: PaperViewAction) => void;
 	paper: PaperPresentation;
 };
 
@@ -37,7 +38,7 @@ export function PaperRow({
 }: PaperRowProps) {
 	return (
 		<PaperCard animationDelay={Math.min(index * 35, 210)}>
-			<PaperTitle href={paper.paperUrl} onClick={onView}>
+			<PaperTitle href={paper.paperUrl} onClick={() => onView("read")}>
 				{paper.title}
 			</PaperTitle>
 			<Text size="xs" tone="soft">
@@ -59,6 +60,7 @@ export function PaperRow({
 							discussUrl={buildChatGptPaperDiscussionUrl(paper)}
 							projectPage={paper.projectPage}
 							githubRepo={paper.githubRepo}
+							onDiscuss={() => onView("chat_opened")}
 						/>
 						{canFavorite ? (
 							<ToggleButton

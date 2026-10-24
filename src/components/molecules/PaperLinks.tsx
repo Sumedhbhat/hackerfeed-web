@@ -6,9 +6,11 @@ export function PaperLinks({
 	discussUrl,
 	projectPage,
 	githubRepo,
+	onDiscuss,
 }: {
 	title: string;
 	discussUrl: string;
+	onDiscuss?: () => void;
 	projectPage: string | null;
 	githubRepo: string | null;
 }) {
@@ -20,6 +22,7 @@ export function PaperLinks({
 				target="_blank"
 				rel="noreferrer"
 				aria-label={`Discuss ${title} in ChatGPT`}
+				onClick={onDiscuss}
 			>
 				<MessageCircle size={14} aria-hidden="true" />
 				Discuss

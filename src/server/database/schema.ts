@@ -53,34 +53,6 @@ export const favorites = sqliteTable(
 	],
 );
 
-export const storyViews = sqliteTable(
-	"story_views",
-	{
-		id: uuidPrimaryKey(),
-		appUserId: text()
-			.notNull()
-			.references(() => appUsers.id, { onDelete: "restrict" }),
-		storyId: text()
-			.notNull()
-			.references(() => stories.id, { onDelete: "restrict" }),
-		viewedAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
-		lastUpdatedDate: text().notNull().default(sql`CURRENT_TIMESTAMP`),
-		lastUpdatedBy: text().notNull(),
-	},
-	(table) => [
-		index("story_views_app_user_id_viewed_at_id_idx").on(
-			table.appUserId,
-			table.viewedAt,
-			table.id,
-		),
-		index("story_views_story_id_viewed_at_id_idx").on(
-			table.storyId,
-			table.viewedAt,
-			table.id,
-		),
-	],
-);
-
 export const hfOrganizations = sqliteTable("hf_organizations", {
 	id: uuidPrimaryKey(),
 	hfOrganizationId: text().notNull().unique(),
@@ -132,30 +104,49 @@ export const paperFavorites = sqliteTable(
 	],
 );
 
-export const paperViews = sqliteTable(
-	"paper_views",
+export const activityActions = [
+	"story.read",
+	"story.discussion_opened",
+	"story.chat_opened",
+	"story.favorited",
+	"story.unfavorited",
+	"paper.read",
+	"paper.chat_opened",
+	"paper.favorited",
+	"paper.unfavorited",
+] as const;
+
+export type ActivityAction = (typeof activityActions)[number];
+
+/** Append-only log of what signed-in users do, for analytics. */
+export const activityEvents = sqliteTable(
+	"activity_events",
 	{
-		id: uuidPrimaryKey(),
+		id: integer().primaryKey(),
 		appUserId: text()
 			.notNull()
 			.references(() => appUsers.id, { onDelete: "restrict" }),
-		paperId: text()
-			.notNull()
-			.references(() => hfPapers.id, { onDelete: "restrict" }),
-		viewedAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
+		action: text({ enum: activityActions }).notNull(),
+		storyId: text().references(() => stories.id, { onDelete: "restrict" }),
+		paperId: text().references(() => hfPapers.id, { onDelete: "restrict" }),
+		occurredAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
 		lastUpdatedDate: text().notNull().default(sql`CURRENT_TIMESTAMP`),
 		lastUpdatedBy: text().notNull(),
 	},
 	(table) => [
-		index("paper_views_app_user_id_viewed_at_id_idx").on(
+		index("activity_events_app_user_id_occurred_at_idx").on(
 			table.appUserId,
-			table.viewedAt,
-			table.id,
+			table.occurredAt,
 		),
-		index("paper_views_paper_id_viewed_at_id_idx").on(
-			table.paperId,
-			table.viewedAt,
-			table.id,
+		index("activity_events_action_occurred_at_idx").on(
+			table.action,
+			table.occurredAt,
+		),
+		index("activity_events_story_id_idx").on(table.storyId),
+		index("activity_events_paper_id_idx").on(table.paperId),
+		check(
+			"activity_events_subject_check",
+			sql`(${table.storyId} is not null and ${table.paperId} is null and ${table.action} like 'story.%') or (${table.paperId} is not null and ${table.storyId} is null and ${table.action} like 'paper.%')`,
 		),
 	],
 );

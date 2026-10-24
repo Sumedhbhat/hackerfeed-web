@@ -9,6 +9,7 @@ import { Stack } from "#/components/atoms/Stack";
 import { MetaLine } from "#/components/molecules/MetaLine";
 import { StoryStats } from "#/components/molecules/StoryStats";
 import { useFeatureFlag } from "#/hooks/useFeatureFlags";
+import { useViewActivity } from "#/hooks/useViewActivity";
 import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
 import {
 	formatStoryAge,
@@ -23,6 +24,7 @@ export function StoryArticle({ story }: { story: HackerNewsStoryRecord }) {
 	const domain = getStoryDomain(story.url);
 	const title = getStoryTitle(story);
 	const aiChat = useFeatureFlag("aiChat");
+	const { recordStoryView } = useViewActivity();
 
 	return (
 		<Card padding="md" animated>
@@ -43,7 +45,11 @@ export function StoryArticle({ story }: { story: HackerNewsStoryRecord }) {
 
 				<Row gap="lg" wrap>
 					{story.url && (
-						<ExternalLink href={story.url} variant="accent">
+						<ExternalLink
+							href={story.url}
+							variant="accent"
+							onClick={() => recordStoryView(story, "read")}
+						>
 							Read article <Icon icon={ArrowRight} muted />
 						</ExternalLink>
 					)}
@@ -55,6 +61,7 @@ export function StoryArticle({ story }: { story: HackerNewsStoryRecord }) {
 							to="/chat/$storyId"
 							params={{ storyId: story.id }}
 							aria-label={`Discuss ${title} with AI`}
+							onClick={() => recordStoryView(story, "chat_opened")}
 						>
 							<Icon icon={MessageCircle} />
 							Discuss

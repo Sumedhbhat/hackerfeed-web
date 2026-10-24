@@ -232,8 +232,25 @@ describe("StoryCard link actions", () => {
 		fireEvent.click(screen.getByRole("button", { name: /read article/i }));
 
 		expect(trpcMock.viewStory).toHaveBeenCalledTimes(2);
-		expect(trpcMock.viewStory).toHaveBeenNthCalledWith(1, story);
+		expect(trpcMock.viewStory).toHaveBeenNthCalledWith(1, {
+			action: "read",
+			story,
+		});
 		expect(openLink).toHaveBeenCalledTimes(2);
+	});
+
+	it("records signed-in discussion and AI chat opens", () => {
+		authMock.user = { id: "workos-story-viewer" };
+		const story = makeStory();
+		render(<StoryCard story={story} />);
+
+		fireEvent.click(screen.getByRole("link", { name: "Discussion" }));
+		fireEvent.click(screen.getByRole("link", { name: /with ai$/i }));
+
+		expect(trpcMock.viewStory.mock.calls).toEqual([
+			[{ action: "discussion_opened", story }],
+			[{ action: "chat_opened", story }],
+		]);
 	});
 
 	it("opens the story when background tracking fails", () => {

@@ -144,7 +144,25 @@ describe("PapersFeed", () => {
 
 		fireEvent.click(screen.getByRole("link", { name: "Reasoning Paper" }));
 
-		expect(trpcMock.viewPaper).toHaveBeenCalledWith({ arxivId: "2606.00001" });
+		expect(trpcMock.viewPaper).toHaveBeenCalledWith({
+			action: "read",
+			arxivId: "2606.00001",
+		});
+	});
+
+	it("records signed-in ChatGPT discussion opens", () => {
+		render(
+			<PapersFeed edition={edition} filters={{}} onFiltersChange={vi.fn()} />,
+		);
+
+		fireEvent.click(
+			screen.getByRole("link", { name: "Discuss Reasoning Paper in ChatGPT" }),
+		);
+
+		expect(trpcMock.viewPaper).toHaveBeenCalledWith({
+			action: "chat_opened",
+			arxivId: "2606.00001",
+		});
 	});
 
 	it("does not record signed-out paper-title clicks", () => {

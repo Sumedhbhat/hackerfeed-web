@@ -20,7 +20,10 @@ import {
 	type SavedPaper,
 } from "#/lib/paper-favorites/schemas";
 import { paperEditionInputSchema } from "#/lib/papers/schemas";
-import { paperViewInputSchema } from "#/lib/view-activity/schemas";
+import {
+	paperViewInputSchema,
+	storyViewInputSchema,
+} from "#/lib/view-activity/schemas";
 import type { AppRouter } from "#/server/trpc/router";
 
 const paperPresentations = paperRows.map((paper) => ({
@@ -191,7 +194,7 @@ export function createDemoApi() {
 				paperFavorites.clear();
 				return;
 			case "views.story":
-				storyViews.add(hackerNewsStorySchema.parse(input).id);
+				storyViews.add(storyViewInputSchema.parse(input).story.id);
 				return;
 			case "views.paper": {
 				const { arxivId } = paperViewInputSchema.parse(input);

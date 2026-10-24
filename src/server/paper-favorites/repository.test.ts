@@ -9,12 +9,15 @@ type CapturedStatement = { sql: string; values: unknown[] };
 
 function createDatabase() {
 	const statements: CapturedStatement[] = [];
+	const batches: CapturedStatement[][] = [];
 	const binding = {
 		prepare(sql: string) {
 			return {
 				bind(...values: unknown[]) {
 					statements.push({ sql, values });
 					return {
+						sql,
+						values,
 						async run() {
 							return { success: true };
 						},
@@ -69,9 +72,13 @@ function createDatabase() {
 				},
 			};
 		},
+		async batch(batch: CapturedStatement[]) {
+			batches.push(batch);
+			return [];
+		},
 	} as unknown as D1DatabaseBinding;
 
-	return { database: createDatabaseContext(binding), statements };
+	return { batches, database: createDatabaseContext(binding), statements };
 }
 
 describe("paper favorite repository", () => {
@@ -116,19 +123,38 @@ describe("paper favorite repository", () => {
 		);
 	});
 
-	it("scopes remove and clear deletes to the app user", async () => {
-		const { database, statements } = createDatabase();
+	it("scopes remove and clear deletes to the app user and logs each removal", async () => {
+		const { batches, database } = createDatabase();
 		const repository = createPaperFavoriteRepository(database);
 
 		await repository.removeFavorite("user-1", "2607.00001");
 		await repository.clearFavorites("user-1");
 
-		const deleteStatements = statements.filter((statement) =>
-			statement.sql.startsWith('delete from "paper_favorites"'),
+		expect(batches).toHaveLength(2);
+		for (const [logRemoval, deleteFavorites] of batches) {
+			expect(logRemoval?.sql).toMatch(
+				/^insert into "activity_events" .* from "paper_favorites" where/,
+			);
+			expect(logRemoval?.values).toContain("paper.unfavorited");
+			expect(deleteFavorites?.sql).toMatch(/^delete from "paper_favorites"/);
+		}
+		expect(batches[0]?.[1]?.values).toEqual(["user-1", "2607.00001"]);
+		expect(batches[1]?.[1]?.values).toEqual(["user-1"]);
+	});
+
+	it("logs a favorite only when the paper was not already saved", async () => {
+		const { batches, database } = createDatabase();
+		const repository = createPaperFavoriteRepository(database);
+
+		await repository
+			.createFavoriteIfMissing("user-1", "paper-001")
+			.catch(() => undefined);
+
+		expect(batches[0]?.[0]?.sql).toContain('insert into "activity_events"');
+		expect(batches[0]?.[0]?.sql).toContain(
+			'not exists (select "id" from "paper_favorites"',
 		);
-		expect(deleteStatements).toHaveLength(2);
-		expect(deleteStatements[0]?.values).toContain("user-1");
-		expect(deleteStatements[0]?.values).toContain("2607.00001");
-		expect(deleteStatements[1]?.values).toEqual(["user-1"]);
+		expect(batches[0]?.[0]?.values).toContain("paper.favorited");
+		expect(batches[0]?.[1]?.sql).toContain('insert into "paper_favorites"');
 	});
 });
