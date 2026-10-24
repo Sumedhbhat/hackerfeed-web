@@ -50,11 +50,7 @@ const config = defineConfig({
 				entry: "client-entry.tsx",
 			},
 		}),
-		viteReact({
-			babel: {
-				plugins: ["babel-plugin-react-compiler"],
-			},
-		}),
+		viteReact(),
 		sentryVitePlugin({
 			org: "sumedhs-org",
 			project: "hackerfeed-web",

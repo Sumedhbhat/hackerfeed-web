@@ -24,6 +24,7 @@ bunx vitest run src/lib/hacker-news/utils.test.ts   # Run a single test file
 bun run lint         # Biome lint
 bun run format       # Biome format
 bun run check        # Biome check (lint + format together)
+bun run typecheck    # tsc --noEmit (CI fails on any type error)
 ```
 
 ## Architecture

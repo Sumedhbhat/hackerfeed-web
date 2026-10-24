@@ -13,7 +13,9 @@ vi.mock("#/hooks/useAuthSession", () => authMock);
 
 import { Route } from "./auth.signed-out";
 
-const SignedOutPage = Route.component as ComponentType;
+// createFileRoute is mocked to return its options, so the component sits on Route.
+const SignedOutPage = (Route as unknown as { component: ComponentType })
+	.component;
 
 afterEach(cleanup);
 

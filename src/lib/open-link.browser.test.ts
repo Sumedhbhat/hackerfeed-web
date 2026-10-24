@@ -1,10 +1,17 @@
 // @vitest-environment happy-dom
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+	afterEach,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	type MockInstance,
+	vi,
+} from "vitest";
 import { openLink } from "#/lib/open-link";
 
 describe("openLink", () => {
-	// biome-ignore lint/suspicious/noExplicitAny: spy types are complex overloads
-	let openSpy: ReturnType<typeof vi.spyOn<any, any>>;
+	let openSpy: MockInstance<typeof window.open>;
 
 	beforeEach(() => {
 		openSpy = vi.spyOn(window, "open").mockReturnValue(null);

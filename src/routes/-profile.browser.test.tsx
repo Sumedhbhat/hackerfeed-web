@@ -36,7 +36,9 @@ vi.mock("@tanstack/react-router", async () => ({
 
 import { parseProfileSearch, Route } from "./profile";
 
-const ProfilePage = Route.component as ComponentType;
+// createFileRoute is mocked to return its options, so the component sits on Route.
+const ProfilePage = (Route as unknown as { component: ComponentType })
+	.component;
 
 beforeEach(() => {
 	authMock.user = null;

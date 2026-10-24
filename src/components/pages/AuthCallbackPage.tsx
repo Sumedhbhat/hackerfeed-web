@@ -55,7 +55,8 @@ export function AuthCallbackPage() {
 	if (isLoading || user) {
 		return (
 			<>
-				{user ? <Navigate href={params.returnTo} replace /> : null}
+				{/* With href set, the router navigates there and ignores `to`. */}
+				{user ? <Navigate to="." href={params.returnTo} replace /> : null}
 				<LoadingScreen />
 			</>
 		);

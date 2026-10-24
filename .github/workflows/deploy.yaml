@@ -114,6 +114,9 @@ jobs:
       - name: Run lint
         run: bun run check
 
+      - name: Typecheck
+        run: bun run typecheck
+
       - name: Run tests
         run: bun run test
 
