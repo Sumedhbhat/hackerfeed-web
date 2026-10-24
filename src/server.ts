@@ -6,7 +6,7 @@ import {
 	type RequestHandler,
 } from "@tanstack/react-start/server";
 import { createServerEntry } from "@tanstack/react-start/server-entry";
-import { logger } from "#/lib/logger";
+import { getTraceId, logger } from "#/lib/logger";
 import { sentryDataCollection } from "#/lib/sentry-data-collection";
 import {
 	createDatabaseContext,
@@ -15,6 +15,12 @@ import {
 } from "#/server/database/client";
 import { renderServerErrorPage } from "#/server/errors/server-error-page";
 import { runHuggingFaceDailyPapersIngestion } from "#/server/huggingface-papers/ingestion";
+import {
+	linkClientTrace,
+	SERVER_TRACE_ID_HEADER,
+	withoutIncomingTrace,
+	withServerTraceId,
+} from "#/server/tracing/client-trace";
 
 type WorkerEnv = {
 	DB: D1DatabaseBinding;
@@ -45,7 +51,7 @@ function wantsJson(request: Request) {
 
 function renderErrorResponse(request: Request, traceId: string | undefined) {
 	const headers = new Headers();
-	if (traceId) headers.set("x-sentry-trace-id", traceId);
+	if (traceId) headers.set(SERVER_TRACE_ID_HEADER, traceId);
 
 	if (wantsJson(request)) {
 		return Response.json(
@@ -68,9 +74,10 @@ function createWorkerDatabaseContext(env: WorkerEnv) {
 
 async function handleAppFetch(request: Request, env: WorkerEnv) {
 	setDatabaseContext(createWorkerDatabaseContext(env));
+	linkClientTrace(request);
 
 	try {
-		return await startFetch(request);
+		return withServerTraceId(await startFetch(request), getTraceId());
 	} catch (error) {
 		// Still inside Sentry's request span, so the issue, logs and spans share
 		// the trace ID the user sees on the error page.
@@ -112,4 +119,17 @@ const instrumentedWorker = Sentry.withSentry((env: WorkerEnv) => {
 	};
 }, worker);
 
-export default instrumentedWorker;
+const instrumentedFetch =
+	instrumentedWorker.fetch as ExportedHandlerFetchHandler<WorkerEnv>;
+
+export default {
+	...instrumentedWorker,
+	fetch(request, env, context) {
+		return instrumentedFetch.call(
+			instrumentedWorker,
+			withoutIncomingTrace(request),
+			env,
+			context,
+		);
+	},
+} satisfies ExportedHandler<WorkerEnv>;
