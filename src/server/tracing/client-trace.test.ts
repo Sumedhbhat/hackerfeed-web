@@ -4,6 +4,7 @@ import {
 	CLIENT_TRACE_HEADER,
 	SERVER_TRACE_ID_HEADER,
 } from "#/lib/tracing/headers";
+import { installSentryTestClient } from "#/test/sentryTestClient";
 import {
 	linkClientTrace,
 	parseClientTrace,
@@ -14,31 +15,8 @@ import {
 const FORGED_TRACE_ID = "deadbeefdeadbeefdeadbeefdeadbeef";
 const FORGED_SENTRY_TRACE = `${FORGED_TRACE_ID}-1234567890abcdef-1`;
 
-class TestClient extends Sentry.Client<Sentry.ClientOptions> {
-	constructor(options: Sentry.ClientOptions) {
-		super(options);
-	}
-	eventFromException() {
-		return Promise.resolve({});
-	}
-	eventFromMessage() {
-		return Promise.resolve({});
-	}
-}
-
 beforeAll(() => {
-	const client = new TestClient({
-		dsn: "https://public@o123.ingest.sentry.io/1",
-		integrations: [],
-		stackParser: () => [],
-		tracesSampleRate: 1,
-		transport: () => ({
-			send: async () => ({}),
-			flush: async () => true,
-		}),
-	});
-	Sentry.setCurrentClient(client);
-	client.init();
+	installSentryTestClient();
 });
 
 function serverTraceFor(request: Request) {

@@ -1,5 +1,6 @@
 import "@tanstack/react-start/server-only";
 
+import * as Sentry from "@sentry/core";
 import {
 	aiProviderIdSchema,
 	type ChatStreamEvent,
@@ -108,6 +109,11 @@ function errorStatus(error: AiProviderError): number {
 	if (error instanceof AiProviderNotConnectedError) return 409;
 	if (error.status === 429) return 429;
 	return 502;
+}
+
+function markStreamFailed(span: Sentry.Span, errorCode: string) {
+	span.setStatus({ code: Sentry.SPAN_STATUS_ERROR, message: "internal_error" });
+	span.setAttribute("ai.error_code", errorCode);
 }
 
 function logProviderError(
@@ -307,6 +313,7 @@ export function createAiHttpHandlers(deps: AiHttpDependencies) {
 
 		/** POST /api/ai/chat — streams NDJSON ChatStreamEvents. */
 		async chat(request: Request): Promise<Response> {
+			const requestSpan = Sentry.getActiveSpan();
 			if (isCrossSiteRequest(request)) return forbidden();
 			if (!request.headers.get("Content-Type")?.includes("application/json")) {
 				return json(
@@ -360,6 +367,16 @@ export function createAiHttpHandlers(deps: AiHttpDependencies) {
 				return json(error, errorStatus(error));
 			}
 
+			// The 200 goes out before the first delta, so a failure midway must
+			// mark the spans itself. Sentry keeps the request span open until an
+			// NDJSON body ends.
+			const streamSpan = Sentry.startInactiveSpan({
+				name: "AI chat stream",
+				op: "ai.chat.stream",
+				parentSpan: requestSpan,
+				attributes: { "ai.provider": providerId, "ai.model": model },
+			});
+			let cancelled = false;
 			const encoder = new TextEncoder();
 			const body = new ReadableStream<Uint8Array>({
 				async start(controller) {
@@ -369,6 +386,7 @@ export function createAiHttpHandlers(deps: AiHttpDependencies) {
 						for await (const text of deltas) send({ type: "delta", text });
 						send({ type: "done" });
 					} catch (error) {
+						if (cancelled) return;
 						const chatError =
 							error instanceof AiProviderError
 								? error
@@ -377,13 +395,23 @@ export function createAiHttpHandlers(deps: AiHttpDependencies) {
 										"The response was interrupted. Try again.",
 										{ retryable: true },
 									);
+						markStreamFailed(streamSpan, chatError.code);
+						if (requestSpan) {
+							markStreamFailed(Sentry.getRootSpan(requestSpan), chatError.code);
+						}
 						logProviderError("AI chat stream failed", error, providerId);
 						send({ type: "error", ...chatError.toJSON() });
 					} finally {
-						controller.close();
+						streamSpan.end();
+						if (!cancelled) controller.close();
 					}
 				},
 				cancel() {
+					cancelled = true;
+					streamSpan.setStatus({
+						code: Sentry.SPAN_STATUS_ERROR,
+						message: "cancelled",
+					});
 					void deltas.return(undefined);
 				},
 			});

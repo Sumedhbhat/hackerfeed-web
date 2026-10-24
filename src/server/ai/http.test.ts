@@ -1,6 +1,8 @@
+import * as Sentry from "@sentry/core";
 import { describe, expect, it, vi } from "vitest";
 import type { ChatStreamEvent } from "#/lib/ai/schemas";
 import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
+import { installSentryTestClient } from "#/test/sentryTestClient";
 import {
 	AiProviderError,
 	AiProviderNotConnectedError,
@@ -615,6 +617,53 @@ describe("chat", () => {
 				message: "Limit hit",
 				retryable: false,
 			},
+		]);
+	});
+
+	it("marks the request and stream spans failed when the stream fails midway", async () => {
+		const sentry = installSentryTestClient();
+		const { handlers, service } = setup();
+		service.startChat.mockResolvedValue(
+			fromArray(["partial"], new AiProviderError("upstream_failed", "Down")),
+		);
+
+		// Like Sentry's Cloudflare wrapper, keep the request span open until the
+		// NDJSON body has been read.
+		await Sentry.startSpanManual(
+			{ name: "POST /api/ai/chat" },
+			async (span) => {
+				await readEvents(await handlers.chat(chatRequest(validChat)));
+				span.end();
+			},
+		);
+
+		const spans = sentry.endedSpans();
+		expect(spans.find((span) => span.name === "AI chat stream")).toMatchObject({
+			status: "error",
+			attributes: expect.objectContaining({
+				"ai.error_code": "upstream_failed",
+			}),
+		});
+		expect(
+			spans.find((span) => span.name === "POST /api/ai/chat"),
+		).toMatchObject({ status: "error" });
+	});
+
+	it("leaves the spans ok when the stream completes", async () => {
+		const sentry = installSentryTestClient();
+		const { handlers } = setup();
+
+		await Sentry.startSpanManual(
+			{ name: "POST /api/ai/chat" },
+			async (span) => {
+				await readEvents(await handlers.chat(chatRequest(validChat)));
+				span.end();
+			},
+		);
+
+		expect(sentry.endedSpans().map((span) => span.status)).toEqual([
+			"ok",
+			"ok",
 		]);
 	});
 
