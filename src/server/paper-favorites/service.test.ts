@@ -84,7 +84,7 @@ function createHarness() {
 			return paper ? { id: paper.id } : null;
 		},
 
-		async createFavoriteIfMissing(appUserId: string, paperId: string) {
+		async addFavorite(appUserId: string, paperId: string) {
 			let favorite = favorites.find(
 				(candidate) =>
 					candidate.appUserId === appUserId && candidate.paperId === paperId,

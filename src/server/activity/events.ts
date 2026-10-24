@@ -8,7 +8,6 @@ type Subject =
 	| { storyId: SQLiteColumn; paperId?: never }
 	| { paperId: SQLiteColumn; storyId?: never };
 
-/** Select list for `insert(activityEvents).select(...)`, one event per selected row. */
 export function activityEventSelection(
 	appUserId: string,
 	action: ActivityAction,

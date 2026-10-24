@@ -117,6 +117,15 @@ export function createFavoriteRepository(database: DatabaseContext) {
 		]);
 	}
 
+	async function getSavedFavorite(appUserId: string, storyId: string) {
+		const favorite = await getFavorite(database, appUserId, storyId);
+		if (!favorite) {
+			throw new Error("D1 favorite upsert failed");
+		}
+
+		return mapFavoriteRow(favorite);
+	}
+
 	return {
 		async upsertStoryFromHackerNews(story: HackerNewsStoryRecord) {
 			const mappedStory = mapHackerNewsStory(story);
@@ -193,12 +202,7 @@ export function createFavoriteRepository(database: DatabaseContext) {
 
 			await database.batch([recordEvent, insertFavorite]);
 
-			const favorite = await getFavorite(database, appUserId, storyId);
-			if (!favorite) {
-				throw new Error("D1 favorite upsert failed");
-			}
-
-			return mapFavoriteRow(favorite);
+			return getSavedFavorite(appUserId, storyId);
 		},
 
 		async createFavoriteIfMissing(appUserId: string, storyId: string) {
@@ -210,12 +214,7 @@ export function createFavoriteRepository(database: DatabaseContext) {
 				})
 				.run();
 
-			const favorite = await getFavorite(database, appUserId, storyId);
-			if (!favorite) {
-				throw new Error("D1 favorite upsert failed");
-			}
-
-			return mapFavoriteRow(favorite);
+			return getSavedFavorite(appUserId, storyId);
 		},
 
 		async removeFavorite(appUserId: string, hnStoryId: number) {

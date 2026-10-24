@@ -147,7 +147,7 @@ describe("paper favorites tRPC router", () => {
 				async findPaperByArxivId() {
 					return null;
 				},
-				async createFavoriteIfMissing() {},
+				async addFavorite() {},
 				async removeFavorite() {},
 				async clearFavorites() {},
 				async listFavorites() {

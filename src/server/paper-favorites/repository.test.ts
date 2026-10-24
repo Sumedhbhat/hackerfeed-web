@@ -55,6 +55,17 @@ function createDatabase() {
 								];
 							}
 
+							if (sql.includes('from "paper_favorites" where')) {
+								return [
+									[
+										"favorite-001",
+										"user-1",
+										"paper-001",
+										"2026-07-10 12:00:00",
+									],
+								];
+							}
+
 							if (sql.includes('from "hf_paper_authors"')) {
 								return [
 									["paper-002", "Ada Lovelace", 1],
@@ -146,9 +157,9 @@ describe("paper favorite repository", () => {
 		const { batches, database } = createDatabase();
 		const repository = createPaperFavoriteRepository(database);
 
-		await repository
-			.createFavoriteIfMissing("user-1", "paper-001")
-			.catch(() => undefined);
+		await expect(
+			repository.addFavorite("user-1", "paper-001"),
+		).resolves.toMatchObject({ id: "favorite-001" });
 
 		expect(batches[0]?.[0]?.sql).toContain('insert into "activity_events"');
 		expect(batches[0]?.[0]?.sql).toContain(

@@ -85,7 +85,7 @@ export function createPaperFavoriteRepository(database: DatabaseContext) {
 			return paper ?? null;
 		},
 
-		async createFavoriteIfMissing(appUserId: string, paperId: string) {
+		async addFavorite(appUserId: string, paperId: string) {
 			const recordEvent = database.insert(activityEvents).select(
 				database
 					.select(
