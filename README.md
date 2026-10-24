@@ -96,7 +96,7 @@ code must not access `env.DB` directly outside the Worker boundary.
 
 ## Activity analytics
 
-Every signed-in action is a row in the D1 `activity_events` table: who
+Each action below is a row in the D1 `activity_events` table: who
 (`appUserId`), what (`action`), which story or paper (`storyId` or `paperId`),
 and when (`occurredAt`, UTC).
 
@@ -133,7 +133,8 @@ GROUP BY s.id ORDER BY reads DESC LIMIT 20;
 To log a new action, add it to `activityActions` in
 `src/server/database/schema.ts`. No migration is needed. Story actions must
 start with `story.` and set `storyId`, and paper actions must start with
-`paper.` and set `paperId`. A CHECK constraint enforces this.
+`paper.` and set `paperId`. A CHECK constraint enforces the prefix and the
+matching column.
 
 ## Infrastructure
 

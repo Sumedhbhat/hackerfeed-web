@@ -10,9 +10,9 @@ export function PaperLinks({
 }: {
 	title: string;
 	discussUrl: string;
-	onDiscuss?: () => void;
 	projectPage: string | null;
 	githubRepo: string | null;
+	onDiscuss?: () => void;
 }) {
 	return (
 		<div className="papers-external-links is-compact">
