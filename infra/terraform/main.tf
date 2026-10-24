@@ -6,6 +6,10 @@ terraform {
       source  = "cloudflare/cloudflare"
       version = "5.27.0"
     }
+    time = {
+      source  = "hashicorp/time"
+      version = "0.14.2"
+    }
   }
 
   # The state server in infra/state-backend. infra/terraform.sh sets the
@@ -33,4 +37,13 @@ resource "cloudflare_d1_database" "this" {
   account_id       = var.cloudflare_account_id
   name             = "hackerfeed"
   read_replication = { mode = "disabled" }
+}
+
+# PR jobs read this state: the preview token uploads demo versions and plans
+# this root. Production-only tokens belong in ./deploy.
+module "preview_token" {
+  source      = "./modules/ci-token"
+  account_id  = var.cloudflare_account_id
+  name        = "hackerfeed-ci-preview"
+  permissions = ["Workers Scripts Write", "D1 Read", "Account API Tokens Read"]
 }

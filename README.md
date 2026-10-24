@@ -139,7 +139,7 @@ matching column.
 ## Infrastructure
 
 `infra/terraform` creates the Cloudflare resources the app runs on: today, the
-D1 databases. It creates resources and nothing else. Wrangler deploys the
+D1 database and CI's Cloudflare tokens. It creates resources and nothing else. Wrangler deploys the
 Worker and its settings from `wrangler.jsonc`, and CI applies `migrations/` in
 its own step.
 
@@ -163,6 +163,23 @@ and views reset on refresh. No D1, WorkOS, AI connections, or production secrets
 are used. Previews do not validate migrations or backend behavior. Run
 `bun run dev:demo` locally, or see [private previews](docs/private-preview.md).
 
+### Cloudflare tokens
+
+GitHub stores one Cloudflare token, `CLOUDFLARE_API_TOKEN` in the `production`
+environment. It runs Terraform and deploys the state server, which Terraform
+needs first. Terraform mints, scopes and rotates every other token:
+
+| Token | Root and state | Used by |
+|---|---|---|
+| `hackerfeed-ci-deploy` | `infra/terraform/deploy`, `deploy` | migrations and Worker deploys |
+| `hackerfeed-ci-preview` | `infra/terraform`, `prod` | PR version uploads and PR plans |
+
+Jobs read them from Terraform outputs with `infra/cloudflare-token.sh`, so the
+`preview` environment holds no Cloudflare token. Token values sit in plain text
+in state, and PR jobs can read `prod`; production-only tokens go in `deploy`,
+which only `production` can read. See
+[Cloudflare CI tokens](docs/cloudflare-ci-deploy-token.md).
+
 Old preview databases and their state are left untouched. Retiring those live
 resources is a separate operation; this change removes automatic creation and
 cleanup. PRs also show a read-only production Terraform plan.
@@ -175,10 +192,10 @@ database. There is no stored password: each CI job requests a GitHub OIDC
 token, and the Worker verifies it against GitHub's keys and this repository's
 id. The job's GitHub environment decides what it may touch:
 
-| Environment | `prod` state |
-|---|---|
-| `production` (master only) | read, write, lock |
-| `preview` (pull requests) | read only, for PR plans |
+| Environment | `prod` state | `deploy` state |
+|---|---|---|
+| `production` (master only) | read, write, lock | read, write, lock |
+| `preview` (pull requests) | read only, for PR plans | none |
 
 Every Terraform command goes through `infra/terraform.sh`. A Python 3 loopback
 proxy requests and refreshes OIDC credentials while Terraform runs, so a long
