@@ -102,7 +102,7 @@ and when (`occurredAt`, UTC).
 
 | `action` | Logged when the user |
 | --- | --- |
-| `story.read` | opens the article from a story card or story page |
+| `story.read` | opens a story: its article, or the HN post when it has no article (Ask HN) |
 | `story.discussion_opened` | opens the in-app comment thread from a story card |
 | `story.chat_opened` | opens the AI chat for a story |
 | `story.favorited` / `story.unfavorited` | saves or removes a story (clearing logs one unfavorite per story) |
