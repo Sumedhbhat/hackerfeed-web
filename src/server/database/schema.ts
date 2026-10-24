@@ -118,7 +118,6 @@ export const activityActions = [
 
 export type ActivityAction = (typeof activityActions)[number];
 
-/** Append-only log of what signed-in users do, for analytics. */
 export const activityEvents = sqliteTable(
 	"activity_events",
 	{
@@ -146,7 +145,7 @@ export const activityEvents = sqliteTable(
 		index("activity_events_paper_id_idx").on(table.paperId),
 		check(
 			"activity_events_subject_check",
-			sql`(${table.storyId} is not null and ${table.paperId} is null and ${table.action} like 'story.%') or (${table.paperId} is not null and ${table.storyId} is null and ${table.action} like 'paper.%')`,
+			sql`(${table.storyId} is not null and ${table.paperId} is null and substr(${table.action}, 1, 6) = 'story.') or (${table.paperId} is not null and ${table.storyId} is null and substr(${table.action}, 1, 6) = 'paper.')`,
 		),
 	],
 );
