@@ -10,9 +10,11 @@ import {
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { type ReactNode, useEffect } from "react";
 import { Document } from "../components/atoms/Document";
+import { ToastProvider } from "../components/atoms/Toast";
 import { AppShell } from "../components/molecules/AppShell";
 import { FatalErrorView } from "../components/molecules/FatalErrorView";
 import { LoadingScreen } from "../components/molecules/LoadingScreen";
+import { ErrorNotifications } from "../components/organisms/layout/ErrorNotifications";
 import SiteFooter from "../components/organisms/layout/SiteFooter";
 import SiteHeader from "../components/organisms/layout/SiteHeader";
 import { signIn, useAuthSession } from "../hooks/useAuthSession";
@@ -131,14 +133,17 @@ function AppLayout() {
 	return (
 		<AuthProvider>
 			<TanStackQueryProvider>
-				{import.meta.env.VITE_DEMO_DATA !== "true" && (
-					<LocalFavoritesMigration />
-				)}
-				<AppShell header={<SiteHeader />} footer={<SiteFooter />}>
-					<SessionGate>
-						<Outlet />
-					</SessionGate>
-				</AppShell>
+				<ToastProvider>
+					<ErrorNotifications />
+					{import.meta.env.VITE_DEMO_DATA !== "true" && (
+						<LocalFavoritesMigration />
+					)}
+					<AppShell header={<SiteHeader />} footer={<SiteFooter />}>
+						<SessionGate>
+							<Outlet />
+						</SessionGate>
+					</AppShell>
+				</ToastProvider>
 				<TanStackDevtools
 					config={{
 						position: "bottom-right",
