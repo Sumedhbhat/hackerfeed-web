@@ -114,7 +114,7 @@ const instrumentedWorker = Sentry.withSentry((env: WorkerEnv) => {
 	return {
 		dsn: env.SENTRY_DSN,
 		environment: env.SENTRY_ENVIRONMENT ?? "production",
-		tracesSampleRate: getSentrySampleRate(env.SENTRY_TRACES_SAMPLE_RATE, 1),
+		tracesSampleRate: getSentrySampleRate(env.SENTRY_TRACES_SAMPLE_RATE, 0.1),
 		dataCollection: sentryDataCollection,
 	};
 }, worker);

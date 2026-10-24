@@ -53,7 +53,10 @@ Read the code when the evidence points into it. The key pieces:
   trace with `client.trace_id:<id>`; given a server trace, follow its link.
 - Error screens and error toasts show the server trace ID when the failing
   request reached the Worker, and the browser trace ID otherwise.
-- Traces are sampled at 100% by default; errors are always captured.
+- Traces are sampled at 10%, separately in the browser and the Worker; errors
+  are always captured. An unsampled trace can show only the error itself (one
+  span, no duration), and a linked trace on the other side may be missing.
+  That is normal, not missing data.
 - Env vars are validated by `createEnv` in `src/env.ts` when a request first
   imports it. A failure throws `Invalid environment variables` and breaks
   every request.

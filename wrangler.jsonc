@@ -21,9 +21,9 @@
 		"SERVER_URL": "",
 		"VITE_APP_TITLE": "Hacker Feed",
 		"VITE_SENTRY_ENVIRONMENT": "production",
-		"VITE_SENTRY_TRACES_SAMPLE_RATE": "1",
+		"VITE_SENTRY_TRACES_SAMPLE_RATE": "0.1",
 		"SENTRY_ENVIRONMENT": "production",
-		"SENTRY_TRACES_SAMPLE_RATE": "1",
+		"SENTRY_TRACES_SAMPLE_RATE": "0.1",
 		"VITE_WORKOS_API_HOSTNAME": "api.workos.com",
 		"VITE_WORKOS_REDIRECT_URI": "https://hackerfeed-web.kgqk4vdcfq.workers.dev/auth/callback"
 	},

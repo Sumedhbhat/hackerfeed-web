@@ -55,13 +55,13 @@ VITE_WORKOS_API_HOSTNAME=api.workos.com
 VITE_APP_TITLE=Hacker Feed
 VITE_SENTRY_DSN=...
 VITE_SENTRY_ENVIRONMENT=development
-VITE_SENTRY_TRACES_SAMPLE_RATE=1
+VITE_SENTRY_TRACES_SAMPLE_RATE=0.1
 
 # .dev.vars
 AI_TOKEN_ENCRYPTION_KEY=... # at least 32 characters
 SENTRY_DSN=...
 SENTRY_ENVIRONMENT=development
-SENTRY_TRACES_SAMPLE_RATE=1
+SENTRY_TRACES_SAMPLE_RATE=0.1
 SERVER_URL=http://localhost:3000
 ```
 
@@ -293,8 +293,9 @@ behind the Worker should continue the Worker's trace, never the browser's.
 
 Sentry ingests warning and error logs. Trace volume is controlled by
 `SENTRY_TRACES_SAMPLE_RATE` and `VITE_SENTRY_TRACES_SAMPLE_RATE`; both default to
-`1`, so every trace ID a user quotes has its spans. Error events are captured
-independently of trace sampling.
+`0.1`, while error events are captured independently of trace sampling. The
+browser and the Worker sample on their own, so a quoted trace ID always finds
+its error, but its spans only when that side was sampled.
 
 Production builds upload browser and Worker source maps to Sentry when
 `SENTRY_AUTH_TOKEN` (a Sentry organization token, stored as a GitHub secret) is
