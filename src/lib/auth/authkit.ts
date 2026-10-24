@@ -1,4 +1,5 @@
 import type { useAuth } from "@workos-inc/authkit-react";
+import { getClientTraceHeaders } from "#/lib/tracing/headers";
 
 type AuthKit = ReturnType<typeof useAuth>;
 
@@ -20,6 +21,11 @@ export async function getAuthHeaders(): Promise<Record<string, string>> {
 	} catch {
 		return {};
 	}
+}
+
+/** Headers for every HackerFeed API call: auth plus the browser trace claim. */
+export async function getApiHeaders(): Promise<Record<string, string>> {
+	return { ...getClientTraceHeaders(), ...(await getAuthHeaders()) };
 }
 
 export function signIn(

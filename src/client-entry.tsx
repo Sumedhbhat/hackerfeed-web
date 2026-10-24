@@ -14,8 +14,9 @@ if (sentryDsn) {
 		environment: env.VITE_SENTRY_ENVIRONMENT,
 		tracesSampleRate: env.VITE_SENTRY_TRACES_SAMPLE_RATE,
 		dataCollection: sentryDataCollection,
-		// Same-origin API calls carry the trace, so browser and Worker spans,
-		// logs and issues share one trace ID.
+		// The Worker owns its trace; API calls send x-client-trace for it to
+		// link instead (getApiHeaders).
+		tracePropagationTargets: [],
 		integrations: [Sentry.browserTracingIntegration()],
 	});
 }

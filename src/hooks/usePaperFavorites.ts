@@ -148,6 +148,8 @@ export function usePaperFavorites(): UsePaperFavoritesReturn {
 
 	const mutation = useMutation({
 		mutationKey: MUTATION_KEY,
+		// The feed shows this failure next to its Refresh button.
+		meta: { notifyOnError: false },
 		mutationFn: async ({ paper, remove }: MutationVariables) => {
 			const client = createTrpcClient();
 			if (remove) {
@@ -184,6 +186,7 @@ export function usePaperFavorites(): UsePaperFavoritesReturn {
 
 	const clearMutation = useMutation({
 		mutationKey: CLEAR_MUTATION_KEY,
+		meta: { notifyOnError: false },
 		mutationFn: async ({ epoch }: { epoch: number }) => {
 			if (epoch !== auth.epoch) return;
 			await createTrpcClient().paperFavorites.clear.mutate();
@@ -272,9 +275,11 @@ export function usePaperFavorites(): UsePaperFavoritesReturn {
 			pending.size === 0 &&
 			savedPapers.length > 0,
 		clearAll,
-		error: favorites.error
-			? "Could not load favorites. Try again."
-			: mutationError,
+		// A failed refetch behind cached favorites is reported as a toast.
+		error:
+			favorites.error && favorites.data === undefined
+				? "Could not load favorites. Try again."
+				: mutationError,
 		isFavorited: (arxivId) => favoriteIds.has(arxivId),
 		isPending: (arxivId) => pending.has(arxivId),
 		isClearPending: clearMutation.isPending,

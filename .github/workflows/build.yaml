@@ -29,6 +29,9 @@ jobs:
       - name: Run lint
         run: bun run check
 
+      - name: Typecheck
+        run: bun run typecheck
+
       # Also runs shellcheck on every `run:` script (preinstalled on the runner).
       - name: Lint GitHub workflows
         run: |

@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { installSentryTestClient } from "#/test/sentryTestClient";
 
 const authMock = vi.hoisted(() => ({
-	getAuthHeaders: vi.fn(async () => ({ Authorization: "Bearer token-1" })),
+	getApiHeaders: vi.fn(async () => ({ Authorization: "Bearer token-1" })),
 	signIn: vi.fn(),
 }));
 
@@ -207,6 +208,58 @@ describe("streamStoryChat", () => {
 			streamStoryChat(request, { onDelta: (text) => deltas.push(text) }),
 		).rejects.toMatchObject({ code: "limit", message: "Limit" });
 		expect(deltas).toEqual(["part"]);
+	});
+
+	it("marks the reply span failed when the stream breaks after its 200", async () => {
+		const sentry = installSentryTestClient();
+		vi.stubGlobal(
+			"fetch",
+			vi
+				.fn()
+				.mockResolvedValue(
+					ndjsonResponse([
+						'{"type":"delta","text":"part"}\n',
+						'{"type":"error","code":"limit","message":"Limit","retryable":false}\n',
+					]),
+				),
+		);
+
+		await streamStoryChat(request, { onDelta: () => undefined }).catch(
+			() => undefined,
+		);
+
+		expect(
+			sentry.endedSpans().find((span) => span.name === "Story chat reply"),
+		).toMatchObject({
+			status: "error",
+			attributes: expect.objectContaining({
+				"ai.error_code": "limit",
+				"sentry.status.message": "internal_error",
+			}),
+		});
+	});
+
+	it("does not count a reply the user stopped as a failure", async () => {
+		const sentry = installSentryTestClient();
+		const controller = new AbortController();
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(async () => {
+				controller.abort();
+				throw new DOMException("Aborted", "AbortError");
+			}),
+		);
+
+		await streamStoryChat(request, {
+			onDelta: () => undefined,
+			signal: controller.signal,
+		}).catch(() => undefined);
+
+		// Sentry reports a "cancelled" span as ok, not as an error.
+		expect(
+			sentry.endedSpans().find((span) => span.name === "Story chat reply")
+				?.status,
+		).toBe("ok");
 	});
 
 	it("rejects when the stream ends without done", async () => {

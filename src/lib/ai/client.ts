@@ -1,4 +1,6 @@
-import { getAuthHeaders, signIn } from "#/lib/auth/authkit";
+import * as Sentry from "@sentry/core";
+import { getApiHeaders, signIn } from "#/lib/auth/authkit";
+import { readServerTraceId } from "#/lib/tracing/headers";
 import type {
 	AiApiError,
 	AiModel,
@@ -11,16 +13,19 @@ export class AiRequestError extends Error {
 	readonly code: string;
 	readonly retryable: boolean;
 	readonly status: number;
+	/** The Worker's trace for the failed request, when it got that far. */
+	readonly traceId?: string;
 
 	constructor(
 		{ code, message, retryable = false }: AiApiError,
-		status: number,
+		response: Response,
 	) {
 		super(message);
 		this.name = "AiRequestError";
 		this.code = code;
 		this.retryable = retryable;
-		this.status = status;
+		this.status = response.status;
+		this.traceId = readServerTraceId(response);
 	}
 }
 
@@ -35,13 +40,13 @@ async function toRequestError(response: Response): Promise<AiRequestError> {
 						"Something went wrong talking to the AI provider. Try again.",
 					retryable: true,
 				},
-		response.status,
+		response,
 	);
 }
 
 async function getJson<T>(path: string): Promise<T> {
 	const response = await fetch(path, {
-		headers: { accept: "application/json", ...(await getAuthHeaders()) },
+		headers: { accept: "application/json", ...(await getApiHeaders()) },
 	});
 	if (!response.ok) throw await toRequestError(response);
 	return (await response.json()) as T;
@@ -64,7 +69,7 @@ export async function fetchAiModels(providerId: string): Promise<AiModel[]> {
 export async function disconnectAiProvider(providerId: string): Promise<void> {
 	const response = await fetch(
 		`/api/ai/providers/${encodeURIComponent(providerId)}/disconnect`,
-		{ method: "POST", headers: await getAuthHeaders() },
+		{ method: "POST", headers: await getApiHeaders() },
 	);
 	if (!response.ok) throw await toRequestError(response);
 }
@@ -80,7 +85,7 @@ export async function connectAiProvider(
 ): Promise<void> {
 	const response = await fetch(getAiConnectUrl(providerId, returnTo), {
 		method: "POST",
-		headers: await getAuthHeaders(),
+		headers: await getApiHeaders(),
 	});
 	if (response.status === 401) return signIn(returnTo);
 	if (!response.ok) throw await toRequestError(response);
@@ -88,23 +93,58 @@ export async function connectAiProvider(
 	window.location.assign(url);
 }
 
+type StreamOptions = {
+	onDelta: (text: string) => void;
+	signal?: AbortSignal;
+};
+
 /**
  * Streams a story chat reply. Resolves when the reply completes; rejects with
  * AiRequestError on failure (after any partial text was delivered).
+ *
+ * The whole reply is one span, failed if the stream breaks after its 200,
+ * cancelled if the user stops it.
  */
-export async function streamStoryChat(
+export function streamStoryChat(
 	request: StoryChatRequest,
-	{
-		onDelta,
-		signal,
-	}: { onDelta: (text: string) => void; signal?: AbortSignal },
+	options: StreamOptions,
+): Promise<void> {
+	return Sentry.startSpan(
+		{
+			name: "Story chat reply",
+			op: "ai.chat",
+			attributes: {
+				"ai.provider": request.providerId,
+				"ai.model": request.model,
+			},
+		},
+		async (span) => {
+			try {
+				await readStoryChat(request, options);
+			} catch (error) {
+				span.setStatus({
+					code: Sentry.SPAN_STATUS_ERROR,
+					message: options.signal?.aborted ? "cancelled" : "internal_error",
+				});
+				if (error instanceof AiRequestError) {
+					span.setAttribute("ai.error_code", error.code);
+				}
+				throw error;
+			}
+		},
+	);
+}
+
+async function readStoryChat(
+	request: StoryChatRequest,
+	{ onDelta, signal }: StreamOptions,
 ): Promise<void> {
 	const response = await fetch("/api/ai/chat", {
 		method: "POST",
 		headers: {
 			accept: "application/x-ndjson",
 			"content-type": "application/json",
-			...(await getAuthHeaders()),
+			...(await getApiHeaders()),
 		},
 		body: JSON.stringify(request),
 		signal,
@@ -117,7 +157,7 @@ export async function streamStoryChat(
 				message: "No response was received.",
 				retryable: true,
 			},
-			response.status,
+			response,
 		);
 	}
 
@@ -129,7 +169,7 @@ export async function streamStoryChat(
 		const event = JSON.parse(line) as ChatStreamEvent;
 		if (event.type === "delta") onDelta(event.text);
 		if (event.type === "error") {
-			throw new AiRequestError(event, response.status);
+			throw new AiRequestError(event, response);
 		}
 		return event.type === "done";
 	};
@@ -152,6 +192,6 @@ export async function streamStoryChat(
 			message: "The response ended early. Try again.",
 			retryable: true,
 		},
-		response.status,
+		response,
 	);
 }

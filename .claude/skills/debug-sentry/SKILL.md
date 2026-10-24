@@ -45,12 +45,18 @@ Read the code when the evidence points into it. The key pieces:
 - `src/server.ts`: Worker entry. `handleAppFetch` catches anything thrown
   while serving and logs `"Unhandled server request error"` with `method` and
   `pathname`, then returns a 500 carrying the trace ID.
-- `src/client-entry.tsx`: browser Sentry init with browser tracing, so a
-  browser trace can continue into Worker spans (tRPC, D1, outgoing fetch).
-- Error screens show the trace ID via `useErrorReport` + `TraceIdNote`.
-- Traces are sampled at 10%; errors are always captured. An unsampled trace
-  can show only the error itself (one span, no duration). That is normal, not
-  missing data.
+- Browser and Worker traces are separate. The Worker strips incoming trace
+  headers and starts its own trace per request (`src/server/tracing/`). The
+  browser sends its trace as `x-client-trace`; the Worker stores it as a span
+  link and a `client.trace_id` attribute on the root span, and returns its own
+  trace ID in `x-sentry-trace-id`. Given a browser trace ID, find the server
+  trace with `client.trace_id:<id>`; given a server trace, follow its link.
+- Error screens and error toasts show the server trace ID when the failing
+  request reached the Worker, and the browser trace ID otherwise.
+- Traces are sampled at 10%, separately in the browser and the Worker; errors
+  are always captured. An unsampled trace can show only the error itself (one
+  span, no duration), and a linked trace on the other side may be missing.
+  That is normal, not missing data.
 - Env vars are validated by `createEnv` in `src/env.ts` when a request first
   imports it. A failure throws `Invalid environment variables` and breaks
   every request.
