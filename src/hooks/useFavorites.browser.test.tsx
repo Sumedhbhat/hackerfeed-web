@@ -1,4 +1,10 @@
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import {
+	cleanup,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useFavorites } from "#/hooks/useFavorites";
 import { clearAllFavorites, toggleFavorite } from "#/lib/favorites-store";
@@ -15,6 +21,10 @@ const trpcMock = vi.hoisted(() => ({
 	list: vi.fn(),
 	remove: vi.fn(),
 }));
+
+const reportErrorMock = vi.hoisted(() => vi.fn());
+
+vi.mock("#/lib/errors/report-error", () => ({ reportError: reportErrorMock }));
 
 vi.mock("#/hooks/useAuthSession", () => ({
 	useAuthSession: () => ({
@@ -58,6 +68,12 @@ function FavoritesProbe() {
 	return (
 		<div>
 			<p data-testid="count">{favorites.count}</p>
+			<button
+				type="button"
+				onClick={() => favorites.toggleFavorite(makeStory({ id: 30 }))}
+			>
+				save story
+			</button>
 			<ul>
 				{favorites.getFavorites().map((story) => (
 					<li key={story.id}>{story.title}</li>
@@ -119,5 +135,27 @@ describe("useFavorites backend source of truth", () => {
 		});
 		expect(screen.queryByText("Local saved story")).toBeNull();
 		expect(screen.getByTestId("count").textContent).toBe("1");
+	});
+
+	it("rolls back and reports a save that fails", async () => {
+		authMock.user = { id: "workos-use-favorites-save-fails" };
+		const error = new Error("database down");
+		trpcMock.add.mockRejectedValue(error);
+
+		render(<FavoritesProbe />);
+		await waitFor(() => expect(trpcMock.list).toHaveBeenCalled());
+		fireEvent.click(screen.getByRole("button", { name: "save story" }));
+
+		await waitFor(() =>
+			expect(reportErrorMock).toHaveBeenCalledWith(
+				"Database favorite mutation failed",
+				error,
+				expect.objectContaining({
+					action: "save",
+					message: "Sorry, we couldn't save this story to your favorites.",
+				}),
+			),
+		);
+		expect(screen.getByTestId("count").textContent).toBe("0");
 	});
 });

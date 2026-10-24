@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { reportError } from "#/lib/errors/report-error";
 import {
 	hasCompletedLocalFavoritesMigration,
 	markLocalFavoritesMigrationCompleted,
@@ -6,7 +7,6 @@ import {
 import { hackerNewsStorySchema } from "#/lib/favorites/schemas";
 import { getFavorites } from "#/lib/favorites-store";
 import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
-import { logger } from "#/lib/logger";
 import { createTrpcClient } from "#/lib/trpc/client";
 import { useAuthSession } from "./useAuthSession";
 
@@ -46,8 +46,10 @@ export function useLocalFavoritesMigration(): void {
 
 				markLocalFavoritesMigrationCompleted(migrationWorkosUserId);
 			} catch (error) {
-				logger.error("Local favorites migration failed", {
-					error,
+				reportError("Local favorites migration failed", error, {
+					action: "save",
+					message:
+						"Sorry, we couldn't move your saved stories to your account. We'll try again next time.",
 					workosUserId: migrationWorkosUserId,
 				});
 			} finally {

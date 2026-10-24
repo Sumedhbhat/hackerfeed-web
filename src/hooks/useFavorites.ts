@@ -1,13 +1,13 @@
 import { useStore } from "@tanstack/react-store";
 import { Store } from "@tanstack/store";
 import { useEffect } from "react";
+import { reportError } from "#/lib/errors/report-error";
 import {
 	clearAllFavorites,
 	favoritesStore,
 	toggleFavorite,
 } from "#/lib/favorites-store";
 import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
-import { logger } from "#/lib/logger";
 import { createTrpcClient } from "#/lib/trpc/client";
 import { useAuthSession } from "./useAuthSession";
 
@@ -75,8 +75,9 @@ export function useFavorites(): UseFavoritesReturn {
 					}));
 				}
 			} catch (error) {
-				logger.error("Database favorites load failed", {
-					error,
+				reportError("Database favorites load failed", error, {
+					action: "load",
+					message: "Sorry, we couldn't load your saved stories.",
 					workosUserId: authenticatedUserId,
 				});
 			} finally {
@@ -129,8 +130,11 @@ export function useFavorites(): UseFavoritesReturn {
 					items: previousBackendFavorites,
 					userId: authenticatedUserId,
 				}));
-				logger.error("Database favorite mutation failed", {
-					error,
+				reportError("Database favorite mutation failed", error, {
+					action: wasFavorited ? "remove" : "save",
+					message: wasFavorited
+						? "Sorry, we couldn't remove this story from your favorites."
+						: "Sorry, we couldn't save this story to your favorites.",
 					hnStoryId: story.id,
 					workosUserId: authenticatedUserId,
 				});
@@ -161,8 +165,9 @@ export function useFavorites(): UseFavoritesReturn {
 					items: previousBackendFavorites,
 					userId: authenticatedUserId,
 				}));
-				logger.error("Database favorites clear failed", {
-					error,
+				reportError("Database favorites clear failed", error, {
+					action: "remove",
+					message: "Sorry, we couldn't clear your favorites.",
 					workosUserId: authenticatedUserId,
 				});
 			}

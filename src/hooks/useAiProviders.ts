@@ -44,6 +44,8 @@ export function useDisconnectAiProvider() {
 	const queryClient = useQueryClient();
 	return useMutation({
 		mutationFn: disconnectAiProvider,
+		// AiProviderRow shows this failure on the row.
+		meta: { notifyOnError: false },
 		onSuccess: (_data, providerId) => {
 			queryClient.removeQueries({ queryKey: modelsQueryKey(providerId) });
 			return queryClient.invalidateQueries({ queryKey: PROVIDERS_QUERY_KEY });

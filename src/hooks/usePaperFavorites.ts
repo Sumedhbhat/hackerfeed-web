@@ -148,6 +148,8 @@ export function usePaperFavorites(): UsePaperFavoritesReturn {
 
 	const mutation = useMutation({
 		mutationKey: MUTATION_KEY,
+		// The feed shows this failure next to its Refresh button.
+		meta: { notifyOnError: false },
 		mutationFn: async ({ paper, remove }: MutationVariables) => {
 			const client = createTrpcClient();
 			if (remove) {
@@ -184,6 +186,7 @@ export function usePaperFavorites(): UsePaperFavoritesReturn {
 
 	const clearMutation = useMutation({
 		mutationKey: CLEAR_MUTATION_KEY,
+		meta: { notifyOnError: false },
 		mutationFn: async ({ epoch }: { epoch: number }) => {
 			if (epoch !== auth.epoch) return;
 			await createTrpcClient().paperFavorites.clear.mutate();
