@@ -1,4 +1,10 @@
-import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import {
+	act,
+	cleanup,
+	fireEvent,
+	screen,
+	waitFor,
+} from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { usePaperFavorites } from "#/hooks/usePaperFavorites";
 import type { SavedPaper } from "#/lib/paper-favorites/schemas";
@@ -122,6 +128,28 @@ afterEach(() => {
 });
 
 describe("usePaperFavorites", () => {
+	it("leaves a failed refetch behind cached favorites to the toast", async () => {
+		trpcMock.list.mockResolvedValueOnce({ items: [saved()], nextCursor: null });
+		const { queryClient } = render(<Probe />);
+		await screen.findByText(/Test Paper/);
+		trpcMock.list.mockRejectedValueOnce(new Error("offline"));
+
+		await act(() =>
+			queryClient.refetchQueries({ queryKey: ["paperFavorites"] }),
+		);
+
+		expect(
+			queryClient.getQueryCache().findAll({ queryKey: ["paperFavorites"] })[0]
+				?.state.status,
+		).toBe("error");
+		// The observer re-renders on the next macrotask.
+		await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+		expect(
+			screen.queryByText("Could not load favorites. Try again."),
+		).toBeNull();
+		expect(screen.getByText(/Test Paper/)).toBeTruthy();
+	});
+
 	it("loads every page at the maximum page size in server order", async () => {
 		trpcMock.list
 			.mockResolvedValueOnce({ items: [saved()], nextCursor: "page-2" })
