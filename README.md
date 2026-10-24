@@ -94,6 +94,48 @@ The Worker creates one typed `DatabaseContext` from its D1 binding. tRPC
 contexts, services, and repositories receive that Drizzle context; application
 code must not access `env.DB` directly outside the Worker boundary.
 
+## Activity analytics
+
+Each action below is a row in the D1 `activity_events` table: who
+(`appUserId`), what (`action`), which story or paper (`storyId` or `paperId`),
+and when (`occurredAt`, UTC).
+
+| `action` | Logged when the user |
+| --- | --- |
+| `story.read` | opens a story: its article, or the HN post when it has no article (Ask HN) |
+| `story.discussion_opened` | opens the in-app comment thread from a story card |
+| `story.chat_opened` | opens the AI chat for a story |
+| `story.favorited` / `story.unfavorited` | saves or removes a story (clearing logs one unfavorite per story) |
+| `paper.read` | opens a paper |
+| `paper.chat_opened` | opens a paper's ChatGPT discussion |
+| `paper.favorited` / `paper.unfavorited` | saves or removes a paper |
+
+Favorite events are written in the same D1 batch as the favorite itself, and
+only when something changed. Opens are reported by the browser without blocking
+the link, so a dropped request loses an event instead of slowing the user down.
+Importing favorites from an older local session is not logged.
+
+Query production with `wrangler d1 execute hackerfeed --remote --command "…"`
+or the D1 console in the Cloudflare dashboard:
+
+```sql
+-- Actions per day
+SELECT date(occurredAt) AS day, action, count(*) AS events
+FROM activity_events GROUP BY day, action ORDER BY day DESC, events DESC;
+
+-- Most-read stories this week
+SELECT s.title, count(*) AS reads
+FROM activity_events e JOIN stories s ON s.id = e.storyId
+WHERE e.action = 'story.read' AND e.occurredAt >= datetime('now', '-7 days')
+GROUP BY s.id ORDER BY reads DESC LIMIT 20;
+```
+
+To log a new action, add it to `activityActions` in
+`src/server/database/schema.ts`. No migration is needed. Story actions must
+start with `story.` and set `storyId`, and paper actions must start with
+`paper.` and set `paperId`. A CHECK constraint enforces the prefix and the
+matching column.
+
 ## Infrastructure
 
 `infra/terraform` creates the Cloudflare resources the app runs on: today, the

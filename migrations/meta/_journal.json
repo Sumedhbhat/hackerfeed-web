@@ -29,6 +29,20 @@
       "when": 1792037112194,
       "tag": "20261015040512_ai_providers",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1792830942146,
+      "tag": "20261024083542_activity_events",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1792830949589,
+      "tag": "20261024083549_fold_views_into_activity_events",
+      "breakpoints": true
     }
   ]
 }

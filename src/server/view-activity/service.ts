@@ -1,6 +1,10 @@
 import "@tanstack/react-start/server-only";
 
 import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
+import type {
+	PaperViewAction,
+	StoryViewAction,
+} from "#/lib/view-activity/schemas";
 import {
 	type AuthenticatedWorkosUser,
 	resolveCurrentWorkosUser,
@@ -15,9 +19,14 @@ type ViewActivityRepositoryDependency = {
 	recordStoryView(
 		appUserId: string,
 		story: HackerNewsStoryRecord,
+		action: StoryViewAction,
 	): PromiseLike<void>;
 	findPaperByArxivId(arxivId: string): PromiseLike<{ id: string } | null>;
-	recordPaperView(appUserId: string, paperId: string): PromiseLike<void>;
+	recordPaperView(
+		appUserId: string,
+		paperId: string,
+		action: PaperViewAction,
+	): PromiseLike<void>;
 };
 
 type UserServiceDependency = {
@@ -46,20 +55,22 @@ export function createViewActivityService(
 		async recordStoryView(
 			user: CurrentUserInput,
 			story: HackerNewsStoryRecord,
+			action: StoryViewAction,
 		): Promise<void> {
 			const appUser = await getAppUser(user);
-			await views.recordStoryView(appUser.id, story);
+			await views.recordStoryView(appUser.id, story, action);
 		},
 
 		async recordPaperView(
 			user: CurrentUserInput,
 			arxivId: string,
+			action: PaperViewAction,
 		): Promise<void> {
 			const appUser = await getAppUser(user);
 			const paper = await views.findPaperByArxivId(arxivId);
 			if (!paper) throw new ViewedPaperNotFoundError(arxivId);
 
-			await views.recordPaperView(appUser.id, paper.id);
+			await views.recordPaperView(appUser.id, paper.id, action);
 		},
 	};
 }

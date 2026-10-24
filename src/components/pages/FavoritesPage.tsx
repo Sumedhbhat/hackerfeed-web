@@ -160,7 +160,9 @@ export function FavoritesPage({
 														papers.isClearPending
 													}
 													onToggleFavorite={() => papers.toggleFavorite(paper)}
-													onView={() => recordPaperView(paper.arxivId)}
+													onView={(action) =>
+														recordPaperView(paper.arxivId, action)
+													}
 												/>
 											))}
 										</PaperList>

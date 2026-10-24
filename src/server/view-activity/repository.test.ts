@@ -59,18 +59,19 @@ function createDatabase() {
 }
 
 describe("view activity repository", () => {
-	it("atomically upserts a story and inserts a new view with server audit identity", async () => {
+	it("atomically upserts a story and logs the activity with server audit identity", async () => {
 		const { batches, database } = createDatabase();
 		const repository = createViewActivityRepository(database);
 
-		await repository.recordStoryView("user-1", story());
+		await repository.recordStoryView("user-1", story(), "discussion_opened");
 
 		expect(batches).toHaveLength(1);
 		expect(batches[0]).toHaveLength(2);
 		expect(batches[0]?.[0]?.sql).toContain(
 			'on conflict ("stories"."hnStoryId") do update',
 		);
-		expect(batches[0]?.[1]?.sql).toContain('insert into "story_views"');
+		expect(batches[0]?.[1]?.sql).toContain('insert into "activity_events"');
+		expect(batches[0]?.[1]?.values).toContain("story.discussion_opened");
 		expect(batches[0]?.[1]?.sql).toContain(
 			'select "stories"."id" from "stories" where "stories"."hnStoryId" = ?',
 		);
@@ -78,22 +79,23 @@ describe("view activity repository", () => {
 		expect(batches[0]?.[1]?.values).toContain(123);
 	});
 
-	it("resolves a paper and inserts a new view with a generated primary key", async () => {
+	it("resolves a paper and logs the activity against it", async () => {
 		const { database, statements } = createDatabase();
 		const repository = createViewActivityRepository(database);
 
 		await expect(repository.findPaperByArxivId("2607.00001")).resolves.toEqual({
 			id: "paper-1",
 		});
-		await repository.recordPaperView("user-1", "paper-1");
+		await repository.recordPaperView("user-1", "paper-1", "read");
 
 		const insert = statements.find((statement) =>
-			statement.sql.startsWith('insert into "paper_views"'),
+			statement.sql.startsWith('insert into "activity_events"'),
 		);
-		expect(insert?.values).toContain("user-1");
-		expect(insert?.values).toContain("paper-1");
-		expect(insert?.values[0]).toMatch(
-			/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
-		);
+		expect(insert?.values).toEqual([
+			"user-1",
+			"paper.read",
+			"paper-1",
+			"user-1",
+		]);
 	});
 });

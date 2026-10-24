@@ -22,10 +22,7 @@ type CurrentUserInput = Parameters<typeof resolveCurrentWorkosUser>[0];
 
 type PaperFavoriteRepositoryDependency = {
 	findPaperByArxivId(arxivId: string): PromiseLike<{ id: string } | null>;
-	createFavoriteIfMissing(
-		appUserId: string,
-		paperId: string,
-	): PromiseLike<unknown>;
+	addFavorite(appUserId: string, paperId: string): PromiseLike<unknown>;
 	removeFavorite(appUserId: string, arxivId: string): PromiseLike<unknown>;
 	clearFavorites(appUserId: string): PromiseLike<unknown>;
 	listFavorites(
@@ -146,7 +143,7 @@ export function createPaperFavoriteService(
 			const paper = await favorites.findPaperByArxivId(arxivId);
 			if (!paper) throw new PaperNotFoundError(arxivId);
 
-			await favorites.createFavoriteIfMissing(appUser.id, paper.id);
+			await favorites.addFavorite(appUser.id, paper.id);
 		},
 
 		async removeFavorite(

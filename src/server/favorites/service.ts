@@ -17,6 +17,7 @@ type FavoriteServiceRepository<TFavorite, TListedFavorites> = {
 	createStoryFromHackerNewsIfMissing(
 		story: HackerNewsStoryRecord,
 	): PromiseLike<{ id: string }>;
+	addFavorite(appUserId: string, storyId: string): PromiseLike<TFavorite>;
 	createFavoriteIfMissing(
 		appUserId: string,
 		storyId: string,
@@ -71,7 +72,7 @@ export function createFavoriteService<TFavorite, TListedFavorites>(
 			const appUser = await getAppUser(user);
 			const sharedStory = await favorites.upsertStoryFromHackerNews(story);
 
-			return favorites.createFavoriteIfMissing(appUser.id, sharedStory.id);
+			return favorites.addFavorite(appUser.id, sharedStory.id);
 		},
 
 		async importLocalFavorites(

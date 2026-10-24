@@ -38,7 +38,7 @@ export function StoryCard({ story, animationDelay }: StoryCardProps) {
 	const storyUrl = story.url ?? getDiscussionUrl(story.id);
 
 	function openStory() {
-		recordStoryView(story);
+		recordStoryView(story, "read");
 		openLink(storyUrl);
 	}
 
@@ -68,7 +68,11 @@ export function StoryCard({ story, animationDelay }: StoryCardProps) {
 						{story.url ? "Read article" : "Open post"}
 					</Button>
 
-					<TextLink to="/story/$storyId" params={{ storyId: story.id }}>
+					<TextLink
+						to="/story/$storyId"
+						params={{ storyId: story.id }}
+						onClick={() => recordStoryView(story, "discussion_opened")}
+					>
 						Discussion
 					</TextLink>
 
@@ -77,6 +81,7 @@ export function StoryCard({ story, animationDelay }: StoryCardProps) {
 							to="/chat/$storyId"
 							params={{ storyId: story.id }}
 							aria-label={`Discuss ${title} with AI`}
+							onClick={() => recordStoryView(story, "chat_opened")}
 						>
 							<Icon icon={MessageCircle} />
 							Discuss
