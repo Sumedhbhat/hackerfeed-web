@@ -2,7 +2,7 @@ import { Tabs as BaseTabs } from "@base-ui/react/tabs";
 import type { ReactNode } from "react";
 
 const TAB_CLASSES =
-	"relative inline-flex cursor-pointer items-center pb-3 text-sm font-medium text-(--sea-ink-soft) transition-colors hover:text-(--sea-ink) focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-(--lagoon) after:absolute after:bottom-0 after:left-0 after:h-[1.5px] after:w-full after:scale-x-0 after:bg-(--lagoon) data-active:text-(--sea-ink) data-active:after:scale-x-100";
+	"inline-flex cursor-pointer items-center pb-3 text-sm font-medium text-(--sea-ink-soft) transition-colors hover:text-(--sea-ink) focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-(--lagoon) data-active:text-(--lagoon-deep)";
 
 export function Tabs<T extends string>({
 	value,
