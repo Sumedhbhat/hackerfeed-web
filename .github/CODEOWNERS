@@ -1,0 +1,3 @@
+# Workflows run with production secrets, so changes to them, Dependabot's
+# config and this file need the owner's review.
+/.github/ @Sumedhbhat
