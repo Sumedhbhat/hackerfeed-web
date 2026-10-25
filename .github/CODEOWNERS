@@ -1,3 +1,9 @@
-# Workflows run with production secrets, so changes to them, Dependabot's
-# config and this file need the owner's review.
+# Workflows, infrastructure and build config run with production secrets, so
+# changes to them need the owner's review. Dependency files stay out so
+# security fixes still merge on green; deploys wait for the owner's approval.
 /.github/ @Sumedhbhat
+/infra/ @Sumedhbhat
+/scripts/ @Sumedhbhat
+/vite.config.ts @Sumedhbhat
+/wrangler.jsonc @Sumedhbhat
+/wrangler.preview.jsonc @Sumedhbhat
