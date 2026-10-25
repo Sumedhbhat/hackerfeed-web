@@ -18,8 +18,7 @@ permissions:
 
 jobs:
   retire-overrides:
-    # Pinned to the commit that adds Bun support (Sumedhbhat/retire-overrides#4); repin to v0.2.0 once released.
-    uses: Sumedhbhat/retire-overrides/.github/workflows/retire-overrides.yml@a355c62cd8422f7d0331cbcd48927e14b0638ad1
+    uses: Sumedhbhat/retire-overrides/.github/workflows/retire-overrides.yml@v0.2.0
     with:
       dry-run: true
       fail-on: "" # shadow mode never fails a build
