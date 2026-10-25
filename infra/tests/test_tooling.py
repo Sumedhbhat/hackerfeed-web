@@ -411,6 +411,12 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("needs.infrastructure.outputs.database_id", production)
         self.assertIn("needs.infrastructure.outputs.database_name", production)
         self.assertIn("--config dist/server/wrangler.json", production)
+        # Only Terraform and the state server below it get the stored token.
+        self.assertNotIn("secrets.CLOUDFLARE_API_TOKEN", preview)
+        self.assertNotIn("secrets.CLOUDFLARE_API_TOKEN", production.split("  deploy:\n", 1)[1])
+        self.assertIn("infra/cloudflare-token.sh deploy deploy_token", production)
+        self.assertIn("infra/cloudflare-token.sh prod preview_token", preview)
+        self.assertNotIn(" deploy ", preview)
         for text in (production, preview):
             self.assertIn("terraform-recovery/**/*.enc", text)
             self.assertIn("terraform-recovery/**/*.hmac", text)

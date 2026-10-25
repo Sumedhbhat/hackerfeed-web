@@ -15,7 +15,8 @@ concurrency:
 jobs:
   # Reconcile every production run, including changes missed by failed or
   # superseded runs and shared root dependency updates. The state server sits
-  # below Terraform, so wrangler deploys it first.
+  # below Terraform, so wrangler deploys it first. CLOUDFLARE_API_TOKEN is the
+  # one stored Cloudflare token: it runs Terraform, which mints the others.
   state-backend:
     runs-on: ubuntu-latest
     environment: production
@@ -61,16 +62,21 @@ jobs:
       - name: Plan infrastructure
         run: |
           source infra/ci-signals.sh
-          run infra/terraform.sh prod plan -input=false -out=tfplan
-          {
-            echo '### Production infrastructure plan'
-            echo '```'
-            run infra/terraform.sh prod show -no-color tfplan
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+          for stage in prod deploy; do
+            run infra/terraform.sh "$stage" plan -input=false -out=tfplan
+            {
+              echo "### Production infrastructure plan ($stage)"
+              echo '```'
+              run infra/terraform.sh "$stage" show -no-color tfplan
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          done
 
       - name: Apply infrastructure
-        run: exec infra/terraform.sh prod apply -input=false tfplan
+        run: |
+          source infra/ci-signals.sh
+          run infra/terraform.sh prod apply -input=false tfplan
+          run infra/terraform.sh deploy apply -input=false tfplan
 
       - name: Read production database
         id: database
@@ -98,8 +104,16 @@ jobs:
     needs: infrastructure
     runs-on: ubuntu-latest
     environment: production
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v7
+
+      - uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: 1.13.4
+          terraform_wrapper: false
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -149,10 +163,13 @@ jobs:
         env:
           D1_DATABASE_ID: ${{ needs.infrastructure.outputs.database_id }}
 
+      # Later steps get the Terraform-minted deploy token, not the stored one.
+      - name: Read deploy token
+        run: exec infra/cloudflare-token.sh deploy deploy_token
+
       - name: Apply database migrations
         run: bunx wrangler d1 migrations apply DB --remote --config dist/server/wrangler.json
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       # Upload secrets with the same production config as the Worker.
@@ -169,9 +186,8 @@ jobs:
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v4
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          apiToken: ${{ env.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: deploy --config dist/server/wrangler.json --secrets-file ${{ runner.temp }}/worker-secrets.json --var SENTRY_RELEASE:${{ github.sha }}
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

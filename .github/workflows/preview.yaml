@@ -24,7 +24,6 @@ jobs:
       id-token: write
     env:
       TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
     steps:
       - uses: actions/checkout@v7
 
@@ -32,6 +31,10 @@ jobs:
         with:
           terraform_version: 1.13.4
           terraform_wrapper: false
+
+      # PR jobs hold no stored Cloudflare token: Terraform mints this one.
+      - name: Read preview token
+        run: exec infra/cloudflare-token.sh prod preview_token
 
       - name: Plan production infrastructure
         run: |
@@ -61,8 +64,17 @@ jobs:
       github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     environment: preview
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
     steps:
       - uses: actions/checkout@v7
+
+      - uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: 1.13.4
+          terraform_wrapper: false
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -82,13 +94,15 @@ jobs:
             exit 1
           fi
 
+      - name: Read preview token
+        run: exec infra/cloudflare-token.sh prod preview_token
+
       - name: Upload preview version
         run: |
           bunx wrangler versions upload --config wrangler.preview.jsonc --preview-alias "pr-${PR_NUMBER}" --message "PR #${PR_NUMBER} @ ${HEAD_SHA}"
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           WRANGLER_OUTPUT_FILE_PATH: ${{ runner.temp }}/wrangler-output.ndjson
 

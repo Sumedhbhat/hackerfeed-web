@@ -6,7 +6,6 @@ import hmac
 import json
 import math
 import os
-import re
 import secrets
 import subprocess
 import sys
@@ -22,7 +21,8 @@ from recovery_state import crypt
 from commands import Commands
 
 STATE_URL = "https://hackerfeed-terraform-state.kgqk4vdcfq.workers.dev"
-STAGE = re.compile(r"^prod$")
+# Each stage is a Terraform root under infra/.
+STAGES = {"prod": "terraform", "deploy": "terraform/deploy"}
 
 
 class RunnerError(Exception):
@@ -222,7 +222,7 @@ def preserve_recovery(directory, stage):
 
 def main():
     stage, command, *args = sys.argv[1:]
-    if not STAGE.fullmatch(stage):
+    if stage not in STAGES:
         raise RunnerError("Invalid stage")
     if (os.environ.get("GITHUB_ACTIONS") != "true" or not os.environ.get("RUNNER_TEMP") or
             not os.environ.get("ACTIONS_ID_TOKEN_REQUEST_TOKEN")):
@@ -240,7 +240,7 @@ def main():
     env.update(TF_HTTP_PASSWORD=password, TF_HTTP_USERNAME="github",
                TF_HTTP_ADDRESS=address, TF_HTTP_LOCK_ADDRESS=address + "/lock",
                TF_HTTP_UNLOCK_ADDRESS=address + "/lock", TF_HTTP_RETRY_MAX="0")
-    directory = Path(__file__).resolve().parent / "terraform"
+    directory = Path(__file__).resolve().parent / STAGES[stage]
     with Commands(on_interrupt=network.cancel) as commands:
         try:
             if (directory / "errored.tfstate").exists():
