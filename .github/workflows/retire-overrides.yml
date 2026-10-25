@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   retire-overrides:
-    uses: Sumedhbhat/retire-overrides/.github/workflows/retire-overrides.yml@v0.2.0
+    uses: Sumedhbhat/retire-overrides/.github/workflows/retire-overrides.yml@c0d7f4f9118e9c23d721885985a1b4544db5d1af # v0.2.0
     with:
       dry-run: true
       fail-on: "" # shadow mode never fails a build
