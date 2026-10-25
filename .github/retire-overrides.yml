@@ -1,0 +1,10 @@
+# retire-overrides configuration (https://github.com/Sumedhbhat/retire-overrides).
+version: 1
+
+# These overrides predate retire-overrides, so it can't tell from git history that they are
+# security fixes. The ledger documents each one, so opt them in: once the tool leaves shadow mode it
+# may remove them automatically when that is provably safe. Until then this only affects the report.
+manage:
+  - package: esbuild # GHSA-67mh-4wv8-2f99, via drizzle-kit
+  - package: postcss-selector-parser # GHSA-rj75-hqrm-r3gf, via @tailwindcss/typography
+  - package: undici # GHSA-xjj6-f33q-929c, via miniflare (wrangler, @cloudflare/vite-plugin)
