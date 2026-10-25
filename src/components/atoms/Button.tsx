@@ -44,7 +44,7 @@ type ButtonAnchorProps = Omit<
 };
 
 function ButtonAnchor({ variant = "primary", ...props }: ButtonAnchorProps) {
-	return <a className={buttonClassName(variant)} {...props} />;
+	return <a {...props} className={buttonClassName(variant)} />;
 }
 
 /** In-app link (`to="/profile"`) that looks like a button. */

@@ -12,8 +12,8 @@ type BrandAnchorProps = Omit<
 function BrandAnchor(props: BrandAnchorProps) {
 	return (
 		<a
-			className="group flex flex-shrink-0 items-center gap-2.5 no-underline"
 			{...props}
+			className="group flex flex-shrink-0 items-center gap-2.5 no-underline"
 		>
 			<img
 				src="/logo192.png"

@@ -1,7 +1,6 @@
 import * as Sentry from "@sentry/react";
-import { Activity, Suspense, useState, useTransition } from "react";
+import { Activity, Suspense, useState } from "react";
 import { PageContainer } from "#/components/atoms/PageContainer";
-import { PendingContent } from "#/components/atoms/PendingContent";
 import { Stack } from "#/components/atoms/Stack";
 import { Tab, TabList, TabPanel, Tabs } from "#/components/atoms/Tabs";
 import { StoryListSkeleton } from "#/components/molecules/StoryListSkeleton";
@@ -11,30 +10,21 @@ import { feedTabs } from "#/components/organisms/feed/feedTabs";
 import { HackerNewsFeedKey, PAGE_SIZE } from "#/lib/hacker-news/queries";
 
 export function FeedPage() {
-	const [activeFeed, setActiveFeedState] = useState<HackerNewsFeedKey>(
+	const [activeFeed, setActiveFeed] = useState<HackerNewsFeedKey>(
 		HackerNewsFeedKey.Top,
 	);
-	const [isPending, startTransition] = useTransition();
-
-	const setActiveFeed = (feed: HackerNewsFeedKey) => {
-		startTransition(() => {
-			setActiveFeedState(feed);
-		});
-	};
 
 	return (
 		<PageContainer>
 			<Tabs value={activeFeed} onValueChange={setActiveFeed}>
 				<Stack gap="lg">
-					<PendingContent pending={isPending}>
-						<TabList aria-label="Feeds">
-							{feedTabs.map((feed) => (
-								<Tab key={feed.key} value={feed.key}>
-									{feed.label}
-								</Tab>
-							))}
-						</TabList>
-					</PendingContent>
+					<TabList aria-label="Feeds">
+						{feedTabs.map((feed) => (
+							<Tab key={feed.key} value={feed.key}>
+								{feed.label}
+							</Tab>
+						))}
+					</TabList>
 
 					{feedTabs.map((feed) => (
 						<TabPanel key={feed.key} value={feed.key} keepMounted>
