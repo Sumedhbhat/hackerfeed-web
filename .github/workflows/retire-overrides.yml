@@ -18,8 +18,11 @@ permissions:
 
 jobs:
   retire-overrides:
-    uses: Sumedhbhat/retire-overrides/.github/workflows/retire-overrides.yml@c0d7f4f9118e9c23d721885985a1b4544db5d1af # v0.2.0
-    with:
-      dry-run: true
-      fail-on: "" # shadow mode never fails a build
-      bun-version: 1.3.0 # same Bun as build.yaml; Bun's override semantics change at 1.4
+    runs-on: ubuntu-latest
+    steps:
+      # Pinned to the v0.3.0 commit, since tags can move. The action checks out this repository itself.
+      - uses: Sumedhbhat/retire-overrides@034cb0467f6dcf5ec8073dcb5feb605c9879046a # v0.3.0
+        with:
+          mode: check # shadow mode: always read-only, no token
+          fail-on: "" # shadow mode never fails a build
+          bun-version: 1.3.0 # same Bun as build.yaml; Bun's override semantics change at 1.4
