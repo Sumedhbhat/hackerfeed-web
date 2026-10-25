@@ -124,6 +124,8 @@ copied into GitHub secrets.
 Terraform rotates the minted tokens: the first production run 30 days after a
 token was made replaces it, and each expires after 90 days. A token only lapses
 if production goes 90 days without a run; run the deploy workflow to renew it.
+That run needs a live Terraform token, so if it has expired too, replace it as
+below first.
 To replace one now, for example after exposure, delete it in Cloudflare and
 run the deploy workflow: Terraform sees it is gone and mints a new one.
 
