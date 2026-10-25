@@ -78,7 +78,7 @@ type MenuAnchorProps = Omit<
 >;
 
 function MenuAnchor(props: MenuAnchorProps) {
-	return <BaseMenu.LinkItem closeOnClick className={ITEM_CLASSES} {...props} />;
+	return <BaseMenu.LinkItem closeOnClick {...props} className={ITEM_CLASSES} />;
 }
 
 export const MenuLinkItem = createLink(MenuAnchor);

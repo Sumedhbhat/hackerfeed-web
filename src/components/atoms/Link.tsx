@@ -8,7 +8,7 @@ const VARIANT_CLASSES = {
 	/** Orange call-to-action link. */
 	accent:
 		"text-sm font-medium text-(--lagoon-deep) no-underline underline-offset-2 hover:text-(--lagoon) hover:underline",
-	/** Top navigation item; underlined when the router marks it active. */
+	/** Top navigation item; darkens when the router marks it active. */
 	nav: "nav-link gap-1.5",
 	/** Inherits surrounding text styles; use for linked titles. */
 	plain: "text-inherit no-underline hover:underline",
@@ -27,8 +27,8 @@ type StyledAnchorProps = Omit<
 function StyledAnchor({ variant = "subtle", ...props }: StyledAnchorProps) {
 	return (
 		<a
-			className={`inline-flex items-center gap-1 ${VARIANT_CLASSES[variant]}`}
 			{...props}
+			className={`inline-flex items-center gap-1 ${VARIANT_CLASSES[variant]}`}
 		/>
 	);
 }
