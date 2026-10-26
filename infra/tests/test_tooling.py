@@ -415,8 +415,15 @@ class WorkflowTests(unittest.TestCase):
         self.assertNotIn("secrets.CLOUDFLARE_API_TOKEN", preview)
         self.assertNotIn("secrets.CLOUDFLARE_API_TOKEN", production.split("  deploy:\n", 1)[1])
         self.assertIn("infra/cloudflare-token.sh deploy deploy_token", production)
-        self.assertIn("infra/cloudflare-token.sh prod preview_token", preview)
+        self.assertIn("infra/cloudflare-token.sh preview preview_token", preview)
         self.assertNotIn(" deploy ", preview)
+        # Only the manual, production-gated rotate workflow mints the preview token.
+        self.assertNotIn("terraform.sh preview", production)
+        self.assertNotIn("terraform.sh preview", preview)
+        rotate = (ROOT / ".github/workflows/rotate-preview-token.yaml").read_text()
+        self.assertRegex(rotate, r"(?m)^on:\n  workflow_dispatch:\n\n")
+        self.assertIn("environment: production", rotate)
+        self.assertIn("infra/terraform.sh preview apply", rotate)
         for text in (production, preview):
             self.assertIn("terraform-recovery/**/*.enc", text)
             self.assertIn("terraform-recovery/**/*.hmac", text)

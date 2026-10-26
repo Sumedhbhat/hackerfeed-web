@@ -166,6 +166,8 @@ jobs:
       # Later steps get the Terraform-minted deploy token, not the stored one.
       - name: Read deploy token
         run: exec infra/cloudflare-token.sh deploy deploy_token
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Apply database migrations
         run: bunx wrangler d1 migrations apply DB --remote --config dist/server/wrangler.json
