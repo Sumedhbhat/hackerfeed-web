@@ -5,8 +5,3 @@ output "database_id" {
 output "database_name" {
   value = cloudflare_d1_database.this.name
 }
-
-output "preview_token" {
-  value     = module.preview_token.value
-  sensitive = true
-}
