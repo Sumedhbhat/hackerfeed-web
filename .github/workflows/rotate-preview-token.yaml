@@ -35,9 +35,11 @@ jobs:
       - name: Plan new preview token
         run: |
           source infra/ci-signals.sh
-          run infra/terraform.sh preview state list > "$RUNNER_TEMP/preview-state"
+          # state list fails on an empty state (the first run); show -json does not.
+          run infra/terraform.sh preview show -json > "$RUNNER_TEMP/preview-state.json"
           replace=()
-          if grep -qx 'module.preview_token.time_rotating.this' "$RUNNER_TEMP/preview-state"; then
+          if jq -e 'any(.. | .address? ; . == "module.preview_token.time_rotating.this")' \
+              "$RUNNER_TEMP/preview-state.json" > /dev/null; then
             replace=(-replace=module.preview_token.time_rotating.this)
           fi
           run infra/terraform.sh preview plan -input=false "${replace[@]}" -out=tfplan

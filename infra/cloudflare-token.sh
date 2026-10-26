@@ -23,7 +23,7 @@ echo "::add-mask::$token"
 
 # Fail here, with the fix, rather than later with a bare authentication error.
 test -n "$account"
-verify=$(curl -sS -H @<(printf 'Authorization: Bearer %s\n' "$token") \
+verify=$(curl -sS --max-time 20 -H @<(printf 'Authorization: Bearer %s\n' "$token") \
   "https://api.cloudflare.com/client/v4/accounts/$account/tokens/verify" || true)
 status=$(jq -r '.result.status // "invalid"' <<< "$verify" 2>/dev/null || echo invalid)
 if [ "$status" != active ]; then
