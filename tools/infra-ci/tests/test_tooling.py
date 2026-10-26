@@ -420,7 +420,7 @@ class WorkflowTests(unittest.TestCase):
         holders = [step.split("\n", 1)[0] for step in steps if "secrets.CLOUDFLARE_API_TOKEN" in step]
         self.assertEqual(holders, ["name: Deploy state server", "name: Plan infrastructure", "name: Apply infrastructure"])
         self.assertIn("tools/infra-ci/cloudflare-token.sh deploy deploy_token", production)
-        self.assertIn("tools/infra-ci/cloudflare-token.sh prod preview_token", preview)
+        self.assertIn("tools/infra-ci/cloudflare-token.sh preview preview_token", preview)
         self.assertNotIn(" deploy ", preview)
         for text in (production, preview):
             self.assertIn("terraform-recovery/**/*.enc", text)

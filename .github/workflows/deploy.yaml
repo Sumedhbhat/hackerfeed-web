@@ -74,7 +74,7 @@ jobs:
           terraform_wrapper: false
 
       - name: Read preview token
-        run: exec tools/infra-ci/cloudflare-token.sh prod preview_token
+        run: exec tools/infra-ci/cloudflare-token.sh preview preview_token
 
       - name: Plan production infrastructure
         run: |
