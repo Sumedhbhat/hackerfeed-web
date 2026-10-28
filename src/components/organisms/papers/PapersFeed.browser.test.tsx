@@ -92,10 +92,19 @@ afterEach(() => {
 });
 
 describe("PapersFeed", () => {
-	it("switches from an AI summary to the original abstract", () => {
+	it("hides the summary until asked, then switches to the original abstract", () => {
 		render(
 			<PapersFeed edition={edition} filters={{}} onFiltersChange={vi.fn()} />,
 		);
+
+		expect(screen.queryByText("The AI summary.")).toBeNull();
+
+		const [firstSummaryToggle] = screen.getAllByRole("button", {
+			name: "Show summary",
+		});
+		fireEvent.click(firstSummaryToggle);
+
+		expect(screen.getByText("The AI summary.")).toBeTruthy();
 
 		fireEvent.click(screen.getByRole("button", { name: "Show abstract" }));
 
