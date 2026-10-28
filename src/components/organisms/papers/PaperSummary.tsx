@@ -18,18 +18,12 @@ export function PaperSummary({ paper }: { paper: PaperPresentation }) {
 	const [overflows, setOverflows] = useState(false);
 	const clampedRef = useRef<HTMLParagraphElement>(null);
 
+	// Without an AI summary, `summary` is the full abstract; only the browser
+	// knows whether 3 lines cut it off.
 	useEffect(() => {
 		const text = clampedRef.current;
-		if (open || !text) return;
-
-		const measure = () =>
-			setOverflows(text.scrollHeight > text.clientHeight + 1);
-		measure();
-		if (typeof ResizeObserver === "undefined") return;
-		const observer = new ResizeObserver(measure);
-		observer.observe(text);
-		return () => observer.disconnect();
-	}, [open]);
+		if (text) setOverflows(text.scrollHeight > text.clientHeight);
+	}, []);
 
 	const canExpand = paper.abstract !== null || overflows;
 
