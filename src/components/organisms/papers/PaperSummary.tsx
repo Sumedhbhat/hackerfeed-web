@@ -1,6 +1,5 @@
-import { BookOpen, ChevronDown, ChevronUp, Sparkles } from "lucide-react";
-import { useState } from "react";
-import { Button } from "#/components/atoms/Button";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import {
 	Collapsible,
 	CollapsiblePanel,
@@ -11,34 +10,45 @@ import { PaperSummaryText } from "#/components/atoms/PaperSummaryText";
 import type { PaperPresentation } from "#/lib/papers/presentation";
 
 /**
- * AI summary of a paper, hidden until asked for so long text doesn't bury
- * the paper, with a toggle to read the original abstract.
+ * A paper's short summary cut to 3 lines, with "Show more" for the full
+ * abstract when there is more to read.
  */
 export function PaperSummary({ paper }: { paper: PaperPresentation }) {
 	const [open, setOpen] = useState(false);
-	const [showAbstract, setShowAbstract] = useState(false);
-	const canShowAbstract = paper.abstract !== null;
+	const [overflows, setOverflows] = useState(false);
+	const clampedRef = useRef<HTMLParagraphElement>(null);
+
+	useEffect(() => {
+		const text = clampedRef.current;
+		if (open || !text) return;
+
+		const measure = () =>
+			setOverflows(text.scrollHeight > text.clientHeight + 1);
+		measure();
+		if (typeof ResizeObserver === "undefined") return;
+		const observer = new ResizeObserver(measure);
+		observer.observe(text);
+		return () => observer.disconnect();
+	}, [open]);
+
+	const canExpand = paper.abstract !== null || overflows;
 
 	return (
 		<Collapsible open={open} onOpenChange={setOpen}>
-			<CollapsibleTrigger>
-				<Icon icon={open ? ChevronUp : ChevronDown} />
-				{open ? "Hide summary" : "Show summary"}
-			</CollapsibleTrigger>
-			<CollapsiblePanel>
-				<PaperSummaryText>
-					{showAbstract && paper.abstract ? paper.abstract : paper.summary}
+			{open ? null : (
+				<PaperSummaryText clamped ref={clampedRef}>
+					{paper.summary}
 				</PaperSummaryText>
-				{canShowAbstract ? (
-					<Button
-						variant="ghost"
-						onClick={() => setShowAbstract((value) => !value)}
-					>
-						<Icon icon={showAbstract ? Sparkles : BookOpen} />
-						{showAbstract ? "Show AI summary" : "Show abstract"}
-					</Button>
-				) : null}
+			)}
+			<CollapsiblePanel>
+				<PaperSummaryText>{paper.abstract ?? paper.summary}</PaperSummaryText>
 			</CollapsiblePanel>
+			{canExpand ? (
+				<CollapsibleTrigger>
+					{open ? "Show less" : "Show more"}
+					<Icon icon={open ? ChevronUp : ChevronDown} />
+				</CollapsibleTrigger>
+			) : null}
 		</Collapsible>
 	);
 }
