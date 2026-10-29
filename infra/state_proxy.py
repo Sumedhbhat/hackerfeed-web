@@ -22,7 +22,7 @@ from commands import Commands
 
 STATE_URL = "https://hackerfeed-terraform-state.kgqk4vdcfq.workers.dev"
 # Each stage is a Terraform root under infra/.
-STAGES = {"prod": "terraform", "deploy": "terraform/deploy"}
+STAGES = {"prod": "terraform", "deploy": "terraform/deploy", "preview": "terraform/preview"}
 
 
 class RunnerError(Exception):

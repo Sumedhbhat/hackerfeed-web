@@ -32,9 +32,10 @@ jobs:
           terraform_version: 1.13.4
           terraform_wrapper: false
 
-      # PR jobs hold no stored Cloudflare token: Terraform mints this one.
+      # PR jobs hold no stored Cloudflare token. The Rotate preview token
+      # workflow mints this one; if it has expired, run that workflow.
       - name: Read preview token
-        run: exec infra/cloudflare-token.sh prod preview_token
+        run: exec infra/cloudflare-token.sh preview preview_token
 
       - name: Plan production infrastructure
         run: |
@@ -95,7 +96,9 @@ jobs:
           fi
 
       - name: Read preview token
-        run: exec infra/cloudflare-token.sh prod preview_token
+        run: exec infra/cloudflare-token.sh preview preview_token
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Upload preview version
         run: |

@@ -1,0 +1,68 @@
+name: Rotate preview token
+
+# Replaces the Cloudflare token PR jobs use. Run it by hand when PR checks say
+# the preview token has expired or expires soon. Only people with write access
+# can start it, and the production environment holds it for the owner's
+# approval on master. Deploys never apply this root.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloudflare-production
+  cancel-in-progress: false
+
+jobs:
+  rotate:
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: 1.13.4
+          terraform_wrapper: false
+
+      - name: Plan new preview token
+        run: |
+          source infra/ci-signals.sh
+          # state list fails on an empty state (the first run); show -json does not.
+          run infra/terraform.sh preview show -json > "$RUNNER_TEMP/preview-state.json"
+          replace=()
+          if jq -e 'any(.. | .address? ; . == "module.preview_token.time_rotating.this")' \
+              "$RUNNER_TEMP/preview-state.json" > /dev/null; then
+            replace=(-replace=module.preview_token.time_rotating.this)
+          fi
+          run infra/terraform.sh preview plan -input=false "${replace[@]}" -out=tfplan
+          {
+            echo '### Preview token plan'
+            echo '```'
+            run infra/terraform.sh preview show -no-color tfplan
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Apply new preview token
+        run: exec infra/terraform.sh preview apply -input=false tfplan
+
+      - name: Check new preview token
+        run: exec infra/cloudflare-token.sh preview preview_token
+
+      - name: Preserve encrypted Terraform recovery state
+        if: ${{ !success() }}
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: terraform-recovery-preview-token
+          path: |
+            ${{ runner.temp }}/terraform-recovery/**/*.enc
+            ${{ runner.temp }}/terraform-recovery/**/*.hmac
+          retention-days: 1
+          if-no-files-found: ignore

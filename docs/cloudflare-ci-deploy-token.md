@@ -10,7 +10,7 @@ local Wrangler OAuth session or put its credentials in GitHub.
 | --- | --- | --- | --- |
 | Terraform | this runbook | GitHub `production` secret `CLOUDFLARE_API_TOKEN` | Terraform, state server deploy |
 | `hackerfeed-ci-deploy` | `infra/terraform/deploy` | `deploy` state (production only) | migrations, Worker deploy |
-| `hackerfeed-ci-preview` | `infra/terraform` | `prod` state (PRs can read it) | PR version uploads, PR plans |
+| `hackerfeed-ci-preview` | `infra/terraform/preview` | `preview` state (PRs can read it) | PR version uploads, PR plans |
 
 Jobs read the minted tokens from Terraform outputs with
 `infra/cloudflare-token.sh`, which signs in through GitHub OIDC like every
@@ -22,8 +22,9 @@ every PR job can read it.
 On pushes to `master` (and manual dispatch), the workflow:
 
 1. Deploys the Terraform state server (`infra/state-backend`) with Wrangler.
-2. Plans and applies the `prod` root (the database `hackerfeed` and the preview
-   token) and the `deploy` root (the deploy token) through Terraform.
+2. Plans and applies the `prod` root (the database `hackerfeed`) and the
+   `deploy` root (the deploy token) through Terraform. It never applies the
+   `preview` root.
 3. Reads the database identity from Terraform outputs and configures Wrangler
    before building the app.
 4. Reads the deploy token, then applies remote migrations with the generated
@@ -93,8 +94,8 @@ The workflows use two GitHub environments:
    repository.
 
 The minted tokens' permissions live in Terraform: the deploy token has Workers
-Scripts Write and D1 Write; the preview token has Workers Scripts Write, D1
-Read and Account API Tokens Read, the last two for PR plans. Cloudflare cannot
+Scripts Write and D1 Write; the preview token has Workers Scripts Write and
+D1 Read, the latter for PR plans. Cloudflare cannot
 limit a Workers token to one script or to version uploads, so the preview
 token can still deploy `hackerfeed-web`; it cannot write D1 or mint tokens.
 
@@ -121,13 +122,33 @@ copied into GitHub secrets.
 
 ## Rotate or revoke
 
-Terraform rotates the minted tokens: the first production run 30 days after a
-token was made replaces it, and each expires after 90 days. A token only lapses
-if production goes 90 days without a run; run the deploy workflow to renew it.
-That run needs a live Terraform token, so if it has expired too, replace it as
-below first.
-To replace one now, for example after exposure, delete it in Cloudflare and
-run the deploy workflow: Terraform sees it is gone and mints a new one.
+### Deploy token
+
+The first production run 30 days after the deploy token was made replaces it,
+and it expires after 90 days. It only lapses if production goes 90 days without
+a run; run the deploy workflow to renew it. That run needs a live Terraform
+token, so if it has expired too, replace that first (below). To replace the
+deploy token now, for example after exposure, delete it in Cloudflare and run
+the deploy workflow: Terraform sees it is gone and mints a new one.
+
+### Preview token
+
+Deploys never touch the preview token. It expires 90 days after it was made,
+and you replace it by hand:
+
+1. Notice it is due. Every PR job checks the token with Cloudflare before using
+   it. In the last 14 days the job annotates a warning that it expires soon;
+   once it has expired (or was revoked), `plan-production` and `preview` fail
+   with "Cloudflare token preview_token from preview is invalid. Run the Rotate
+   preview token workflow".
+2. In GitHub, open **Actions** > **Rotate preview token** > **Run workflow** on
+   `master`. Only people with write access can start it, and it runs in the
+   `production` environment, so it waits for your approval.
+3. Approve it. Its summary shows the plan: the old token is destroyed and a new
+   90-day token is created, which the last step checks with Cloudflare.
+4. Re-run the failed PR checks.
+
+Run it the same way to replace the token early, for example after exposure.
 
 Rotate the Terraform token by hand before its 90-day expiry:
 
