@@ -92,17 +92,22 @@ afterEach(() => {
 });
 
 describe("PapersFeed", () => {
-	it("switches from an AI summary to the original abstract", () => {
+	it("shows the short summary and expands to the original abstract", () => {
 		render(
 			<PapersFeed edition={edition} filters={{}} onFiltersChange={vi.fn()} />,
 		);
 
-		fireEvent.click(screen.getByRole("button", { name: "Show abstract" }));
+		expect(screen.getByText("The AI summary.")).toBeTruthy();
+		expect(screen.queryByText("The original abstract.")).toBeNull();
+		// Only the paper with an abstract has more to show.
+		expect(screen.getAllByRole("button", { name: /Show more/ })).toHaveLength(
+			1,
+		);
+
+		fireEvent.click(screen.getByRole("button", { name: /Show more/ }));
 
 		expect(screen.getByText("The original abstract.")).toBeTruthy();
-		expect(
-			screen.getByRole("button", { name: "Show AI summary" }),
-		).toBeTruthy();
+		expect(screen.getByRole("button", { name: /Show less/ })).toBeTruthy();
 	});
 
 	it("filters papers by search text without rendering rank labels", () => {
