@@ -32,7 +32,7 @@
 			"binding": "DB",
 			"database_name": "hackerfeed",
 			"database_id": "local-hackerfeed",
-			"migrations_dir": "migrations"
+			"migrations_dir": "packages/backend/migrations"
 		}
 	]
 }

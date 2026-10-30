@@ -159,6 +159,7 @@ jobs:
             echo "Production build includes fixtures; VITE_DEMO_DATA must not be set" >&2
             exit 1
           fi
+          bun tools/workspace/src/check-client-bundle.ts
           bound=$(jq -r '.d1_databases[] | select(.binding == "DB") | .database_id' dist/server/wrangler.json)
           if [ "$bound" != "$D1_DATABASE_ID" ]; then
             echo "Build binds DB to '${bound}', not Terraform's database" >&2

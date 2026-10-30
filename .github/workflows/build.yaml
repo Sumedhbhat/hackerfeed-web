@@ -64,6 +64,7 @@ jobs:
             echo "Production build includes fixtures; VITE_DEMO_DATA must not be set" >&2
             exit 1
           fi
+          bun tools/workspace/src/check-client-bundle.ts
 
       - name: Detect infrastructure changes
         id: changes

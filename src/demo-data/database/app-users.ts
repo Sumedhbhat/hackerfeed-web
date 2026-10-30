@@ -1,4 +1,4 @@
-import type { appUsers } from "#/server/database/schema";
+import type { appUsers } from "@hackerfeed/backend/database/schema";
 
 type AppUser = typeof appUsers.$inferSelect;
 

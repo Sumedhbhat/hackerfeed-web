@@ -1,6 +1,6 @@
+import type { FeatureFlags } from "@hackerfeed/backend/api-types";
 import { z } from "zod";
 import { getApiHeaders } from "#/lib/auth/authkit";
-import type { FeatureFlags } from "#/server/feature-flags/service";
 
 export type { FeatureFlags };
 export type FeatureFlagName = keyof FeatureFlags;

@@ -1,0 +1,19 @@
+{
+	"$schema": "../../node_modules/nx/schemas/project-schema.json",
+	"name": "backend",
+	"projectType": "library",
+	"sourceRoot": "packages/backend/src",
+	"tags": [
+		"type:backend",
+		"platform:server",
+		"scope:shared"
+	],
+	"metadata": {
+		"owner": "@Sumedhbhat"
+	},
+	"targets": {
+		"lint": {},
+		"typecheck": {},
+		"test": {}
+	}
+}
