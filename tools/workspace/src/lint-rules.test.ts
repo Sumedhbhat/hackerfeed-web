@@ -21,6 +21,7 @@ const LAYER_IMPORT = "lint/style/noRestrictedImports";
 
 const WEB = "apps/web/src";
 const UI = "packages/ui/src";
+const API = "packages/api-client/src";
 
 const fixtures: Record<string, string> = {
 	[`${WEB}/components/organisms/x/ClassName.tsx`]: `export const A = () => <div className="p-4" />;`,
@@ -45,6 +46,8 @@ const fixtures: Record<string, string> = {
 	[`${UI}/atoms/BaseUiOk.tsx`]: `import { Toggle } from "@base-ui/react/toggle";\nexport const A = () => <Toggle />;`,
 	[`${UI}/molecules/BaseUi.tsx`]: `import { Toggle } from "@base-ui/react/toggle";\nexport const A = () => <Toggle />;`,
 	[`${WEB}/components/organisms/x/BaseUi.tsx`]: `import { Toggle } from "@base-ui/react/toggle";\nexport const A = () => <Toggle />;`,
+	[`${API}/BackendCode.ts`]: `import { createDb } from "@hackerfeed/backend/database/client";\nexport const a = createDb;`,
+	[`${API}/BackendTypesOk.ts`]: `import type { AppRouter } from "@hackerfeed/backend/api-types";\nexport type A = AppRouter;`,
 };
 
 const expected: Record<string, string[]> = {
@@ -70,6 +73,8 @@ const expected: Record<string, string[]> = {
 	[`${UI}/atoms/BaseUiOk.tsx`]: [],
 	[`${UI}/molecules/BaseUi.tsx`]: [LAYER_IMPORT],
 	[`${WEB}/components/organisms/x/BaseUi.tsx`]: [LAYER_IMPORT],
+	[`${API}/BackendCode.ts`]: [LAYER_IMPORT],
+	[`${API}/BackendTypesOk.ts`]: [],
 };
 
 type Diagnostic = {

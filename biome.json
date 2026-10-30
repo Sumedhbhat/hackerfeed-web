@@ -163,6 +163,30 @@
 					}
 				}
 			}
+		},
+		{
+			"includes": ["**/packages/api-client/src/**"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noRestrictedImports": {
+							"level": "error",
+							"options": {
+								"patterns": [
+									{
+										"group": [
+											"@hackerfeed/backend",
+											"@hackerfeed/backend/**",
+											"!@hackerfeed/backend/api-types"
+										],
+										"message": "The browser may use only the backend's types: import type from @hackerfeed/backend/api-types."
+									}
+								]
+							}
+						}
+					}
+				}
+			}
 		}
 	]
 }
