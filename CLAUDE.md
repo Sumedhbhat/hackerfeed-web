@@ -37,7 +37,7 @@ bunx nx graph        # Project graph
 
 **Workspace:** an Nx workspace of Bun workspace packages, deployed as one Worker. `apps/web` is the TanStack Start host; shared code lives in `packages/` (`ui`, `contracts`, `hacker-news`, `runtime`, `backend`, `api-client`); infrastructure in `apps/state-backend`, `infra/` and `tools/infra-ci`. README > Workspace lists every project. Packages import each other only through their `package.json` `exports` (`@hackerfeed/ui/atoms/Button`); never reach into another project with a relative path. Add a package by copying a small one (`packages/hacker-news`) and renaming it.
 
-**Boundaries:** installs are isolated (`bunfig.toml`), so a package can import only what its own `package.json` declares; those `dependencies` are the allowed edges, and adding one is a design change to raise with the user. The backend never reaches the browser: browser code uses only `import type` from `@hackerfeed/backend/api-types` (a Biome rule holds `api-client` to it), and TanStack Start's import protection in `apps/web/vite.config.ts` fails the client build on any other backend import. Packages don't read env; `apps/web/src/backend.ts` passes config into `createBackend`. When a check blocks you, change the code, not the rule.
+**Boundaries:** installs are isolated (`bunfig.toml`), so a package can import only the npm and workspace packages its own `package.json` declares; those `dependencies` are the allowed edges, and adding one is a design change to raise with the user. No tool stops a relative import into another project or a root devDependency used from a package, so don't write either. The backend never reaches the browser: browser code uses only `import type` from `@hackerfeed/backend/api-types` (a Biome rule holds `api-client` to it), and TanStack Start's import protection in `apps/web/vite.config.ts` fails the client build on any other backend import. Packages don't read env; `apps/web/src/backend.ts` passes config into `createBackend`. When a check blocks you, change the code, not the rule.
 
 **Path alias:** inside `apps/web`, `#/*` maps to `apps/web/src/*` (its `package.json` `imports` and `tsconfig.json`). Paths below are relative to `apps/web` unless they start with `packages/`, `infra/` or `tools/`.
 
@@ -120,7 +120,7 @@ Prefer props that describe intent (`tone="soft"`, `size="page"`, `variant="accen
 
 ### Testing
 
-Each package has its own `vitest.config.ts`: `node` for shared and server packages, `happy-dom` for `ui` and `api-client`. `apps/web/vitest.config.ts` has two projects:
+Shared and server packages run Vitest with its defaults (`node`, no config file); `ui` and `api-client` have a `vitest.config.ts` for `happy-dom`. `apps/web/vitest.config.ts` has two projects:
 - **`node`** — pure utility and store tests (`src/**/*.test.{ts,tsx}`, excluding `src/components/**` and `*.browser.test.*`)
 - **`browser`** — component and browser-API tests using `happy-dom` (`src/components/**/*.test.*` and `src/**/*.browser.test.*`)
 

@@ -51,7 +51,7 @@ its own checks.
 Packages import each other only through their `package.json` `exports`, for
 example `@hackerfeed/ui/atoms/Button`. Inside `apps/web`, `#/*` still maps to
 `apps/web/src/*`. Installs are isolated (`bunfig.toml`), so a package can
-import only what its own `package.json` declares (see
+import only the npm and workspace packages its own `package.json` declares (see
 [Project boundaries](#project-boundaries)).
 
 Run one project's targets with Nx, for example `bunx nx test backend` or
@@ -378,10 +378,14 @@ move to an independent API service.
   or auth.
 
 Which package may import which is the `dependencies` in each `package.json`:
-installs are isolated, so an undeclared import fails `tsc`. `tsc` also rejects
-subpaths missing from a package's `exports`. Nx's ESLint boundary rule isn't
-used: typescript-eslint needs the TypeScript JS API, and TypeScript 7 doesn't
-ship one.
+installs are isolated, so importing an undeclared npm or workspace package fails
+`tsc`. `tsc` also rejects subpaths missing from a package's `exports`. Review
+still has to catch what no tool checks: relative imports into another project,
+the root's devDependencies (`nx`, `wrangler`, `vitest`...) resolving from any
+package, a Terraform `module` source without a matching `implicitDependencies`
+entry, and dependency cycles. Nx's ESLint boundary rule isn't used:
+typescript-eslint needs the TypeScript JS API, and TypeScript 7 doesn't ship
+one.
 
 tRPC is the current application boundary. Route handlers adapt HTTP/tRPC
 requests to backend services; durable domain behavior belongs in services, and
@@ -400,8 +404,8 @@ lockfile, workflows, and Biome and lint rules count as inputs to every
 project, so a change there selects everything.
 
 Nx caches `typecheck` and Vitest `test` results locally. Biome lints the whole
-repo from the root. Builds,
-Terraform, migrations and deploys are never cached. There is no remote cache.
+repo from the root. Builds, Terraform, migrations and deploys are never cached.
+There is no remote cache.
 
 ## Observability
 

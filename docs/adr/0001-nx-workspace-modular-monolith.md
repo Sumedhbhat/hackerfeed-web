@@ -9,7 +9,7 @@ HackerFeed stays one deployed Worker, but its code is split into Bun workspace p
 ## Considered options
 
 - **Nx's `@nx/enforce-module-boundaries` ESLint rule.** Rejected because typescript-eslint needs the TypeScript compiler's JS API (`typescript <6.1.0`), and TypeScript 7 ships only the native `tsc`.
-- **A custom checker over the Nx graph.** Built, then removed: every rule it enforced is covered by a tool already in the repo. Bun's isolated installs make each package's declared `dependencies` its allowed imports, `tsc` rejects undeclared packages and unexported subpaths, TanStack Start's import protection keeps backend code out of the client build, and Biome holds `api-client` to the backend's types.
+- **A custom checker over the Nx graph.** Built, then removed: the rules that mattered are covered by tools already in the repo. Bun's isolated installs make each package's declared `dependencies` its allowed imports, `tsc` rejects undeclared packages and unexported subpaths, TanStack Start's import protection keeps backend code out of the client build, and Biome holds `api-client` to the backend's types. Left to review: relative imports into another project, root devDependencies resolving from any package, Terraform module edges, and cycles. There are few packages, so these are cheap to catch in review.
 - **Only `ui`, `contracts`, `backend` and `api-client`.** `runtime` and `hacker-news` were added because both the browser and the backend use the logger, trace headers, HTTP client and HN record helpers, and the backend may not import the app.
 
 ## Consequences
