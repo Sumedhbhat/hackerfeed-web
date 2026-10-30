@@ -89,7 +89,8 @@
 	"overrides": [
 		{
 			"includes": [
-				"**/packages/ui/src/**",
+				"**/packages/ui/src/atoms/**",
+				"**/packages/ui/src/molecules/**",
 				"**/*.test.tsx",
 				"**/src/client-entry.tsx",
 				"**/src/router.tsx",
@@ -106,7 +107,8 @@
 		{
 			"includes": [
 				"**/src/**/*.tsx",
-				"!**/packages/ui/src/**",
+				"!**/packages/ui/src/atoms/**",
+				"!**/packages/ui/src/molecules/**",
 				"!**/*.test.tsx",
 				"!**/src/client-entry.tsx",
 				"!**/src/router.tsx",
