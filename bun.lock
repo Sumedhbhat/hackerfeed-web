@@ -17,6 +17,7 @@
       "dependencies": {
         "@base-ui/react": "^1.9.0",
         "@cloudflare/vite-plugin": "^1.64.0",
+        "@hackerfeed/backend": "workspace:*",
         "@hackerfeed/contracts": "workspace:*",
         "@hackerfeed/hacker-news": "workspace:*",
         "@hackerfeed/runtime": "workspace:*",
@@ -41,7 +42,6 @@
         "@trpc/tanstack-react-query": "^11.19.0",
         "@workos-inc/authkit-react": "^0.16.2",
         "drizzle-orm": "^0.45.3",
-        "jose": "^6.2.12",
         "ky": "^2.1.0",
         "lucide-react": "^1.49.0",
         "react": "^19.3.0",
@@ -62,12 +62,31 @@
         "@types/react-dom": "^19.3.0",
         "@vitejs/plugin-react": "^6.1.1",
         "babel-plugin-react-compiler": "^1.0.0",
-        "drizzle-kit": "^0.31.11",
         "happy-dom": "^21.0.4",
         "tsx": "^4.23.15",
         "vite": "^8.3.1",
         "vitest": "^5.0.4",
         "wrangler": "^4.151.0",
+      },
+    },
+    "packages/backend": {
+      "name": "@hackerfeed/backend",
+      "dependencies": {
+        "@hackerfeed/contracts": "workspace:*",
+        "@hackerfeed/hacker-news": "workspace:*",
+        "@hackerfeed/runtime": "workspace:*",
+        "@sentry/cloudflare": "^11.7.0",
+        "@sentry/core": "^11.7.0",
+        "@tanstack/react-start": "latest",
+        "@trpc/server": "^11.19.0",
+        "drizzle-orm": "^0.45.3",
+        "jose": "^6.2.12",
+        "superjson": "^2.2.2",
+        "zod": "^4.6.5",
+      },
+      "devDependencies": {
+        "drizzle-kit": "^0.31.11",
+        "vitest": "^5.0.4",
       },
     },
     "packages/contracts": {
@@ -278,6 +297,8 @@
     "@floating-ui/react-dom": ["@floating-ui/react-dom@2.1.9", "", { "dependencies": { "@floating-ui/dom": "^1.8.0" }, "peerDependencies": { "react": ">=16.8.0", "react-dom": ">=16.8.0" } }, "sha512-JDjEFGCpImxDCA7JJKviA0M9+RtmJdj0m/NVU5IMgBK+AmZouAQQ7/+2GLH0GXXY0YMw9oXPB8hKdbPYg5QLYg=="],
 
     "@floating-ui/utils": ["@floating-ui/utils@0.2.12", "", {}, "sha512-HpCo8tmWzLVad5s2d19EhAz5zqrrQ6s69qd6moPMQvkOuSwDT1YgRfWSVuc4ennqrgv3OHppiOGMQ7oC13yIww=="],
+
+    "@hackerfeed/backend": ["@hackerfeed/backend@workspace:packages/backend"],
 
     "@hackerfeed/contracts": ["@hackerfeed/contracts@workspace:packages/contracts"],
 

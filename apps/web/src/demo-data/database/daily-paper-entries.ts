@@ -1,4 +1,4 @@
-import type { hfDailyPaperEntries } from "#/server/database/schema";
+import type { hfDailyPaperEntries } from "@hackerfeed/backend/database/schema";
 import { DEMO_DATE, ingestedTimestamps, isoAt } from "../defaults";
 import { paperRows } from "./papers";
 

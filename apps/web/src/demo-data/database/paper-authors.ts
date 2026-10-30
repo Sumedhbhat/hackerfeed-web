@@ -2,7 +2,7 @@ import type {
 	hfAuthors,
 	hfPaperAuthors,
 	hfPapers,
-} from "#/server/database/schema";
+} from "@hackerfeed/backend/database/schema";
 import { ingestedTimestamps } from "../defaults";
 import { ada, ben, chen, dana, eli, fay } from "./authors";
 import {

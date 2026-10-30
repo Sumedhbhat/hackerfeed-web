@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { handleTrpcRequest } from "#/server/trpc/handler";
+import { backend } from "#/backend";
 
 export const Route = createFileRoute("/api/trpc/$")({
 	server: {
 		handlers: {
-			GET: ({ request }) => handleTrpcRequest(request),
-			POST: ({ request }) => handleTrpcRequest(request),
+			GET: ({ request }) => backend.handleTrpcRequest(request),
+			POST: ({ request }) => backend.handleTrpcRequest(request),
 		},
 	},
 });

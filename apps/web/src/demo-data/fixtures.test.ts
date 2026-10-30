@@ -1,7 +1,7 @@
+import * as schema from "@hackerfeed/backend/database/schema";
 import { getTableColumns, getTableName, is } from "drizzle-orm";
 import { getTableConfig, SQLiteTable } from "drizzle-orm/sqlite-core";
 import { describe, expect, it, vi } from "vitest";
-import * as schema from "#/server/database/schema";
 import { databaseFixtures as fixtures } from "./database";
 import { type DemoItem, feeds, items } from "./hacker-news";
 

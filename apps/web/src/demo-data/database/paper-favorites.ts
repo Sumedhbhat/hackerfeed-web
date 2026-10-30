@@ -1,4 +1,7 @@
-import type { hfPapers, paperFavorites } from "#/server/database/schema";
+import type {
+	hfPapers,
+	paperFavorites,
+} from "@hackerfeed/backend/database/schema";
 import { sqliteAt } from "../defaults";
 import { demoUser } from "./app-users";
 import { reasoningBenchmark, sparseAttention } from "./papers";

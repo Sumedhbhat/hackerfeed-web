@@ -2,7 +2,7 @@ import type {
 	activityEvents,
 	hfPapers,
 	stories,
-} from "#/server/database/schema";
+} from "@hackerfeed/backend/database/schema";
 import { sqliteAt } from "../defaults";
 import { demoUser } from "./app-users";
 import { favoriteRows } from "./favorites";

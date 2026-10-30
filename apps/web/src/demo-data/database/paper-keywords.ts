@@ -1,4 +1,7 @@
-import type { hfPaperKeywords, hfPapers } from "#/server/database/schema";
+import type {
+	hfPaperKeywords,
+	hfPapers,
+} from "@hackerfeed/backend/database/schema";
 import { ingestedTimestamps } from "../defaults";
 import {
 	diffusionFixtures,
