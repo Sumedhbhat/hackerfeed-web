@@ -1,20 +1,42 @@
 {
 	"$schema": "./node_modules/nx/schemas/nx-schema.json",
 	"defaultBase": "master",
+	"namedInputs": {
+		"workspacePolicy": [
+			"{workspaceRoot}/package.json",
+			"{workspaceRoot}/bun.lock",
+			"{workspaceRoot}/bunfig.toml",
+			"{workspaceRoot}/nx.json",
+			"{workspaceRoot}/tsconfig.base.json",
+			"{workspaceRoot}/biome.json",
+			"{workspaceRoot}/lint/**/*",
+			"{workspaceRoot}/tools/workspace/**/*",
+			"{workspaceRoot}/.github/workflows/**/*"
+		],
+		"default": ["{projectRoot}/**/*", "workspacePolicy"]
+	},
 	"targetDefaults": {
 		"lint": {
 			"command": "biome check {projectRoot}",
+			"inputs": ["default", "^default"],
 			"cache": false
 		},
 		"typecheck": {
 			"command": "tsc --noEmit -p {projectRoot}",
+			"inputs": ["default", "^default"],
 			"cache": false
 		},
 		"test": {
 			"command": "vitest run",
 			"options": { "cwd": "{projectRoot}" },
+			"inputs": ["default", "^default"],
 			"cache": false
 		},
-		"build": { "cache": false }
+		"build": { "inputs": ["default", "^default"], "cache": false },
+		"fmt": { "inputs": ["default", "^default"], "cache": false },
+		"validate": { "inputs": ["default", "^default"], "cache": false },
+		"plan": { "cache": false },
+		"apply": { "cache": false },
+		"deploy": { "cache": false }
 	}
 }
