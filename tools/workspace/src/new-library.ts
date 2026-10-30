@@ -2,7 +2,7 @@
 // Nx targets, tags and an owner. CI picks it up through the project graph.
 //
 //   bun run new:library <name> --type <type> --platform <platform> [--owner @login]
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
@@ -12,7 +12,12 @@ const root = join(import.meta.dirname, "../../..");
 
 export function libraryFiles(
 	name: string,
-	{ type, platform, owner }: { type: string; platform: string; owner: string },
+	{
+		type,
+		platform,
+		owner,
+		vitest,
+	}: { type: string; platform: string; owner: string; vitest: string },
 ): Record<string, string> {
 	if (!/^[a-z][a-z0-9-]*$/.test(name)) {
 		throw new Error(`Library name must be kebab-case, got "${name}"`);
@@ -33,6 +38,7 @@ export function libraryFiles(
 			private: true,
 			type: "module",
 			exports: { ".": "./src/index.ts" },
+			devDependencies: { vitest },
 		}),
 		"project.json": json({
 			$schema: "../../node_modules/nx/schemas/project-schema.json",
@@ -89,10 +95,14 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
 		console.error(`packages/${name} already exists`);
 		process.exit(1);
 	}
+	const rootPackage = JSON.parse(
+		readFileSync(join(root, "package.json"), "utf8"),
+	);
 	const files = libraryFiles(name, {
 		type: values.type,
 		platform: values.platform,
 		owner: values.owner,
+		vitest: rootPackage.devDependencies.vitest,
 	});
 	for (const [path, content] of Object.entries(files)) {
 		mkdirSync(join(directory, path, ".."), { recursive: true });

@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { libraryFiles } from "./new-library";
 
-const options = { type: "domain", platform: "shared", owner: "@Sumedhbhat" };
+const options = {
+	type: "domain",
+	platform: "shared",
+	owner: "@Sumedhbhat",
+	vitest: "^5.0.4",
+};
 
 describe("libraryFiles", () => {
 	it("creates a package with public exports, targets, tags and an owner", () => {
@@ -10,6 +15,7 @@ describe("libraryFiles", () => {
 			name: "@hackerfeed/search",
 			private: true,
 			exports: { ".": "./src/index.ts" },
+			devDependencies: { vitest: "^5.0.4" },
 		});
 		expect(JSON.parse(files["project.json"])).toMatchObject({
 			name: "search",

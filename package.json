@@ -17,7 +17,8 @@
     "format": "biome format",
     "lint": "biome lint",
     "check": "biome check",
-    "new:library": "bun tools/workspace/src/new-library.ts"
+    "new:library": "bun tools/workspace/src/new-library.ts",
+    "check:workspace": "bun tools/workspace/src/check-workspace.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",

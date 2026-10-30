@@ -33,6 +33,10 @@ jobs:
       - name: Run lint
         run: bun run check
 
+      # Project tags, owners, file ownership, import boundaries and cycles.
+      - name: Check workspace structure
+        run: bun run check:workspace
+
       - name: Typecheck
         run: bun run typecheck
 
