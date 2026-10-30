@@ -278,7 +278,8 @@ remote state through an authorized CI job before applying again. Do not paste
 state into logs, comments, or issues. Local regression tests run with
 `bunx nx run-many -t test -p infra-ci,state-backend`; they do not write live
 infrastructure. Put Terraform 1.13.4 on `PATH` to run the integration cases.
-`bunx nx run-many -t fmt,validate` checks every Terraform project offline.
+`bunx nx run-many -t fmt,validate` checks every Terraform project without
+remote state or live infrastructure (the first run downloads providers).
 
 ## AI Assistants (bring your own subscription)
 
