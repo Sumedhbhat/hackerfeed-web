@@ -2,18 +2,18 @@
 
 GitHub stores one Cloudflare token: the Terraform token, in the `production`
 environment. Terraform uses it to mint every other token CI needs, so they are
-created, scoped, rotated and revoked in `infra/terraform`. This runbook creates
+created, scoped, rotated and revoked in Terraform (`infra/cloudflare-prod` and `infra/deploy-access`). This runbook creates
 the Terraform token. It is for GitHub Actions only; do not reuse a developer's
 local Wrangler OAuth session or put its credentials in GitHub.
 
 | Token | Defined in | Stored in | Used by |
 | --- | --- | --- | --- |
 | Terraform | this runbook | GitHub `production` secret `CLOUDFLARE_API_TOKEN` | Terraform, state server deploy |
-| `hackerfeed-ci-deploy` | `infra/terraform/deploy` | `deploy` state (production only) | migrations, Worker deploy |
-| `hackerfeed-ci-preview` | `infra/terraform` | `prod` state (PRs can read it) | PR version uploads, PR plans |
+| `hackerfeed-ci-deploy` | `infra/deploy-access` | `deploy` state (production only) | migrations, Worker deploy |
+| `hackerfeed-ci-preview` | `infra/cloudflare-prod` | `prod` state (PRs can read it) | PR version uploads, PR plans |
 
 Jobs read the minted tokens from Terraform outputs with
-`infra/cloudflare-token.sh`, which signs in through GitHub OIDC like every
+`tools/infra-ci/cloudflare-token.sh`, which signs in through GitHub OIDC like every
 Terraform command. Never put a production-only token in the `prod` state:
 every PR job can read it.
 
@@ -21,7 +21,7 @@ every PR job can read it.
 
 On pushes to `master` (and manual dispatch), the workflow:
 
-1. Deploys the Terraform state server (`infra/state-backend`) with Wrangler.
+1. Deploys the Terraform state server (`apps/state-backend`) with Wrangler.
 2. Plans and applies the `prod` root (the database `hackerfeed` and the preview
    token) and the `deploy` root (the deploy token) through Terraform.
 3. Reads the database identity from Terraform outputs and configures Wrangler

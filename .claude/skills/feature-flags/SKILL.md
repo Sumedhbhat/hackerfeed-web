@@ -1,6 +1,6 @@
 ---
 name: feature-flags
-description: Add, enable, disable, target or remove a HackerFeed feature flag. Use when a feature should be hidden, rolled out to specific users, turned on or off for everyone, or when a flag is no longer needed. Flags live in code (src/server/feature-flags/config.ts); there is no flag service.
+description: Add, enable, disable, target or remove a HackerFeed feature flag. Use when a feature should be hidden, rolled out to specific users, turned on or off for everyone, or when a flag is no longer needed. Flags live in code (packages/backend/src/feature-flags/config.ts); there is no flag service.
 ---
 
 # Feature flags
@@ -13,12 +13,12 @@ third-party flag service, so don't add one.
 
 | Piece | File | Role |
 | --- | --- | --- |
-| Config | `src/server/feature-flags/config.ts` | Every flag: `description`, `enabled`, optional `enabledForUserIds`. Server-only, so the config and its user ids never reach the browser. |
-| Evaluator | `src/server/feature-flags/service.ts` | `evaluateFeatureFlags(user)` returns all flags for a session. `isFeatureEnabled(name, user)` checks one flag inside server code. |
-| API | `src/routes/api.feature-flags.ts` | `GET /api/feature-flags` returns `{ flags: { [name]: boolean } }` for the bearer token's user, or the signed-out defaults. `no-store`. |
-| Client fetch | `src/lib/feature-flags/client.ts` | `fetchFeatureFlags()` sends the AuthKit bearer token. |
-| Hooks | `src/hooks/useFeatureFlags.ts` | `useFeatureFlag(name)` returns a boolean. The query is keyed by user id, so signing in or out refetches. |
-| Gate | `SessionGate` in `src/routes/__root.tsx` | Holds every non-public page until both the auth state and that session's flags are known. |
+| Config | `packages/backend/src/feature-flags/config.ts` | Every flag: `description`, `enabled`, optional `enabledForUserIds`. Server-only, so the config and its user ids never reach the browser. |
+| Evaluator | `packages/backend/src/feature-flags/service.ts` | `evaluateFeatureFlags(user)` returns all flags for a session. `isFeatureEnabled(name, user)` checks one flag inside server code. |
+| API | `apps/web/src/routes/api.feature-flags.ts` → `handleFeatureFlagsRequest` in `packages/backend/src/index.ts` | `GET /api/feature-flags` returns `{ flags: { [name]: boolean } }` for the bearer token's user, or the signed-out defaults. `no-store`. |
+| Client fetch | `packages/api-client/src/feature-flags.ts`, configured in `apps/web/src/lib/feature-flags/client.ts` | `fetchFeatureFlags()` sends the AuthKit bearer token. The flag types reach the browser as types only, through `@hackerfeed/backend/api-types`. |
+| Hooks | `apps/web/src/hooks/useFeatureFlags.ts` | `useFeatureFlag(name)` returns a boolean. The query is keyed by user id, so signing in or out refetches. |
+| Gate | `SessionGate` in `apps/web/src/routes/__root.tsx` | Holds every non-public page until both the auth state and that session's flags are known. |
 
 How a flag evaluates: `enabled: true` turns it on for everyone, signed in or
 not. Otherwise it is on only for signed-in users listed in `enabledForUserIds`.
@@ -43,11 +43,11 @@ flag off.
    only hides it; anyone can still call the API. Use
    `isFeatureEnabled("newThing", user)` and answer `404` with
    `code: "feature_disabled"`. For an example, see `isEnabled` in
-   `src/server/ai/http.ts` (wired in `src/server/ai/runtime.ts`). In tRPC, check
+   `packages/backend/src/ai/http.ts` (wired in `packages/backend/src/ai/runtime.ts`). In tRPC, check
    `ctx.user` inside the procedure.
 3. Hide the UI with `const on = useFeatureFlag("newThing")`. Call the hook at
    the top of the component, before any early return. For a whole route, render
-   `<Navigate … replace />` when the flag is off, like `src/routes/chat.$storyId.tsx`.
+   `<Navigate … replace />` when the flag is off, like `apps/web/src/routes/chat.$storyId.tsx`.
 4. Tests:
    - Server: inject the flag check, e.g. `isEnabled: () => false`, and assert
      the 404 plus that the service was never called. Evaluation tests pass a

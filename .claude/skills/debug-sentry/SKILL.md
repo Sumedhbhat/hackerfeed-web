@@ -39,14 +39,14 @@ evidence. You are an investigator, not an operator: look, don't touch.
 
 Read the code when the evidence points into it. The key pieces:
 
-- `src/lib/logger.ts`: the only logger. Every call writes to Sentry Logs and
+- `packages/runtime/src/logger.ts`: the only logger. Every call writes to Sentry Logs and
   the console. `logger.error(msg, { error })` also creates a Sentry issue
   (`captureException`, tag `log_message`). Only warn/error logs are ingested.
-- `src/server.ts`: Worker entry. `handleAppFetch` catches anything thrown
+- `apps/web/src/server.ts`: Worker entry. `handleAppFetch` catches anything thrown
   while serving and logs `"Unhandled server request error"` with `method` and
   `pathname`, then returns a 500 carrying the trace ID.
 - Browser and Worker traces are separate. The Worker strips incoming trace
-  headers and starts its own trace per request (`src/server/tracing/`). The
+  headers and starts its own trace per request (`packages/backend/src/tracing/`). The
   browser sends its trace as `x-client-trace`; the Worker stores it as a span
   link and a `client.trace_id` attribute on the root span, and returns its own
   trace ID in `x-sentry-trace-id`. Given a browser trace ID, find the server
@@ -57,8 +57,8 @@ Read the code when the evidence points into it. The key pieces:
   are always captured. An unsampled trace can show only the error itself (one
   span, no duration), and a linked trace on the other side may be missing.
   That is normal, not missing data.
-- Env vars are validated by `createEnv` in `src/env.ts` when a request first
-  imports it. A failure throws `Invalid environment variables` and breaks
+- Env vars are validated by `createEnv` in `apps/web/src/env.ts` when a request
+  first imports it. A failure throws `Invalid environment variables` and breaks
   every request.
 
 ## A way in (adapt as the evidence leads)
@@ -77,11 +77,11 @@ Read the code when the evidence points into it. The key pieces:
    - "First seen" against `git log` and `wrangler deployments list --name
      hackerfeed-web` usually identifies the change that caused it.
    - CI deploys upload source maps and set the release to the commit SHA, so
-     stack frames should show `src/...` paths and the event's `release` names
+     stack frames should show `apps/web/src/...` or `packages/<name>/src/...` paths and the event's `release` names
      the exact commit (`git show <release>`). If frames are still minified
      (`assets/router-<hash>.js:<line>`), that build had no maps: use function
-     names and messages, or run `bun run build` and look in `dist/`.
-6. If Sentry isn't enough, reproduce: `bun run build`, then `bunx vite preview`
+     names and messages, or run `bun run build` and look in `apps/web/dist/`.
+6. If Sentry isn't enough, reproduce: `bun run build`, then `bunx vite preview` in `apps/web`
    and request the failing path. The Worker's JSON log lines include
    `traceId` and `err`. `wrangler secret list --name hackerfeed-web` shows
    which secrets exist (names only, never values).
@@ -91,7 +91,7 @@ Read the code when the evidence points into it. The key pieces:
 - Events from before source maps were added, or from builds made without
   `SENTRY_AUTH_TOKEN`, have minified stacks and no `release`.
 - `createEnv` validation details show as `[object Array]` in breadcrumbs: the
-  variable name is lost. Confirm it from `src/env.ts` against the secret list
+  variable name is lost. Confirm it from `apps/web/src/env.ts` against the secret list
   or a local reproduction.
 
 ## Report back
