@@ -24,8 +24,7 @@
     "security:audit": "bun audit --audit-level=high",
     "format": "biome format",
     "lint": "biome lint",
-    "check": "biome check",
-    "new:library": "bun tools/workspace/src/new-library.ts"
+    "check": "biome check"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

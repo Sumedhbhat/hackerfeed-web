@@ -3,16 +3,7 @@
 	"name": "hacker-news",
 	"projectType": "library",
 	"sourceRoot": "packages/hacker-news/src",
-	"tags": [
-		"type:domain",
-		"platform:shared",
-		"scope:shared"
-	],
-	"metadata": {
-		"owner": "@Sumedhbhat"
-	},
 	"targets": {
-		"lint": {},
 		"typecheck": {},
 		"test": {}
 	}

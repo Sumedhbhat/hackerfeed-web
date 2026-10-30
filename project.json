@@ -3,19 +3,7 @@
 	"name": "web",
 	"projectType": "application",
 	"sourceRoot": "src",
-	"tags": [
-		"type:app",
-		"platform:browser",
-		"platform:server",
-		"scope:hackerfeed"
-	],
-	"metadata": {
-		"owner": "@Sumedhbhat"
-	},
 	"targets": {
-		"lint": {
-			"command": "biome check ."
-		},
 		"typecheck": {
 			"command": "tsc --noEmit"
 		},

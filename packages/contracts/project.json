@@ -3,16 +3,7 @@
 	"name": "contracts",
 	"projectType": "library",
 	"sourceRoot": "packages/contracts/src",
-	"tags": [
-		"type:contracts",
-		"platform:shared",
-		"scope:shared"
-	],
-	"metadata": {
-		"owner": "@Sumedhbhat"
-	},
 	"targets": {
-		"lint": {},
 		"typecheck": {},
 		"test": {}
 	}
