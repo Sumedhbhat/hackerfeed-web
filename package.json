@@ -19,6 +19,7 @@
     "test": "nx run-many -t test",
     "typecheck": "nx run-many -t typecheck",
     "cf:typegen": "wrangler types",
+    "db:generate": "bun run --cwd packages/backend db:generate",
     "db:migrate:local": "wrangler d1 migrations apply DB --local",
     "security:audit": "bun audit --audit-level=high",
     "format": "biome format",
