@@ -18,7 +18,14 @@ export function libraryFiles(
 		platform,
 		owner,
 		vitest,
-	}: { type: string; platform: string; owner: string; vitest: string },
+		happyDom,
+	}: {
+		type: string;
+		platform: string;
+		owner: string;
+		vitest: string;
+		happyDom: string;
+	},
 ): Record<string, string> {
 	if (!/^[a-z][a-z0-9-]*$/.test(name)) {
 		throw new Error(`Library name must be kebab-case, got "${name}"`);
@@ -39,7 +46,8 @@ export function libraryFiles(
 			private: true,
 			type: "module",
 			exports: { ".": "./src/index.ts" },
-			devDependencies: { vitest },
+			devDependencies:
+				platform === "browser" ? { "happy-dom": happyDom, vitest } : { vitest },
 		}),
 		"project.json": json({
 			$schema: "../../node_modules/nx/schemas/project-schema.json",
@@ -115,6 +123,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
 		platform: values.platform,
 		owner: values.owner,
 		vitest: rootPackage.devDependencies.vitest,
+		happyDom: rootPackage.devDependencies["happy-dom"],
 	});
 	for (const [path, content] of Object.entries(files)) {
 		mkdirSync(join(directory, path, ".."), { recursive: true });

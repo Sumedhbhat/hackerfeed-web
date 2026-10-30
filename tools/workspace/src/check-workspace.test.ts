@@ -329,6 +329,7 @@ describe("checkWorkspace", () => {
 			platform: "shared",
 			owner,
 			vitest: "^5.0.4",
+			happyDom: "^21.0.4",
 		});
 		const projectJson = JSON.parse(files["project.json"]);
 		const generated: Project = {

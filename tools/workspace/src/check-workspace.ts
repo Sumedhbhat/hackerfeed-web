@@ -60,7 +60,11 @@ function blank(text: string) {
 	return text.replace(/[^\n]/g, " ");
 }
 
-/** Import specifiers in a module, ignoring comments and template literals. */
+/**
+ * Import specifiers in a module, ignoring comments and template literals.
+ * Regex-based: a `//` or backtick inside a string on an import's line, or
+ * before it, can hide that import. Biome keeps imports first on their own lines.
+ */
 export function findImports(source: string): ImportStatement[] {
 	const code = source
 		.replace(/\/\*[\s\S]*?\*\//g, blank)

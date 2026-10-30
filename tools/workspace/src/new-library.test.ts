@@ -6,6 +6,7 @@ const options = {
 	platform: "shared",
 	owner: "@Sumedhbhat",
 	vitest: "^5.0.4",
+	happyDom: "^21.0.4",
 };
 
 describe("libraryFiles", () => {
@@ -23,6 +24,15 @@ describe("libraryFiles", () => {
 			metadata: { owner: "@Sumedhbhat" },
 			targets: { lint: {}, typecheck: {}, test: {} },
 		});
+	});
+
+	it("declares happy-dom for browser libraries", () => {
+		const files = libraryFiles("widgets", { ...options, platform: "browser" });
+		expect(JSON.parse(files["package.json"]).devDependencies).toEqual({
+			"happy-dom": "^21.0.4",
+			vitest: "^5.0.4",
+		});
+		expect(files["vitest.config.ts"]).toContain(`environment: "happy-dom"`);
 	});
 
 	it.each([
