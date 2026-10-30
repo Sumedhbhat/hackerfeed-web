@@ -11,6 +11,7 @@
     "dev:demo": "bun run --cwd apps/web dev:demo",
     "build": "nx run web:build",
     "build:demo": "nx run web:build-demo",
+    "preview": "bun run --cwd apps/web preview",
     "preview:private": "bun run --cwd apps/web preview:private",
     "demo-data:compare": "bun run --cwd apps/web demo-data:compare",
     "cf:typegen": "bun run --cwd apps/web cf:typegen",
