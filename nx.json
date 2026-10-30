@@ -8,13 +8,9 @@
 		},
 		"test": {
 			"command": "vitest run",
-			"options": {
-				"cwd": "{projectRoot}"
-			},
+			"options": { "cwd": "{projectRoot}" },
 			"cache": false
 		},
-		"build": {
-			"cache": false
-		}
+		"build": { "cache": false }
 	}
 }

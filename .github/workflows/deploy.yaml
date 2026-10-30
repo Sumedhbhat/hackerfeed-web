@@ -155,11 +155,11 @@ jobs:
 
       - name: Verify build
         run: |
-          if grep -rlF hackerfeed-demo-data dist; then
+          if grep -rlF hackerfeed-demo-data apps/web/dist; then
             echo "Production build includes fixtures; VITE_DEMO_DATA must not be set" >&2
             exit 1
           fi
-          bound=$(jq -r '.d1_databases[] | select(.binding == "DB") | .database_id' dist/server/wrangler.json)
+          bound=$(jq -r '.d1_databases[] | select(.binding == "DB") | .database_id' apps/web/dist/server/wrangler.json)
           if [ "$bound" != "$D1_DATABASE_ID" ]; then
             echo "Build binds DB to '${bound}', not Terraform's database" >&2
             exit 1
@@ -172,7 +172,7 @@ jobs:
         run: exec infra/cloudflare-token.sh deploy deploy_token
 
       - name: Apply database migrations
-        run: bunx wrangler d1 migrations apply DB --remote --config dist/server/wrangler.json
+        run: bunx wrangler d1 migrations apply DB --remote --config apps/web/dist/server/wrangler.json
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
@@ -192,6 +192,6 @@ jobs:
         with:
           apiToken: ${{ env.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy --config dist/server/wrangler.json --secrets-file ${{ runner.temp }}/worker-secrets.json --var SENTRY_RELEASE:${{ github.sha }}
+          command: deploy --config apps/web/dist/server/wrangler.json --secrets-file ${{ runner.temp }}/worker-secrets.json --var SENTRY_RELEASE:${{ github.sha }}
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

@@ -4,8 +4,9 @@
 /.github/ @Sumedhbhat
 /infra/ @Sumedhbhat
 /scripts/ @Sumedhbhat
-/vite.config.ts @Sumedhbhat
-/wrangler.jsonc @Sumedhbhat
-/wrangler.preview.jsonc @Sumedhbhat
+/apps/web/scripts/ @Sumedhbhat
+/apps/web/vite.config.ts @Sumedhbhat
+/apps/web/wrangler.jsonc @Sumedhbhat
+/apps/web/wrangler.preview.jsonc @Sumedhbhat
 /nx.json @Sumedhbhat
 /bunfig.toml @Sumedhbhat

@@ -19,7 +19,7 @@ const STYLING = "plugin";
 const RAW_ELEMENT = "lint/correctness/noRestrictedElements";
 const LAYER_IMPORT = "lint/style/noRestrictedImports";
 
-const WEB = "src";
+const WEB = "apps/web/src";
 const UI = "packages/ui/src";
 
 const fixtures: Record<string, string> = {
@@ -92,7 +92,7 @@ beforeAll(() => {
 	}
 	const result = spawnSync(
 		biome,
-		["lint", "--reporter=json", "src", "packages"],
+		["lint", "--reporter=json", "apps", "packages"],
 		{
 			cwd: workdir,
 			encoding: "utf8",
@@ -138,7 +138,7 @@ describe("suppressions", () => {
 	}
 
 	it("never silences the component layer rules", () => {
-		const offenders = ["src", "packages", "tools"]
+		const offenders = ["apps", "packages", "tools"]
 			.flatMap((dir) => [...sourceFiles(join(root, dir))])
 			.map((path) => relative(root, path))
 			.filter((path) =>
