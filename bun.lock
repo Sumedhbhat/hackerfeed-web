@@ -4,12 +4,16 @@
   "workspaces": {
     "": {
       "name": "hackerfeed",
+      "dependencies": {
+        "jose": "^6.2.12",
+      },
       "devDependencies": {
         "@biomejs/biome": "2.5.15",
         "@types/node": "^26.6.3",
         "nx": "23.3.0",
         "typescript": "^7.0.2",
         "vitest": "^5.0.4",
+        "wrangler": "^4.151.0",
       },
     },
     "apps/web": {
@@ -43,7 +47,6 @@
         "@trpc/tanstack-react-query": "^11.19.0",
         "@workos-inc/authkit-react": "^0.16.2",
         "drizzle-orm": "^0.45.3",
-        "jose": "^6.2.12",
         "ky": "^2.1.0",
         "lucide-react": "^1.49.0",
         "react": "^19.3.0",

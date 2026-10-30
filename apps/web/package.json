@@ -13,8 +13,6 @@
     "preview": "vite preview",
     "preview:private": "scripts/private-preview.sh",
     "demo-data:compare": "bun scripts/compare-demo-data.ts",
-    "test": "vitest run",
-    "typecheck": "tsc --noEmit",
     "cf:typegen": "wrangler types",
     "db:migrate:local": "wrangler d1 migrations apply DB --local"
   },

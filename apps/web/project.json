@@ -3,10 +3,7 @@
 	"name": "web",
 	"projectType": "application",
 	"sourceRoot": "apps/web/src",
-	"tags": ["type:app", "platform:browser", "platform:server", "scope:hackerfeed"],
-	"metadata": { "owner": "@Sumedhbhat" },
 	"targets": {
-		"lint": {},
 		"typecheck": {},
 		"test": {},
 		"build": {
