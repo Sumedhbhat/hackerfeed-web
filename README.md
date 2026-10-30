@@ -241,8 +241,9 @@ id. The job's GitHub environment decides what it may touch:
 | `production` (master only) | read, write, lock | read, write, lock |
 | `preview` (pull requests) | read only, for PR plans | none |
 
-Every Terraform command goes through `tools/infra-ci/terraform.sh`, which maps
-each state name to its root directory. A Python 3 loopback
+Every Terraform command that touches state goes through
+`tools/infra-ci/terraform.sh`, which maps each state name to its root directory
+(`fmt` and `validate` run `terraform` directly). A Python 3 loopback
 proxy requests and refreshes OIDC credentials while Terraform runs, so a long
 apply can still save state and release its lock. Each invocation has its own
 port and password; the proxy forwards only that stage to the fixed state
@@ -372,7 +373,9 @@ move to an independent API service.
   makes every import of it `import type`, and a Biome rule stops `api-client`
   importing any other backend path. In `apps/web`, TanStack Start's import
   protection (`apps/web/vite.config.ts`) fails the client build on any other
-  backend import.
+  backend import. Server-only app code (`apps/web/src/backend.ts`, `server.ts`)
+  imports the backend freely, and the demo build bundles
+  `@hackerfeed/backend/database/schema` for its in-memory fixtures.
 - Shared schemas live in `packages/contracts`, never next to the Drizzle
   tables. The backend maps rows to these DTOs.
 - `packages/ui` is presentational: no app code, workspace packages, API clients
