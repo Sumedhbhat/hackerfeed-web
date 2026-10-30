@@ -13,30 +13,76 @@
 			"{workspaceRoot}/tools/workspace/**/*",
 			"{workspaceRoot}/.github/workflows/**/*"
 		],
-		"default": ["{projectRoot}/**/*", "workspacePolicy"]
+		"default": [
+			"{projectRoot}/**/*",
+			"workspacePolicy"
+		]
 	},
 	"targetDefaults": {
 		"lint": {
 			"command": "biome check {projectRoot}",
-			"inputs": ["default", "^default"],
-			"cache": false
+			"inputs": [
+				"default"
+			],
+			"cache": true
 		},
 		"typecheck": {
 			"command": "tsc --noEmit -p {projectRoot}",
-			"inputs": ["default", "^default"],
-			"cache": false
+			"inputs": [
+				"default",
+				"^default",
+				{
+					"runtime": "node --version"
+				}
+			],
+			"cache": true
 		},
 		"test": {
 			"command": "vitest run",
-			"options": { "cwd": "{projectRoot}" },
-			"inputs": ["default", "^default"],
+			"options": {
+				"cwd": "{projectRoot}"
+			},
+			"inputs": [
+				"default",
+				"^default",
+				{
+					"runtime": "node --version"
+				},
+				{
+					"env": "VITE_DEMO_DATA"
+				}
+			],
+			"cache": true
+		},
+		"build": {
+			"inputs": [
+				"default",
+				"^default"
+			],
 			"cache": false
 		},
-		"build": { "inputs": ["default", "^default"], "cache": false },
-		"fmt": { "inputs": ["default", "^default"], "cache": false },
-		"validate": { "inputs": ["default", "^default"], "cache": false },
-		"plan": { "cache": false },
-		"apply": { "cache": false },
-		"deploy": { "cache": false }
+		"fmt": {
+			"inputs": [
+				"default",
+				"^default"
+			],
+			"cache": false
+		},
+		"validate": {
+			"inputs": [
+				"default",
+				"^default"
+			],
+			"cache": false
+		},
+		"plan": {
+			"cache": false
+		},
+		"apply": {
+			"cache": false
+		},
+		"deploy": {
+			"cache": false
+		}
 	}
 }

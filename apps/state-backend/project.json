@@ -18,7 +18,8 @@
 			"command": "bun test apps/state-backend/tests",
 			"options": {
 				"cwd": "."
-			}
+			},
+			"cache": false
 		},
 		"deploy": {
 			"command": "wrangler d1 migrations apply DB --remote -c apps/state-backend/wrangler.jsonc && wrangler deploy -c apps/state-backend/wrangler.jsonc",
