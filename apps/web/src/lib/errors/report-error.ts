@@ -1,7 +1,7 @@
+import { AiRequestError } from "@hackerfeed/api-client/ai";
 import { type LogContext, logger } from "@hackerfeed/runtime/logger";
 import { readServerTraceId } from "@hackerfeed/runtime/trace-headers";
 import { TRPCClientError } from "@trpc/client";
-import { AiRequestError } from "#/lib/ai/client";
 
 /** What the user was doing when it failed; picks the fallback message. */
 export type FailedAction = "load" | "save" | "remove";

@@ -1,5 +1,5 @@
 {
-	"$schema": "node_modules/wrangler/config-schema.json",
+	"$schema": "../../node_modules/wrangler/config-schema.json",
 	"name": "hackerfeed-web",
 	"compatibility_date": "2025-09-02",
 	"compatibility_flags": [
@@ -32,7 +32,7 @@
 			"binding": "DB",
 			"database_name": "hackerfeed",
 			"database_id": "local-hackerfeed",
-			"migrations_dir": "packages/backend/migrations"
+			"migrations_dir": "../../packages/backend/migrations"
 		}
 	]
 }

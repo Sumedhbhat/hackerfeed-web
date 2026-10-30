@@ -44,11 +44,13 @@ bun run security:audit   # Audit dependencies at high severity and above
 Application environment variables are validated in `src/env.ts`. Cloudflare
 bindings and production defaults live in `wrangler.jsonc`.
 
-For local development, put public Vite values in `.env.local` and Worker-only
-secrets in `.dev.vars`:
+For local development, put public Vite values in `apps/web/.env.local` and
+Worker-only secrets in `apps/web/.dev.vars`. Vite and wrangler read them from
+the app's directory, so in a checkout from before the move, move both files
+there from the repo root:
 
 ```bash
-# .env.local
+# apps/web/.env.local
 VITE_WORKOS_CLIENT_ID=...
 VITE_WORKOS_REDIRECT_URI=http://localhost:3000/auth/callback
 VITE_WORKOS_API_HOSTNAME=api.workos.com
@@ -57,7 +59,7 @@ VITE_SENTRY_DSN=...
 VITE_SENTRY_ENVIRONMENT=development
 VITE_SENTRY_TRACES_SAMPLE_RATE=0.1
 
-# .dev.vars
+# apps/web/.dev.vars
 AI_TOKEN_ENCRYPTION_KEY=... # at least 32 characters
 SENTRY_DSN=...
 SENTRY_ENVIRONMENT=development
@@ -274,7 +276,7 @@ without a deploy.
 ### Configuration
 
 ```bash
-# .dev.vars (optional)
+# apps/web/.dev.vars (optional)
 CHATGPT_CLIENT_ID=oaiapp_...         # issued by OpenAI for this deployment
 CHATGPT_CLIENT_SECRET=...            # only for confidential clients
 ```

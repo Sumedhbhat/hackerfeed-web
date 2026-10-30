@@ -7,7 +7,7 @@ import type {
 } from "@hackerfeed/contracts/ai";
 import { readServerTraceId } from "@hackerfeed/runtime/trace-headers";
 import * as Sentry from "@sentry/core";
-import { getApiHeaders, signIn } from "#/lib/auth/authkit";
+import type { ApiAuth } from "./auth";
 
 export class AiRequestError extends Error {
 	readonly code: string;
@@ -44,32 +44,40 @@ async function toRequestError(response: Response): Promise<AiRequestError> {
 	);
 }
 
-async function getJson<T>(path: string): Promise<T> {
+async function getJson<T>(auth: ApiAuth, path: string): Promise<T> {
 	const response = await fetch(path, {
-		headers: { accept: "application/json", ...(await getApiHeaders()) },
+		headers: { accept: "application/json", ...(await auth.getHeaders()) },
 	});
 	if (!response.ok) throw await toRequestError(response);
 	return (await response.json()) as T;
 }
 
-export async function fetchAiProviders(): Promise<AiProviderStatus[]> {
+async function fetchAiProviders(auth: ApiAuth): Promise<AiProviderStatus[]> {
 	const { providers } = await getJson<{ providers: AiProviderStatus[] }>(
+		auth,
 		"/api/ai/providers",
 	);
 	return providers;
 }
 
-export async function fetchAiModels(providerId: string): Promise<AiModel[]> {
+async function fetchAiModels(
+	auth: ApiAuth,
+	providerId: string,
+): Promise<AiModel[]> {
 	const { models } = await getJson<{ models: AiModel[] }>(
+		auth,
 		`/api/ai/providers/${encodeURIComponent(providerId)}/models`,
 	);
 	return models;
 }
 
-export async function disconnectAiProvider(providerId: string): Promise<void> {
+async function disconnectAiProvider(
+	auth: ApiAuth,
+	providerId: string,
+): Promise<void> {
 	const response = await fetch(
 		`/api/ai/providers/${encodeURIComponent(providerId)}/disconnect`,
-		{ method: "POST", headers: await getApiHeaders() },
+		{ method: "POST", headers: await auth.getHeaders() },
 	);
 	if (!response.ok) throw await toRequestError(response);
 }
@@ -79,15 +87,16 @@ export function getAiConnectUrl(providerId: string, returnTo: string): string {
 }
 
 /** Starts the provider's sign-in, then leaves the page for the provider. */
-export async function connectAiProvider(
+async function connectAiProvider(
+	auth: ApiAuth,
 	providerId: string,
 	returnTo = window.location.pathname,
 ): Promise<void> {
 	const response = await fetch(getAiConnectUrl(providerId, returnTo), {
 		method: "POST",
-		headers: await getApiHeaders(),
+		headers: await auth.getHeaders(),
 	});
-	if (response.status === 401) return signIn(returnTo);
+	if (response.status === 401) return auth.signIn(returnTo);
 	if (!response.ok) throw await toRequestError(response);
 	const { url } = (await response.json()) as { url: string };
 	window.location.assign(url);
@@ -105,7 +114,8 @@ type StreamOptions = {
  * The whole reply is one span, failed if the stream breaks after its 200,
  * cancelled if the user stops it.
  */
-export function streamStoryChat(
+function streamStoryChat(
+	auth: ApiAuth,
 	request: StoryChatRequest,
 	options: StreamOptions,
 ): Promise<void> {
@@ -120,7 +130,7 @@ export function streamStoryChat(
 		},
 		async (span) => {
 			try {
-				await readStoryChat(request, options);
+				await readStoryChat(auth, request, options);
 			} catch (error) {
 				span.setStatus({
 					code: Sentry.SPAN_STATUS_ERROR,
@@ -136,6 +146,7 @@ export function streamStoryChat(
 }
 
 async function readStoryChat(
+	auth: ApiAuth,
 	request: StoryChatRequest,
 	{ onDelta, signal }: StreamOptions,
 ): Promise<void> {
@@ -144,7 +155,7 @@ async function readStoryChat(
 		headers: {
 			accept: "application/x-ndjson",
 			"content-type": "application/json",
-			...(await getApiHeaders()),
+			...(await auth.getHeaders()),
 		},
 		body: JSON.stringify(request),
 		signal,
@@ -194,4 +205,18 @@ async function readStoryChat(
 		},
 		response,
 	);
+}
+
+/** The AI endpoints, sending `auth`'s headers with every request. */
+export function createAiClient(auth: ApiAuth) {
+	return {
+		fetchAiProviders: () => fetchAiProviders(auth),
+		fetchAiModels: (providerId: string) => fetchAiModels(auth, providerId),
+		disconnectAiProvider: (providerId: string) =>
+			disconnectAiProvider(auth, providerId),
+		connectAiProvider: (providerId: string, returnTo?: string) =>
+			connectAiProvider(auth, providerId, returnTo),
+		streamStoryChat: (request: StoryChatRequest, options: StreamOptions) =>
+			streamStoryChat(auth, request, options),
+	};
 }

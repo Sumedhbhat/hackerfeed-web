@@ -406,11 +406,11 @@ class WorkflowTests(unittest.TestCase):
         self.assertNotIn("d1 ", preview)
         self.assertNotIn("AI_TOKEN_ENCRYPTION_KEY", preview)
         self.assertNotIn("VITE_WORKOS_CLIENT_ID", preview)
-        self.assertIn("--config wrangler.preview.jsonc", preview)
+        self.assertIn("--config apps/web/wrangler.preview.jsonc", preview)
         self.assertNotIn("wrangler deploy", preview)
         self.assertIn("needs.infrastructure.outputs.database_id", production)
         self.assertIn("needs.infrastructure.outputs.database_name", production)
-        self.assertIn("--config dist/server/wrangler.json", production)
+        self.assertIn("--config apps/web/dist/server/wrangler.json", production)
         # Only Terraform and the state server below it get the stored token.
         self.assertNotIn("secrets.CLOUDFLARE_API_TOKEN", preview)
         self.assertNotIn("secrets.CLOUDFLARE_API_TOKEN", production.split("  deploy:\n", 1)[1])

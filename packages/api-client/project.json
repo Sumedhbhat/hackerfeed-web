@@ -1,0 +1,10 @@
+{
+	"$schema": "../../node_modules/nx/schemas/project-schema.json",
+	"name": "api-client",
+	"projectType": "library",
+	"sourceRoot": "packages/api-client/src",
+	"targets": {
+		"typecheck": {},
+		"test": {}
+	}
+}

@@ -1,8 +1,8 @@
+import { AiRequestError } from "@hackerfeed/api-client/ai";
 import type { ChatMessage } from "@hackerfeed/contracts/ai";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-	AiRequestError,
 	disconnectAiProvider,
 	fetchAiModels,
 	fetchAiProviders,
