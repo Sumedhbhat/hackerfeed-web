@@ -1,4 +1,4 @@
-import type { AppRouter } from "@hackerfeed/backend/api-types";
+import type { AppRouter } from "@hackerfeed/api-client/trpc";
 import {
 	type FavoriteStoryInput,
 	favoriteStoryIdInputSchema,

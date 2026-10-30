@@ -1,25 +1,15 @@
-import type { AppRouter } from "@hackerfeed/backend/api-types";
 import {
-	createTRPCClient,
-	httpBatchLink,
-	TRPCClientError,
-	type TRPCLink,
-} from "@trpc/client";
+	type AppRouter,
+	createTrpcClient as createApiTrpcClient,
+} from "@hackerfeed/api-client/trpc";
+import { TRPCClientError, type TRPCLink } from "@trpc/client";
 import { observable } from "@trpc/server/observable";
-import superjson from "superjson";
 import { getApiHeaders } from "#/lib/auth/authkit";
 
 export function createTrpcClient() {
-	return createTRPCClient<AppRouter>({
-		links: [
-			import.meta.env.VITE_DEMO_DATA === "true"
-				? demoLink
-				: httpBatchLink({
-						url: "/api/trpc",
-						transformer: superjson,
-						headers: getApiHeaders,
-					}),
-		],
+	return createApiTrpcClient({
+		auth: { getHeaders: getApiHeaders },
+		link: import.meta.env.VITE_DEMO_DATA === "true" ? demoLink : undefined,
 	});
 }
 

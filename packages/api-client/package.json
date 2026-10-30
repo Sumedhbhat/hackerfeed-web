@@ -1,0 +1,24 @@
+{
+	"name": "@hackerfeed/api-client",
+	"private": true,
+	"type": "module",
+	"exports": {
+		"./ai": "./src/ai.ts",
+		"./auth": "./src/auth.ts",
+		"./feature-flags": "./src/feature-flags.ts",
+		"./trpc": "./src/trpc.ts"
+	},
+	"dependencies": {
+		"@hackerfeed/contracts": "workspace:*",
+		"@hackerfeed/runtime": "workspace:*",
+		"@sentry/core": "^11.7.0",
+		"@trpc/client": "^11.19.0",
+		"superjson": "^2.2.2",
+		"zod": "^4.6.5"
+	},
+	"devDependencies": {
+		"@hackerfeed/backend": "workspace:*",
+		"happy-dom": "^21.0.4",
+		"vitest": "^5.0.4"
+	}
+}

@@ -1,0 +1,19 @@
+{
+	"$schema": "../../node_modules/nx/schemas/project-schema.json",
+	"name": "api-client",
+	"projectType": "library",
+	"sourceRoot": "packages/api-client/src",
+	"tags": [
+		"type:api-client",
+		"platform:browser",
+		"scope:shared"
+	],
+	"metadata": {
+		"owner": "@Sumedhbhat"
+	},
+	"targets": {
+		"lint": {},
+		"typecheck": {},
+		"test": {}
+	}
+}

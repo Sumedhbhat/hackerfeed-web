@@ -1,22 +1,20 @@
 import { installSentryTestClient } from "@hackerfeed/runtime/testing/sentry-test-client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-const authMock = vi.hoisted(() => ({
-	getApiHeaders: vi.fn(async () => ({ Authorization: "Bearer token-1" })),
+import { AiRequestError, createAiClient, getAiConnectUrl } from "./ai";
+
+const authMock = {
+	getHeaders: vi.fn(async () => ({ Authorization: "Bearer token-1" })),
 	signIn: vi.fn(),
-}));
+};
 
-vi.mock("#/lib/auth/authkit", () => authMock);
-
-import {
-	AiRequestError,
+const {
 	connectAiProvider,
 	disconnectAiProvider,
 	fetchAiModels,
 	fetchAiProviders,
-	getAiConnectUrl,
 	streamStoryChat,
-} from "./client";
+} = createAiClient(authMock);
 
 function ndjsonResponse(chunks: string[], status = 200) {
 	const encoder = new TextEncoder();
