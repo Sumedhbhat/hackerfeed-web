@@ -1,0 +1,14 @@
+{
+	"$schema": "../../../node_modules/nx/schemas/project-schema.json",
+	"name": "tf-ci-token",
+	"projectType": "library",
+	"sourceRoot": "infra/modules/ci-token",
+	"targets": {
+		"fmt": {
+			"command": "terraform fmt -check -diff",
+			"options": {
+				"cwd": "infra/modules/ci-token"
+			}
+		}
+	}
+}

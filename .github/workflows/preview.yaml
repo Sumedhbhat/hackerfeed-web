@@ -34,16 +34,16 @@ jobs:
 
       # PR jobs hold no stored Cloudflare token: Terraform mints this one.
       - name: Read preview token
-        run: exec infra/cloudflare-token.sh prod preview_token
+        run: exec tools/infra-ci/cloudflare-token.sh prod preview_token
 
       - name: Plan production infrastructure
         run: |
-          source infra/ci-signals.sh
-          run infra/terraform.sh prod plan -input=false -lock=false -out=tfplan
+          source tools/infra-ci/ci-signals.sh
+          run tools/infra-ci/terraform.sh prod plan -input=false -lock=false -out=tfplan
           {
             echo '### Production infrastructure plan'
             echo '```'
-            run infra/terraform.sh prod show -no-color tfplan
+            run tools/infra-ci/terraform.sh prod show -no-color tfplan
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -99,7 +99,7 @@ jobs:
           fi
 
       - name: Read preview token
-        run: exec infra/cloudflare-token.sh prod preview_token
+        run: exec tools/infra-ci/cloudflare-token.sh prod preview_token
 
       - name: Upload preview version
         run: |

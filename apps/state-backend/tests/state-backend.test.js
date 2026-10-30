@@ -4,12 +4,12 @@ import { cp, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { exportJWK, generateKeyPair, SignJWT } from "jose";
-import handler from "../state-backend/src/index.ts";
+import handler from "../src/index.ts";
 
 const sqlite = new Database(":memory:");
 sqlite.exec(
 	await Bun.file(
-		new URL("../state-backend/migrations/0001_states.sql", import.meta.url),
+		new URL("../migrations/0001_states.sql", import.meta.url),
 	).text(),
 );
 const DB = {
@@ -268,13 +268,18 @@ resource "terraform_data" "local" { input = "local-only" }
 		sqlite.exec("DELETE FROM states");
 		const directory = await mkdtemp(join(tmpdir(), "hackerfeed-proxy-"));
 		try {
-			const infra = join(directory, "infra");
-			await mkdir(join(infra, "terraform"), { recursive: true });
+			const infra = join(directory, "tools/infra-ci");
+			const stage = join(directory, "infra/cloudflare-prod");
+			await mkdir(infra, { recursive: true });
+			await mkdir(stage, { recursive: true });
 			for (const file of ["state_proxy.py", "recovery_state.py", "commands.py"]) {
-				await cp(new URL("../" + file, import.meta.url), join(infra, file));
+				await cp(
+					new URL(`../../../tools/infra-ci/${file}`, import.meta.url),
+					join(infra, file),
+				);
 			}
 			await writeFile(
-				join(infra, "terraform/main.tf"),
+				join(stage, "main.tf"),
 				`terraform {
  backend "http" {
   lock_method = "POST"
@@ -341,7 +346,7 @@ sys.exit(runner.main())
 			expect(state.lock_id).toBeNull();
 			expect(JSON.parse(state.state).resources).toHaveLength(1);
 			expect(
-				await Bun.file(join(infra, "terraform/errored.tfstate")).exists(),
+				await Bun.file(join(stage, "errored.tfstate")).exists(),
 			).toBe(false);
 		} finally {
 			await rm(directory, { recursive: true, force: true });

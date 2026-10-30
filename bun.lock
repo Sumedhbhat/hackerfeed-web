@@ -4,15 +4,21 @@
   "workspaces": {
     "": {
       "name": "hackerfeed",
-      "dependencies": {
-        "jose": "^6.2.12",
-      },
       "devDependencies": {
         "@biomejs/biome": "2.5.15",
         "@types/node": "^26.6.3",
         "nx": "23.3.0",
         "typescript": "^7.0.2",
         "vitest": "^5.0.4",
+        "wrangler": "^4.151.0",
+      },
+    },
+    "apps/state-backend": {
+      "name": "@hackerfeed/state-backend",
+      "dependencies": {
+        "jose": "^6.2.12",
+      },
+      "devDependencies": {
         "wrangler": "^4.151.0",
       },
     },
@@ -327,6 +333,8 @@
     "@hackerfeed/hacker-news": ["@hackerfeed/hacker-news@workspace:packages/hacker-news"],
 
     "@hackerfeed/runtime": ["@hackerfeed/runtime@workspace:packages/runtime"],
+
+    "@hackerfeed/state-backend": ["@hackerfeed/state-backend@workspace:apps/state-backend"],
 
     "@hackerfeed/ui": ["@hackerfeed/ui@workspace:packages/ui"],
 

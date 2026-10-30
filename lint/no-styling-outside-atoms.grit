@@ -10,7 +10,7 @@ or {
 } where {
 	register_diagnostic(
 		span = $styling,
-		message = "Only atoms and molecules style elements. Organisms, pages, routes and everything else describe *what* is on screen: use a component from #/components/atoms or #/components/molecules (add one, or a variant, if none fits). Do not work around this with spreads, `class`, global CSS or biome-ignore.",
+		message = "Only atoms and molecules style elements. Organisms, pages, routes and everything else describe *what* is on screen: use a component from @hackerfeed/ui/atoms or @hackerfeed/ui/molecules (add one, or a variant, if none fits). Do not work around this with spreads, `class`, global CSS or biome-ignore.",
 		severity = "error"
 	)
 }

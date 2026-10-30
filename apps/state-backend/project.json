@@ -1,0 +1,19 @@
+{
+	"$schema": "../../node_modules/nx/schemas/project-schema.json",
+	"name": "state-backend",
+	"projectType": "application",
+	"sourceRoot": "apps/state-backend/src",
+	"targets": {
+		"typecheck": {},
+		"test": {
+			"command": "bun test apps/state-backend/tests",
+			"options": {
+				"cwd": "."
+			},
+			"cache": false
+		}
+	},
+	"implicitDependencies": [
+		"infra-ci"
+	]
+}

@@ -1,0 +1,24 @@
+{
+	"$schema": "../../node_modules/nx/schemas/project-schema.json",
+	"name": "infra-prod",
+	"projectType": "application",
+	"sourceRoot": "infra/cloudflare-prod",
+	"implicitDependencies": [
+		"infra-ci",
+		"tf-ci-token"
+	],
+	"targets": {
+		"fmt": {
+			"command": "terraform fmt -check -diff",
+			"options": {
+				"cwd": "infra/cloudflare-prod"
+			}
+		},
+		"validate": {
+			"command": "terraform init -backend=false -input=false -lockfile=readonly && terraform validate",
+			"options": {
+				"cwd": "infra/cloudflare-prod"
+			}
+		}
+	}
+}

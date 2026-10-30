@@ -18,12 +18,12 @@ import unittest
 from unittest.mock import patch
 from urllib.parse import parse_qs, urlsplit
 
-ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "infra"))
+ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT / "tools/infra-ci"))
 
 
 def load(name, filename):
-    spec = importlib.util.spec_from_file_location(name, ROOT / "infra" / filename)
+    spec = importlib.util.spec_from_file_location(name, ROOT / "tools/infra-ci" / filename)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
@@ -287,10 +287,12 @@ class ProxyTests(unittest.TestCase):
         for interrupted in (False, True):
             with self.subTest(interrupted=interrupted), tempfile.TemporaryDirectory() as temporary:
                 directory = Path(temporary)
-                infra = directory / "infra"
-                (infra / "terraform").mkdir(parents=True)
+                infra = directory / "tools/infra-ci"
+                infra.mkdir(parents=True)
+                stage = directory / "infra/cloudflare-prod"
+                stage.mkdir(parents=True)
                 for filename in ("terraform.sh", "state_proxy.py", "recovery_state.py", "commands.py"):
-                    shutil.copy(ROOT / "infra" / filename, infra)
+                    shutil.copy(ROOT / "tools/infra-ci" / filename, infra)
                 binary = directory / "bin"
                 binary.mkdir()
                 fake = binary / "terraform"
@@ -318,7 +320,7 @@ else: fail()
                 try:
                     if interrupted:
                         deadline = time.monotonic() + 5
-                        while not (infra / "terraform/ready").exists():
+                        while not (stage / "ready").exists():
                             self.assertIsNone(child.poll())
                             self.assertLess(time.monotonic(), deadline)
                             time.sleep(.02)
@@ -332,7 +334,7 @@ else: fail()
                         restored = directory / "restored.tfstate"
                         recovery.crypt(encrypted, restored, decrypt=True)
                     self.assertEqual(restored.read_text(), "confidential-recovery-state")
-                    port = int((infra / "terraform/address").read_text().split(":")[2].split("/")[0])
+                    port = int((stage / "address").read_text().split(":")[2].split("/")[0])
                     with socket.socket() as connection:
                         self.assertNotEqual(connection.connect_ex(("127.0.0.1", port)), 0)
                 finally:
@@ -414,8 +416,8 @@ class WorkflowTests(unittest.TestCase):
         # Only Terraform and the state server below it get the stored token.
         self.assertNotIn("secrets.CLOUDFLARE_API_TOKEN", preview)
         self.assertNotIn("secrets.CLOUDFLARE_API_TOKEN", production.split("  deploy:\n", 1)[1])
-        self.assertIn("infra/cloudflare-token.sh deploy deploy_token", production)
-        self.assertIn("infra/cloudflare-token.sh prod preview_token", preview)
+        self.assertIn("tools/infra-ci/cloudflare-token.sh deploy deploy_token", production)
+        self.assertIn("tools/infra-ci/cloudflare-token.sh prod preview_token", preview)
         self.assertNotIn(" deploy ", preview)
         for text in (production, preview):
             self.assertIn("terraform-recovery/**/*.enc", text)

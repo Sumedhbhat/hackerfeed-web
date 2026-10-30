@@ -4,7 +4,7 @@ Dummy data that previews show instead of anything real. Nothing here comes
 from production, Hacker News or Hugging Face.
 
 - `database/<table>.ts`: every row of every D1 table, typed from
-  `src/server/database/schema.ts`. `database/index.ts` lists them all.
+  `packages/backend/src/database/schema.ts`. `database/index.ts` lists them all.
 - `hacker-news.ts`: stories, comments and feed orderings, in the Hacker News
   API's response shape. Preview builds (`VITE_DEMO_DATA=true`) answer Hacker
   News requests from it (`src/lib/hacker-news/demo-api.ts`).

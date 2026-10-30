@@ -1,5 +1,5 @@
 /**
- * Terraform state server for infra/terraform, speaking Terraform's `http`
+ * Terraform state server for the roots in infra/, speaking Terraform's `http`
  * backend protocol. State and locks live in D1.
  *
  * Callers sign in with a GitHub Actions OIDC token as the basic-auth password.

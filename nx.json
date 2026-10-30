@@ -1,16 +1,68 @@
 {
 	"$schema": "./node_modules/nx/schemas/nx-schema.json",
 	"defaultBase": "master",
+	"namedInputs": {
+		"workspacePolicy": [
+			"{workspaceRoot}/package.json",
+			"{workspaceRoot}/bun.lock",
+			"{workspaceRoot}/bunfig.toml",
+			"{workspaceRoot}/nx.json",
+			"{workspaceRoot}/tsconfig.base.json",
+			"{workspaceRoot}/biome.json",
+			"{workspaceRoot}/lint/**/*",
+			"{workspaceRoot}/.github/workflows/**/*"
+		],
+		"default": [
+			"{projectRoot}/**/*",
+			"workspacePolicy"
+		]
+	},
 	"targetDefaults": {
 		"typecheck": {
 			"command": "tsc --noEmit -p {projectRoot}",
-			"cache": false
+			"inputs": [
+				"default",
+				"^default"
+			],
+			"cache": true
 		},
 		"test": {
 			"command": "vitest run",
-			"options": { "cwd": "{projectRoot}" },
+			"options": {
+				"cwd": "{projectRoot}"
+			},
+			"inputs": [
+				"default",
+				"^default",
+				{
+					"runtime": "node --version"
+				},
+				{
+					"env": "VITE_DEMO_DATA"
+				}
+			],
+			"cache": true
+		},
+		"build": {
+			"inputs": [
+				"default",
+				"^default"
+			],
 			"cache": false
 		},
-		"build": { "cache": false }
+		"fmt": {
+			"inputs": [
+				"default",
+				"^default"
+			],
+			"cache": false
+		},
+		"validate": {
+			"inputs": [
+				"default",
+				"^default"
+			],
+			"cache": false
+		}
 	}
 }
