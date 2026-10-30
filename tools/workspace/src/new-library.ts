@@ -2,6 +2,7 @@
 // Nx targets, tags and an owner. CI picks it up through the project graph.
 //
 //   bun run new:library <name> --type <type> --platform <platform> [--owner @login]
+import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -87,6 +88,17 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
 	const directory = join(root, "packages", name);
 	if (existsSync(directory)) {
 		console.error(`packages/${name} already exists`);
+		process.exit(1);
+	}
+	const projects: string[] = JSON.parse(
+		execFileSync("bunx", ["nx", "show", "projects", "--json"], {
+			cwd: root,
+			encoding: "utf8",
+			env: { ...process.env, NX_DAEMON: "false" },
+		}),
+	);
+	if (projects.includes(name)) {
+		console.error(`An Nx project named ${name} already exists`);
 		process.exit(1);
 	}
 	const files = libraryFiles(name, {
