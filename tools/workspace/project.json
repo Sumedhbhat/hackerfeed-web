@@ -5,6 +5,8 @@
 	"sourceRoot": "tools/workspace/src",
 	"targets": {
 		"typecheck": {},
-		"test": {}
+		"test": {
+			"cache": false
+		}
 	}
 }
