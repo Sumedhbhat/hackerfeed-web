@@ -10,7 +10,6 @@
 			"{workspaceRoot}/tsconfig.base.json",
 			"{workspaceRoot}/biome.json",
 			"{workspaceRoot}/lint/**/*",
-			"{workspaceRoot}/tools/workspace/**/*",
 			"{workspaceRoot}/.github/workflows/**/*"
 		],
 		"default": [
@@ -23,10 +22,7 @@
 			"command": "tsc --noEmit -p {projectRoot}",
 			"inputs": [
 				"default",
-				"^default",
-				{
-					"runtime": "node --version"
-				}
+				"^default"
 			],
 			"cache": true
 		},
@@ -66,15 +62,6 @@
 				"default",
 				"^default"
 			],
-			"cache": false
-		},
-		"plan": {
-			"cache": false
-		},
-		"apply": {
-			"cache": false
-		},
-		"deploy": {
 			"cache": false
 		}
 	}

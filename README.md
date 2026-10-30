@@ -46,28 +46,21 @@ its own checks.
 | `infra-deploy` | `infra/deploy-access` | Terraform root for the production-only `deploy` state |
 | `tf-ci-token` | `infra/modules/ci-token` | The Terraform module that mints CI tokens |
 | `infra-ci` | `tools/infra-ci` | The OIDC state wrapper, cancellation and recovery tooling |
-| `workspace` | `tools/workspace` | Boundary checks, affected selection and the library generator |
+| `workspace` | `tools/workspace` | Tests for the Biome layer rules |
 
 Packages import each other only through their `package.json` `exports`, for
 example `@hackerfeed/ui/atoms/Button`. Inside `apps/web`, `#/*` still maps to
-`apps/web/src/*`. Every project has `type:*`, `platform:*` and `scope:*` tags
-and an owner in `project.json`. `tools/workspace/src/policy.ts` says which
-types and platforms may import which, and `bun run check:workspace` enforces
-it (see [Project boundaries](#project-boundaries)).
+`apps/web/src/*`. Installs are isolated (`bunfig.toml`), so a package can
+import only what its own `package.json` declares (see
+[Project boundaries](#project-boundaries)).
 
 Run one project's targets with Nx, for example `bunx nx test backend` or
-`bunx nx run-many -t lint,typecheck,test -p ui,web`. `bunx nx graph` draws the
+`bunx nx run-many -t typecheck,test -p ui,web`. `bunx nx graph` draws the
 project graph.
 
-To add a shared library:
-
-```bash
-bun run new:library <name> --type <type> --platform <platform>
-bun install
-```
-
-It gets exports, tags, an owner and `lint`, `typecheck` and `test` targets, so
-CI checks it without workflow changes.
+To add a shared library, copy a small one such as `packages/hacker-news`,
+rename it in `package.json` and `project.json`, and run `bun install`. Nx finds
+its `typecheck` and `test` targets, so CI checks it without workflow changes.
 
 ## Scripts
 
@@ -80,7 +73,6 @@ bun run typecheck        # Every project's typecheck, through Nx
 bun run lint             # Run Biome lint
 bun run format           # Run Biome format
 bun run check            # Run Biome lint and format checks
-bun run check:workspace  # Check project tags, owners and import boundaries
 bun run security:audit   # Audit dependencies at high severity and above
 ```
 
@@ -375,20 +367,21 @@ move to an independent API service.
   `packages/api-client`.
 - `api-client` is the only project allowed to import `backend`, and only the
   types in `@hackerfeed/backend/api-types` (tRPC infers its client from the
-  router's type). The import must be `import type`, so it is erased from the
-  bundle. CI also fails the build if a backend table name appears in
-  `apps/web/dist/client`.
+  router's type). `api-types` exports only types, so `verbatimModuleSyntax`
+  makes every import of it `import type`, and a Biome rule stops `api-client`
+  importing any other backend path. In `apps/web`, TanStack Start's import
+  protection (`apps/web/vite.config.ts`) fails the client build on any other
+  backend import.
 - Shared schemas live in `packages/contracts`, never next to the Drizzle
   tables. The backend maps rows to these DTOs.
 - `packages/ui` is presentational: no app code, workspace packages, API clients
   or auth.
 
-`bun run check:workspace` (`tools/workspace/src/check-workspace.ts`) enforces
-these rules, plus file ownership, declared dependencies, public exports,
-Terraform module edges and cycles. The rules are data in
-`tools/workspace/src/policy.ts`. Nx's ESLint boundary rule isn't used:
-typescript-eslint needs the TypeScript JS API, and TypeScript 7 doesn't ship
-one.
+Which package may import which is the `dependencies` in each `package.json`:
+installs are isolated, so an undeclared import fails `tsc`. `tsc` also rejects
+subpaths missing from a package's `exports`. Nx's ESLint boundary rule isn't
+used: typescript-eslint needs the TypeScript JS API, and TypeScript 7 doesn't
+ship one.
 
 tRPC is the current application boundary. Route handlers adapt HTTP/tRPC
 requests to backend services; durable domain behavior belongs in services, and
@@ -400,15 +393,14 @@ refresh is intentionally deferred.
 ### Affected checks
 
 PR builds still run every check on every project. They also record which
-projects Nx would select for the change (`tools/workspace/src/affected.ts`,
-"Affected projects" in the job summary), so the selection can be compared
-with the full run before CI switches to it. Root manifests, the lockfile,
-workflows, Biome and lint rules, and `tools/workspace` count as inputs to
-every project, so a change there selects everything. A missing base commit
-also selects everything. `tools/workspace/src/affected.test.ts` pins the
-expected selection for each kind of change.
+projects `nx show projects --affected` would select for the change
+("Record affected projects" in the job summary), so the selection can be
+compared with the full run before CI switches to it. Root manifests, the
+lockfile, workflows, and Biome and lint rules count as inputs to every
+project, so a change there selects everything.
 
-Nx caches `lint`, `typecheck` and Vitest `test` results locally. Builds,
+Nx caches `typecheck` and Vitest `test` results locally. Biome lints the whole
+repo from the root. Builds,
 Terraform, migrations and deploys are never cached. There is no remote cache.
 
 ## Observability

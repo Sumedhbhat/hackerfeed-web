@@ -26,10 +26,8 @@ bun run lint         # Biome lint
 bun run format       # Biome format
 bun run check        # Biome check (lint + format together)
 bun run typecheck    # tsc --noEmit for every project (CI fails on any type error)
-bun run check:workspace  # Project tags, owners, import boundaries, cycles
 
 # Workspace
-bun run new:library <name> --type <type> --platform <platform>   # New package
 bunx nx graph        # Project graph
 ```
 
@@ -37,9 +35,9 @@ bunx nx graph        # Project graph
 
 **Framework stack:** TanStack Start (SSR React framework) + TanStack Router (file-based routing) + TanStack Query (data fetching) + TanStack Store (client state). Deployed to Cloudflare Workers via `@cloudflare/vite-plugin`.
 
-**Workspace:** an Nx workspace of Bun workspace packages, deployed as one Worker. `apps/web` is the TanStack Start host; shared code lives in `packages/` (`ui`, `contracts`, `hacker-news`, `runtime`, `backend`, `api-client`); infrastructure in `apps/state-backend`, `infra/` and `tools/infra-ci`. README > Workspace lists every project. Packages import each other only through their `package.json` `exports` (`@hackerfeed/ui/atoms/Button`); never reach into another project with a relative path. Add a package with `bun run new:library`, not by hand.
+**Workspace:** an Nx workspace of Bun workspace packages, deployed as one Worker. `apps/web` is the TanStack Start host; shared code lives in `packages/` (`ui`, `contracts`, `hacker-news`, `runtime`, `backend`, `api-client`); infrastructure in `apps/state-backend`, `infra/` and `tools/infra-ci`. README > Workspace lists every project. Packages import each other only through their `package.json` `exports` (`@hackerfeed/ui/atoms/Button`); never reach into another project with a relative path. Add a package by copying a small one (`packages/hacker-news`) and renaming it.
 
-**Boundaries:** `tools/workspace/src/policy.ts` says which project types and platforms may import which, and which npm packages each may use; `bun run check:workspace` enforces it in CI. The backend never reaches the browser: only `api-client` imports it, and only `import type` from `@hackerfeed/backend/api-types`. Packages don't read env; `apps/web/src/backend.ts` passes config into `createBackend`. When the check blocks you, change the code, not the policy, unless the user asks for a new edge.
+**Boundaries:** installs are isolated (`bunfig.toml`), so a package can import only what its own `package.json` declares; those `dependencies` are the allowed edges, and adding one is a design change to raise with the user. The backend never reaches the browser: browser code uses only `import type` from `@hackerfeed/backend/api-types` (a Biome rule holds `api-client` to it), and TanStack Start's import protection in `apps/web/vite.config.ts` fails the client build on any other backend import. Packages don't read env; `apps/web/src/backend.ts` passes config into `createBackend`. When a check blocks you, change the code, not the rule.
 
 **Path alias:** inside `apps/web`, `#/*` maps to `apps/web/src/*` (its `package.json` `imports` and `tsconfig.json`). Paths below are relative to `apps/web` unless they start with `packages/`, `infra/` or `tools/`.
 

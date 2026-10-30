@@ -3,15 +3,6 @@
 	"name": "infra-prod",
 	"projectType": "application",
 	"sourceRoot": "infra/cloudflare-prod",
-	"tags": [
-		"type:infra",
-		"platform:ci",
-		"scope:hackerfeed"
-	],
-	"metadata": {
-		"owner": "@Sumedhbhat",
-		"stateName": "prod"
-	},
 	"implicitDependencies": [
 		"infra-ci",
 		"tf-ci-token"
@@ -28,14 +19,6 @@
 			"options": {
 				"cwd": "infra/cloudflare-prod"
 			}
-		},
-		"plan": {
-			"command": "tools/infra-ci/terraform.sh prod plan -input=false",
-			"cache": false
-		},
-		"apply": {
-			"command": "tools/infra-ci/terraform.sh prod apply -input=false",
-			"cache": false
 		}
 	}
 }

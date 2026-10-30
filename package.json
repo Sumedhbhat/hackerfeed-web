@@ -20,19 +20,13 @@
     "security:audit": "bun audit --audit-level=high",
     "test": "nx run-many -t test",
     "typecheck": "nx run-many -t typecheck",
-    "check:workspace": "bun tools/workspace/src/check-workspace.ts",
-    "new:library": "bun tools/workspace/src/new-library.ts",
     "format": "biome format",
     "lint": "biome lint",
     "check": "biome check"
   },
-  "dependencies": {
-    "jose": "^6.2.12"
-  },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
     "@types/node": "^26.6.3",
-    "happy-dom": "^21.0.4",
     "nx": "23.3.0",
     "typescript": "^7.0.2",
     "vitest": "^5.0.4",

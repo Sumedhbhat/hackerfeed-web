@@ -3,18 +3,6 @@
 	"name": "tf-ci-token",
 	"projectType": "library",
 	"sourceRoot": "infra/modules/ci-token",
-	"tags": [
-		"type:infra",
-		"platform:ci",
-		"scope:shared"
-	],
-	"metadata": {
-		"owner": "@Sumedhbhat",
-		"validatedBy": [
-			"infra-prod",
-			"infra-deploy"
-		]
-	},
 	"targets": {
 		"fmt": {
 			"command": "terraform fmt -check -diff",

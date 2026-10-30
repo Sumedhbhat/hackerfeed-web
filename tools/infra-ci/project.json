@@ -3,14 +3,6 @@
 	"name": "infra-ci",
 	"projectType": "library",
 	"sourceRoot": "tools/infra-ci",
-	"tags": [
-		"type:tooling",
-		"platform:ci",
-		"scope:hackerfeed"
-	],
-	"metadata": {
-		"owner": "@Sumedhbhat"
-	},
 	"targets": {
 		"test": {
 			"command": "python3 -m unittest discover -s tools/infra-ci/tests -p 'test_*.py'",

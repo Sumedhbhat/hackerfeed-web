@@ -3,15 +3,6 @@
 	"name": "infra-deploy",
 	"projectType": "application",
 	"sourceRoot": "infra/deploy-access",
-	"tags": [
-		"type:infra",
-		"platform:ci",
-		"scope:hackerfeed"
-	],
-	"metadata": {
-		"owner": "@Sumedhbhat",
-		"stateName": "deploy"
-	},
 	"implicitDependencies": [
 		"infra-ci",
 		"tf-ci-token"
@@ -28,14 +19,6 @@
 			"options": {
 				"cwd": "infra/deploy-access"
 			}
-		},
-		"plan": {
-			"command": "tools/infra-ci/terraform.sh deploy plan -input=false",
-			"cache": false
-		},
-		"apply": {
-			"command": "tools/infra-ci/terraform.sh deploy apply -input=false",
-			"cache": false
 		}
 	}
 }

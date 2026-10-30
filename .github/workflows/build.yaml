@@ -30,17 +30,13 @@ jobs:
       # Shadow mode: records what affected CI would select (base: master,
       # head: the merge result). Every check below still runs on every project.
       - name: Record affected projects
-        run: bun tools/workspace/src/affected.ts --base "$(git rev-parse -q --verify 'HEAD^1' || true)" --head HEAD
+        run: bunx nx show projects --affected --base=HEAD^1 --head=HEAD | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Audit dependencies
         run: bun run security:audit
 
       - name: Run lint
         run: bun run check
-
-      # Project tags, owners, file ownership, import boundaries and cycles.
-      - name: Check workspace structure
-        run: bun run check:workspace
 
       - name: Typecheck
         run: bun run typecheck
