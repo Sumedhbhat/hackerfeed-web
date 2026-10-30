@@ -9,6 +9,11 @@ import viteReact from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
 const demo = process.env.VITE_DEMO_DATA === "true";
+// The browser may import only the backend's types; the demo build also bundles
+// its schema for the in-memory database.
+const backendInBrowser = demo
+	? /^@hackerfeed\/backend(?!\/(api-types|database\/schema)$)/
+	: /^@hackerfeed\/backend(?!\/api-types$)/;
 const sentryAuthToken = process.env.SENTRY_AUTH_TOKEN;
 const { D1_DATABASE_ID, D1_DATABASE_NAME } = process.env;
 if (!D1_DATABASE_ID !== !D1_DATABASE_NAME) {
@@ -48,6 +53,9 @@ const config = defineConfig({
 				: {}),
 			client: {
 				entry: "client-entry.tsx",
+			},
+			importProtection: {
+				client: { specifiers: [backendInBrowser] },
 			},
 		}),
 		viteReact(),
