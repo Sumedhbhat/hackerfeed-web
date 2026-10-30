@@ -1,0 +1,25 @@
+{
+	"$schema": "../../node_modules/nx/schemas/project-schema.json",
+	"name": "web",
+	"projectType": "application",
+	"sourceRoot": "apps/web/src",
+	"targets": {
+		"lint": { "command": "biome check apps/web" },
+		"typecheck": {
+			"command": "tsc --noEmit",
+			"options": { "cwd": "{projectRoot}" }
+		},
+		"test": {
+			"command": "vitest run",
+			"options": { "cwd": "{projectRoot}" }
+		},
+		"build": {
+			"command": "vite build",
+			"options": { "cwd": "{projectRoot}" }
+		},
+		"build-demo": {
+			"command": "vite build",
+			"options": { "cwd": "{projectRoot}", "env": { "VITE_DEMO_DATA": "true" } }
+		}
+	}
+}

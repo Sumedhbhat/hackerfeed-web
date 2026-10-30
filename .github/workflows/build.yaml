@@ -16,6 +16,10 @@ jobs:
         with:
           fetch-depth: 2
 
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.3.0
@@ -56,7 +60,7 @@ jobs:
 
       - name: Verify build has no demo data
         run: |
-          if grep -rlF hackerfeed-demo-data dist; then
+          if grep -rlF hackerfeed-demo-data apps/web/dist; then
             echo "Production build includes fixtures; VITE_DEMO_DATA must not be set" >&2
             exit 1
           fi

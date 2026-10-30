@@ -12,7 +12,7 @@ fi
 url="https://${host}:${HTTPS_PORT}"
 
 bun run build:demo
-./node_modules/.bin/wrangler dev --config wrangler.preview.jsonc --local --ip 127.0.0.1 --port "$PORT" &
+bunx wrangler dev --config wrangler.preview.jsonc --local --ip 127.0.0.1 --port "$PORT" &
 worker_pid=$!
 
 # Expose the port to the tailnet only; never use `tailscale funnel` here.
