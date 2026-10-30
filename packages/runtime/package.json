@@ -1,0 +1,19 @@
+{
+	"name": "@hackerfeed/runtime",
+	"private": true,
+	"type": "module",
+	"exports": {
+		"./http": "./src/http.ts",
+		"./logger": "./src/logger.ts",
+		"./sentry-data-collection": "./src/sentry-data-collection.ts",
+		"./trace-headers": "./src/trace-headers.ts",
+		"./testing/sentry-test-client": "./src/testing/sentry-test-client.ts"
+	},
+	"dependencies": {
+		"@sentry/core": "^11.7.0",
+		"ky": "^2.1.0"
+	},
+	"devDependencies": {
+		"vitest": "^5.0.4"
+	}
+}

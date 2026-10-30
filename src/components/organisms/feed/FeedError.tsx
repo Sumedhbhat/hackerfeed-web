@@ -1,10 +1,10 @@
+import { getTraceId } from "@hackerfeed/runtime/logger";
 import { Button } from "#/components/atoms/Button";
 import { ExternalLink } from "#/components/atoms/Link";
 import { Row } from "#/components/atoms/Row";
 import { EmptyState } from "#/components/molecules/EmptyState";
 import { TraceIdNote } from "#/components/molecules/TraceIdNote";
 import type { feedTabs } from "#/components/organisms/feed/feedTabs";
-import { getTraceId } from "#/lib/logger";
 
 type FeedErrorProps = {
 	feed: (typeof feedTabs)[number];

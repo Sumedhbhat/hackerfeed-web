@@ -1,3 +1,5 @@
+import type { SavedPaper } from "@hackerfeed/contracts/paper-favorites";
+import type { PaperFeedPaper } from "@hackerfeed/contracts/papers";
 import {
 	act,
 	cleanup,
@@ -7,8 +9,6 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { usePaperFavorites } from "#/hooks/usePaperFavorites";
-import type { SavedPaper } from "#/lib/paper-favorites/schemas";
-import type { PaperFeedPaper } from "#/lib/papers/schemas";
 import { renderWithQueryClient as render } from "#/test/renderWithQueryClient";
 
 const authMock = vi.hoisted(() => ({ user: null as { id: string } | null }));

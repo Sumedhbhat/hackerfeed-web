@@ -1,6 +1,6 @@
 import "@tanstack/react-start/server-only";
 
-import type { AiProviderStatus } from "#/lib/ai/schemas";
+import type { AiProviderStatus } from "@hackerfeed/contracts/ai";
 import {
 	type AuthenticatedWorkosUser,
 	resolveCurrentWorkosUser,

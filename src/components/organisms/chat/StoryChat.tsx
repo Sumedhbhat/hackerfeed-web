@@ -1,3 +1,8 @@
+import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
+import {
+	buildChatGptStoryDiscussionUrl,
+	getStoryTitle,
+} from "@hackerfeed/hacker-news/utils";
 import {
 	Button,
 	ButtonLink,
@@ -9,11 +14,6 @@ import { StoryChatHeader } from "#/components/molecules/StoryChatHeader";
 import { ChatConversation } from "#/components/organisms/chat/ChatConversation";
 import { useAiProviders } from "#/hooks/useAiProviders";
 import { signIn } from "#/hooks/useAuthSession";
-import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
-import {
-	buildChatGptStoryDiscussionUrl,
-	getStoryTitle,
-} from "#/lib/hacker-news/utils";
 
 /** Story header plus the chat, or what the user needs to do before chatting. */
 export function StoryChat({ story }: { story: HackerNewsStoryRecord }) {

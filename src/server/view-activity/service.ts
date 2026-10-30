@@ -1,10 +1,10 @@
 import "@tanstack/react-start/server-only";
 
-import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
 import type {
 	PaperViewAction,
 	StoryViewAction,
-} from "#/lib/view-activity/schemas";
+} from "@hackerfeed/contracts/view-activity";
+import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
 import {
 	type AuthenticatedWorkosUser,
 	resolveCurrentWorkosUser,

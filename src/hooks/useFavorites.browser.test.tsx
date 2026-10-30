@@ -1,3 +1,4 @@
+import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
 import {
 	cleanup,
 	fireEvent,
@@ -8,7 +9,6 @@ import {
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useFavorites } from "#/hooks/useFavorites";
 import { clearAllFavorites, toggleFavorite } from "#/lib/favorites-store";
-import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
 
 const authMock = vi.hoisted(() => ({
 	isLoading: false,

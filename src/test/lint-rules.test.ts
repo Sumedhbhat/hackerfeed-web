@@ -13,6 +13,7 @@ import { dirname, join, relative } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 const root = join(dirname(new URL(import.meta.url).pathname), "../..");
+const app = root;
 const biome = join(root, "node_modules/.bin/biome");
 
 const STYLING = "plugin";
@@ -114,7 +115,7 @@ describe("suppressions", () => {
 	}
 
 	it("never silences the component layer rules", () => {
-		const offenders = [...sourceFiles(join(root, "src"))]
+		const offenders = [...sourceFiles(join(app, "src"))]
 			.map((path) => relative(root, path))
 			.filter((path) =>
 				layerRules.test(readFileSync(join(root, path), "utf8")),

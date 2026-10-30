@@ -1,7 +1,7 @@
+import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
 import { useSuspenseQueries, useSuspenseQuery } from "@tanstack/react-query";
 import {
 	commentQueryOptions,
-	type HackerNewsStoryRecord,
 	storyQueryOptions,
 } from "#/lib/hacker-news/queries";
 

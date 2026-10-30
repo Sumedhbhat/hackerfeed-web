@@ -8,7 +8,7 @@ const loggerMock = vi.hoisted(() => ({
 	logger: { error: vi.fn(() => "0123456789abcdef0123456789abcdef") },
 }));
 
-vi.mock("#/lib/logger", () => loggerMock);
+vi.mock("@hackerfeed/runtime/logger", () => loggerMock);
 
 import { AiRequestError } from "#/lib/ai/client";
 import {

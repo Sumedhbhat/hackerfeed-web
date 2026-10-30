@@ -1,6 +1,6 @@
 import "@tanstack/react-start/server-only";
 
-import type { AiModel, ChatMessage } from "#/lib/ai/schemas";
+import type { AiModel, ChatMessage } from "@hackerfeed/contracts/ai";
 
 /** A user's OAuth client registration with a provider. */
 export type AiProviderRegistration = {

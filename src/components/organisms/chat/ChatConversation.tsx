@@ -1,6 +1,6 @@
+import type { AiProviderStatus } from "@hackerfeed/contracts/ai";
 import { useState } from "react";
 import { ProviderConversation } from "#/components/organisms/chat/ProviderConversation";
-import type { AiProviderStatus } from "#/lib/ai/schemas";
 
 /** Picks one of the user's connected providers; switching starts a new chat. */
 export function ChatConversation({

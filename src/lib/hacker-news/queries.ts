@@ -1,6 +1,10 @@
+import type {
+	HackerNewsCommentRecord,
+	HackerNewsStoryRecord,
+} from "@hackerfeed/hacker-news/records";
+import { http } from "@hackerfeed/runtime/http";
+import { logger } from "@hackerfeed/runtime/logger";
 import { queryOptions } from "@tanstack/react-query";
-import { http } from "#/lib/http/client";
-import { logger } from "#/lib/logger";
 
 const HACKER_NEWS_API_BASE_URL = "https://hacker-news.firebaseio.com/v0";
 const DEFAULT_FEED_STORY_LIMIT = 12;
@@ -12,31 +16,6 @@ export enum HackerNewsFeedKey {
 	New = "new",
 	Best = "best",
 }
-
-export type HackerNewsStoryRecord = {
-	by: string | null;
-	descendants: number;
-	id: number;
-	kids: number[];
-	score: number;
-	text: string | null;
-	time: number | null;
-	title: string | null;
-	type: "story";
-	url: string | null;
-};
-
-export type HackerNewsCommentRecord = {
-	id: number;
-	by: string | null;
-	text: string | null;
-	time: number | null;
-	kids: number[];
-	parent: number;
-	type: "comment";
-	deleted: boolean;
-	dead: boolean;
-};
 
 type HackerNewsStoryResponse = {
 	by?: string;

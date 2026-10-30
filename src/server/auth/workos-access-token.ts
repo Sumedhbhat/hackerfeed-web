@@ -1,8 +1,8 @@
 import "@tanstack/react-start/server-only";
 
+import { logger, setLogUser } from "@hackerfeed/runtime/logger";
 import type { CryptoKey, JWK, JWTVerifyGetKey, KeyObject } from "jose";
 import { createRemoteJWKSet, jwtVerify } from "jose";
-import { logger, setLogUser } from "#/lib/logger";
 import type { AuthenticatedWorkosUser } from "./current-user";
 
 type JwtVerifyKey = JWTVerifyGetKey | CryptoKey | KeyObject | JWK | Uint8Array;

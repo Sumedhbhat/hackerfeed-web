@@ -1,8 +1,8 @@
+import type { ChatStreamEvent } from "@hackerfeed/contracts/ai";
+import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
+import { installSentryTestClient } from "@hackerfeed/runtime/testing/sentry-test-client";
 import * as Sentry from "@sentry/core";
 import { describe, expect, it, vi } from "vitest";
-import type { ChatStreamEvent } from "#/lib/ai/schemas";
-import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
-import { installSentryTestClient } from "#/test/sentryTestClient";
 import {
 	AiProviderError,
 	AiProviderNotConnectedError,

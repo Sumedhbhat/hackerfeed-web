@@ -1,10 +1,10 @@
-import * as Sentry from "@sentry/core";
-import { beforeAll, describe, expect, it } from "vitest";
+import { installSentryTestClient } from "@hackerfeed/runtime/testing/sentry-test-client";
 import {
 	CLIENT_TRACE_HEADER,
 	SERVER_TRACE_ID_HEADER,
-} from "#/lib/tracing/headers";
-import { installSentryTestClient } from "#/test/sentryTestClient";
+} from "@hackerfeed/runtime/trace-headers";
+import * as Sentry from "@sentry/core";
+import { beforeAll, describe, expect, it } from "vitest";
 import {
 	linkClientTrace,
 	parseClientTrace,

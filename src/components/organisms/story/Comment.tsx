@@ -1,3 +1,4 @@
+import type { HackerNewsCommentRecord } from "@hackerfeed/hacker-news/records";
 import { Suspense } from "react";
 import {
 	Collapsible,
@@ -11,7 +12,6 @@ import { Text } from "#/components/atoms/Text";
 import { ThreadItem } from "#/components/atoms/ThreadItem";
 import { CommentSkeleton } from "#/components/molecules/CommentSkeleton";
 import { useComment } from "#/hooks/useComment";
-import type { HackerNewsCommentRecord } from "#/lib/hacker-news/queries";
 
 type CommentProps = {
 	comment: HackerNewsCommentRecord;

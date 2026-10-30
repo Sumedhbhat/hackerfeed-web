@@ -1,5 +1,5 @@
+import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
 import { describe, expect, it } from "vitest";
-import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
 import { UnauthorizedError } from "#/server/auth/current-user";
 import { createViewActivityService, ViewedPaperNotFoundError } from "./service";
 

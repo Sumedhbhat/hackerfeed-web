@@ -1,4 +1,4 @@
-import type { HackerNewsStoryRecord } from "./queries";
+import type { HackerNewsStoryRecord } from "./records";
 
 const RELATIVE_TIME_FORMATTER = new Intl.RelativeTimeFormat("en", {
 	numeric: "auto",

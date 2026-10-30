@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { arxivIdSchema, paperPresentationSchema } from "#/lib/papers/schemas";
+import { arxivIdSchema, paperPresentationSchema } from "./papers";
 
 export const paperFavoriteInputSchema = z
 	.object({

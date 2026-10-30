@@ -1,3 +1,4 @@
+import { logger } from "@hackerfeed/runtime/logger";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import type { QueryClient } from "@tanstack/react-query";
 import {
@@ -24,7 +25,6 @@ import { useLocalFavoritesMigration } from "../hooks/useLocalFavoritesMigration"
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 import TanStackQueryProvider from "../integrations/tanstack-query/root-provider";
 import { AuthProvider } from "../integrations/workos/provider";
-import { logger } from "../lib/logger";
 import appCss from "../styles.css?url";
 
 interface MyRouterContext {

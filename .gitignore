@@ -24,3 +24,7 @@ docs/internal/
 
 # Python infrastructure tooling
 __pycache__/
+
+# Nx
+.nx/cache
+.nx/workspace-data

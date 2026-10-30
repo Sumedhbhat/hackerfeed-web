@@ -1,7 +1,7 @@
+import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { StoryArticle } from "#/components/organisms/story/StoryArticle";
-import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
 
 const authMock = vi.hoisted(() => ({
 	user: null as { id: string } | null,

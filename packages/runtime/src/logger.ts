@@ -12,7 +12,7 @@
  * linked; see README > Observability.
  *
  * Usage:
- *   import { logger } from "#/lib/logger";
+ *   import { logger } from "@hackerfeed/runtime/logger";
  *   logger.info("feed loaded", { feed: "top", count: 30 });
  *   const traceId = logger.error("favorites load failed", { error, storyId });
  */

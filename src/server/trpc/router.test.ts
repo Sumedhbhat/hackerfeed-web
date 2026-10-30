@@ -1,6 +1,6 @@
+import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
 import { TRPCError } from "@trpc/server";
 import { describe, expect, it } from "vitest";
-import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
 import type { DatabaseContext } from "#/server/database/client";
 import { createTrpcContext } from "./context";
 import { createAppRouter } from "./router";
