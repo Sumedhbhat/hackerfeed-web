@@ -32,6 +32,7 @@
     "@hackerfeed/contracts": "workspace:*",
     "@hackerfeed/hacker-news": "workspace:*",
     "@hackerfeed/runtime": "workspace:*",
+    "@hackerfeed/ui": "workspace:*",
     "@sentry/cloudflare": "^11.7.0",
     "@sentry/core": "^11.7.0",
     "@sentry/react": "^11.7.0",

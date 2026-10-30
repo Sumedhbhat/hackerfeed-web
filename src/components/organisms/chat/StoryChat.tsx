@@ -7,10 +7,10 @@ import {
 	Button,
 	ButtonLink,
 	ExternalButtonLink,
-} from "#/components/atoms/Button";
-import { CardSkeleton } from "#/components/molecules/CardSkeleton";
-import { NoticeCard } from "#/components/molecules/NoticeCard";
-import { StoryChatHeader } from "#/components/molecules/StoryChatHeader";
+} from "@hackerfeed/ui/atoms/Button";
+import { CardSkeleton } from "@hackerfeed/ui/molecules/CardSkeleton";
+import { NoticeCard } from "@hackerfeed/ui/molecules/NoticeCard";
+import { StoryChatHeader } from "@hackerfeed/ui/molecules/StoryChatHeader";
 import { ChatConversation } from "#/components/organisms/chat/ChatConversation";
 import { useAiProviders } from "#/hooks/useAiProviders";
 import { signIn } from "#/hooks/useAuthSession";

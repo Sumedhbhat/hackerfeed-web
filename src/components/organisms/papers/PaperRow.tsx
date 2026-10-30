@@ -1,14 +1,14 @@
 import type { PaperViewAction } from "@hackerfeed/contracts/view-activity";
+import { Icon } from "@hackerfeed/ui/atoms/Icon";
+import { PaperCard } from "@hackerfeed/ui/atoms/PaperCard";
+import { Text } from "@hackerfeed/ui/atoms/Text";
+import { ToggleButton } from "@hackerfeed/ui/atoms/Toggle";
+import { KeywordList } from "@hackerfeed/ui/molecules/KeywordList";
+import { PaperCardFooter } from "@hackerfeed/ui/molecules/PaperCardFooter";
+import { PaperLinks } from "@hackerfeed/ui/molecules/PaperLinks";
+import { PaperSignals } from "@hackerfeed/ui/molecules/PaperSignals";
+import { PaperTitle } from "@hackerfeed/ui/molecules/PaperTitle";
 import { Star } from "lucide-react";
-import { Icon } from "#/components/atoms/Icon";
-import { PaperCard } from "#/components/atoms/PaperCard";
-import { Text } from "#/components/atoms/Text";
-import { ToggleButton } from "#/components/atoms/Toggle";
-import { KeywordList } from "#/components/molecules/KeywordList";
-import { PaperCardFooter } from "#/components/molecules/PaperCardFooter";
-import { PaperLinks } from "#/components/molecules/PaperLinks";
-import { PaperSignals } from "#/components/molecules/PaperSignals";
-import { PaperTitle } from "#/components/molecules/PaperTitle";
 import {
 	buildChatGptPaperDiscussionUrl,
 	formatAuthors,

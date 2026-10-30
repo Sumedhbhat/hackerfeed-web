@@ -1,8 +1,8 @@
+import { Button } from "@hackerfeed/ui/atoms/Button";
+import { Icon } from "@hackerfeed/ui/atoms/Icon";
+import { PaperFeedMessage } from "@hackerfeed/ui/molecules/PaperFeedMessage";
+import { PaperFeedSkeleton } from "@hackerfeed/ui/molecules/PaperFeedSkeleton";
 import { RefreshCw } from "lucide-react";
-import { Button } from "#/components/atoms/Button";
-import { Icon } from "#/components/atoms/Icon";
-import { PaperFeedMessage } from "#/components/molecules/PaperFeedMessage";
-import { PaperFeedSkeleton } from "#/components/molecules/PaperFeedSkeleton";
 import {
 	type PaperFilters,
 	PapersFeed,

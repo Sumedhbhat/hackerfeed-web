@@ -10,6 +10,7 @@
         "@hackerfeed/contracts": "workspace:*",
         "@hackerfeed/hacker-news": "workspace:*",
         "@hackerfeed/runtime": "workspace:*",
+        "@hackerfeed/ui": "workspace:*",
         "@sentry/cloudflare": "^11.7.0",
         "@sentry/core": "^11.7.0",
         "@sentry/react": "^11.7.0",
@@ -85,6 +86,31 @@
       },
       "devDependencies": {
         "vitest": "^5.0.4",
+      },
+    },
+    "packages/ui": {
+      "name": "@hackerfeed/ui",
+      "dependencies": {
+        "@base-ui/react": "^1.9.0",
+        "@tailwindcss/typography": "^0.5.20",
+        "lucide-react": "^1.49.0",
+        "tailwindcss": "^4.3.3",
+      },
+      "devDependencies": {
+        "@tanstack/react-router": "latest",
+        "@testing-library/dom": "^10.4.2",
+        "@testing-library/react": "^16.3.3",
+        "@types/react": "^19.3.0",
+        "@types/react-dom": "^19.3.0",
+        "happy-dom": "^21.0.4",
+        "react": "^19.3.0",
+        "react-dom": "^19.3.0",
+        "vitest": "^5.0.4",
+      },
+      "peerDependencies": {
+        "@tanstack/react-router": "latest",
+        "react": "^19.3.0",
+        "react-dom": "^19.3.0",
       },
     },
   },
@@ -251,6 +277,8 @@
     "@hackerfeed/hacker-news": ["@hackerfeed/hacker-news@workspace:packages/hacker-news"],
 
     "@hackerfeed/runtime": ["@hackerfeed/runtime@workspace:packages/runtime"],
+
+    "@hackerfeed/ui": ["@hackerfeed/ui@workspace:packages/ui"],
 
     "@img/colour": ["@img/colour@1.1.0", "", {}, "sha512-Td76q7j57o/tLVdgS746cYARfSyxk8iEfRxewL9h4OMzYhbW4TAcppl0mT4eyqXddh6L/jwoM75mo7ixa/pCeQ=="],
 
