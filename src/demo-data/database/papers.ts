@@ -1,4 +1,4 @@
-import type { hfPapers } from "#/server/database/schema";
+import type { hfPapers } from "@hackerfeed/backend/database/schema";
 import { ingestedTimestamps } from "../defaults";
 import { exampleUniversity, placeholderAi } from "./organizations";
 

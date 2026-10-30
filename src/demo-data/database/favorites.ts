@@ -1,4 +1,4 @@
-import type { favorites, stories } from "#/server/database/schema";
+import type { favorites, stories } from "@hackerfeed/backend/database/schema";
 import { sqliteAt } from "../defaults";
 import { demoUser } from "./app-users";
 import { buildCache, sideProjects, tinySpreadsheet } from "./stories";

@@ -1,7 +1,7 @@
 import type {
 	aiProviderConnections,
 	aiProviders,
-} from "#/server/database/schema";
+} from "@hackerfeed/backend/database/schema";
 import { sqliteAt } from "../defaults";
 
 export const aiProviderRows: (typeof aiProviders.$inferSelect)[] = [

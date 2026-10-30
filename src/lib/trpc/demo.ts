@@ -1,3 +1,4 @@
+import type { AppRouter } from "@hackerfeed/backend/api-types";
 import {
 	type FavoriteStoryInput,
 	favoriteStoryIdInputSchema,
@@ -24,7 +25,6 @@ import { paperFavoriteRows } from "#/demo-data/database/paper-favorites";
 import { paperKeywordRows } from "#/demo-data/database/paper-keywords";
 import { paperRows } from "#/demo-data/database/papers";
 import { storyRows } from "#/demo-data/database/stories";
-import type { AppRouter } from "#/server/trpc/router";
 
 const paperPresentations = paperRows.map((paper) => ({
 	arxivId: paper.arxivId,

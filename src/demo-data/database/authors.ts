@@ -1,4 +1,4 @@
-import type { hfAuthors } from "#/server/database/schema";
+import type { hfAuthors } from "@hackerfeed/backend/database/schema";
 import { INGESTED_AT, ingestedTimestamps, slugify } from "../defaults";
 
 type Author = typeof hfAuthors.$inferSelect;

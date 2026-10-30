@@ -1,5 +1,5 @@
+import * as schema from "@hackerfeed/backend/database/schema";
 import { getTableName } from "drizzle-orm";
-import * as schema from "#/server/database/schema";
 import { activityEventRows } from "./activity-events";
 import { aiProviderConnectionRows, aiProviderRows } from "./ai-providers";
 import { appUserRows } from "./app-users";

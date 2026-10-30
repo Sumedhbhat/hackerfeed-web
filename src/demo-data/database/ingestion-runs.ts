@@ -1,4 +1,4 @@
-import type { hfIngestionRuns } from "#/server/database/schema";
+import type { hfIngestionRuns } from "@hackerfeed/backend/database/schema";
 import { DEMO_DATE, INGESTED_AT, ingestedTimestamps, isoAt } from "../defaults";
 import { authorRows } from "./authors";
 import { dailyPaperEntryRows } from "./daily-paper-entries";

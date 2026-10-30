@@ -1,4 +1,4 @@
-import type { hfOrganizations } from "#/server/database/schema";
+import type { hfOrganizations } from "@hackerfeed/backend/database/schema";
 import { ingestedTimestamps } from "../defaults";
 
 type Organization = typeof hfOrganizations.$inferSelect;

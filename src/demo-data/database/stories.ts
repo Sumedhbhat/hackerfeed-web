@@ -1,4 +1,4 @@
-import type { stories } from "#/server/database/schema";
+import type { stories } from "@hackerfeed/backend/database/schema";
 import * as hackerNews from "../hacker-news";
 
 type Story = typeof stories.$inferSelect;

@@ -1,3 +1,4 @@
+import type { AppRouter } from "@hackerfeed/backend/api-types";
 import {
 	createTRPCClient,
 	httpBatchLink,
@@ -7,7 +8,6 @@ import {
 import { observable } from "@trpc/server/observable";
 import superjson from "superjson";
 import { getApiHeaders } from "#/lib/auth/authkit";
-import type { AppRouter } from "#/server/trpc/router";
 
 export function createTrpcClient() {
 	return createTRPCClient<AppRouter>({

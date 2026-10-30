@@ -1,11 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { aiHttpHandlers } from "#/server/ai/runtime";
+import { backend } from "#/backend";
 
 export const Route = createFileRoute("/api/ai/providers_/$provider/models")({
 	server: {
 		handlers: {
-			GET: ({ request, params }) =>
-				aiHttpHandlers.models(request, params.provider),
+			GET: ({ request, params }) => backend.ai.models(request, params.provider),
 		},
 	},
 });

@@ -1,0 +1,33 @@
+{
+	"name": "@hackerfeed/backend",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts",
+		"./api-types": "./src/api-types.ts",
+		"./database/client": "./src/database/client.ts",
+		"./database/schema": "./src/database/schema.ts",
+		"./huggingface-papers/ingestion": "./src/huggingface-papers/ingestion.ts",
+		"./tracing/client-trace": "./src/tracing/client-trace.ts"
+	},
+	"scripts": {
+		"db:generate": "drizzle-kit generate"
+	},
+	"dependencies": {
+		"@hackerfeed/contracts": "workspace:*",
+		"@hackerfeed/hacker-news": "workspace:*",
+		"@hackerfeed/runtime": "workspace:*",
+		"@sentry/cloudflare": "^11.7.0",
+		"@sentry/core": "^11.7.0",
+		"@tanstack/react-start": "latest",
+		"@trpc/server": "^11.19.0",
+		"drizzle-orm": "^0.45.3",
+		"jose": "^6.2.12",
+		"superjson": "^2.2.2",
+		"zod": "^4.6.5"
+	},
+	"devDependencies": {
+		"drizzle-kit": "^0.31.11",
+		"vitest": "^5.0.4"
+	}
+}
