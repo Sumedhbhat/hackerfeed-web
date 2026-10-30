@@ -35,8 +35,8 @@ jobs:
 
       - name: Deploy state server
         run: |
-          bunx wrangler d1 migrations apply DB --remote -c infra/state-backend/wrangler.jsonc
-          bunx wrangler deploy -c infra/state-backend/wrangler.jsonc
+          bunx wrangler d1 migrations apply DB --remote -c apps/state-backend/wrangler.jsonc
+          bunx wrangler deploy -c apps/state-backend/wrangler.jsonc
 
   infrastructure:
     needs: state-backend
@@ -61,29 +61,29 @@ jobs:
 
       - name: Plan infrastructure
         run: |
-          source infra/ci-signals.sh
+          source tools/infra-ci/ci-signals.sh
           for stage in prod deploy; do
-            run infra/terraform.sh "$stage" plan -input=false -out=tfplan
+            run tools/infra-ci/terraform.sh "$stage" plan -input=false -out=tfplan
             {
               echo "### Production infrastructure plan ($stage)"
               echo '```'
-              run infra/terraform.sh "$stage" show -no-color tfplan
+              run tools/infra-ci/terraform.sh "$stage" show -no-color tfplan
               echo '```'
             } >> "$GITHUB_STEP_SUMMARY"
           done
 
       - name: Apply infrastructure
         run: |
-          source infra/ci-signals.sh
-          run infra/terraform.sh prod apply -input=false tfplan
-          run infra/terraform.sh deploy apply -input=false tfplan
+          source tools/infra-ci/ci-signals.sh
+          run tools/infra-ci/terraform.sh prod apply -input=false tfplan
+          run tools/infra-ci/terraform.sh deploy apply -input=false tfplan
 
       - name: Read production database
         id: database
         run: |
-          source infra/ci-signals.sh
-          run infra/terraform.sh prod output -raw database_id > "$RUNNER_TEMP/database-id"
-          run infra/terraform.sh prod output -raw database_name > "$RUNNER_TEMP/database-name"
+          source tools/infra-ci/ci-signals.sh
+          run tools/infra-ci/terraform.sh prod output -raw database_id > "$RUNNER_TEMP/database-id"
+          run tools/infra-ci/terraform.sh prod output -raw database_name > "$RUNNER_TEMP/database-name"
           {
             echo "id=$(cat "$RUNNER_TEMP/database-id")"
             echo "name=$(cat "$RUNNER_TEMP/database-name")"
@@ -170,7 +170,7 @@ jobs:
 
       # Later steps get the Terraform-minted deploy token, not the stored one.
       - name: Read deploy token
-        run: exec infra/cloudflare-token.sh deploy deploy_token
+        run: exec tools/infra-ci/cloudflare-token.sh deploy deploy_token
 
       - name: Apply database migrations
         run: bunx wrangler d1 migrations apply DB --remote --config apps/web/dist/server/wrangler.json

@@ -47,11 +47,7 @@ jobs:
           terraform_version: 1.13.4
           terraform_wrapper: false
 
-      - name: Test infrastructure tooling (local only)
-        run: |
-          python3 -m unittest discover -s infra/tests -p 'test_*.py' -v
-          bun test infra/tests/state-backend.test.js
-
+      # Every project's tests, the infrastructure tooling's included (local only).
       - name: Run tests
         run: bun run test
 
@@ -66,18 +62,5 @@ jobs:
           fi
           bun tools/workspace/src/check-client-bundle.ts
 
-      - name: Detect infrastructure changes
-        id: changes
-        run: |
-          if git diff --quiet HEAD^1 HEAD -- infra/; then
-            echo "infra=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "infra=true" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Check Terraform
-        if: steps.changes.outputs.infra == 'true'
-        run: |
-          terraform -chdir=infra/terraform fmt -check
-          terraform -chdir=infra/terraform init -backend=false -input=false
-          terraform -chdir=infra/terraform validate
+        run: bunx nx run-many -t fmt,validate

@@ -12,6 +12,15 @@
         "vitest": "^5.0.4",
       },
     },
+    "apps/state-backend": {
+      "name": "@hackerfeed/state-backend",
+      "dependencies": {
+        "jose": "^6.2.12",
+      },
+      "devDependencies": {
+        "wrangler": "^4.151.0",
+      },
+    },
     "apps/web": {
       "name": "@hackerfeed/web",
       "dependencies": {
@@ -323,6 +332,8 @@
     "@hackerfeed/hacker-news": ["@hackerfeed/hacker-news@workspace:packages/hacker-news"],
 
     "@hackerfeed/runtime": ["@hackerfeed/runtime@workspace:packages/runtime"],
+
+    "@hackerfeed/state-backend": ["@hackerfeed/state-backend@workspace:apps/state-backend"],
 
     "@hackerfeed/ui": ["@hackerfeed/ui@workspace:packages/ui"],
 

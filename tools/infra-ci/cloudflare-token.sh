@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Usage: infra/cloudflare-token.sh <stage> <output>
+# Usage: tools/infra-ci/cloudflare-token.sh <stage> <output>
 # Gives the job's later steps a Terraform-minted CLOUDFLARE_API_TOKEN, masked.
 set -euo pipefail
 source "$(dirname "$0")/ci-signals.sh"
