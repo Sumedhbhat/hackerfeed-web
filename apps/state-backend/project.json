@@ -24,5 +24,8 @@
 			"command": "wrangler d1 migrations apply DB --remote -c apps/state-backend/wrangler.jsonc && wrangler deploy -c apps/state-backend/wrangler.jsonc",
 			"cache": false
 		}
-	}
+	},
+	"implicitDependencies": [
+		"infra-ci"
+	]
 }
