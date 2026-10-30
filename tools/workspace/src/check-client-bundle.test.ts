@@ -35,7 +35,7 @@ export const c = sqliteTable("hf_papers", {});`;
 	it("reports a chunk that declares a table, even without an underscore", () => {
 		const found = findBackendCode(
 			bundle({
-				"assets/ok.js": `const tab = { id: "stories", label: "favorites" };`,
+				"assets/ok.js": `const tab = { id: "stories", label: "favorites" };\nconst key = ["hacker-news", "feed", f, "stories", { limit }];`,
 				"assets/leak.js": `const t=q("stories",{id:i("id")});`,
 			}),
 			["stories", "favorites"],

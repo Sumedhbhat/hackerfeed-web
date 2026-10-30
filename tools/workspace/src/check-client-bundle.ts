@@ -1,5 +1,5 @@
 // Fails when backend code reaches the browser bundle. Drizzle declares each
-// table as sqliteTable("name", { ...columns }), which bundles to `"name",{`.
+// table as sqliteTable("name", { ...columns }), which bundles to `("name",{`.
 // Only backend runtime code has that shape, so finding it in dist/client means
 // a non-type import pulled the backend in.
 //
@@ -32,7 +32,7 @@ export function findBackendCode(
 		const text = readFileSync(path, "utf8");
 		return markers
 			.filter((name) =>
-				new RegExp(`["'\`]${name}["'\`]\\s*,\\s*\\{`).test(text),
+				new RegExp(`\\(\\s*["'\`]${name}["'\`]\\s*,\\s*\\{`).test(text),
 			)
 			.map((name) => `${path}: table ${name}`);
 	});
