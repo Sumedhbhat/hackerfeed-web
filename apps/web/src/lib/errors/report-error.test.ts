@@ -10,7 +10,7 @@ const loggerMock = vi.hoisted(() => ({
 
 vi.mock("@hackerfeed/runtime/logger", () => loggerMock);
 
-import { AiRequestError } from "#/lib/ai/client";
+import { AiRequestError } from "@hackerfeed/api-client/ai";
 import {
 	type ErrorNotice,
 	getServerTraceId,
