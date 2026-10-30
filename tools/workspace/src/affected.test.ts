@@ -1,21 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { selectProjects } from "./affected";
+import { nx, selectProjects } from "./affected";
 
-const ALL = [
-	"api-client",
-	"backend",
-	"contracts",
-	"hacker-news",
-	"infra-ci",
-	"infra-deploy",
-	"infra-prod",
-	"runtime",
-	"state-backend",
-	"tf-ci-token",
-	"ui",
-	"web",
-	"workspace",
-];
+// Every project in the graph, so a library from new:library needs no edit here.
+const ALL = nx([]);
 
 const INFRA_ROOTS = ["infra-deploy", "infra-prod"];
 
@@ -60,6 +47,12 @@ const matrix: [string, string, string[]][] = [
 ];
 
 describe("affected selection", () => {
+	it("reads the project list from the graph", () => {
+		expect(ALL).toEqual(
+			expect.arrayContaining(["web", "infra-prod", "workspace"]),
+		);
+	});
+
 	it.each(matrix)("%s selects the right projects", (_name, file, expected) => {
 		expect(selectProjects({ files: [file] }).projects).toEqual(
 			[...expected].sort(),

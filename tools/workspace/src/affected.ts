@@ -19,7 +19,7 @@ export type Selection = {
 
 const root = join(import.meta.dirname, "../../..");
 
-function nx(args: string[]): string[] {
+export function nx(args: string[]): string[] {
 	const output = execFileSync(
 		"bunx",
 		["nx", "show", "projects", ...args, "--json"],
