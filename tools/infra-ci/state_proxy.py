@@ -21,8 +21,9 @@ from recovery_state import crypt
 from commands import Commands
 
 STATE_URL = "https://hackerfeed-terraform-state.kgqk4vdcfq.workers.dev"
-# Each stage is a Terraform root under infra/.
-STAGES = {"prod": "terraform", "deploy": "terraform/deploy"}
+# Each stage is a Terraform root, keyed by its state name on the server.
+ROOT = Path(__file__).resolve().parents[2]
+STAGES = {"prod": "infra/cloudflare-prod", "deploy": "infra/deploy-access"}
 
 
 class RunnerError(Exception):
@@ -240,7 +241,7 @@ def main():
     env.update(TF_HTTP_PASSWORD=password, TF_HTTP_USERNAME="github",
                TF_HTTP_ADDRESS=address, TF_HTTP_LOCK_ADDRESS=address + "/lock",
                TF_HTTP_UNLOCK_ADDRESS=address + "/lock", TF_HTTP_RETRY_MAX="0")
-    directory = Path(__file__).resolve().parent / STAGES[stage]
+    directory = ROOT / STAGES[stage]
     with Commands(on_interrupt=network.cancel) as commands:
         try:
             if (directory / "errored.tfstate").exists():

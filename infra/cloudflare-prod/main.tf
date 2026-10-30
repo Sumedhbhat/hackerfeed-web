@@ -12,7 +12,7 @@ terraform {
     }
   }
 
-  # The state server in infra/state-backend. infra/terraform.sh sets the
+  # The state server in apps/state-backend. tools/infra-ci/terraform.sh sets the
   # stage's address and signs in with the job's GitHub OIDC token.
   backend "http" {
     lock_method   = "POST"
@@ -40,9 +40,9 @@ resource "cloudflare_d1_database" "this" {
 }
 
 # PR jobs read this state: the preview token uploads demo versions and plans
-# this root. Production-only tokens belong in ./deploy.
+# this root. Production-only tokens belong in ../deploy-access.
 module "preview_token" {
-  source      = "./modules/ci-token"
+  source      = "../modules/ci-token"
   account_id  = var.cloudflare_account_id
   name        = "hackerfeed-ci-preview"
   permissions = ["Workers Scripts Write", "D1 Read", "Account API Tokens Read"]

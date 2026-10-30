@@ -3,6 +3,8 @@
 # security fixes still merge on green; deploys wait for the owner's approval.
 /.github/ @Sumedhbhat
 /infra/ @Sumedhbhat
+/tools/ @Sumedhbhat
+/apps/state-backend/ @Sumedhbhat
 /scripts/ @Sumedhbhat
 /apps/web/scripts/ @Sumedhbhat
 /apps/web/vite.config.ts @Sumedhbhat

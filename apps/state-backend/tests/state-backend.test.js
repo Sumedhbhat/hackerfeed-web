@@ -4,12 +4,12 @@ import { cp, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { exportJWK, generateKeyPair, SignJWT } from "jose";
-import handler from "../state-backend/src/index.ts";
+import handler from "../src/index.ts";
 
 const sqlite = new Database(":memory:");
 sqlite.exec(
 	await Bun.file(
-		new URL("../state-backend/migrations/0001_states.sql", import.meta.url),
+		new URL("../migrations/0001_states.sql", import.meta.url),
 	).text(),
 );
 const DB = {

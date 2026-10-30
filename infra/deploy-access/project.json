@@ -1,0 +1,41 @@
+{
+	"$schema": "../../node_modules/nx/schemas/project-schema.json",
+	"name": "infra-deploy",
+	"projectType": "application",
+	"sourceRoot": "infra/deploy-access",
+	"tags": [
+		"type:infra",
+		"platform:ci",
+		"scope:hackerfeed"
+	],
+	"metadata": {
+		"owner": "@Sumedhbhat",
+		"stateName": "deploy"
+	},
+	"implicitDependencies": [
+		"infra-ci",
+		"tf-ci-token"
+	],
+	"targets": {
+		"fmt": {
+			"command": "terraform fmt -check -diff",
+			"options": {
+				"cwd": "infra/deploy-access"
+			}
+		},
+		"validate": {
+			"command": "terraform init -backend=false -input=false -lockfile=readonly && terraform validate",
+			"options": {
+				"cwd": "infra/deploy-access"
+			}
+		},
+		"plan": {
+			"command": "tools/infra-ci/terraform.sh deploy plan -input=false",
+			"cache": false
+		},
+		"apply": {
+			"command": "tools/infra-ci/terraform.sh deploy apply -input=false",
+			"cache": false
+		}
+	}
+}

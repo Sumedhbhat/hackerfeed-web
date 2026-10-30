@@ -1,0 +1,28 @@
+{
+	"$schema": "../../node_modules/nx/schemas/project-schema.json",
+	"name": "state-backend",
+	"projectType": "application",
+	"sourceRoot": "apps/state-backend/src",
+	"tags": [
+		"type:infra",
+		"platform:server",
+		"scope:hackerfeed"
+	],
+	"metadata": {
+		"owner": "@Sumedhbhat"
+	},
+	"targets": {
+		"lint": {},
+		"typecheck": {},
+		"test": {
+			"command": "bun test apps/state-backend/tests",
+			"options": {
+				"cwd": "."
+			}
+		},
+		"deploy": {
+			"command": "wrangler d1 migrations apply DB --remote -c apps/state-backend/wrangler.jsonc && wrangler deploy -c apps/state-backend/wrangler.jsonc",
+			"cache": false
+		}
+	}
+}

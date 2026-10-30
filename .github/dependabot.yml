@@ -23,7 +23,7 @@ updates:
     labels: [dependencies]
 
   - package-ecosystem: terraform
-    directory: /infra/terraform
+    directories: [/infra/cloudflare-prod, /infra/deploy-access]
     schedule:
       interval: weekly
     cooldown:

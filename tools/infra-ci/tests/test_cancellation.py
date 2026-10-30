@@ -15,7 +15,7 @@ from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from recovery_state import crypt
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 SECRET = "local-cancellation-recovery-key"
 
 
@@ -49,11 +49,12 @@ def descendants(pid):
 
 class CancellationTests(unittest.TestCase):
     def fixture(self, directory):
-        infra = directory / "infra"
-        (infra / "terraform").mkdir(parents=True)
+        infra = directory / "tools/infra-ci"
+        infra.mkdir(parents=True)
+        (directory / "infra/cloudflare-prod").mkdir(parents=True)
         for name in ("terraform.sh", "state_proxy.py", "recovery_state.py", "commands.py",
                      "ci-signals.sh"):
-            shutil.copy(ROOT / "infra" / name, infra)
+            shutil.copy(ROOT / "tools/infra-ci" / name, infra)
         # Only substitute network transport. Keep the actual
         # workflow, shell helper, Python forwarding, proxy, and encryption.
         wrapper = infra / "terraform.sh"
@@ -65,7 +66,7 @@ import state_proxy as p
 real_server = p.make_server
 root = Path(os.environ["RUNNER_TEMP"])
 def issue(*args, **kwargs):
-    if os.environ.get("FAIL_SAVE") == "oidc-stall" and (root / "infra/terraform/ready").exists(): time.sleep(30)
+    if os.environ.get("FAIL_SAVE") == "oidc-stall" and (root / "infra/cloudflare-prod/ready").exists(): time.sleep(30)
     claims = base64.urlsafe_b64encode(json.dumps({"exp":time.time()+300,"aud":p.STATE_URL}).encode()).decode().rstrip("=")
     if os.environ.get("FAIL_SAVE") == "oidc-stall":
         claims = base64.urlsafe_b64encode(json.dumps({"exp":time.time()+1,"aud":p.STATE_URL}).encode()).decode().rstrip("=")
@@ -81,14 +82,14 @@ def send(url, method="GET", data=None, **kwargs):
         return 200, {}, b""
     state = root / "saved-state"
     failure = os.environ.get("FAIL_SAVE")
-    if failure == "get-stall" and method == "GET" and (root / "infra/terraform/ready").exists(): time.sleep(30)
+    if failure == "get-stall" and method == "GET" and (root / "infra/cloudflare-prod/ready").exists(): time.sleep(30)
     if method == "POST":
         if failure == "true": return 403, {}, b"unavailable"
         if failure == "500": return 500, {}, b"unavailable"
         if failure == "unavailable": raise URLError("connection refused")
         if failure == "timeout": raise TimeoutError("timed out")
         if failure == "inflight-stall":
-            (root / "infra/terraform/ready").touch()
+            (root / "infra/cloudflare-prod/ready").touch()
             time.sleep(30)
         if failure == "stall": time.sleep(30)
         state.write_bytes(data)
@@ -130,7 +131,7 @@ sys.exit(p.main())
         pids = {child.pid}
         try:
             deadline = time.monotonic() + 10
-            while not (directory / "infra/terraform/ready").exists():
+            while not (directory / "infra/cloudflare-prod/ready").exists():
                 if child.poll() is not None:
                     self.fail(str(child.communicate()))
                 self.assertLess(time.monotonic(), deadline, "Terraform did not become ready")
@@ -239,7 +240,7 @@ while True: time.sleep(.02)
                     fake.chmod(0o700)
                     env.update(PATH=str(binary) + os.pathsep + env["PATH"], BLOCK_COMMAND=command)
                     self.cancel(directory, env, workflow, step, signum)
-                    self.assertEqual((directory / "infra/terraform/signals").read_text(), "signal\n")
+                    self.assertEqual((directory / "infra/cloudflare-prod/signals").read_text(), "signal\n")
                     self.assert_recovery(directory, "confidential-recovery-state")
                     self.assertFalse((directory / "output").exists())
 
@@ -274,20 +275,20 @@ resource "terraform_data" "local" {
  depends_on = [terraform_data.local]
 }
 '''
-                        (directory / "infra/terraform/main.tf").write_text(config)
+                        (directory / "infra/cloudflare-prod/main.tf").write_text(config)
                         if destroy:
-                            result = subprocess.run(["infra/terraform.sh", "prod", "apply", "-input=false", "-auto-approve"],
+                            result = subprocess.run(["tools/infra-ci/terraform.sh", "prod", "apply", "-input=false", "-auto-approve"],
                                                     cwd=directory, env=env, capture_output=True, timeout=15)
                             self.assertEqual(result.returncode, 0, result.stderr)
                             (directory / "events").unlink()
                         if not destroy:
-                            result = subprocess.run(["infra/terraform.sh", "prod", "plan", "-input=false", "-out=tfplan"],
+                            result = subprocess.run(["tools/infra-ci/terraform.sh", "prod", "plan", "-input=false", "-out=tfplan"],
                                                     cwd=directory, env=env, capture_output=True, timeout=15)
                             self.assertEqual(result.returncode, 0, result.stderr)
                         env["FAIL_SAVE"] = str(fail_save).lower()
                         self.cancel(directory, env,
                                     "deploy.yaml", "Apply infrastructure", signum,
-                                    command="exec infra/terraform.sh prod destroy -input=false -auto-approve\n" if destroy else None)
+                                    command="exec tools/infra-ci/terraform.sh prod destroy -input=false -auto-approve\n" if destroy else None)
                         events = [json.loads(line) for line in (directory / "events").read_text().splitlines()]
                         self.assertTrue(any(event["method"] == "POST" and not event["url"].endswith("/lock") for event in events))
                         self.assertEqual(events[-1]["method"], "DELETE")
@@ -297,7 +298,7 @@ resource "terraform_data" "local" {
                             self.assert_recovery(directory)
                         else:
                             self.assertTrue(json.loads((directory / "saved-state").read_text())["resources"])
-                            self.assertFalse((directory / "infra/terraform/errored.tfstate").exists())
+                            self.assertFalse((directory / "infra/cloudflare-prod/errored.tfstate").exists())
 
     @unittest.skipUnless(shutil.which("terraform"), "terraform executable required")
     def test_retryable_and_stalled_network_recover_within_runner_deadline(self):
@@ -331,23 +332,23 @@ resource "terraform_data" "local" {
  depends_on = [terraform_data.local]
 }
 '''
-                    (directory / "infra/terraform/main.tf").write_text(config)
+                    (directory / "infra/cloudflare-prod/main.tf").write_text(config)
                     if destroy:
-                        result = subprocess.run(["infra/terraform.sh", "prod", "apply", "-input=false", "-auto-approve"],
+                        result = subprocess.run(["tools/infra-ci/terraform.sh", "prod", "apply", "-input=false", "-auto-approve"],
                                                 cwd=directory, env=env, capture_output=True, timeout=15)
                         self.assertEqual(result.returncode, 0, result.stderr)
                     if not destroy:
-                        result = subprocess.run(["infra/terraform.sh", "prod", "plan", "-input=false", "-out=tfplan"],
+                        result = subprocess.run(["tools/infra-ci/terraform.sh", "prod", "plan", "-input=false", "-out=tfplan"],
                                                 cwd=directory, env=env, capture_output=True, timeout=15)
                         self.assertEqual(result.returncode, 0, result.stderr)
                     env["FAIL_SAVE"] = failure
                     code = self.cancel(directory, env,
                                        "deploy.yaml", "Apply infrastructure", signum,
                                        runner_deadline=True,
-                                       command="exec infra/terraform.sh prod destroy -input=false -auto-approve\n" if destroy else None)
+                                       command="exec tools/infra-ci/terraform.sh prod destroy -input=false -auto-approve\n" if destroy else None)
                     self.assertEqual(code, 128 + signum)
                     restored = self.assert_recovery(directory)
-                    original = directory / "infra/terraform/errored.tfstate"
+                    original = directory / "infra/cloudflare-prod/errored.tfstate"
                     self.assertEqual(restored.read_bytes(), original.read_bytes())
                     # Timed-out requests have an unknown remote outcome. Keep
                     # the lock rather than letting a pending write race unlock.
@@ -357,7 +358,7 @@ resource "terraform_data" "local" {
                     (directory / "locked").unlink(missing_ok=True)
                     original.rename(directory / "acknowledged-error.tfstate")
                     env.pop("FAIL_SAVE")
-                    result = subprocess.run(["infra/terraform.sh", "prod", "state", "push", str(restored)],
+                    result = subprocess.run(["tools/infra-ci/terraform.sh", "prod", "state", "push", str(restored)],
                                             cwd=directory, env=env, capture_output=True, timeout=15)
                     self.assertEqual(result.returncode, 0, result.stderr)
                     self.assertEqual(json.loads((directory / "saved-state").read_bytes())["resources"],
