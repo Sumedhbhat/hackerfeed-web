@@ -3,16 +3,7 @@
 	"name": "ui",
 	"projectType": "library",
 	"sourceRoot": "packages/ui/src",
-	"tags": [
-		"type:ui",
-		"platform:browser",
-		"scope:shared"
-	],
-	"metadata": {
-		"owner": "@Sumedhbhat"
-	},
 	"targets": {
-		"lint": {},
 		"typecheck": {},
 		"test": {}
 	}
