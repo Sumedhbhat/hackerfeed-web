@@ -1,4 +1,6 @@
 // @vitest-environment happy-dom
+
+import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
 	clearAllFavorites,
@@ -6,7 +8,6 @@ import {
 	isFavorited,
 	toggleFavorite,
 } from "#/lib/favorites-store";
-import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
 
 function makeStory(
 	id: number,

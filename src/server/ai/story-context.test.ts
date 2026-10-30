@@ -1,8 +1,8 @@
-import { describe, expect, it } from "vitest";
 import type {
 	HackerNewsCommentRecord,
 	HackerNewsStoryRecord,
-} from "#/lib/hacker-news/queries";
+} from "@hackerfeed/hacker-news/records";
+import { describe, expect, it } from "vitest";
 import {
 	buildStoryChatInstructions,
 	MAX_CONTEXT_COMMENTS,

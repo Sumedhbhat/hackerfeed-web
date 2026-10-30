@@ -1,5 +1,5 @@
+import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
 import { describe, expect, it, vi } from "vitest";
-import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
 import {
 	createDatabaseContext,
 	type D1DatabaseBinding,

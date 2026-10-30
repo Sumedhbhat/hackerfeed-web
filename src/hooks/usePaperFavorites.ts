@@ -1,3 +1,5 @@
+import type { SavedPaper } from "@hackerfeed/contracts/paper-favorites";
+import type { PaperFeedPaper } from "@hackerfeed/contracts/papers";
 import {
 	useMutation,
 	useMutationState,
@@ -5,8 +7,6 @@ import {
 	useQueryClient,
 } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import type { SavedPaper } from "#/lib/paper-favorites/schemas";
-import type { PaperFeedPaper } from "#/lib/papers/schemas";
 import { createTrpcClient } from "#/lib/trpc/client";
 import { useAuthSession } from "./useAuthSession";
 

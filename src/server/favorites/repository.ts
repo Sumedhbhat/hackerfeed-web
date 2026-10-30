@@ -1,7 +1,7 @@
 import "@tanstack/react-start/server-only";
 
+import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
 import { and, desc, eq, inArray, notExists, type SQL } from "drizzle-orm";
-import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
 import { activityEventSelection } from "../activity/events";
 import type { DatabaseContext } from "../database/client";
 import {

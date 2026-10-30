@@ -1,5 +1,5 @@
+import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
 import { Store } from "@tanstack/store";
-import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
 
 const STORAGE_KEY = "hackerfeed:favorites";
 

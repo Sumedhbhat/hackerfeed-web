@@ -1,6 +1,6 @@
 import "@tanstack/react-start/server-only";
 
-import type { AiModel } from "#/lib/ai/schemas";
+import type { AiModel } from "@hackerfeed/contracts/ai";
 import { AiProviderError, networkError } from "#/server/ai/errors";
 import { parseServerSentEvents } from "#/server/ai/sse";
 import type { AiChatInput } from "#/server/ai/types";

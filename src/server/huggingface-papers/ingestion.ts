@@ -1,6 +1,6 @@
 import "@tanstack/react-start/server-only";
 
-import { logger } from "#/lib/logger";
+import { logger } from "@hackerfeed/runtime/logger";
 import type { DatabaseContext } from "#/server/database/client";
 import { fetchHuggingFaceDailyPapersEdition } from "./client";
 import { getPreviousIndiaEditionDate } from "./edition-date";

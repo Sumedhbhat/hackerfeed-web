@@ -1,10 +1,10 @@
+import type { AiProviderStatus } from "@hackerfeed/contracts/ai";
 import { Button } from "#/components/atoms/Button";
 import { ExternalLink } from "#/components/atoms/Link";
 import { Text } from "#/components/atoms/Text";
 import { ProviderRow } from "#/components/molecules/ProviderRow";
 import { useDisconnectAiProvider } from "#/hooks/useAiProviders";
 import { connectAiProvider } from "#/lib/ai/client";
-import type { AiProviderStatus } from "#/lib/ai/schemas";
 
 /** One AI app with its connection status and connect/disconnect actions. */
 export function AiProviderRow({

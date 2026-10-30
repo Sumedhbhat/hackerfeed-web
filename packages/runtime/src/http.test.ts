@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { createHttpClient } from "./client";
+import { createHttpClient } from "./http";
 
 function stalledFetch() {
 	return vi.fn<typeof fetch>((input, init) => {

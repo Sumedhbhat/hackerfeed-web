@@ -1,3 +1,5 @@
+import type { SavedPaper } from "@hackerfeed/contracts/paper-favorites";
+import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
 import {
 	cleanup,
 	fireEvent,
@@ -9,8 +11,6 @@ import { useState } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { FavoritesPage } from "#/components/pages/FavoritesPage";
 import { clearAllFavorites, toggleFavorite } from "#/lib/favorites-store";
-import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
-import type { SavedPaper } from "#/lib/paper-favorites/schemas";
 import { type FavoritesType, parseFavoritesSearch } from "#/routes/favorites";
 import { renderWithQueryClient as render } from "#/test/renderWithQueryClient";
 

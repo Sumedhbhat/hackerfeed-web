@@ -1,5 +1,5 @@
+import { installSentryTestClient } from "@hackerfeed/runtime/testing/sentry-test-client";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { installSentryTestClient } from "#/test/sentryTestClient";
 
 const authMock = vi.hoisted(() => ({
 	getApiHeaders: vi.fn(async () => ({ Authorization: "Bearer token-1" })),

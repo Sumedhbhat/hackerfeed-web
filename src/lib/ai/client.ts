@@ -1,13 +1,13 @@
-import * as Sentry from "@sentry/core";
-import { getApiHeaders, signIn } from "#/lib/auth/authkit";
-import { readServerTraceId } from "#/lib/tracing/headers";
 import type {
 	AiApiError,
 	AiModel,
 	AiProviderStatus,
 	ChatStreamEvent,
 	StoryChatRequest,
-} from "./schemas";
+} from "@hackerfeed/contracts/ai";
+import { readServerTraceId } from "@hackerfeed/runtime/trace-headers";
+import * as Sentry from "@sentry/core";
+import { getApiHeaders, signIn } from "#/lib/auth/authkit";
 
 export class AiRequestError extends Error {
 	readonly code: string;

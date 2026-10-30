@@ -1,5 +1,5 @@
 import "@tanstack/react-start/server-only";
-import { http } from "#/lib/http/client";
+import { http } from "@hackerfeed/runtime/http";
 import type { HuggingFaceDailyPaper } from "./schema";
 import { validateHuggingFaceDailyPapersResponse } from "./schema";
 

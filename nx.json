@@ -2,9 +2,23 @@
 	"$schema": "./node_modules/nx/schemas/nx-schema.json",
 	"defaultBase": "master",
 	"targetDefaults": {
-		"build": { "cache": false },
-		"test": { "cache": false },
-		"typecheck": { "cache": false },
-		"lint": { "cache": false }
+		"lint": {
+			"command": "biome check {projectRoot}",
+			"cache": false
+		},
+		"typecheck": {
+			"command": "tsc --noEmit -p {projectRoot}",
+			"cache": false
+		},
+		"test": {
+			"command": "vitest run",
+			"options": {
+				"cwd": "{projectRoot}"
+			},
+			"cache": false
+		},
+		"build": {
+			"cache": false
+		}
 	}
 }

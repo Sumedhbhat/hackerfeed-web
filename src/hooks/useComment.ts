@@ -1,10 +1,8 @@
+import type { HackerNewsCommentRecord } from "@hackerfeed/hacker-news/records";
+import { formatStoryAge } from "@hackerfeed/hacker-news/utils";
 import { useSuspenseQueries } from "@tanstack/react-query";
 import { useState } from "react";
-import {
-	commentQueryOptions,
-	type HackerNewsCommentRecord,
-} from "#/lib/hacker-news/queries";
-import { formatStoryAge } from "#/lib/hacker-news/utils";
+import { commentQueryOptions } from "#/lib/hacker-news/queries";
 
 export type UseCommentReturn = {
 	collapsed: boolean;

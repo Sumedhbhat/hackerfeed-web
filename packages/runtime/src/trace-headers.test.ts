@@ -1,7 +1,7 @@
 import * as Sentry from "@sentry/core";
 import { beforeAll, describe, expect, it } from "vitest";
-import { installSentryTestClient } from "#/test/sentryTestClient";
-import { CLIENT_TRACE_HEADER, getClientTraceHeaders } from "./headers";
+import { installSentryTestClient } from "./testing/sentry-test-client";
+import { CLIENT_TRACE_HEADER, getClientTraceHeaders } from "./trace-headers";
 
 beforeAll(() => {
 	installSentryTestClient({ tracePropagationTargets: [] });

@@ -2,6 +2,9 @@
   "name": "hackerfeed-web",
   "private": true,
   "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
   "imports": {
     "#/*": "./src/*"
   },
@@ -13,20 +16,23 @@
     "preview": "vite preview",
     "preview:private": "scripts/private-preview.sh",
     "demo-data:compare": "bun scripts/compare-demo-data.ts",
-    "security:audit": "bun audit --audit-level=high",
-    "test": "vitest run",
-    "typecheck": "tsc --noEmit",
+    "test": "nx run-many -t test",
+    "typecheck": "nx run-many -t typecheck",
     "cf:typegen": "wrangler types",
     "db:generate": "drizzle-kit generate",
     "db:migrate:local": "wrangler d1 migrations apply DB --local",
-    "solve:issues": "node scripts/solve-issues.mjs",
+    "security:audit": "bun audit --audit-level=high",
     "format": "biome format",
     "lint": "biome lint",
-    "check": "biome check"
+    "check": "biome check",
+    "new:library": "bun tools/workspace/src/new-library.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
     "@cloudflare/vite-plugin": "^1.64.0",
+    "@hackerfeed/contracts": "workspace:*",
+    "@hackerfeed/hacker-news": "workspace:*",
+    "@hackerfeed/runtime": "workspace:*",
     "@sentry/cloudflare": "^11.7.0",
     "@sentry/core": "^11.7.0",
     "@sentry/react": "^11.7.0",

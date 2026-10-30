@@ -1,0 +1,4 @@
+[install]
+# Keep the hoisted layout the single-package app used; tools/workspace
+# checks that each package declares what it imports.
+linker = "hoisted"

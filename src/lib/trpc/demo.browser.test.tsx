@@ -1,9 +1,9 @@
+import { favoriteStoriesOutputSchema } from "@hackerfeed/contracts/favorites";
+import { paperFavoritesListOutputSchema } from "@hackerfeed/contracts/paper-favorites";
+import { paperEditionOutputSchema } from "@hackerfeed/contracts/papers";
 import { render, renderHook, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { favoriteStoriesOutputSchema } from "#/lib/favorites/schemas";
-import { paperFavoritesListOutputSchema } from "#/lib/paper-favorites/schemas";
 import { matchesFilters } from "#/lib/papers/presentation";
-import { paperEditionOutputSchema } from "#/lib/papers/schemas";
 import { createDemoApi } from "./demo";
 
 vi.mock("@workos-inc/authkit-react", () => ({

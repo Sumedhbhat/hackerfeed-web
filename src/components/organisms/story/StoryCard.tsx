@@ -1,3 +1,10 @@
+import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
+import {
+	formatStoryAge,
+	getDiscussionUrl,
+	getStoryDomain,
+	getStoryTitle,
+} from "@hackerfeed/hacker-news/utils";
 import { MessageCircle, Star } from "lucide-react";
 import { Button } from "#/components/atoms/Button";
 import { Card } from "#/components/atoms/Card";
@@ -12,13 +19,6 @@ import { StoryStats } from "#/components/molecules/StoryStats";
 import { useFavorites } from "#/hooks/useFavorites";
 import { useFeatureFlag } from "#/hooks/useFeatureFlags";
 import { useViewActivity } from "#/hooks/useViewActivity";
-import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
-import {
-	formatStoryAge,
-	getDiscussionUrl,
-	getStoryDomain,
-	getStoryTitle,
-} from "#/lib/hacker-news/utils";
 import { openLink } from "#/lib/open-link";
 
 type StoryCardProps = {

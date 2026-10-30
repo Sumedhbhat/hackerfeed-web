@@ -1,13 +1,41 @@
 {
 	"$schema": "./node_modules/nx/schemas/project-schema.json",
-	"name": "hackerfeed-web",
+	"name": "web",
+	"projectType": "application",
+	"sourceRoot": "src",
+	"tags": [
+		"type:app",
+		"platform:browser",
+		"platform:server",
+		"scope:hackerfeed"
+	],
+	"metadata": {
+		"owner": "@Sumedhbhat"
+	},
 	"targets": {
-		"lint": { "command": "biome check" },
-		"typecheck": { "command": "tsc --noEmit" },
-		"test": { "command": "vitest run" },
-		"build": { "command": "vite build" },
-		"test-infra": {
-			"command": "python3 -m unittest discover -s infra/tests -p 'test_*.py' && bun test infra/tests/state-backend.test.js"
+		"lint": {
+			"command": "biome check ."
+		},
+		"typecheck": {
+			"command": "tsc --noEmit"
+		},
+		"test": {
+			"command": "vitest run"
+		},
+		"build": {
+			"command": "vite build",
+			"options": {
+				"cwd": "{projectRoot}"
+			}
+		},
+		"build-demo": {
+			"command": "vite build",
+			"options": {
+				"cwd": "{projectRoot}",
+				"env": {
+					"VITE_DEMO_DATA": "true"
+				}
+			}
 		}
 	}
 }

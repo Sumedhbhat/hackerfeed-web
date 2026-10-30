@@ -1,6 +1,10 @@
+import {
+	getTraceId,
+	type LogContext,
+	logger,
+} from "@hackerfeed/runtime/logger";
 import { useEffect, useState } from "react";
 import { getServerTraceId } from "#/lib/errors/report-error";
-import { getTraceId, type LogContext, logger } from "#/lib/logger";
 
 /**
  * Reports an error shown by an error UI once (from an effect, not render) and

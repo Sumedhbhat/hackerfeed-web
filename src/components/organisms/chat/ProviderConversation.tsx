@@ -1,3 +1,7 @@
+import {
+	type AiProviderStatus,
+	MAX_CHAT_MESSAGE_LENGTH,
+} from "@hackerfeed/contracts/ai";
 import { MessageCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "#/components/atoms/Button";
@@ -14,10 +18,6 @@ import { InlineNotice } from "#/components/molecules/InlineNotice";
 import { NoticeCard } from "#/components/molecules/NoticeCard";
 import { SelectField } from "#/components/molecules/SelectField";
 import { useAiModels, useStoryChat } from "#/hooks/useAiProviders";
-import {
-	type AiProviderStatus,
-	MAX_CHAT_MESSAGE_LENGTH,
-} from "#/lib/ai/schemas";
 
 export const STARTER_PROMPTS = [
 	"Summarize this article in a few bullet points.",

@@ -1,7 +1,7 @@
+import { type LogContext, logger } from "@hackerfeed/runtime/logger";
+import { readServerTraceId } from "@hackerfeed/runtime/trace-headers";
 import { TRPCClientError } from "@trpc/client";
 import { AiRequestError } from "#/lib/ai/client";
-import { type LogContext, logger } from "#/lib/logger";
-import { readServerTraceId } from "#/lib/tracing/headers";
 
 /** What the user was doing when it failed; picks the fallback message. */
 export type FailedAction = "load" | "save" | "remove";

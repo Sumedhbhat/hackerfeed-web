@@ -3,7 +3,7 @@ import {
 	arxivIdSchema,
 	editionPaperSchema,
 	paperPresentationSchema,
-} from "./schemas";
+} from "./papers";
 
 const paper = {
 	abstract: "Original abstract",

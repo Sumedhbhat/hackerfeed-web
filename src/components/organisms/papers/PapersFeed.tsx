@@ -1,3 +1,4 @@
+import type { PaperEdition } from "@hackerfeed/contracts/papers";
 import { RefreshCw } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "#/components/atoms/Button";
@@ -12,7 +13,6 @@ import { PaperTopicNav } from "#/components/molecules/PaperTopicNav";
 import { usePaperFavorites } from "#/hooks/usePaperFavorites";
 import { useViewActivity } from "#/hooks/useViewActivity";
 import { matchesFilters } from "#/lib/papers/presentation";
-import type { PaperEdition } from "#/lib/papers/schemas";
 import { PaperRow } from "./PaperRow";
 
 export type PaperFilters = {

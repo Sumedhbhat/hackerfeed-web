@@ -1,3 +1,4 @@
+import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
 import { useStore } from "@tanstack/react-store";
 import { Store } from "@tanstack/store";
 import { useEffect } from "react";
@@ -7,7 +8,6 @@ import {
 	favoritesStore,
 	toggleFavorite,
 } from "#/lib/favorites-store";
-import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
 import { createTrpcClient } from "#/lib/trpc/client";
 import { useAuthSession } from "./useAuthSession";
 
