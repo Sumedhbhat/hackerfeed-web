@@ -1,12 +1,12 @@
-import { ChevronDown, ChevronUp } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 import {
 	Collapsible,
 	CollapsiblePanel,
 	CollapsibleTrigger,
-} from "#/components/atoms/Collapsible";
-import { Icon } from "#/components/atoms/Icon";
-import { PaperSummaryText } from "#/components/atoms/PaperSummaryText";
+} from "@hackerfeed/ui/atoms/Collapsible";
+import { Icon } from "@hackerfeed/ui/atoms/Icon";
+import { PaperSummaryText } from "@hackerfeed/ui/atoms/PaperSummaryText";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import type { PaperPresentation } from "#/lib/papers/presentation";
 
 /**

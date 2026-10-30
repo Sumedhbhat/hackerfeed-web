@@ -5,17 +5,17 @@ import {
 	getStoryDomain,
 	getStoryTitle,
 } from "@hackerfeed/hacker-news/utils";
+import { Button } from "@hackerfeed/ui/atoms/Button";
+import { Card } from "@hackerfeed/ui/atoms/Card";
+import { Heading } from "@hackerfeed/ui/atoms/Heading";
+import { Icon } from "@hackerfeed/ui/atoms/Icon";
+import { TextLink } from "@hackerfeed/ui/atoms/Link";
+import { Row } from "@hackerfeed/ui/atoms/Row";
+import { Stack } from "@hackerfeed/ui/atoms/Stack";
+import { ToggleButton } from "@hackerfeed/ui/atoms/Toggle";
+import { MetaLine } from "@hackerfeed/ui/molecules/MetaLine";
+import { StoryStats } from "@hackerfeed/ui/molecules/StoryStats";
 import { MessageCircle, Star } from "lucide-react";
-import { Button } from "#/components/atoms/Button";
-import { Card } from "#/components/atoms/Card";
-import { Heading } from "#/components/atoms/Heading";
-import { Icon } from "#/components/atoms/Icon";
-import { TextLink } from "#/components/atoms/Link";
-import { Row } from "#/components/atoms/Row";
-import { Stack } from "#/components/atoms/Stack";
-import { ToggleButton } from "#/components/atoms/Toggle";
-import { MetaLine } from "#/components/molecules/MetaLine";
-import { StoryStats } from "#/components/molecules/StoryStats";
 import { useFavorites } from "#/hooks/useFavorites";
 import { useFeatureFlag } from "#/hooks/useFeatureFlags";
 import { useViewActivity } from "#/hooks/useViewActivity";

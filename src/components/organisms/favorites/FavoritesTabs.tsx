@@ -1,4 +1,4 @@
-import { Tab, TabList } from "#/components/atoms/Tabs";
+import { Tab, TabList } from "@hackerfeed/ui/atoms/Tabs";
 
 /** "Stories | Papers" tabs with arrow/Home/End keyboard navigation. */
 export function FavoritesTabs() {

@@ -1,0 +1,10 @@
+{
+	"$schema": "../../node_modules/nx/schemas/project-schema.json",
+	"name": "workspace",
+	"projectType": "library",
+	"sourceRoot": "tools/workspace/src",
+	"targets": {
+		"typecheck": {},
+		"test": {}
+	}
+}

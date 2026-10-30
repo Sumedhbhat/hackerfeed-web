@@ -5,16 +5,16 @@ import {
 	getStoryDomain,
 	getStoryTitle,
 } from "@hackerfeed/hacker-news/utils";
+import { Card } from "@hackerfeed/ui/atoms/Card";
+import { Heading } from "@hackerfeed/ui/atoms/Heading";
+import { Icon } from "@hackerfeed/ui/atoms/Icon";
+import { ExternalLink, TextLink } from "@hackerfeed/ui/atoms/Link";
+import { Prose } from "@hackerfeed/ui/atoms/Prose";
+import { Row } from "@hackerfeed/ui/atoms/Row";
+import { Stack } from "@hackerfeed/ui/atoms/Stack";
+import { MetaLine } from "@hackerfeed/ui/molecules/MetaLine";
+import { StoryStats } from "@hackerfeed/ui/molecules/StoryStats";
 import { ArrowRight, MessageCircle } from "lucide-react";
-import { Card } from "#/components/atoms/Card";
-import { Heading } from "#/components/atoms/Heading";
-import { Icon } from "#/components/atoms/Icon";
-import { ExternalLink, TextLink } from "#/components/atoms/Link";
-import { Prose } from "#/components/atoms/Prose";
-import { Row } from "#/components/atoms/Row";
-import { Stack } from "#/components/atoms/Stack";
-import { MetaLine } from "#/components/molecules/MetaLine";
-import { StoryStats } from "#/components/molecules/StoryStats";
 import { useFeatureFlag } from "#/hooks/useFeatureFlags";
 import { useViewActivity } from "#/hooks/useViewActivity";
 

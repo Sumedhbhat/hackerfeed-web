@@ -1,7 +1,7 @@
+import { Button } from "@hackerfeed/ui/atoms/Button";
+import { PageContainer } from "@hackerfeed/ui/atoms/PageContainer";
+import { StatusPanel } from "@hackerfeed/ui/molecules/StatusPanel";
 import { CircleCheck, LogIn } from "lucide-react";
-import { Button } from "#/components/atoms/Button";
-import { PageContainer } from "#/components/atoms/PageContainer";
-import { StatusPanel } from "#/components/molecules/StatusPanel";
 import { signIn } from "#/hooks/useAuthSession";
 
 export function SignedOutPage() {

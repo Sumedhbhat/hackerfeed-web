@@ -1,9 +1,9 @@
 import { getTraceId } from "@hackerfeed/runtime/logger";
-import { Button } from "#/components/atoms/Button";
-import { ExternalLink } from "#/components/atoms/Link";
-import { Row } from "#/components/atoms/Row";
-import { EmptyState } from "#/components/molecules/EmptyState";
-import { TraceIdNote } from "#/components/molecules/TraceIdNote";
+import { Button } from "@hackerfeed/ui/atoms/Button";
+import { ExternalLink } from "@hackerfeed/ui/atoms/Link";
+import { Row } from "@hackerfeed/ui/atoms/Row";
+import { EmptyState } from "@hackerfeed/ui/molecules/EmptyState";
+import { TraceIdNote } from "@hackerfeed/ui/molecules/TraceIdNote";
 import type { feedTabs } from "#/components/organisms/feed/feedTabs";
 
 type FeedErrorProps = {

@@ -16,7 +16,7 @@ vi.mock("@hackerfeed/runtime/logger", () => ({
 	logger: { error: vi.fn(() => CLIENT_TRACE_ID), warn: vi.fn() },
 }));
 
-import { ToastProvider } from "#/components/atoms/Toast";
+import { ToastProvider } from "@hackerfeed/ui/atoms/Toast";
 import { reportError } from "#/lib/errors/report-error";
 import { ErrorNotifications } from "./ErrorNotifications";
 

@@ -1,9 +1,9 @@
+import { PageContainer } from "@hackerfeed/ui/atoms/PageContainer";
+import { Stack } from "@hackerfeed/ui/atoms/Stack";
+import { Tab, TabList, TabPanel, Tabs } from "@hackerfeed/ui/atoms/Tabs";
+import { StoryListSkeleton } from "@hackerfeed/ui/molecules/StoryListSkeleton";
 import * as Sentry from "@sentry/react";
 import { Activity, Suspense, useState } from "react";
-import { PageContainer } from "#/components/atoms/PageContainer";
-import { Stack } from "#/components/atoms/Stack";
-import { Tab, TabList, TabPanel, Tabs } from "#/components/atoms/Tabs";
-import { StoryListSkeleton } from "#/components/molecules/StoryListSkeleton";
 import { FeedError } from "#/components/organisms/feed/FeedError";
 import { FeedPane } from "#/components/organisms/feed/FeedPane";
 import { feedTabs } from "#/components/organisms/feed/feedTabs";

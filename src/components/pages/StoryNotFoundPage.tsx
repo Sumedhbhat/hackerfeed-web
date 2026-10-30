@@ -1,10 +1,10 @@
+import { Heading } from "@hackerfeed/ui/atoms/Heading";
+import { Icon } from "@hackerfeed/ui/atoms/Icon";
+import { Kicker } from "@hackerfeed/ui/atoms/Kicker";
+import { TextLink } from "@hackerfeed/ui/atoms/Link";
+import { PageContainer } from "@hackerfeed/ui/atoms/PageContainer";
+import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { ArrowLeft } from "lucide-react";
-import { Heading } from "#/components/atoms/Heading";
-import { Icon } from "#/components/atoms/Icon";
-import { Kicker } from "#/components/atoms/Kicker";
-import { TextLink } from "#/components/atoms/Link";
-import { PageContainer } from "#/components/atoms/PageContainer";
-import { Stack } from "#/components/atoms/Stack";
 
 /** Shown when the requested story doesn't exist. */
 export function StoryNotFoundPage() {

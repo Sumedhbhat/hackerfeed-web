@@ -1,10 +1,10 @@
+import { Icon } from "@hackerfeed/ui/atoms/Icon";
+import { PageContainer } from "@hackerfeed/ui/atoms/PageContainer";
+import { BackLink } from "@hackerfeed/ui/molecules/BackLink";
+import { CardSkeleton } from "@hackerfeed/ui/molecules/CardSkeleton";
+import { NoticeCard } from "@hackerfeed/ui/molecules/NoticeCard";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
-import { Icon } from "#/components/atoms/Icon";
-import { PageContainer } from "#/components/atoms/PageContainer";
-import { BackLink } from "#/components/molecules/BackLink";
-import { CardSkeleton } from "#/components/molecules/CardSkeleton";
-import { NoticeCard } from "#/components/molecules/NoticeCard";
 import { StoryChat } from "#/components/organisms/chat/StoryChat";
 import { storyQueryOptions } from "#/lib/hacker-news/queries";
 

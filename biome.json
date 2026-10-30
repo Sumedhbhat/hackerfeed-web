@@ -48,19 +48,19 @@
 					"level": "error",
 					"options": {
 						"elements": {
-							"button": "Use <Button> from #/components/atoms/Button.",
-							"a": "Use <TextLink>/<ExternalLink> from #/components/atoms/Link or <ButtonLink>/<ExternalButtonLink> from #/components/atoms/Button.",
-							"input": "Use <TextInput> from #/components/atoms/TextField, or add a field atom.",
-							"textarea": "Use <TextArea> from #/components/atoms/TextField.",
-							"select": "Use <Select> from #/components/atoms/TextField or <SelectField> from #/components/molecules/SelectField.",
-							"h1": "Use <Heading level={1}> from #/components/atoms/Heading.",
-							"h2": "Use <Heading level={2}> from #/components/atoms/Heading.",
-							"h3": "Use <Heading level={3}> from #/components/atoms/Heading.",
-							"h4": "Use <Heading level={4}> from #/components/atoms/Heading.",
-							"h5": "Use <Heading> from #/components/atoms/Heading.",
-							"h6": "Use <Heading> from #/components/atoms/Heading.",
-							"p": "Use <Text> from #/components/atoms/Text.",
-							"img": "Use <Avatar> or add an image atom in #/components/atoms.",
+							"button": "Use <Button> from @hackerfeed/ui/atoms/Button.",
+							"a": "Use <TextLink>/<ExternalLink> from @hackerfeed/ui/atoms/Link or <ButtonLink>/<ExternalButtonLink> from @hackerfeed/ui/atoms/Button.",
+							"input": "Use <TextInput> from @hackerfeed/ui/atoms/TextField, or add a field atom.",
+							"textarea": "Use <TextArea> from @hackerfeed/ui/atoms/TextField.",
+							"select": "Use <Select> from @hackerfeed/ui/atoms/TextField or <SelectField> from @hackerfeed/ui/molecules/SelectField.",
+							"h1": "Use <Heading level={1}> from @hackerfeed/ui/atoms/Heading.",
+							"h2": "Use <Heading level={2}> from @hackerfeed/ui/atoms/Heading.",
+							"h3": "Use <Heading level={3}> from @hackerfeed/ui/atoms/Heading.",
+							"h4": "Use <Heading level={4}> from @hackerfeed/ui/atoms/Heading.",
+							"h5": "Use <Heading> from @hackerfeed/ui/atoms/Heading.",
+							"h6": "Use <Heading> from @hackerfeed/ui/atoms/Heading.",
+							"p": "Use <Text> from @hackerfeed/ui/atoms/Text.",
+							"img": "Use <Avatar> or add an image atom in @hackerfeed/ui/atoms.",
 							"style": "Styles live in atoms/molecules (Tailwind) or src/styles.css, never in an inline <style>."
 						}
 					}
@@ -73,7 +73,7 @@
 						"patterns": [
 							{
 								"group": ["@base-ui/**"],
-								"message": "Base UI is wrapped by the atoms in #/components/atoms (Tabs, Menu, Toggle, Select...). Use or extend an atom instead of importing Base UI here."
+								"message": "Base UI is wrapped by the atoms in @hackerfeed/ui/atoms (Tabs, Menu, Toggle, Select...). Use or extend an atom instead of importing Base UI here."
 							}
 						]
 					}
@@ -89,8 +89,8 @@
 	"overrides": [
 		{
 			"includes": [
-				"**/src/components/atoms/**",
-				"**/src/components/molecules/**",
+				"**/packages/ui/src/atoms/**",
+				"**/packages/ui/src/molecules/**",
 				"**/*.test.tsx",
 				"**/src/client-entry.tsx",
 				"**/src/router.tsx",
@@ -107,8 +107,8 @@
 		{
 			"includes": [
 				"**/src/**/*.tsx",
-				"!**/src/components/atoms/**",
-				"!**/src/components/molecules/**",
+				"!**/packages/ui/src/atoms/**",
+				"!**/packages/ui/src/molecules/**",
 				"!**/*.test.tsx",
 				"!**/src/client-entry.tsx",
 				"!**/src/router.tsx",
@@ -117,7 +117,7 @@
 			"plugins": ["./lint/no-styling-outside-atoms.grit"]
 		},
 		{
-			"includes": ["**/src/components/atoms/**", "!**/*.test.tsx"],
+			"includes": ["**/packages/ui/src/atoms/**", "!**/*.test.tsx"],
 			"linter": {
 				"rules": {
 					"style": {
@@ -127,13 +127,11 @@
 								"patterns": [
 									{
 										"group": [
-											"#/hooks/*",
-											"#/lib/*",
-											"#/server/*",
-											"#/components/organisms/*",
-											"#/components/pages/*"
+											"#/**",
+											"@hackerfeed/**",
+											"!@hackerfeed/ui/atoms/**"
 										],
-										"message": "Atoms and molecules are presentational: take data and callbacks as props instead of importing hooks, lib or higher layers."
+										"message": "Atoms are the lowest layer: import only other atoms, and take data and callbacks as props instead of importing molecules, app code or other workspace packages."
 									}
 								]
 							}
@@ -143,7 +141,7 @@
 			}
 		},
 		{
-			"includes": ["**/src/components/molecules/**", "!**/*.test.tsx"],
+			"includes": ["**/packages/ui/src/molecules/**", "!**/*.test.tsx"],
 			"linter": {
 				"rules": {
 					"style": {
@@ -152,18 +150,12 @@
 							"options": {
 								"patterns": [
 									{
-										"group": [
-											"#/hooks/*",
-											"#/lib/*",
-											"#/server/*",
-											"#/components/organisms/*",
-											"#/components/pages/*"
-										],
-										"message": "Atoms and molecules are presentational: take data and callbacks as props instead of importing hooks, lib or higher layers."
+										"group": ["#/**", "@hackerfeed/**", "!@hackerfeed/ui/**"],
+										"message": "Atoms and molecules are presentational: take data and callbacks as props instead of importing app code or other workspace packages."
 									},
 									{
 										"group": ["@base-ui/**"],
-										"message": "Base UI is wrapped by the atoms in #/components/atoms (Tabs, Menu, Toggle, Select...). Use or extend an atom instead of importing Base UI here."
+										"message": "Base UI is wrapped by the atoms in @hackerfeed/ui/atoms (Tabs, Menu, Toggle, Select...). Use or extend an atom instead of importing Base UI here."
 									}
 								]
 							}

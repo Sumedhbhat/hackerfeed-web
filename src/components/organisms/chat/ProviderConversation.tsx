@@ -2,21 +2,21 @@ import {
 	type AiProviderStatus,
 	MAX_CHAT_MESSAGE_LENGTH,
 } from "@hackerfeed/contracts/ai";
+import { Button } from "@hackerfeed/ui/atoms/Button";
+import { Card } from "@hackerfeed/ui/atoms/Card";
+import { TextLink } from "@hackerfeed/ui/atoms/Link";
+import { Row } from "@hackerfeed/ui/atoms/Row";
+import { Stack } from "@hackerfeed/ui/atoms/Stack";
+import { Text } from "@hackerfeed/ui/atoms/Text";
+import { CardSkeleton } from "@hackerfeed/ui/molecules/CardSkeleton";
+import { ChatComposer } from "@hackerfeed/ui/molecules/ChatComposer";
+import { ChatMessage } from "@hackerfeed/ui/molecules/ChatMessage";
+import { IconText } from "@hackerfeed/ui/molecules/IconText";
+import { InlineNotice } from "@hackerfeed/ui/molecules/InlineNotice";
+import { NoticeCard } from "@hackerfeed/ui/molecules/NoticeCard";
+import { SelectField } from "@hackerfeed/ui/molecules/SelectField";
 import { MessageCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Button } from "#/components/atoms/Button";
-import { Card } from "#/components/atoms/Card";
-import { TextLink } from "#/components/atoms/Link";
-import { Row } from "#/components/atoms/Row";
-import { Stack } from "#/components/atoms/Stack";
-import { Text } from "#/components/atoms/Text";
-import { CardSkeleton } from "#/components/molecules/CardSkeleton";
-import { ChatComposer } from "#/components/molecules/ChatComposer";
-import { ChatMessage } from "#/components/molecules/ChatMessage";
-import { IconText } from "#/components/molecules/IconText";
-import { InlineNotice } from "#/components/molecules/InlineNotice";
-import { NoticeCard } from "#/components/molecules/NoticeCard";
-import { SelectField } from "#/components/molecules/SelectField";
 import { useAiModels, useStoryChat } from "#/hooks/useAiProviders";
 
 export const STARTER_PROMPTS = [
