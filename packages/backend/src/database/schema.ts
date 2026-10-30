@@ -271,7 +271,7 @@ export const hfIngestionRuns = sqliteTable(
 /**
  * Catalog of AI apps users can connect with their own subscription (e.g.
  * ChatGPT). Each enabled row needs a matching adapter in
- * `src/server/ai/providers`; rows without one are hidden.
+ * `src/ai/providers`; rows without one are hidden.
  */
 export const aiProviders = sqliteTable("ai_providers", {
 	/** Stable slug used in URLs and to pick the adapter, e.g. "chatgpt". */

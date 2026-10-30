@@ -7,18 +7,23 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "bun run --filter @hackerfeed/web dev",
-    "dev:demo": "bun run --filter @hackerfeed/web dev:demo",
+    "dev": "bun run --cwd apps/web dev",
+    "dev:demo": "bun run --cwd apps/web dev:demo",
     "build": "nx run web:build",
     "build:demo": "nx run web:build-demo",
+    "preview:private": "bun run --cwd apps/web preview:private",
+    "demo-data:compare": "bun run --cwd apps/web demo-data:compare",
+    "cf:typegen": "bun run --cwd apps/web cf:typegen",
+    "db:generate": "bun run --cwd packages/backend db:generate",
+    "db:migrate:local": "bun run --cwd apps/web db:migrate:local",
     "security:audit": "bun audit --audit-level=high",
     "test": "nx run-many -t test",
     "typecheck": "nx run-many -t typecheck",
+    "check:workspace": "bun tools/workspace/src/check-workspace.ts",
+    "new:library": "bun tools/workspace/src/new-library.ts",
     "format": "biome format",
     "lint": "biome lint",
-    "check": "biome check",
-    "new:library": "bun tools/workspace/src/new-library.ts",
-    "check:workspace": "bun tools/workspace/src/check-workspace.ts"
+    "check": "biome check"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",

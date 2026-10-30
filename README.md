@@ -13,6 +13,7 @@ It runs on Cloudflare Workers with D1 for persistent app data.
 - WorkOS AuthKit for authentication
 - Sentry for browser and Worker observability
 - Biome and Vitest for quality checks
+- Nx and Bun workspaces for project boundaries and dependency-aware checks
 
 ## Getting Started
 
@@ -25,27 +26,73 @@ bun run dev
 
 The dev server listens on port 3000.
 
+## Workspace
+
+The repository is an Nx workspace of Bun workspace packages. HackerFeed is
+still one deployed Worker; the packages give each part a public interface and
+its own checks.
+
+| Project | Path | What it holds |
+|---|---|---|
+| `web` | `apps/web` | The TanStack Start host: routes, pages, hooks, demo data, Vite and Wrangler config |
+| `ui` | `packages/ui` | Atoms, molecules and the design tokens stylesheet |
+| `contracts` | `packages/contracts` | Zod request/response schemas shared by browser and Worker |
+| `hacker-news` | `packages/hacker-news` | Hacker News record types and display helpers |
+| `runtime` | `packages/runtime` | Logger, trace headers, Sentry data policy, HTTP client |
+| `backend` | `packages/backend` | Services, repositories, the Drizzle schema, migrations and the tRPC router |
+| `api-client` | `packages/api-client` | Browser transports for tRPC, AI and feature flags |
+| `state-backend` | `apps/state-backend` | The Terraform state Worker |
+| `infra-prod` | `infra/cloudflare-prod` | Terraform root for the `prod` state |
+| `infra-deploy` | `infra/deploy-access` | Terraform root for the production-only `deploy` state |
+| `tf-ci-token` | `infra/modules/ci-token` | The Terraform module that mints CI tokens |
+| `infra-ci` | `tools/infra-ci` | The OIDC state wrapper, cancellation and recovery tooling |
+| `workspace` | `tools/workspace` | Boundary checks, affected selection and the library generator |
+
+Packages import each other only through their `package.json` `exports`, for
+example `@hackerfeed/ui/atoms/Button`. Inside `apps/web`, `#/*` still maps to
+`apps/web/src/*`. Every project has `type:*`, `platform:*` and `scope:*` tags
+and an owner in `project.json`. `tools/workspace/src/policy.ts` says which
+types and platforms may import which, and `bun run check:workspace` enforces
+it (see [Project boundaries](#project-boundaries)).
+
+Run one project's targets with Nx, for example `bunx nx test backend` or
+`bunx nx run-many -t lint,typecheck,test -p ui,web`. `bunx nx graph` draws the
+project graph.
+
+To add a shared library:
+
+```bash
+bun run new:library <name> --type <type> --platform <platform>
+bun install
+```
+
+It gets exports, tags, an owner and `lint`, `typecheck` and `test` targets, so
+CI checks it without workflow changes.
+
 ## Scripts
 
 ```bash
 bun run dev              # Start Vite dev server on port 3000
-bun run build            # Production build
-bun run preview          # Preview the production build locally
+bun run build            # Production build (apps/web/dist)
 gh workflow run deploy.yaml  # Deploy with Terraform outputs in CI
-bun run test             # Run Vitest
+bun run test             # Every project's tests, through Nx
+bun run typecheck        # Every project's typecheck, through Nx
 bun run lint             # Run Biome lint
 bun run format           # Run Biome format
 bun run check            # Run Biome lint and format checks
+bun run check:workspace  # Check project tags, owners and import boundaries
 bun run security:audit   # Audit dependencies at high severity and above
 ```
 
 ## Environment
 
-Application environment variables are validated in `src/env.ts`. Cloudflare
-bindings and production defaults live in `wrangler.jsonc`.
+Application environment variables are validated in `apps/web/src/env.ts`.
+Cloudflare bindings and production defaults live in `apps/web/wrangler.jsonc`.
+The app reads env once and passes what the backend needs to `createBackend` in
+`apps/web/src/backend.ts`; packages never read env themselves.
 
-For local development, put public Vite values in `.env.local` and Worker-only
-secrets in `.dev.vars`:
+For local development, put public Vite values in `apps/web/.env.local` and
+Worker-only secrets in `apps/web/.dev.vars`:
 
 ```bash
 # .env.local
@@ -77,9 +124,10 @@ bun run cf:typegen
 
 ## Database
 
-Persistent data uses Cloudflare D1 through the `DB` binding in `wrangler.jsonc`.
-Tables are defined in `src/server/database/schema.ts`, SQL migrations live in
-`migrations/`, and Wrangler applies them.
+Persistent data uses Cloudflare D1 through the `DB` binding in
+`apps/web/wrangler.jsonc`. Tables are defined in
+`packages/backend/src/database/schema.ts`, SQL migrations live in
+`packages/backend/migrations/`, and Wrangler applies them.
 
 ```bash
 # After changing the Drizzle schema
@@ -131,30 +179,32 @@ GROUP BY s.id ORDER BY reads DESC LIMIT 20;
 ```
 
 To log a new action, add it to `activityActions` in
-`src/server/database/schema.ts`. No migration is needed. Story actions must
+`packages/backend/src/database/schema.ts`. No migration is needed. Story actions must
 start with `story.` and set `storyId`, and paper actions must start with
 `paper.` and set `paperId`. A CHECK constraint enforces the prefix and the
 matching column.
 
 ## Infrastructure
 
-`infra/terraform` creates the Cloudflare resources the app runs on: today, the
-D1 database and CI's Cloudflare tokens. It creates resources and nothing else. Wrangler deploys the
-Worker and its settings from `wrangler.jsonc`, and CI applies `migrations/` in
-its own step.
+The Terraform roots in `infra/cloudflare-prod` (`prod` state) and
+`infra/deploy-access` (`deploy` state) create the Cloudflare resources the app
+runs on: today, the D1 database and CI's Cloudflare tokens. Both use the
+`infra/modules/ci-token` module. They create resources and nothing else.
+Wrangler deploys the Worker and its settings from `apps/web/wrangler.jsonc`,
+and CI applies `packages/backend/migrations/` in its own step.
 
 Terraform owns the production database `hackerfeed` in the `prod` state. The
 import block adopts the existing database on the first apply. Its UUID appears
 only there for bootstrap. CI reconciles it on every production run, reads
 `database_id` and `database_name`, and passes them to the build as
-`D1_DATABASE_ID` and `D1_DATABASE_NAME`. `vite.config.ts` writes them into the
-`DB` binding of the generated `dist/server/wrangler.json`, which migrations and
-deployment both use.
+`D1_DATABASE_ID` and `D1_DATABASE_NAME`. `apps/web/vite.config.ts` writes them
+into the `DB` binding of the generated `apps/web/dist/server/wrangler.json`,
+which migrations and deployment both use.
 The checked-in Wrangler binding uses `local-hackerfeed` for local development;
 it is not a remote database identity. Run remote migrations through CI.
 
 PR previews are static fixture demos uploaded as versions of `hackerfeed-web`
-using `wrangler.preview.jsonc`, without deploying them. Branch aliases and
+using `apps/web/wrangler.preview.jsonc`, without deploying them. Branch aliases and
 immutable commit URLs are reported on the PR. Because those uploads are newer
 than the last release, roll back from the dashboard's deployment list or with
 `wrangler rollback <version-id>`: a bare `wrangler rollback` targets the
@@ -171,10 +221,10 @@ needs first. Terraform mints, scopes and rotates every other token:
 
 | Token | Root and state | Used by |
 |---|---|---|
-| `hackerfeed-ci-deploy` | `infra/terraform/deploy`, `deploy` | migrations and Worker deploys |
-| `hackerfeed-ci-preview` | `infra/terraform`, `prod` | PR version uploads and PR plans |
+| `hackerfeed-ci-deploy` | `infra/deploy-access`, `deploy` | migrations and Worker deploys |
+| `hackerfeed-ci-preview` | `infra/cloudflare-prod`, `prod` | PR version uploads and PR plans |
 
-Jobs read them from Terraform outputs with `infra/cloudflare-token.sh`, so the
+Jobs read them from Terraform outputs with `tools/infra-ci/cloudflare-token.sh`, so the
 `preview` environment holds no Cloudflare token. Token values sit in plain text
 in state, and PR jobs can read `prod`; production-only tokens go in `deploy`,
 which only `production` can read. See
@@ -186,7 +236,7 @@ cleanup. PRs also show a read-only production Terraform plan.
 
 ### State and sign-in
 
-Terraform state lives in `infra/state-backend`, a small Worker on the free plan
+Terraform state lives in `apps/state-backend`, a small Worker on the free plan
 (`hackerfeed-terraform-state`) that stores state and locks in its own D1
 database. There is no stored password: each CI job requests a GitHub OIDC
 token, and the Worker verifies it against GitHub's keys and this repository's
@@ -197,7 +247,8 @@ id. The job's GitHub environment decides what it may touch:
 | `production` (master only) | read, write, lock | read, write, lock |
 | `preview` (pull requests) | read only, for PR plans | none |
 
-Every Terraform command goes through `infra/terraform.sh`. A Python 3 loopback
+Every Terraform command goes through `tools/infra-ci/terraform.sh`, which maps
+each state name to its root directory. A Python 3 loopback
 proxy requests and refreshes OIDC credentials while Terraform runs, so a long
 apply can still save state and release its lock. Each invocation has its own
 port and password; the proxy forwards only that stage to the fixed state
@@ -228,12 +279,12 @@ AES-256-CBC with PBKDF2 and a separate HMAC-SHA256 check. The key is the job's
 existing `CLOUDFLARE_API_TOKEN`, so retain that credential until recovery is done.
 Download both `.enc` and `.hmac` files promptly. In a secure environment with the
 original credential set, run
-`python3 infra/recovery_state.py <file.tfstate.enc> <recovered.tfstate>`. Recover
+`python3 tools/infra-ci/recovery_state.py <file.tfstate.enc> <recovered.tfstate>`. Recover
 remote state through an authorized CI job before applying again. Do not paste
 state into logs, comments, or issues. Local regression tests run with
-`python3 -m unittest discover -s infra/tests -p 'test_*.py' -v` and
-`bun test infra/tests/state-backend.test.js`; they do not write live
+`bunx nx run-many -t test -p infra-ci,state-backend`; they do not write live
 infrastructure. Put Terraform 1.13.4 on `PATH` to run the integration cases.
+`bunx nx run-many -t fmt,validate` checks every Terraform project offline.
 
 ## AI Assistants (bring your own subscription)
 
@@ -247,10 +298,10 @@ The feature is provider-agnostic:
 - **`ai_providers` table:** the catalog of AI apps shown on the profile page
   (`id`, `name`, `description`, `manageUrl`, `enabled`, `sortOrder`). It's
   seeded with one row, `chatgpt`.
-- **Adapters (`src/server/ai/providers/<id>/`):** everything protocol-specific
-  (OAuth, token refresh, models, streaming) behind the `AiProviderAdapter`
-  interface in `src/server/ai/types.ts`.
-- **Generic core (`src/server/ai/`):** sessions, the sealed OAuth flow cookie,
+- **Adapters (`packages/backend/src/ai/providers/<id>/`):** everything
+  protocol-specific (OAuth, token refresh, models, streaming) behind the
+  `AiProviderAdapter` interface in `packages/backend/src/ai/types.ts`.
+- **Generic core (`packages/backend/src/ai/`):** sessions, the sealed OAuth flow cookie,
   token encryption, refresh-before-expiry, disconnects, and the HTTP routes:
   - `GET /ai/:provider/connect` and `GET /ai/:provider/callback`
   - `GET /api/ai/providers`
@@ -264,8 +315,8 @@ stored.
 
 ### Adding a provider
 
-1. Implement `AiProviderAdapter` in `src/server/ai/providers/<id>/`.
-2. Register it in the `adapters` list in `src/server/ai/runtime.ts`.
+1. Implement `AiProviderAdapter` in `packages/backend/src/ai/providers/<id>/`.
+2. Register it in the `adapters` list in `packages/backend/src/ai/runtime.ts`.
 3. Add a row with the same `id` to `ai_providers` in a migration.
 
 A row without an adapter is hidden. Setting `enabled` to 0 turns a provider off
@@ -274,7 +325,7 @@ without a deploy.
 ### Configuration
 
 ```bash
-# .dev.vars (optional)
+# apps/web/.dev.vars (optional)
 CHATGPT_CLIENT_ID=oaiapp_...         # issued by OpenAI for this deployment
 CHATGPT_CLIENT_SECRET=...            # only for confidential clients
 ```
@@ -295,7 +346,7 @@ ChatGPT uses
 
 The `/papers` route serves the latest successful Hugging Face Daily Papers
 edition from D1. The same Worker runs ingestion from the Cloudflare cron
-configured in `wrangler.jsonc`:
+configured in `apps/web/wrangler.jsonc`:
 
 ```text
 30 23 * * *  # 23:30 UTC / 05:00 Asia/Kolkata
@@ -310,21 +361,32 @@ Planning docs for this feature live in `docs/paper/`:
 - `docs/paper/issue.md`
 - `docs/paper/questions.md`
 
-## Backend Boundaries
+## Project boundaries
 
-The backend currently lives inside the TanStack Start app, but it should remain
-separable from the React application so it can later move to an independent API
-service.
+HackerFeed is a modular monolith: one Worker, built from packages with
+enforced interfaces. The backend lives in `packages/backend` so it can later
+move to an independent API service.
 
-Server-only modules live under `src/server/` and must not be imported by React
-UI, client hooks, or browser code. This includes database access, auth session
-resolution, user and favorites services, Hugging Face Papers ingestion, and
-tRPC context/router/handler modules.
+- `apps/web` is the host. Its routes are thin adapters that call the
+  `backend` built in `apps/web/src/backend.ts`.
+- The browser reaches backend behavior only over HTTP, through the clients in
+  `packages/api-client`.
+- `api-client` is the only project allowed to import `backend`, and only the
+  types in `@hackerfeed/backend/api-types` (tRPC infers its client from the
+  router's type). The import must be `import type`, so it is erased from the
+  bundle. CI also fails the build if a backend table name appears in
+  `apps/web/dist/client`.
+- Shared schemas live in `packages/contracts`, never next to the Drizzle
+  tables. The backend maps rows to these DTOs.
+- `packages/ui` is presentational: no app code, workspace packages, API clients
+  or auth.
 
-React UI and hooks communicate with backend behavior through the tRPC client.
-Shared schemas that are safe for both client and server imports live outside
-`src/server/`, such as `src/lib/favorites/schemas.ts` and
-`src/lib/papers/schemas.ts`.
+`bun run check:workspace` (`tools/workspace/src/check-workspace.ts`) enforces
+these rules, plus file ownership, declared dependencies, public exports,
+Terraform module edges and cycles. The rules are data in
+`tools/workspace/src/policy.ts`. Nx's ESLint boundary rule isn't used:
+typescript-eslint needs the TypeScript JS API, and TypeScript 7 doesn't ship
+one.
 
 tRPC is the current application boundary. Route handlers adapt HTTP/tRPC
 requests to backend services; durable domain behavior belongs in services, and
@@ -332,6 +394,20 @@ database details belong in repositories.
 
 Story freshness is refresh-on-favorite for this rollout. Stale-on-read story
 refresh is intentionally deferred.
+
+### Affected checks
+
+PR builds still run every check on every project. They also record which
+projects Nx would select for the change (`tools/workspace/src/affected.ts`,
+"Affected projects" in the job summary), so the selection can be compared
+with the full run before CI switches to it. Root manifests, the lockfile,
+workflows, Biome and lint rules, and `tools/workspace` count as inputs to
+every project, so a change there selects everything. A missing base commit
+also selects everything. `tools/workspace/src/affected.test.ts` pins the
+expected selection for each kind of change.
+
+Nx caches `lint`, `typecheck` and Vitest `test` results locally. Builds,
+Terraform, migrations and deploys are never cached. There is no remote cache.
 
 ## Observability
 
@@ -371,11 +447,13 @@ without the token skip source maps.
 
 ## Routing
 
-Routes live in `src/routes/`. `src/routeTree.gen.ts` is generated by the
-TanStack Router Vite plugin and should not be edited manually. Add routes by
-creating files in `src/routes/`; the plugin regenerates the tree on the next dev
-server restart or build.
+Routes live in `apps/web/src/routes/`. `apps/web/src/routeTree.gen.ts` is
+generated by the TanStack Router Vite plugin and should not be edited manually.
+Add routes by creating files in `apps/web/src/routes/`; the plugin regenerates
+the tree on the next dev server restart or build.
 
 ## Styling
 
-Styling uses Tailwind CSS in `src/styles.css`.
+Styling uses Tailwind CSS in `packages/ui/src/styles.css`, which the app loads
+as `@hackerfeed/ui/styles.css`. Tailwind scans `packages/ui/src` through
+`@source`; only atoms and molecules carry classes.
