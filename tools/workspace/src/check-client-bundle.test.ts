@@ -20,24 +20,28 @@ function bundle(files: Record<string, string>) {
 }
 
 describe("client bundle check", () => {
-	it("takes the snake_case table names from the schema", () => {
+	it("takes every table name from the schema", () => {
 		const schema = `export const a = sqliteTable("app_users", {});
 export const b = sqliteTable(
 	"stories", {});
 export const c = sqliteTable("hf_papers", {});`;
-		expect(backendMarkers(schema)).toEqual(["app_users", "hf_papers"]);
+		expect(backendMarkers(schema)).toEqual([
+			"app_users",
+			"stories",
+			"hf_papers",
+		]);
 	});
 
-	it("reports a chunk that carries a table name", () => {
+	it("reports a chunk that declares a table, even without an underscore", () => {
 		const found = findBackendCode(
 			bundle({
-				"assets/ok.js": `const label = "Saved papers";`,
-				"assets/leak.js": `const t = sqliteTable("hf_papers", {});`,
+				"assets/ok.js": `const tab = { id: "stories", label: "favorites" };`,
+				"assets/leak.js": `const t=q("stories",{id:i("id")});`,
 			}),
-			["hf_papers"],
+			["stories", "favorites"],
 		);
 		expect(found).toEqual([
-			`${join(directory, "assets/leak.js")}: "hf_papers"`,
+			`${join(directory, "assets/leak.js")}: table stories`,
 		]);
 	});
 

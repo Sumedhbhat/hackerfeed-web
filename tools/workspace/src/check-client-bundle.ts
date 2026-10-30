@@ -1,6 +1,7 @@
-// Fails when backend code reaches the browser bundle. The Drizzle table names
-// (the snake_case ones, which no UI string uses) live only in backend runtime
-// code, so one in dist/client means a non-type import pulled it in.
+// Fails when backend code reaches the browser bundle. Drizzle declares each
+// table as sqliteTable("name", { ...columns }), which bundles to `"name",{`.
+// Only backend runtime code has that shape, so finding it in dist/client means
+// a non-type import pulled the backend in.
 //
 //   bun tools/workspace/src/check-client-bundle.ts [dist/client]
 import { readdirSync, readFileSync } from "node:fs";
@@ -10,9 +11,9 @@ import { fileURLToPath } from "node:url";
 const root = join(import.meta.dirname, "../../..");
 
 export function backendMarkers(schemaSource: string): string[] {
-	return [...schemaSource.matchAll(/sqliteTable\(\s*"([^"]+)"/g)]
-		.map((match) => match[1])
-		.filter((name) => name.includes("_"));
+	return [...schemaSource.matchAll(/sqliteTable\(\s*"([^"]+)"/g)].map(
+		(match) => match[1],
+	);
 }
 
 function* files(directory: string): Generator<string> {
@@ -27,12 +28,13 @@ export function findBackendCode(
 	bundleDirectory: string,
 	markers: string[],
 ): string[] {
-	const quoted = markers.flatMap((name) => [`"${name}"`, `'${name}'`]);
 	return [...files(bundleDirectory)].flatMap((path) => {
 		const text = readFileSync(path, "utf8");
-		return quoted
-			.filter((marker) => text.includes(marker))
-			.map((marker) => `${path}: ${marker}`);
+		return markers
+			.filter((name) =>
+				new RegExp(`["'\`]${name}["'\`]\\s*,\\s*\\{`).test(text),
+			)
+			.map((name) => `${path}: table ${name}`);
 	});
 }
 
