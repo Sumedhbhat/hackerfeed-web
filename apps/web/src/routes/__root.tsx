@@ -1,4 +1,10 @@
 import { logger } from "@hackerfeed/runtime/logger";
+import { Document } from "@hackerfeed/ui/atoms/Document";
+import { ToastProvider } from "@hackerfeed/ui/atoms/Toast";
+import { AppShell } from "@hackerfeed/ui/molecules/AppShell";
+import { FatalErrorView } from "@hackerfeed/ui/molecules/FatalErrorView";
+import { LoadingScreen } from "@hackerfeed/ui/molecules/LoadingScreen";
+import appCss from "@hackerfeed/ui/styles.css?url";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import type { QueryClient } from "@tanstack/react-query";
 import {
@@ -10,11 +16,6 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { type ReactNode, useEffect } from "react";
-import { Document } from "../components/atoms/Document";
-import { ToastProvider } from "../components/atoms/Toast";
-import { AppShell } from "../components/molecules/AppShell";
-import { FatalErrorView } from "../components/molecules/FatalErrorView";
-import { LoadingScreen } from "../components/molecules/LoadingScreen";
 import { ErrorNotifications } from "../components/organisms/layout/ErrorNotifications";
 import SiteFooter from "../components/organisms/layout/SiteFooter";
 import SiteHeader from "../components/organisms/layout/SiteHeader";
@@ -25,7 +26,6 @@ import { useLocalFavoritesMigration } from "../hooks/useLocalFavoritesMigration"
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 import TanStackQueryProvider from "../integrations/tanstack-query/root-provider";
 import { AuthProvider } from "../integrations/workos/provider";
-import appCss from "../styles.css?url";
 
 interface MyRouterContext {
 	queryClient: QueryClient;

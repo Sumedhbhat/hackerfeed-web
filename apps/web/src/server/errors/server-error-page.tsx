@@ -1,7 +1,7 @@
 import "@tanstack/react-start/server-only";
 
+import { FatalErrorView } from "@hackerfeed/ui/molecules/FatalErrorView";
 import { renderToStaticMarkup } from "react-dom/server";
-import { FatalErrorView } from "#/components/molecules/FatalErrorView";
 
 const documentStyles = `
 		:root { color-scheme: light dark; }

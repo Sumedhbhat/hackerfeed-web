@@ -1,5 +1,5 @@
-import { Skeleton, SkeletonGroup } from "#/components/atoms/Skeleton";
-import { Stack } from "#/components/atoms/Stack";
+import { Skeleton, SkeletonGroup } from "../atoms/Skeleton";
+import { Stack } from "../atoms/Stack";
 
 /** Placeholder with the shape of one comment, shown while replies load. */
 export function CommentSkeleton() {

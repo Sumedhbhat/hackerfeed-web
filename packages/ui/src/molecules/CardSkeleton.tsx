@@ -1,5 +1,5 @@
-import { Card } from "#/components/atoms/Card";
-import { Skeleton, SkeletonGroup } from "#/components/atoms/Skeleton";
+import { Card } from "../atoms/Card";
+import { Skeleton, SkeletonGroup } from "../atoms/Skeleton";
 
 /** Card holding one pulsing bar, shown while a section loads. */
 export function CardSkeleton({

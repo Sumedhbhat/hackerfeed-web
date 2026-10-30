@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
-import { Card } from "#/components/atoms/Card";
-import { Heading } from "#/components/atoms/Heading";
-import { Kicker } from "#/components/atoms/Kicker";
-import { Stack } from "#/components/atoms/Stack";
-import { Text } from "#/components/atoms/Text";
+import { Card } from "../atoms/Card";
+import { Heading } from "../atoms/Heading";
+import { Kicker } from "../atoms/Kicker";
+import { Stack } from "../atoms/Stack";
+import { Text } from "../atoms/Text";
 
 type EmptyStateProps = {
 	kicker: string;

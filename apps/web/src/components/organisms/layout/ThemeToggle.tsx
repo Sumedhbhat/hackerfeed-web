@@ -1,5 +1,5 @@
+import { Button } from "@hackerfeed/ui/atoms/Button";
 import { Moon, Sun } from "lucide-react";
-import { Button } from "#/components/atoms/Button";
 import { useTheme } from "#/hooks/useTheme";
 
 export default function ThemeToggle() {

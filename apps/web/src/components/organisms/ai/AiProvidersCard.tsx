@@ -1,12 +1,12 @@
+import { Button } from "@hackerfeed/ui/atoms/Button";
+import { PanelSection } from "@hackerfeed/ui/atoms/PanelSection";
+import { Row } from "@hackerfeed/ui/atoms/Row";
+import { Skeleton, SkeletonGroup } from "@hackerfeed/ui/atoms/Skeleton";
+import { Stack } from "@hackerfeed/ui/atoms/Stack";
+import { Text } from "@hackerfeed/ui/atoms/Text";
+import { IconHeading } from "@hackerfeed/ui/molecules/IconHeading";
+import { IconText } from "@hackerfeed/ui/molecules/IconText";
 import { CheckCircle2, Sparkles, TriangleAlert } from "lucide-react";
-import { Button } from "#/components/atoms/Button";
-import { PanelSection } from "#/components/atoms/PanelSection";
-import { Row } from "#/components/atoms/Row";
-import { Skeleton, SkeletonGroup } from "#/components/atoms/Skeleton";
-import { Stack } from "#/components/atoms/Stack";
-import { Text } from "#/components/atoms/Text";
-import { IconHeading } from "#/components/molecules/IconHeading";
-import { IconText } from "#/components/molecules/IconText";
 import { AiProviderRow } from "#/components/organisms/ai/AiProviderRow";
 import { useAiProviders } from "#/hooks/useAiProviders";
 

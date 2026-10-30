@@ -1,7 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
-import { Heading } from "#/components/atoms/Heading";
-import { Icon } from "#/components/atoms/Icon";
+import { Heading } from "../atoms/Heading";
+import { Icon } from "../atoms/Icon";
 
 /** Small section heading with a soft icon in front of it. */
 export function IconHeading({

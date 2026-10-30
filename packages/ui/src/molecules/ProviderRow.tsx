@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Text } from "#/components/atoms/Text";
+import { Text } from "../atoms/Text";
 
 /** One connectable service in a list: name, status line, actions, and an optional error. */
 export function ProviderRow({

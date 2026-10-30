@@ -1,6 +1,6 @@
 import { type ReactNode, useId } from "react";
-import { Kicker } from "#/components/atoms/Kicker";
-import { ToggleButton, ToggleGroup } from "#/components/atoms/Toggle";
+import { Kicker } from "../atoms/Kicker";
+import { ToggleButton, ToggleGroup } from "../atoms/Toggle";
 
 type SortOption<T extends string> = { value: T; label: string };
 

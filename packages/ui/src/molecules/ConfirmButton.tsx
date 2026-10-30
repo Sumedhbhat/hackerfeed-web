@@ -6,7 +6,7 @@ import {
 	AlertDialogPopup,
 	AlertDialogTitle,
 	AlertDialogTrigger,
-} from "#/components/atoms/AlertDialog";
+} from "../atoms/AlertDialog";
 
 export function ConfirmButton({
 	children,

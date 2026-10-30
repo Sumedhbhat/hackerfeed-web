@@ -1,8 +1,8 @@
 import { Mail } from "lucide-react";
-import { Avatar } from "#/components/atoms/Avatar";
-import { Heading } from "#/components/atoms/Heading";
-import { Kicker } from "#/components/atoms/Kicker";
-import { IconText } from "#/components/molecules/IconText";
+import { Avatar } from "../atoms/Avatar";
+import { Heading } from "../atoms/Heading";
+import { Kicker } from "../atoms/Kicker";
+import { IconText } from "./IconText";
 
 /** Picture, name and email at the top of the profile page. */
 export function ProfileSummary({

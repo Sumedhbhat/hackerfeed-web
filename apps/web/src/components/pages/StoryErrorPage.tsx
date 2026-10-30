@@ -1,9 +1,9 @@
+import { Icon } from "@hackerfeed/ui/atoms/Icon";
+import { PageContainer } from "@hackerfeed/ui/atoms/PageContainer";
+import { BackLink } from "@hackerfeed/ui/molecules/BackLink";
+import { EmptyState } from "@hackerfeed/ui/molecules/EmptyState";
+import { TraceIdNote } from "@hackerfeed/ui/molecules/TraceIdNote";
 import { ArrowLeft } from "lucide-react";
-import { Icon } from "#/components/atoms/Icon";
-import { PageContainer } from "#/components/atoms/PageContainer";
-import { BackLink } from "#/components/molecules/BackLink";
-import { EmptyState } from "#/components/molecules/EmptyState";
-import { TraceIdNote } from "#/components/molecules/TraceIdNote";
 import { useErrorReport } from "#/hooks/useErrorReport";
 
 /** Shown when the story route's loader or render fails. */

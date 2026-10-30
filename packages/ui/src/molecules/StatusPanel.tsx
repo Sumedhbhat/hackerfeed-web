@@ -1,10 +1,10 @@
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
-import { Heading } from "#/components/atoms/Heading";
-import { IconBadge } from "#/components/atoms/IconBadge";
-import { Kicker } from "#/components/atoms/Kicker";
-import { Panel } from "#/components/atoms/Panel";
-import { Text } from "#/components/atoms/Text";
+import { Heading } from "../atoms/Heading";
+import { IconBadge } from "../atoms/IconBadge";
+import { Kicker } from "../atoms/Kicker";
+import { Panel } from "../atoms/Panel";
+import { Text } from "../atoms/Text";
 
 type StatusPanelProps = {
 	icon: LucideIcon;

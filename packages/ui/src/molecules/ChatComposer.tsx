@@ -1,8 +1,8 @@
 import { Send, Square } from "lucide-react";
 import type { FormEvent } from "react";
-import { Button } from "#/components/atoms/Button";
-import { Icon } from "#/components/atoms/Icon";
-import { TextArea } from "#/components/atoms/TextField";
+import { Button } from "../atoms/Button";
+import { Icon } from "../atoms/Icon";
+import { TextArea } from "../atoms/TextField";
 
 /** Message box with a Send button, or a Stop button while a reply streams in. */
 export function ChatComposer({

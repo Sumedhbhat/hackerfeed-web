@@ -1,4 +1,4 @@
-import { ToggleButton, ToggleGroup } from "#/components/atoms/Toggle";
+import { ToggleButton, ToggleGroup } from "../atoms/Toggle";
 
 type Topic = { keyword: string; paperCount: number };
 

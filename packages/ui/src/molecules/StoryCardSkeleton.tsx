@@ -1,7 +1,7 @@
-import { Card } from "#/components/atoms/Card";
-import { Row } from "#/components/atoms/Row";
-import { Skeleton, SkeletonGroup } from "#/components/atoms/Skeleton";
-import { Stack } from "#/components/atoms/Stack";
+import { Card } from "../atoms/Card";
+import { Row } from "../atoms/Row";
+import { Skeleton, SkeletonGroup } from "../atoms/Skeleton";
+import { Stack } from "../atoms/Stack";
 
 /** Placeholder with the shape of a StoryCard, shown while stories load. */
 export function StoryCardSkeleton() {

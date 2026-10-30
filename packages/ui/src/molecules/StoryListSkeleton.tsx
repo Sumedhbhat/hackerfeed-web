@@ -1,5 +1,5 @@
-import { Stack } from "#/components/atoms/Stack";
-import { StoryCardSkeleton } from "#/components/molecules/StoryCardSkeleton";
+import { Stack } from "../atoms/Stack";
+import { StoryCardSkeleton } from "./StoryCardSkeleton";
 
 /** A column of StoryCard placeholders, shown while a feed loads. */
 export function StoryListSkeleton({ count }: { count: number }) {

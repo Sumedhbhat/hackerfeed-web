@@ -1,11 +1,11 @@
+import { Avatar } from "@hackerfeed/ui/atoms/Avatar";
+import { AvatarSkeleton } from "@hackerfeed/ui/atoms/AvatarSkeleton";
+import { ButtonLink } from "@hackerfeed/ui/atoms/Button";
+import { MenuItem, MenuLinkItem } from "@hackerfeed/ui/atoms/Menu";
+import { Stack } from "@hackerfeed/ui/atoms/Stack";
+import { Text } from "@hackerfeed/ui/atoms/Text";
+import { DropdownMenu } from "@hackerfeed/ui/molecules/DropdownMenu";
 import { LogOut, User } from "lucide-react";
-import { Avatar } from "#/components/atoms/Avatar";
-import { AvatarSkeleton } from "#/components/atoms/AvatarSkeleton";
-import { ButtonLink } from "#/components/atoms/Button";
-import { MenuItem, MenuLinkItem } from "#/components/atoms/Menu";
-import { Stack } from "#/components/atoms/Stack";
-import { Text } from "#/components/atoms/Text";
-import { DropdownMenu } from "#/components/molecules/DropdownMenu";
 import { useUserMenu } from "#/hooks/useUserMenu";
 
 export default function UserMenu() {

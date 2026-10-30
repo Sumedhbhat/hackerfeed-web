@@ -1,4 +1,4 @@
-import { Button } from "#/components/atoms/Button";
+import { Button } from "../atoms/Button";
 
 /** Centered "load more" button under a list. */
 export function LoadMoreButton({

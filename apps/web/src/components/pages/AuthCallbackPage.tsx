@@ -1,11 +1,11 @@
+import { Button } from "@hackerfeed/ui/atoms/Button";
+import { PageContainer } from "@hackerfeed/ui/atoms/PageContainer";
+import { LoadingScreen } from "@hackerfeed/ui/molecules/LoadingScreen";
+import { StatusPanel } from "@hackerfeed/ui/molecules/StatusPanel";
+import { TraceIdNote } from "@hackerfeed/ui/molecules/TraceIdNote";
 import { Navigate } from "@tanstack/react-router";
 import { AlertCircle, RotateCw } from "lucide-react";
 import { useState } from "react";
-import { Button } from "#/components/atoms/Button";
-import { PageContainer } from "#/components/atoms/PageContainer";
-import { LoadingScreen } from "#/components/molecules/LoadingScreen";
-import { StatusPanel } from "#/components/molecules/StatusPanel";
-import { TraceIdNote } from "#/components/molecules/TraceIdNote";
 import { signIn, useAuthSession } from "#/hooks/useAuthSession";
 import { useErrorReport } from "#/hooks/useErrorReport";
 import { toSafeReturnTo } from "#/lib/auth/authkit";

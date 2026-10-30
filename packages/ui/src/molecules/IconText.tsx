@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
-import { Icon } from "#/components/atoms/Icon";
+import { Icon } from "../atoms/Icon";
 
 const TONE = {
 	default: "text-(--sea-ink)",

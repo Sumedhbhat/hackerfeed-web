@@ -1,7 +1,7 @@
-import { Card } from "#/components/atoms/Card";
-import { PageContainer } from "#/components/atoms/PageContainer";
-import { Row } from "#/components/atoms/Row";
-import { Skeleton, SkeletonGroup } from "#/components/atoms/Skeleton";
+import { Card } from "../atoms/Card";
+import { PageContainer } from "../atoms/PageContainer";
+import { Row } from "../atoms/Row";
+import { Skeleton, SkeletonGroup } from "../atoms/Skeleton";
 
 /** Placeholder for the story detail page: back link and story header card. */
 export function StoryPageSkeleton() {

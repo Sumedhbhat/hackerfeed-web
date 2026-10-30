@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { TextLink } from "#/components/atoms/Link";
+import { TextLink } from "../atoms/Link";
 
 /** "← Back" link at the top of detail pages. */
 export function BackLink({

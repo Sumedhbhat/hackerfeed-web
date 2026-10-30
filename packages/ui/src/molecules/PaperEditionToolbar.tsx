@@ -1,5 +1,5 @@
 import { CalendarDays, Search } from "lucide-react";
-import { TextInput } from "#/components/atoms/TextField";
+import { TextInput } from "../atoms/TextField";
 
 /** Search box and edition date picker at the top of the papers feed. */
 export function PaperEditionToolbar({

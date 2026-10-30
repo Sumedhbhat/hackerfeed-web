@@ -1,16 +1,16 @@
 import type { HackerNewsCommentRecord } from "@hackerfeed/hacker-news/records";
-import { Suspense } from "react";
 import {
 	Collapsible,
 	CollapsiblePanel,
 	CollapsibleTrigger,
-} from "#/components/atoms/Collapsible";
-import { Prose } from "#/components/atoms/Prose";
-import { Row } from "#/components/atoms/Row";
-import { Stack } from "#/components/atoms/Stack";
-import { Text } from "#/components/atoms/Text";
-import { ThreadItem } from "#/components/atoms/ThreadItem";
-import { CommentSkeleton } from "#/components/molecules/CommentSkeleton";
+} from "@hackerfeed/ui/atoms/Collapsible";
+import { Prose } from "@hackerfeed/ui/atoms/Prose";
+import { Row } from "@hackerfeed/ui/atoms/Row";
+import { Stack } from "@hackerfeed/ui/atoms/Stack";
+import { Text } from "@hackerfeed/ui/atoms/Text";
+import { ThreadItem } from "@hackerfeed/ui/atoms/ThreadItem";
+import { CommentSkeleton } from "@hackerfeed/ui/molecules/CommentSkeleton";
+import { Suspense } from "react";
 import { useComment } from "#/hooks/useComment";
 
 type CommentProps = {

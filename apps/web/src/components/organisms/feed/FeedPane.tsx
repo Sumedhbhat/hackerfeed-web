@@ -1,11 +1,11 @@
+import { Button } from "@hackerfeed/ui/atoms/Button";
+import { Icon } from "@hackerfeed/ui/atoms/Icon";
+import { Stack } from "@hackerfeed/ui/atoms/Stack";
+import { EmptyState } from "@hackerfeed/ui/molecules/EmptyState";
+import { LoadMoreButton } from "@hackerfeed/ui/molecules/LoadMoreButton";
 import { useSuspenseQueries } from "@tanstack/react-query";
 import { ArrowRight } from "lucide-react";
 import { Activity, Suspense } from "react";
-import { Button } from "#/components/atoms/Button";
-import { Icon } from "#/components/atoms/Icon";
-import { Stack } from "#/components/atoms/Stack";
-import { EmptyState } from "#/components/molecules/EmptyState";
-import { LoadMoreButton } from "#/components/molecules/LoadMoreButton";
 import { feedTabs } from "#/components/organisms/feed/feedTabs";
 import { StoryCard } from "#/components/organisms/story/StoryCard";
 import { FeedStatus, useFeed } from "#/hooks/useFeed";

@@ -1,4 +1,4 @@
-import { FooterBar } from "#/components/molecules/FooterBar";
+import { FooterBar } from "@hackerfeed/ui/molecules/FooterBar";
 
 export default function SiteFooter() {
 	const year = new Date().getFullYear();

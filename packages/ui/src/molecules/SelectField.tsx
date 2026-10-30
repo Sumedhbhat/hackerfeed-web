@@ -4,7 +4,7 @@ import {
 	type SelectOption,
 	SelectOptions,
 	SelectTrigger,
-} from "#/components/atoms/Select";
+} from "../atoms/Select";
 
 /** Labelled dropdown that sits inline with other controls, e.g. "Model [GPT-5 ▾]". */
 export function SelectField({

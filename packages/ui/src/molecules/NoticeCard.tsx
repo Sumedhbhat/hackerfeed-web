@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
-import { Card } from "#/components/atoms/Card";
-import { Heading } from "#/components/atoms/Heading";
-import { Text } from "#/components/atoms/Text";
+import { Card } from "../atoms/Card";
+import { Heading } from "../atoms/Heading";
+import { Text } from "../atoms/Text";
 
 /** Card with a short message and what to do about it, e.g. "Sign in to chat. [Sign in]". */
 export function NoticeCard({

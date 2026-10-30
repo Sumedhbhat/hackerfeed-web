@@ -1,8 +1,8 @@
 import type { AiProviderStatus } from "@hackerfeed/contracts/ai";
-import { Button } from "#/components/atoms/Button";
-import { ExternalLink } from "#/components/atoms/Link";
-import { Text } from "#/components/atoms/Text";
-import { ProviderRow } from "#/components/molecules/ProviderRow";
+import { Button } from "@hackerfeed/ui/atoms/Button";
+import { ExternalLink } from "@hackerfeed/ui/atoms/Link";
+import { Text } from "@hackerfeed/ui/atoms/Text";
+import { ProviderRow } from "@hackerfeed/ui/molecules/ProviderRow";
 import { useDisconnectAiProvider } from "#/hooks/useAiProviders";
 import { connectAiProvider } from "#/lib/ai/client";
 

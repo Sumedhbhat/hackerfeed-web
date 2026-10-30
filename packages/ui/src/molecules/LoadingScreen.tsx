@@ -1,4 +1,4 @@
-import { Spinner } from "#/components/atoms/Spinner";
+import { Spinner } from "../atoms/Spinner";
 
 /** Full-height centered spinner for whole-page loading. */
 export function LoadingScreen({ label }: { label?: string }) {

@@ -1,4 +1,5 @@
 import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
+import { StoryCardSkeleton } from "@hackerfeed/ui/molecules/StoryCardSkeleton";
 import {
 	cleanup,
 	fireEvent,
@@ -7,7 +8,6 @@ import {
 	waitFor,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { StoryCardSkeleton } from "#/components/molecules/StoryCardSkeleton";
 import { StoryCard } from "#/components/organisms/story/StoryCard";
 import { clearAllFavorites, isFavorited } from "#/lib/favorites-store";
 

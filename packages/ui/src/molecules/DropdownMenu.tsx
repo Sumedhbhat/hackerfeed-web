@@ -1,10 +1,5 @@
 import type { ReactNode } from "react";
-import {
-	Menu,
-	MenuGroup,
-	MenuPopup,
-	MenuTrigger,
-} from "#/components/atoms/Menu";
+import { Menu, MenuGroup, MenuPopup, MenuTrigger } from "../atoms/Menu";
 
 /**
  * A trigger with a panel that drops down below it, aligned right.

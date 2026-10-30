@@ -1,7 +1,7 @@
-import { BrandLink } from "#/components/atoms/BrandLink";
-import { CountBadge } from "#/components/atoms/CountBadge";
-import { TextLink } from "#/components/atoms/Link";
-import { HeaderBar } from "#/components/molecules/HeaderBar";
+import { BrandLink } from "@hackerfeed/ui/atoms/BrandLink";
+import { CountBadge } from "@hackerfeed/ui/atoms/CountBadge";
+import { TextLink } from "@hackerfeed/ui/atoms/Link";
+import { HeaderBar } from "@hackerfeed/ui/molecules/HeaderBar";
 import { useAuthSession } from "#/hooks/useAuthSession";
 import { useFavorites } from "#/hooks/useFavorites";
 import { usePaperFavorites } from "#/hooks/usePaperFavorites";

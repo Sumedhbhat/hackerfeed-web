@@ -1,11 +1,11 @@
 import { Check, ChevronDown, Copy } from "lucide-react";
-import { Button } from "#/components/atoms/Button";
+import { Button } from "../atoms/Button";
 import {
 	Collapsible,
 	CollapsiblePanel,
 	CollapsibleTrigger,
-} from "#/components/atoms/Collapsible";
-import { Icon } from "#/components/atoms/Icon";
+} from "../atoms/Collapsible";
+import { Icon } from "../atoms/Icon";
 
 /**
  * "Details" under an error message: the ID to quote when reporting it, and

@@ -1,4 +1,4 @@
-import { Text } from "#/components/atoms/Text";
+import { Text } from "../atoms/Text";
 
 type StoryStatsProps = {
 	score: number;

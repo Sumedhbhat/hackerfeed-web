@@ -1,8 +1,8 @@
 import { ArrowRight } from "lucide-react";
-import { Heading } from "#/components/atoms/Heading";
-import { Icon } from "#/components/atoms/Icon";
-import { Kicker } from "#/components/atoms/Kicker";
-import { ExternalLink } from "#/components/atoms/Link";
+import { Heading } from "../atoms/Heading";
+import { Icon } from "../atoms/Icon";
+import { Kicker } from "../atoms/Kicker";
+import { ExternalLink } from "../atoms/Link";
 
 /** Title block of the story chat screen, with a link to the article. */
 export function StoryChatHeader({
