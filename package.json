@@ -20,6 +20,8 @@
     "security:audit": "bun audit --audit-level=high",
     "test": "nx run-many -t test",
     "typecheck": "nx run-many -t typecheck",
+    "check:workspace": "bun tools/workspace/src/check-workspace.ts",
+    "new:library": "bun tools/workspace/src/new-library.ts",
     "format": "biome format",
     "lint": "biome lint",
     "check": "biome check"
