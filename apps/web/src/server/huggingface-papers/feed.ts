@@ -1,6 +1,9 @@
 import "@tanstack/react-start/server-only";
 
-import type { PaperEdition, PopularPaperKeyword } from "#/lib/papers/schemas";
+import type {
+	PaperEdition,
+	PopularPaperKeyword,
+} from "@hackerfeed/contracts/papers";
 import type { DatabaseContext } from "#/server/database/client";
 import {
 	createHuggingFacePaperFeedRepository,

@@ -1,3 +1,10 @@
+import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
+import {
+	formatStoryAge,
+	getDiscussionUrl,
+	getStoryDomain,
+	getStoryTitle,
+} from "@hackerfeed/hacker-news/utils";
 import { ArrowRight, MessageCircle } from "lucide-react";
 import { Card } from "#/components/atoms/Card";
 import { Heading } from "#/components/atoms/Heading";
@@ -10,13 +17,6 @@ import { MetaLine } from "#/components/molecules/MetaLine";
 import { StoryStats } from "#/components/molecules/StoryStats";
 import { useFeatureFlag } from "#/hooks/useFeatureFlags";
 import { useViewActivity } from "#/hooks/useViewActivity";
-import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
-import {
-	formatStoryAge,
-	getDiscussionUrl,
-	getStoryDomain,
-	getStoryTitle,
-} from "#/lib/hacker-news/utils";
 
 /** Header card at the top of the story page: title, body text, stats and links. */
 export function StoryArticle({ story }: { story: HackerNewsStoryRecord }) {

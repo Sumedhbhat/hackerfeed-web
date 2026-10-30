@@ -1,3 +1,4 @@
+import type { ChatMessage } from "@hackerfeed/contracts/ai";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -7,7 +8,6 @@ import {
 	fetchAiProviders,
 	streamStoryChat,
 } from "#/lib/ai/client";
-import type { ChatMessage } from "#/lib/ai/schemas";
 import { useAuthSession } from "./useAuthSession";
 
 const PROVIDERS_QUERY_KEY = ["ai", "providers"] as const;

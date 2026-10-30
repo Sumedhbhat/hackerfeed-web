@@ -1,0 +1,19 @@
+{
+	"$schema": "../../node_modules/nx/schemas/project-schema.json",
+	"name": "contracts",
+	"projectType": "library",
+	"sourceRoot": "packages/contracts/src",
+	"tags": [
+		"type:contracts",
+		"platform:shared",
+		"scope:shared"
+	],
+	"metadata": {
+		"owner": "@Sumedhbhat"
+	},
+	"targets": {
+		"lint": {},
+		"typecheck": {},
+		"test": {}
+	}
+}

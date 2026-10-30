@@ -1,6 +1,6 @@
+import type { PaperEdition } from "@hackerfeed/contracts/papers";
 import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { PaperEdition } from "#/lib/papers/schemas";
 import { renderWithQueryClient as render } from "#/test/renderWithQueryClient";
 import { PapersFeed } from "./PapersFeed";
 

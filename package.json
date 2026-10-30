@@ -16,11 +16,15 @@
     "typecheck": "nx run-many -t typecheck",
     "format": "biome format",
     "lint": "biome lint",
-    "check": "biome check"
+    "check": "biome check",
+    "new:library": "bun tools/workspace/src/new-library.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
-    "nx": "23.3.0"
+    "@types/node": "^26.6.3",
+    "nx": "23.3.0",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.4"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

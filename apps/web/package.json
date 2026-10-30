@@ -22,6 +22,9 @@
   "dependencies": {
     "@base-ui/react": "^1.9.0",
     "@cloudflare/vite-plugin": "^1.64.0",
+    "@hackerfeed/contracts": "workspace:*",
+    "@hackerfeed/hacker-news": "workspace:*",
+    "@hackerfeed/runtime": "workspace:*",
     "@sentry/cloudflare": "^11.7.0",
     "@sentry/core": "^11.7.0",
     "@sentry/react": "^11.7.0",
@@ -66,7 +69,6 @@
     "drizzle-kit": "^0.31.11",
     "happy-dom": "^21.0.4",
     "tsx": "^4.23.15",
-    "typescript": "^7.0.2",
     "vite": "^8.3.1",
     "vitest": "^5.0.4",
     "wrangler": "^4.151.0"

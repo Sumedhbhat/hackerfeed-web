@@ -1,3 +1,4 @@
+import { logger } from "@hackerfeed/runtime/logger";
 import { createFileRoute } from "@tanstack/react-router";
 import { FeedPage } from "#/components/pages/FeedPage";
 import {
@@ -6,7 +7,6 @@ import {
 	PAGE_SIZE,
 	storyQueryOptions,
 } from "#/lib/hacker-news/queries";
-import { logger } from "#/lib/logger";
 
 export const Route = createFileRoute("/")({
 	component: FeedPage,

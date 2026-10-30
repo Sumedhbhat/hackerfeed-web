@@ -3,12 +3,12 @@ import "@tanstack/react-start/server-only";
 import type {
 	HackerNewsCommentRecord,
 	HackerNewsStoryRecord,
-} from "#/lib/hacker-news/queries";
+} from "@hackerfeed/hacker-news/records";
 import {
 	getDiscussionUrl,
 	getStoryTitle,
 	stripHtml,
-} from "#/lib/hacker-news/utils";
+} from "@hackerfeed/hacker-news/utils";
 
 export const MAX_CONTEXT_COMMENTS = 8;
 const MAX_STORY_TEXT_LENGTH = 4_000;

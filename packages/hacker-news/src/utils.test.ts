@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
+import type { HackerNewsStoryRecord } from "./records";
 import {
 	formatStoryAge,
 	getDiscussionUrl,
 	getStoryDomain,
 	getStoryTitle,
 	stripHtml,
-} from "#/lib/hacker-news/utils";
+} from "./utils";
 
 function makeStory(
 	overrides: Partial<HackerNewsStoryRecord> = {},

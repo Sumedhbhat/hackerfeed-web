@@ -1,8 +1,8 @@
+import { logger, setLogUser } from "@hackerfeed/runtime/logger";
 import { AuthKitProvider, useAuth } from "@workos-inc/authkit-react";
 import { type ReactNode, useEffect } from "react";
 import { env } from "#/env";
 import { setAuthKit } from "#/lib/auth/authkit";
-import { logger, setLogUser } from "#/lib/logger";
 
 /**
  * WorkOS AuthKit owns the whole session. `devMode` keeps the refresh token in

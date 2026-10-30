@@ -1,0 +1,12 @@
+{
+	"name": "@hackerfeed/hacker-news",
+	"private": true,
+	"type": "module",
+	"exports": {
+		"./records": "./src/records.ts",
+		"./utils": "./src/utils.ts"
+	},
+	"devDependencies": {
+		"vitest": "^5.0.4"
+	}
+}

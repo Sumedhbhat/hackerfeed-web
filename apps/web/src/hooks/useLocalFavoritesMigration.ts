@@ -1,12 +1,12 @@
+import { hackerNewsStorySchema } from "@hackerfeed/contracts/favorites";
+import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
 import { useEffect, useRef } from "react";
 import { reportError } from "#/lib/errors/report-error";
 import {
 	hasCompletedLocalFavoritesMigration,
 	markLocalFavoritesMigrationCompleted,
 } from "#/lib/favorites/local-migration";
-import { hackerNewsStorySchema } from "#/lib/favorites/schemas";
 import { getFavorites } from "#/lib/favorites-store";
-import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
 import { createTrpcClient } from "#/lib/trpc/client";
 import { useAuthSession } from "./useAuthSession";
 

@@ -1,9 +1,9 @@
-import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
-import { createTrpcClient } from "#/lib/trpc/client";
 import type {
 	PaperViewAction,
 	StoryViewAction,
-} from "#/lib/view-activity/schemas";
+} from "@hackerfeed/contracts/view-activity";
+import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
+import { createTrpcClient } from "#/lib/trpc/client";
 import { useAuthSession } from "./useAuthSession";
 
 export function useViewActivity() {

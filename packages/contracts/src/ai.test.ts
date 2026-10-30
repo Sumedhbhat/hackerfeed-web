@@ -3,7 +3,7 @@ import {
 	MAX_CHAT_MESSAGE_LENGTH,
 	MAX_CHAT_MESSAGES,
 	storyChatRequestSchema,
-} from "./schemas";
+} from "./ai";
 
 const valid = {
 	providerId: "chatgpt",

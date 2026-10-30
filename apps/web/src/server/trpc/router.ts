@@ -1,33 +1,33 @@
 import "@tanstack/react-start/server-only";
 
-import * as Sentry from "@sentry/cloudflare";
-import { initTRPC, TRPCError } from "@trpc/server";
-import superjson from "superjson";
 import {
 	favoriteStoriesOutputSchema,
 	favoriteStoryIdInputSchema,
 	hackerNewsStorySchema,
 	importLocalFavoritesInputSchema,
-} from "#/lib/favorites/schemas";
-import type { HackerNewsStoryRecord } from "#/lib/hacker-news/queries";
+} from "@hackerfeed/contracts/favorites";
 import {
 	type PaperFavoritesListInput,
 	type PaperFavoritesListOutput,
 	paperFavoriteInputSchema,
 	paperFavoritesListInputSchema,
 	paperFavoritesListOutputSchema,
-} from "#/lib/paper-favorites/schemas";
+} from "@hackerfeed/contracts/paper-favorites";
 import {
 	type PaperEdition,
 	paperEditionInputSchema,
 	paperEditionOutputSchema,
-} from "#/lib/papers/schemas";
+} from "@hackerfeed/contracts/papers";
 import {
 	type PaperViewAction,
 	paperViewInputSchema,
 	type StoryViewAction,
 	storyViewInputSchema,
-} from "#/lib/view-activity/schemas";
+} from "@hackerfeed/contracts/view-activity";
+import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
+import * as Sentry from "@sentry/cloudflare";
+import { initTRPC, TRPCError } from "@trpc/server";
+import superjson from "superjson";
 import { createFavoriteServiceFromDatabase } from "#/server/favorites/service";
 import { createHuggingFacePaperFeedServiceFromDatabase } from "#/server/huggingface-papers/feed";
 import {

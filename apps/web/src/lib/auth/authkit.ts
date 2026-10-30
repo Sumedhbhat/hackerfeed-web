@@ -1,5 +1,5 @@
+import { getClientTraceHeaders } from "@hackerfeed/runtime/trace-headers";
 import type { useAuth } from "@workos-inc/authkit-react";
-import { getClientTraceHeaders } from "#/lib/tracing/headers";
 
 type AuthKit = ReturnType<typeof useAuth>;
 

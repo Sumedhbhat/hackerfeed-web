@@ -1,3 +1,19 @@
+import {
+	type FavoriteStoryInput,
+	favoriteStoryIdInputSchema,
+	hackerNewsStorySchema,
+	importLocalFavoritesInputSchema,
+} from "@hackerfeed/contracts/favorites";
+import {
+	paperFavoriteInputSchema,
+	paperFavoritesListInputSchema,
+	type SavedPaper,
+} from "@hackerfeed/contracts/paper-favorites";
+import { paperEditionInputSchema } from "@hackerfeed/contracts/papers";
+import {
+	paperViewInputSchema,
+	storyViewInputSchema,
+} from "@hackerfeed/contracts/view-activity";
 import { TRPCClientError, type TRPCLink } from "@trpc/client";
 import { observable } from "@trpc/server/observable";
 import { authorRows } from "#/demo-data/database/authors";
@@ -8,22 +24,6 @@ import { paperFavoriteRows } from "#/demo-data/database/paper-favorites";
 import { paperKeywordRows } from "#/demo-data/database/paper-keywords";
 import { paperRows } from "#/demo-data/database/papers";
 import { storyRows } from "#/demo-data/database/stories";
-import {
-	type FavoriteStoryInput,
-	favoriteStoryIdInputSchema,
-	hackerNewsStorySchema,
-	importLocalFavoritesInputSchema,
-} from "#/lib/favorites/schemas";
-import {
-	paperFavoriteInputSchema,
-	paperFavoritesListInputSchema,
-	type SavedPaper,
-} from "#/lib/paper-favorites/schemas";
-import { paperEditionInputSchema } from "#/lib/papers/schemas";
-import {
-	paperViewInputSchema,
-	storyViewInputSchema,
-} from "#/lib/view-activity/schemas";
 import type { AppRouter } from "#/server/trpc/router";
 
 const paperPresentations = paperRows.map((paper) => ({

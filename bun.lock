@@ -6,7 +6,10 @@
       "name": "hackerfeed",
       "devDependencies": {
         "@biomejs/biome": "2.5.15",
+        "@types/node": "^26.6.3",
         "nx": "23.3.0",
+        "typescript": "^7.0.2",
+        "vitest": "^5.0.4",
       },
     },
     "apps/web": {
@@ -14,6 +17,9 @@
       "dependencies": {
         "@base-ui/react": "^1.9.0",
         "@cloudflare/vite-plugin": "^1.64.0",
+        "@hackerfeed/contracts": "workspace:*",
+        "@hackerfeed/hacker-news": "workspace:*",
+        "@hackerfeed/runtime": "workspace:*",
         "@sentry/cloudflare": "^11.7.0",
         "@sentry/core": "^11.7.0",
         "@sentry/react": "^11.7.0",
@@ -58,10 +64,34 @@
         "drizzle-kit": "^0.31.11",
         "happy-dom": "^21.0.4",
         "tsx": "^4.23.15",
-        "typescript": "^7.0.2",
         "vite": "^8.3.1",
         "vitest": "^5.0.4",
         "wrangler": "^4.151.0",
+      },
+    },
+    "packages/contracts": {
+      "name": "@hackerfeed/contracts",
+      "dependencies": {
+        "zod": "^4.6.5",
+      },
+      "devDependencies": {
+        "vitest": "^5.0.4",
+      },
+    },
+    "packages/hacker-news": {
+      "name": "@hackerfeed/hacker-news",
+      "devDependencies": {
+        "vitest": "^5.0.4",
+      },
+    },
+    "packages/runtime": {
+      "name": "@hackerfeed/runtime",
+      "dependencies": {
+        "@sentry/core": "^11.7.0",
+        "ky": "^2.1.0",
+      },
+      "devDependencies": {
+        "vitest": "^5.0.4",
       },
     },
   },
@@ -222,6 +252,12 @@
     "@floating-ui/react-dom": ["@floating-ui/react-dom@2.1.9", "", { "dependencies": { "@floating-ui/dom": "^1.8.0" }, "peerDependencies": { "react": ">=16.8.0", "react-dom": ">=16.8.0" } }, "sha512-JDjEFGCpImxDCA7JJKviA0M9+RtmJdj0m/NVU5IMgBK+AmZouAQQ7/+2GLH0GXXY0YMw9oXPB8hKdbPYg5QLYg=="],
 
     "@floating-ui/utils": ["@floating-ui/utils@0.2.12", "", {}, "sha512-HpCo8tmWzLVad5s2d19EhAz5zqrrQ6s69qd6moPMQvkOuSwDT1YgRfWSVuc4ennqrgv3OHppiOGMQ7oC13yIww=="],
+
+    "@hackerfeed/contracts": ["@hackerfeed/contracts@workspace:packages/contracts"],
+
+    "@hackerfeed/hacker-news": ["@hackerfeed/hacker-news@workspace:packages/hacker-news"],
+
+    "@hackerfeed/runtime": ["@hackerfeed/runtime@workspace:packages/runtime"],
 
     "@hackerfeed/web": ["@hackerfeed/web@workspace:apps/web"],
 

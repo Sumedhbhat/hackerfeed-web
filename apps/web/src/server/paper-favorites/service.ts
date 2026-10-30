@@ -1,10 +1,10 @@
 import "@tanstack/react-start/server-only";
 
-import { z } from "zod";
 import type {
 	PaperFavoritesListInput,
 	PaperFavoritesListOutput,
-} from "#/lib/paper-favorites/schemas";
+} from "@hackerfeed/contracts/paper-favorites";
+import { z } from "zod";
 import {
 	type AuthenticatedWorkosUser,
 	resolveCurrentWorkosUser,

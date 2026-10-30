@@ -1,8 +1,8 @@
+import { logger } from "@hackerfeed/runtime/logger";
 import { useEffect, useState } from "react";
 import { useShowToast } from "#/components/atoms/Toast";
 import { ErrorDetails } from "#/components/molecules/ErrorDetails";
 import { type ErrorNotice, onErrorNotice } from "#/lib/errors/report-error";
-import { logger } from "#/lib/logger";
 
 const ERROR_TOAST_TIMEOUT_MS = 10_000;
 

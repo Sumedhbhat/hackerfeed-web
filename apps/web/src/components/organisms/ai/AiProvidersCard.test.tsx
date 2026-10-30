@@ -1,3 +1,4 @@
+import type { AiProviderStatus } from "@hackerfeed/contracts/ai";
 import {
 	cleanup,
 	fireEvent,
@@ -6,7 +7,6 @@ import {
 	within,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { AiProviderStatus } from "#/lib/ai/schemas";
 import { renderWithQueryClient as render } from "#/test/renderWithQueryClient";
 import { AiProvidersCard, getAiResultMessage } from "./AiProvidersCard";
 

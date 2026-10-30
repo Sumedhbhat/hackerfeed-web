@@ -1,3 +1,4 @@
+import type { PaperViewAction } from "@hackerfeed/contracts/view-activity";
 import { Star } from "lucide-react";
 import { Icon } from "#/components/atoms/Icon";
 import { PaperCard } from "#/components/atoms/PaperCard";
@@ -14,7 +15,6 @@ import {
 	formatPaperDate,
 	type PaperPresentation,
 } from "#/lib/papers/presentation";
-import type { PaperViewAction } from "#/lib/view-activity/schemas";
 import { PaperSummary } from "./PaperSummary";
 
 type PaperRowProps = {

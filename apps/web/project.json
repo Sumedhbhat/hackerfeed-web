@@ -3,16 +3,12 @@
 	"name": "web",
 	"projectType": "application",
 	"sourceRoot": "apps/web/src",
+	"tags": ["type:app", "platform:browser", "platform:server", "scope:hackerfeed"],
+	"metadata": { "owner": "@Sumedhbhat" },
 	"targets": {
-		"lint": { "command": "biome check apps/web" },
-		"typecheck": {
-			"command": "tsc --noEmit",
-			"options": { "cwd": "{projectRoot}" }
-		},
-		"test": {
-			"command": "vitest run",
-			"options": { "cwd": "{projectRoot}" }
-		},
+		"lint": {},
+		"typecheck": {},
+		"test": {},
 		"build": {
 			"command": "vite build",
 			"options": { "cwd": "{projectRoot}" }

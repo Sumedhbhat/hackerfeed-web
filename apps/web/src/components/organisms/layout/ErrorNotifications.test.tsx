@@ -12,7 +12,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 const CLIENT_TRACE_ID = "0123456789abcdef0123456789abcdef";
 const SERVER_TRACE_ID = "fedcba9876543210fedcba9876543210";
 
-vi.mock("#/lib/logger", () => ({
+vi.mock("@hackerfeed/runtime/logger", () => ({
 	logger: { error: vi.fn(() => CLIENT_TRACE_ID), warn: vi.fn() },
 }));
 

@@ -1,3 +1,4 @@
+import { logger } from "@hackerfeed/runtime/logger";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { StoryErrorPage } from "#/components/pages/StoryErrorPage";
 import { StoryNotFoundPage } from "#/components/pages/StoryNotFoundPage";
@@ -6,7 +7,6 @@ import {
 	commentQueryOptions,
 	storyQueryOptions,
 } from "#/lib/hacker-news/queries";
-import { logger } from "#/lib/logger";
 
 export const Route = createFileRoute("/story/$storyId")({
 	params: {

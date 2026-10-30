@@ -1,10 +1,10 @@
+import { getTraceId } from "@hackerfeed/runtime/logger";
+import { sentryDataCollection } from "@hackerfeed/runtime/sentry-data-collection";
 import * as Sentry from "@sentry/react";
 import { StartClient } from "@tanstack/react-start/client";
 import { StrictMode, startTransition } from "react";
 import { hydrateRoot } from "react-dom/client";
 import { env } from "#/env";
-import { getTraceId } from "#/lib/logger";
-import { sentryDataCollection } from "#/lib/sentry-data-collection";
 
 const sentryDsn = env.VITE_SENTRY_DSN;
 

@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { hackerNewsStorySchema } from "#/lib/favorites/schemas";
-import { arxivIdSchema } from "#/lib/papers/schemas";
+import { hackerNewsStorySchema } from "./favorites";
+import { arxivIdSchema } from "./papers";
 
 export const storyViewActionSchema = z.enum([
 	"read",

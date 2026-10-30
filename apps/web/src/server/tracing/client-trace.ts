@@ -1,8 +1,8 @@
-import * as Sentry from "@sentry/core";
 import {
 	CLIENT_TRACE_HEADER,
 	SERVER_TRACE_ID_HEADER,
-} from "#/lib/tracing/headers";
+} from "@hackerfeed/runtime/trace-headers";
+import * as Sentry from "@sentry/core";
 
 const INCOMING_TRACE_HEADERS = [
 	"sentry-trace",

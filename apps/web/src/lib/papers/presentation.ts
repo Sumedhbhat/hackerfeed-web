@@ -1,4 +1,4 @@
-import type { PaperFeedPaper } from "#/lib/papers/schemas";
+import type { PaperFeedPaper } from "@hackerfeed/contracts/papers";
 
 /** What a paper row needs to render; shared by the feed and saved papers. */
 export type PaperPresentation = Omit<

@@ -1,0 +1,19 @@
+{
+	"$schema": "../../node_modules/nx/schemas/project-schema.json",
+	"name": "runtime",
+	"projectType": "library",
+	"sourceRoot": "packages/runtime/src",
+	"tags": [
+		"type:runtime",
+		"platform:shared",
+		"scope:shared"
+	],
+	"metadata": {
+		"owner": "@Sumedhbhat"
+	},
+	"targets": {
+		"lint": {},
+		"typecheck": {},
+		"test": {}
+	}
+}
