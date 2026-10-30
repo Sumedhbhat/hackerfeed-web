@@ -126,8 +126,12 @@
 							"options": {
 								"patterns": [
 									{
-										"group": ["#/**", "@hackerfeed/**", "!@hackerfeed/ui/**"],
-										"message": "Atoms and molecules are presentational: take data and callbacks as props instead of importing app code or other workspace packages."
+										"group": [
+											"#/**",
+											"@hackerfeed/**",
+											"!@hackerfeed/ui/atoms/**"
+										],
+										"message": "Atoms are the lowest layer: import only other atoms, and take data and callbacks as props instead of importing molecules, app code or other workspace packages."
 									}
 								]
 							}
