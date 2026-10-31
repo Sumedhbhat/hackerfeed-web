@@ -21,9 +21,11 @@ function NextBatchPrefetcher({ ids }: { ids: number[] }) {
 
 type FeedPaneProps = {
 	feed: HackerNewsFeedKey;
+	/** Fetch the stories behind "Load more" ahead of the click. */
+	prefetchNextBatch: boolean;
 };
 
-export function FeedPane({ feed }: FeedPaneProps) {
+export function FeedPane({ feed, prefetchNextBatch }: FeedPaneProps) {
 	const {
 		displayedIds,
 		nextBatchIds,
@@ -74,7 +76,7 @@ export function FeedPane({ feed }: FeedPaneProps) {
 				/>
 			)}
 
-			{hasMore && nextBatchIds.length > 0 && (
+			{prefetchNextBatch && hasMore && nextBatchIds.length > 0 && (
 				<Activity mode="hidden">
 					<Suspense fallback={null}>
 						<NextBatchPrefetcher ids={nextBatchIds} />

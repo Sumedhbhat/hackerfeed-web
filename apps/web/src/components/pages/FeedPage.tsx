@@ -3,7 +3,7 @@ import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { Tab, TabList, TabPanel, Tabs } from "@hackerfeed/ui/atoms/Tabs";
 import { StoryListSkeleton } from "@hackerfeed/ui/molecules/StoryListSkeleton";
 import * as Sentry from "@sentry/react";
-import { Activity, Suspense, useState } from "react";
+import { Activity, Suspense, useEffect, useState } from "react";
 import { FeedError } from "#/components/organisms/feed/FeedError";
 import { FeedPane } from "#/components/organisms/feed/FeedPane";
 import { feedTabs } from "#/components/organisms/feed/feedTabs";
@@ -19,6 +19,14 @@ export function FeedPage() {
 		setActiveFeed(feed);
 		setOpenedFeeds((opened) => new Set(opened).add(feed));
 	}
+
+	useEffect(
+		() =>
+			whenPageIdle(() =>
+				setOpenedFeeds(new Set(feedTabs.map((feed) => feed.key))),
+			),
+		[],
+	);
 
 	return (
 		<PageContainer>
@@ -44,7 +52,10 @@ export function FeedPage() {
 										<Suspense
 											fallback={<StoryListSkeleton count={PAGE_SIZE} />}
 										>
-											<FeedPane feed={feed.key} />
+											<FeedPane
+												feed={feed.key}
+												prefetchNextBatch={activeFeed === feed.key}
+											/>
 										</Suspense>
 									</Sentry.ErrorBoundary>
 								</Activity>
@@ -55,4 +66,23 @@ export function FeedPage() {
 			</Tabs>
 		</PageContainer>
 	);
+}
+
+/** Runs `callback` once the page has loaded and the main thread is idle. */
+function whenPageIdle(callback: () => void) {
+	let idle: number | undefined;
+	const schedule = () => {
+		idle = window.requestIdleCallback
+			? window.requestIdleCallback(callback)
+			: window.setTimeout(callback, 1);
+	};
+	if (document.readyState === "complete") schedule();
+	else window.addEventListener("load", schedule, { once: true });
+
+	return () => {
+		window.removeEventListener("load", schedule);
+		if (idle === undefined) return;
+		if (window.cancelIdleCallback) window.cancelIdleCallback(idle);
+		else window.clearTimeout(idle);
+	};
 }
