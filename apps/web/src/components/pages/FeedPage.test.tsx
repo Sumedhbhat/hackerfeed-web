@@ -1,4 +1,10 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import {
+	cleanup,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from "@testing-library/react";
 import React, { Suspense } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -147,6 +153,29 @@ describe("tab switching", () => {
 				.getByRole("tab", { name: /^best$/i })
 				.getAttribute("aria-selected"),
 		).toBe("true");
+	});
+
+	const requestedFeeds = () =>
+		new Set(
+			mockUseSuspenseQuery.mock.calls.map(([options]) => options.queryKey[2]),
+		);
+
+	it("loads a feed straight away when its tab is opened", () => {
+		render(<FeedPage />, { wrapper: Wrapper });
+
+		expect(requestedFeeds()).toEqual(new Set(["top"]));
+
+		fireEvent.click(screen.getByRole("tab", { name: /^new$/i }));
+
+		expect(requestedFeeds()).toEqual(new Set(["top", "new"]));
+	});
+
+	it("loads the other feeds once the page is idle", async () => {
+		render(<FeedPage />, { wrapper: Wrapper });
+
+		await waitFor(() =>
+			expect(requestedFeeds()).toEqual(new Set(["top", "new", "best"])),
+		);
 	});
 
 	it("switching tab deactivates the previously active tab", () => {

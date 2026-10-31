@@ -16,6 +16,7 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { type ReactNode, useEffect } from "react";
+import { env } from "#/env";
 import { ErrorNotifications } from "../components/organisms/layout/ErrorNotifications";
 import SiteFooter from "../components/organisms/layout/SiteFooter";
 import SiteHeader from "../components/organisms/layout/SiteHeader";
@@ -26,6 +27,7 @@ import { useLocalFavoritesMigration } from "../hooks/useLocalFavoritesMigration"
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 import TanStackQueryProvider from "../integrations/tanstack-query/root-provider";
 import { AuthProvider } from "../integrations/workos/provider";
+import themeInit from "../lib/theme-init.js?raw";
 
 interface MyRouterContext {
 	queryClient: QueryClient;
@@ -79,7 +81,17 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 				rel: "apple-touch-icon",
 				href: "/logo192.png",
 			},
+			...(import.meta.env.VITE_DEMO_DATA === "true"
+				? []
+				: [
+						{
+							rel: "preconnect",
+							href: `https://${env.VITE_WORKOS_API_HOSTNAME ?? "api.workos.com"}`,
+							crossOrigin: "anonymous" as const,
+						},
+					]),
 		],
+		scripts: [{ children: themeInit }],
 	}),
 	component: AppLayout,
 	errorComponent: RootError,
@@ -178,14 +190,7 @@ function SessionGate({ children }: { children: ReactNode }) {
 
 function RootDocument({ children }: { children: React.ReactNode }) {
 	return (
-		<Document
-			head={
-				<>
-					<script src="/theme-init.js" />
-					<HeadContent />
-				</>
-			}
-		>
+		<Document head={<HeadContent />}>
 			{children}
 			<Scripts />
 		</Document>
