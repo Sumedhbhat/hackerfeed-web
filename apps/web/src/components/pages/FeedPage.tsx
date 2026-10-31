@@ -13,10 +13,16 @@ export function FeedPage() {
 	const [activeFeed, setActiveFeed] = useState<HackerNewsFeedKey>(
 		HackerNewsFeedKey.Top,
 	);
+	const [openedFeeds, setOpenedFeeds] = useState(() => new Set([activeFeed]));
+
+	function openFeed(feed: HackerNewsFeedKey) {
+		setActiveFeed(feed);
+		setOpenedFeeds((opened) => new Set(opened).add(feed));
+	}
 
 	return (
 		<PageContainer>
-			<Tabs value={activeFeed} onValueChange={setActiveFeed}>
+			<Tabs value={activeFeed} onValueChange={openFeed}>
 				<Stack gap="lg">
 					<TabList aria-label="Feeds">
 						{feedTabs.map((feed) => (
@@ -28,17 +34,21 @@ export function FeedPage() {
 
 					{feedTabs.map((feed) => (
 						<TabPanel key={feed.key} value={feed.key} keepMounted>
-							<Activity mode={activeFeed === feed.key ? "visible" : "hidden"}>
-								<Sentry.ErrorBoundary
-									fallback={({ resetError }) => (
-										<FeedError feed={feed} onRetry={resetError} />
-									)}
-								>
-									<Suspense fallback={<StoryListSkeleton count={PAGE_SIZE} />}>
-										<FeedPane feed={feed.key} />
-									</Suspense>
-								</Sentry.ErrorBoundary>
-							</Activity>
+							{openedFeeds.has(feed.key) && (
+								<Activity mode={activeFeed === feed.key ? "visible" : "hidden"}>
+									<Sentry.ErrorBoundary
+										fallback={({ resetError }) => (
+											<FeedError feed={feed} onRetry={resetError} />
+										)}
+									>
+										<Suspense
+											fallback={<StoryListSkeleton count={PAGE_SIZE} />}
+										>
+											<FeedPane feed={feed.key} />
+										</Suspense>
+									</Sentry.ErrorBoundary>
+								</Activity>
+							)}
 						</TabPanel>
 					))}
 				</Stack>
