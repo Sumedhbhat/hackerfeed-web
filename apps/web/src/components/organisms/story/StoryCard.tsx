@@ -64,7 +64,7 @@ export function StoryCard({ story, animationDelay }: StoryCardProps) {
 				/>
 
 				<Row gap="lg" wrap>
-					<Button variant="ghost" onClick={openStory}>
+					<Button variant="primary" onClick={openStory}>
 						{story.url ? "Read article" : "Open post"}
 					</Button>
 
