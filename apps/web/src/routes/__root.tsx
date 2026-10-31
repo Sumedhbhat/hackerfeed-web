@@ -26,6 +26,7 @@ import { useLocalFavoritesMigration } from "../hooks/useLocalFavoritesMigration"
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 import TanStackQueryProvider from "../integrations/tanstack-query/root-provider";
 import { AuthProvider } from "../integrations/workos/provider";
+import themeInit from "../lib/theme-init.js?raw";
 
 interface MyRouterContext {
 	queryClient: QueryClient;
@@ -80,6 +81,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 				href: "/logo192.png",
 			},
 		],
+		scripts: [{ children: themeInit }],
 	}),
 	component: AppLayout,
 	errorComponent: RootError,
@@ -178,14 +180,7 @@ function SessionGate({ children }: { children: ReactNode }) {
 
 function RootDocument({ children }: { children: React.ReactNode }) {
 	return (
-		<Document
-			head={
-				<>
-					<script src="/theme-init.js" />
-					<HeadContent />
-				</>
-			}
-		>
+		<Document head={<HeadContent />}>
 			{children}
 			<Scripts />
 		</Document>
