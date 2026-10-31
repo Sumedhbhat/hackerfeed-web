@@ -16,6 +16,7 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { type ReactNode, useEffect } from "react";
+import { env } from "#/env";
 import { ErrorNotifications } from "../components/organisms/layout/ErrorNotifications";
 import SiteFooter from "../components/organisms/layout/SiteFooter";
 import SiteHeader from "../components/organisms/layout/SiteHeader";
@@ -80,6 +81,15 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 				rel: "apple-touch-icon",
 				href: "/logo192.png",
 			},
+			...(import.meta.env.VITE_DEMO_DATA === "true"
+				? []
+				: [
+						{
+							rel: "preconnect",
+							href: `https://${env.VITE_WORKOS_API_HOSTNAME ?? "api.workos.com"}`,
+							crossOrigin: "anonymous" as const,
+						},
+					]),
 		],
 		scripts: [{ children: themeInit }],
 	}),
