@@ -17,7 +17,7 @@
 		"@hackerfeed/contracts": "workspace:*",
 		"@hackerfeed/hacker-news": "workspace:*",
 		"@hackerfeed/runtime": "workspace:*",
-		"@sentry/cloudflare": "^11.7.0",
+		"@sentry/cloudflare": "^11.8.0",
 		"@sentry/core": "^11.7.0",
 		"@tanstack/react-start": "latest",
 		"@trpc/server": "^11.19.0",
@@ -28,6 +28,6 @@
 	},
 	"devDependencies": {
 		"drizzle-kit": "^0.31.11",
-		"vitest": "^5.0.4"
+		"vitest": "^5.0.5"
 	}
 }
