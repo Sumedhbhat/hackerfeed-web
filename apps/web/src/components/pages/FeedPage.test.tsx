@@ -34,8 +34,6 @@ vi.mock("@tanstack/react-query", async (importOriginal) => {
 	};
 });
 
-vi.mock("#/lib/open-link", () => ({ openLink: vi.fn() }));
-
 vi.mock("#/hooks/useAuthSession", () => ({
 	useAuthSession: () => ({
 		isLoading: false,

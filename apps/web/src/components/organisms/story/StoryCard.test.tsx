@@ -26,10 +26,6 @@ const trpcMock = vi.hoisted(() => ({
 	viewStory: vi.fn(),
 }));
 
-vi.mock("#/lib/open-link", () => ({
-	openLink: vi.fn(),
-}));
-
 vi.mock("#/hooks/useAuthSession", () => ({
 	useAuthSession: () => ({
 		isLoading: authMock.isLoading,
@@ -84,8 +80,6 @@ vi.mock("@tanstack/react-router", async (importOriginal) => {
 			),
 	};
 });
-
-import { openLink } from "#/lib/open-link";
 
 function makeStory(
 	overrides: Partial<HackerNewsStoryRecord> = {},
@@ -175,32 +169,37 @@ describe("StoryCard rendering", () => {
 		expect(screen.queryByText(/unknown/i)).toBeNull();
 	});
 
-	it("shows 'Read article' button for stories with a URL", () => {
+	it("shows 'Read article' for stories with a URL", () => {
 		render(<StoryCard story={makeStory({ url: "https://example.com" })} />);
-		expect(screen.getByRole("button", { name: /read article/i })).toBeDefined();
+		expect(screen.getByRole("link", { name: /read article/i })).toBeDefined();
 	});
 
-	it("shows 'Open post' button for URL-less stories", () => {
+	it("shows 'Open post' for URL-less stories", () => {
 		render(<StoryCard story={makeStory({ url: null })} />);
-		expect(screen.getByRole("button", { name: /open post/i })).toBeDefined();
+		expect(screen.getByRole("link", { name: /open post/i })).toBeDefined();
 	});
 });
 
 describe("StoryCard link actions", () => {
-	it("'Read article' calls openLink with the story URL", () => {
+	it("links the title and 'Read article' to the story URL in a new tab", () => {
 		render(
 			<StoryCard story={makeStory({ url: "https://article.example.com" })} />,
 		);
-		fireEvent.click(screen.getByRole("button", { name: /read article/i }));
-		expect(openLink).toHaveBeenCalledWith("https://article.example.com");
+		for (const link of [
+			screen.getByRole("link", { name: "A Test Story Title" }),
+			screen.getByRole("link", { name: /read article/i }),
+		]) {
+			expect(link.getAttribute("href")).toBe("https://article.example.com");
+			expect(link.getAttribute("target")).toBe("_blank");
+			expect(link.getAttribute("rel")).toBe("noopener noreferrer");
+		}
 	});
 
-	it("'Open post' calls openLink with the HN discussion URL when story has no URL", () => {
+	it("links 'Open post' to the HN discussion when story has no URL", () => {
 		render(<StoryCard story={makeStory({ id: 12345, url: null })} />);
-		fireEvent.click(screen.getByRole("button", { name: /open post/i }));
-		expect(openLink).toHaveBeenCalledWith(
-			"https://news.ycombinator.com/item?id=12345",
-		);
+		expect(
+			screen.getByRole("link", { name: /open post/i }).getAttribute("href"),
+		).toBe("https://news.ycombinator.com/item?id=12345");
 	});
 
 	it("'Discussion' renders a link to the internal discussion page", () => {
@@ -228,15 +227,38 @@ describe("StoryCard link actions", () => {
 		const story = makeStory();
 		render(<StoryCard story={story} />);
 
-		fireEvent.click(screen.getByRole("heading", { name: story.title ?? "" }));
-		fireEvent.click(screen.getByRole("button", { name: /read article/i }));
+		fireEvent.click(screen.getByRole("link", { name: story.title ?? "" }));
+		fireEvent.click(screen.getByRole("link", { name: /read article/i }));
 
 		expect(trpcMock.viewStory).toHaveBeenCalledTimes(2);
 		expect(trpcMock.viewStory).toHaveBeenNthCalledWith(1, {
 			action: "read",
 			story,
 		});
-		expect(openLink).toHaveBeenCalledTimes(2);
+	});
+
+	it("records middle-click reads but not other auxiliary clicks", () => {
+		authMock.user = { id: "workos-story-viewer" };
+		const story = makeStory();
+		render(<StoryCard story={story} />);
+
+		fireEvent(
+			screen.getByRole("link", { name: story.title ?? "" }),
+			new MouseEvent("auxclick", { bubbles: true, button: 1 }),
+		);
+		fireEvent(
+			screen.getByRole("link", { name: /read article/i }),
+			new MouseEvent("auxclick", { bubbles: true, button: 1 }),
+		);
+		fireEvent(
+			screen.getByRole("link", { name: /read article/i }),
+			new MouseEvent("auxclick", { bubbles: true, button: 2 }),
+		);
+
+		expect(trpcMock.viewStory.mock.calls).toEqual([
+			[{ action: "read", story }],
+			[{ action: "read", story }],
+		]);
 	});
 
 	it("records signed-in discussion and AI chat opens", () => {
@@ -253,24 +275,12 @@ describe("StoryCard link actions", () => {
 		]);
 	});
 
-	it("opens the story when background tracking fails", () => {
-		authMock.user = { id: "workos-story-viewer" };
-		trpcMock.viewStory.mockRejectedValueOnce(new Error("offline"));
-		render(<StoryCard story={makeStory()} />);
-
-		fireEvent.click(screen.getByRole("button", { name: /read article/i }));
-
-		expect(trpcMock.viewStory).toHaveBeenCalledTimes(1);
-		expect(openLink).toHaveBeenCalledWith("https://example.com/test-article");
-	});
-
 	it("does not record signed-out story clicks", () => {
 		render(<StoryCard story={makeStory()} />);
 
-		fireEvent.click(screen.getByRole("button", { name: /read article/i }));
+		fireEvent.click(screen.getByRole("link", { name: /read article/i }));
 
 		expect(trpcMock.viewStory).not.toHaveBeenCalled();
-		expect(openLink).toHaveBeenCalledTimes(1);
 	});
 });
 
