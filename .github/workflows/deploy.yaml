@@ -13,11 +13,19 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # The run's one approval; production has no reviewer, so its jobs don't ask again.
+  approve:
+    runs-on: ubuntu-latest
+    environment: production-approval
+    steps:
+      - run: echo "Deployment approved"
+
   # Reconcile every production run, including changes missed by failed or
   # superseded runs and shared root dependency updates. The state server sits
   # below Terraform, so wrangler deploys it first. CLOUDFLARE_API_TOKEN is the
   # one stored Cloudflare token: it runs Terraform, which mints the others.
   state-backend:
+    needs: approve
     runs-on: ubuntu-latest
     environment: production
     env:

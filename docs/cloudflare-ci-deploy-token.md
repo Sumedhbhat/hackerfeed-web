@@ -99,8 +99,10 @@ limit a Workers token to one script or to version uploads, so the preview
 token can still deploy `hackerfeed-web`; it cannot write D1 or mint tokens.
 
 Terraform state needs no secret: CI signs in to the state server with a GitHub
-OIDC token (see README > Infrastructure). Configure environment protection
-rules on `production` if deployments should require an approval.
+OIDC token (see README > Infrastructure). A deploy waits for one approval on
+the `production-approval` environment, which holds the required reviewer.
+`production` has no reviewer, only the master-only branch rule, so its three
+jobs don't ask again; put reviewers back on `production` and every job asks.
 
 ## Verify without deploying
 
