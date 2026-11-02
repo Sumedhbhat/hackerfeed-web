@@ -75,15 +75,18 @@ read-all permissions unless the workflow is changed to use those services.
 
 ## Store it in GitHub
 
-The workflows use two GitHub environments:
+The workflows use three GitHub environments:
 
-- `production`: `deploy.yaml`. Only `master` may deploy from it.
+- `production-approval`: `deploy.yaml`'s approval gate. It has the required
+  reviewer and no secrets; only `master` may deploy from it.
+- `production`: `deploy.yaml`. Only `master` may deploy from it. It has no
+  reviewer: the gate already asked.
 - `preview`: `preview.yaml`, for pull requests.
 
 1. In GitHub, open this repository's **Settings** > **Environments**.
 2. In `production`, add or update the secret `CLOUDFLARE_API_TOKEN` with the
    token value. It must never be added to `preview`: it can mint any token.
-3. In both environments, add `CLOUDFLARE_ACCOUNT_ID`. The account id is an
+3. In `production` and `preview`, add `CLOUDFLARE_ACCOUNT_ID`. The account id is an
    identifier, not a secret, but keeping it alongside the deployment
    configuration is fine.
 4. Only `production` needs `VITE_SENTRY_DSN`, `VITE_WORKOS_CLIENT_ID`,
@@ -99,10 +102,9 @@ limit a Workers token to one script or to version uploads, so the preview
 token can still deploy `hackerfeed-web`; it cannot write D1 or mint tokens.
 
 Terraform state needs no secret: CI signs in to the state server with a GitHub
-OIDC token (see README > Infrastructure). A deploy waits for one approval on
-the `production-approval` environment, which holds the required reviewer.
-`production` has no reviewer, only the master-only branch rule, so its three
-jobs don't ask again; put reviewers back on `production` and every job asks.
+OIDC token (see README > Infrastructure). A deploy waits for one approval, on
+`production-approval`; reviewers on `production` would make each of its three
+jobs ask again.
 
 ## Verify without deploying
 
