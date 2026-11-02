@@ -5,11 +5,11 @@ import {
 	getStoryDomain,
 	getStoryTitle,
 } from "@hackerfeed/hacker-news/utils";
-import { Button } from "@hackerfeed/ui/atoms/Button";
+import { ExternalButtonLink } from "@hackerfeed/ui/atoms/Button";
 import { Card } from "@hackerfeed/ui/atoms/Card";
 import { Heading } from "@hackerfeed/ui/atoms/Heading";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
-import { TextLink } from "@hackerfeed/ui/atoms/Link";
+import { ExternalLink, TextLink } from "@hackerfeed/ui/atoms/Link";
 import { Row } from "@hackerfeed/ui/atoms/Row";
 import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { ToggleButton } from "@hackerfeed/ui/atoms/Toggle";
@@ -19,7 +19,6 @@ import { MessageCircle, Star } from "lucide-react";
 import { useFavorites } from "#/hooks/useFavorites";
 import { useFeatureFlag } from "#/hooks/useFeatureFlags";
 import { useViewActivity } from "#/hooks/useViewActivity";
-import { openLink } from "#/lib/open-link";
 
 type StoryCardProps = {
 	story: HackerNewsStoryRecord;
@@ -37,24 +36,18 @@ export function StoryCard({ story, animationDelay }: StoryCardProps) {
 	const title = getStoryTitle(story);
 	const storyUrl = story.url ?? getDiscussionUrl(story.id);
 
-	function openStory() {
+	function recordRead() {
 		recordStoryView(story, "read");
-		openLink(storyUrl);
 	}
 
 	return (
 		<Card animated animationDelay={animationDelay}>
 			<MetaLine items={[domain, age]} />
 			<Stack gap="md">
-				<Heading
-					level={3}
-					size="card"
-					onClick={openStory}
-					onKeyDown={(e) => {
-						if (e.key === "Enter" || e.key === " ") openStory();
-					}}
-				>
-					{title}
+				<Heading level={3} size="card">
+					<ExternalLink href={storyUrl} variant="plain" onClick={recordRead}>
+						{title}
+					</ExternalLink>
 				</Heading>
 
 				<StoryStats
@@ -64,9 +57,13 @@ export function StoryCard({ story, animationDelay }: StoryCardProps) {
 				/>
 
 				<Row gap="lg" wrap>
-					<Button variant="primary" onClick={openStory}>
+					<ExternalButtonLink
+						href={storyUrl}
+						variant="primary"
+						onClick={recordRead}
+					>
 						{story.url ? "Read article" : "Open post"}
-					</Button>
+					</ExternalButtonLink>
 
 					<TextLink
 						to="/story/$storyId"

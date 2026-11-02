@@ -20,9 +20,6 @@ type HeadingProps = {
 	id?: string;
 	/** Cut off with an ellipsis instead of wrapping. */
 	truncate?: boolean;
-	/** Makes the heading clickable (e.g. a story title that opens the story). */
-	onClick?: () => void;
-	onKeyDown?: (event: React.KeyboardEvent<HTMLHeadingElement>) => void;
 };
 
 export function Heading({
@@ -32,11 +29,10 @@ export function Heading({
 	...props
 }: HeadingProps) {
 	const Element = `h${level}` as const;
-	const cursor = props.onClick ? " cursor-pointer" : "";
 	const truncation = truncate ? " truncate" : "";
 	return (
 		<Element
-			className={`m-0 text-(--sea-ink) ${SIZE[size]}${cursor}${truncation}`}
+			className={`m-0 text-(--sea-ink) ${SIZE[size]}${truncation}`}
 			{...props}
 		/>
 	);
