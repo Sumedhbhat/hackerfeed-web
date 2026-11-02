@@ -40,12 +40,21 @@ export function StoryCard({ story, animationDelay }: StoryCardProps) {
 		recordStoryView(story, "read");
 	}
 
+	function recordMiddleClickRead(event: React.MouseEvent) {
+		if (event.button === 1) recordRead();
+	}
+
 	return (
 		<Card animated animationDelay={animationDelay}>
 			<MetaLine items={[domain, age]} />
 			<Stack gap="md">
 				<Heading level={3} size="card">
-					<ExternalLink href={storyUrl} variant="plain" onClick={recordRead}>
+					<ExternalLink
+						href={storyUrl}
+						variant="plain"
+						onClick={recordRead}
+						onAuxClick={recordMiddleClickRead}
+					>
 						{title}
 					</ExternalLink>
 				</Heading>
@@ -61,6 +70,7 @@ export function StoryCard({ story, animationDelay }: StoryCardProps) {
 						href={storyUrl}
 						variant="primary"
 						onClick={recordRead}
+						onAuxClick={recordMiddleClickRead}
 					>
 						{story.url ? "Read article" : "Open post"}
 					</ExternalButtonLink>

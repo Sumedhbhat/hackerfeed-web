@@ -237,6 +237,30 @@ describe("StoryCard link actions", () => {
 		});
 	});
 
+	it("records middle-click reads but not other auxiliary clicks", () => {
+		authMock.user = { id: "workos-story-viewer" };
+		const story = makeStory();
+		render(<StoryCard story={story} />);
+
+		fireEvent(
+			screen.getByRole("link", { name: story.title ?? "" }),
+			new MouseEvent("auxclick", { bubbles: true, button: 1 }),
+		);
+		fireEvent(
+			screen.getByRole("link", { name: /read article/i }),
+			new MouseEvent("auxclick", { bubbles: true, button: 1 }),
+		);
+		fireEvent(
+			screen.getByRole("link", { name: /read article/i }),
+			new MouseEvent("auxclick", { bubbles: true, button: 2 }),
+		);
+
+		expect(trpcMock.viewStory.mock.calls).toEqual([
+			[{ action: "read", story }],
+			[{ action: "read", story }],
+		]);
+	});
+
 	it("records signed-in discussion and AI chat opens", () => {
 		authMock.user = { id: "workos-story-viewer" };
 		const story = makeStory();
