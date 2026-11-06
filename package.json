@@ -25,12 +25,12 @@
     "check": "biome check"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.15",
+    "@biomejs/biome": "2.6.2",
     "@types/node": "^26.6.3",
     "nx": "23.3.0",
     "typescript": "^7.0.2",
-    "vitest": "^5.0.4",
-    "wrangler": "^4.151.0"
+    "vitest": "^5.0.5",
+    "wrangler": "^4.152.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
