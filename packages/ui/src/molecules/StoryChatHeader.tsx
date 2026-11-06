@@ -1,8 +1,8 @@
 import { ArrowUpRight } from "lucide-react";
+import { ExternalButtonLink } from "../atoms/Button";
 import { Heading } from "../atoms/Heading";
 import { Icon } from "../atoms/Icon";
 import { Kicker } from "../atoms/Kicker";
-import { ExternalLink } from "../atoms/Link";
 
 /** Title block of the story chat screen, with a link to the article. */
 export function StoryChatHeader({
@@ -21,10 +21,10 @@ export function StoryChatHeader({
 				{title}
 			</Heading>
 			{url ? (
-				<div className="mt-2">
-					<ExternalLink href={url} variant="accent">
+				<div className="mt-1 -ml-1.5">
+					<ExternalButtonLink href={url} variant="accent">
 						Read article <Icon icon={ArrowUpRight} size={14} />
-					</ExternalLink>
+					</ExternalButtonLink>
 				</div>
 			) : null}
 		</header>

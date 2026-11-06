@@ -1,4 +1,8 @@
 import { Fragment, type ReactNode } from "react";
+import { CodeBlock } from "../atoms/CodeBlock";
+import { ExternalLink } from "../atoms/Link";
+import { ProseList, ProseListItem } from "../atoms/ProseList";
+import { Text } from "../atoms/Text";
 
 /*
  * The small part of Markdown that chat replies actually use: paragraphs,
@@ -133,11 +137,7 @@ function inline(text: string): ReactNode[] {
 	return text.split(INLINE).map((part, index) => {
 		const key = `${index}:${part}`;
 		if (part.startsWith("**") && part.endsWith("**") && part.length > 4) {
-			return (
-				<strong key={key} className="font-semibold">
-					{part.slice(2, -2)}
-				</strong>
-			);
+			return <strong key={key}>{part.slice(2, -2)}</strong>;
 		}
 		if (part.startsWith("`") && part.endsWith("`") && part.length > 2) {
 			return <code key={key}>{part.slice(1, -1)}</code>;
@@ -146,15 +146,9 @@ function inline(text: string): ReactNode[] {
 		const href = link?.[2] ? safeHref(link[2]) : null;
 		if (link && href) {
 			return (
-				<a
-					key={key}
-					href={href}
-					target="_blank"
-					rel="noopener noreferrer"
-					className="text-(--lagoon-deep) underline decoration-(--lagoon)/40 underline-offset-[3px] hover:decoration-(--lagoon)"
-				>
+				<ExternalLink key={key} href={href} variant="inline">
 					{link[1]}
-				</a>
+				</ExternalLink>
 			);
 		}
 		return <Fragment key={key}>{part}</Fragment>;
@@ -162,24 +156,16 @@ function inline(text: string): ReactNode[] {
 }
 
 function MarkdownList({ list }: { list: ListBlock }) {
-	const List = list.kind;
 	return (
-		<List
-			start={list.kind === "ol" && list.start !== 1 ? list.start : undefined}
-			className={`m-0 flex flex-col gap-1.5 pl-5 ${List === "ol" ? "list-decimal" : "list-disc"} marker:text-(--sea-ink-faint)`}
-		>
+		<ProseList ordered={list.kind === "ol"} start={list.start}>
 			{list.items.map((item, itemIndex) => (
 				// biome-ignore lint/suspicious/noArrayIndexKey: list items are positional and never reorder
-				<li key={itemIndex} className="pl-1">
+				<ProseListItem key={itemIndex}>
 					{inline(item.text)}
-					{item.children ? (
-						<div className="mt-1.5">
-							<MarkdownList list={item.children} />
-						</div>
-					) : null}
-				</li>
+					{item.children ? <MarkdownList list={item.children} /> : null}
+				</ProseListItem>
 			))}
-		</List>
+		</ProseList>
 	);
 }
 
@@ -192,24 +178,17 @@ export function ChatMarkdown({ text }: { text: string }) {
 				const key = `${block.kind}-${index}`;
 				if (block.kind === "h") {
 					return (
-						<p key={key} className="m-0 mt-1 font-semibold text-(--sea-ink)">
+						<Text key={key} size="inherit" weight="semibold">
 							{inline(block.text)}
-						</p>
+						</Text>
 					);
 				}
 				if (block.kind === "pre") {
-					return (
-						<pre
-							key={key}
-							className="m-0 overflow-x-auto rounded-lg bg-(--chip-bg) px-3.5 py-3 text-meta"
-						>
-							<code>{block.lines.join("\n")}</code>
-						</pre>
-					);
+					return <CodeBlock key={key} code={block.lines.join("\n")} />;
 				}
 				if (block.kind === "p") {
 					return (
-						<p key={key} className="m-0">
+						<Text key={key} size="inherit">
 							{block.lines.map((line, lineIndex) => (
 								// biome-ignore lint/suspicious/noArrayIndexKey: lines are positional and never reorder
 								<Fragment key={lineIndex}>
@@ -217,7 +196,7 @@ export function ChatMarkdown({ text }: { text: string }) {
 									{inline(line)}
 								</Fragment>
 							))}
-						</p>
+						</Text>
 					);
 				}
 				return <MarkdownList key={key} list={block} />;

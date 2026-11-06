@@ -4,6 +4,8 @@ const SIZE = {
 	xs: "text-meta",
 	sm: "text-sm",
 	base: "text-base",
+	/** Keep the size the parent set (e.g. inside a chat reply). */
+	inherit: "",
 } as const;
 
 const TONE = {

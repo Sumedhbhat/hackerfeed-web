@@ -8,18 +8,18 @@ const BASE_CLASSES =
 const VARIANT_CLASSES = {
 	/** The one main action in a view. */
 	primary:
-		"min-h-11 bg-(--lagoon) px-3.5 py-1.5 text-(--on-lagoon) sm:min-h-9 hover:bg-(--lagoon-deep) hover:text-(--on-lagoon)",
+		"min-h-11 bg-(--lagoon) px-3.5 py-1.5 text-(--on-lagoon) disabled:bg-(--chip-bg) disabled:text-(--sea-ink-faint) disabled:opacity-100 sm:min-h-9 hover:bg-(--lagoon-deep) hover:text-(--on-lagoon)",
 	/** A main action that repeats down a list, where a solid button would shout. */
 	soft: "whitespace-nowrap min-h-11 bg-(--lagoon-tint) px-2.5 py-1.5 text-(--lagoon-deep) hover:bg-(--lagoon) hover:text-(--on-lagoon) sm:min-h-9 sm:px-3",
 	/** The main action of a list row: green text, no fill, so a column of rows stays calm. */
 	accent:
-		"whitespace-nowrap min-h-11 min-w-11 px-1.5 py-1.5 font-semibold text-(--lagoon-deep) hover:bg-(--lagoon-tint) hover:text-(--lagoon-deep) sm:min-h-9 sm:min-w-9 sm:px-2",
+		"whitespace-nowrap min-h-11 min-w-11 px-1.5 py-1.5 font-semibold text-(--lagoon-deep) hover:bg-(--lagoon-tint) hover:text-(--lagoon-deep) sm:min-h-8 sm:min-w-8 sm:px-2",
 	/** Bordered button for secondary actions and pick-one chips. */
 	secondary:
 		"min-h-9 border border-(--chip-line) bg-(--surface-strong) px-3 py-1.5 text-left text-(--sea-ink) hover:border-(--field-line) hover:bg-(--chip-bg) aria-pressed:border-(--lagoon) aria-pressed:bg-(--lagoon-tint) aria-pressed:text-(--lagoon-deep)",
 	/** Text-only action; pressed means saved, so it turns brass. */
 	ghost:
-		"whitespace-nowrap min-h-11 min-w-11 px-1.5 py-1.5 font-normal text-(--sea-ink-soft) sm:min-h-9 sm:min-w-9 sm:px-2 hover:bg-(--chip-bg) hover:text-(--sea-ink) aria-pressed:text-(--bookmark) aria-pressed:hover:text-(--bookmark)",
+		"whitespace-nowrap min-h-11 min-w-11 px-1.5 py-1.5 font-normal text-(--sea-ink-soft) sm:min-h-8 sm:min-w-8 sm:px-2 hover:bg-(--chip-bg) hover:text-(--sea-ink) aria-pressed:text-(--bookmark) aria-pressed:hover:text-(--bookmark)",
 	/** One option in a segmented control (pick one of a few views). */
 	segment:
 		"whitespace-nowrap min-h-8 px-3 py-1 text-(--sea-ink-soft) hover:text-(--sea-ink) aria-pressed:bg-(--surface-strong) aria-pressed:text-(--sea-ink) aria-pressed:shadow-(--shadow-raised)",

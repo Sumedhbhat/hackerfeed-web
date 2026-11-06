@@ -146,15 +146,17 @@ export function ProviderConversation({
 								<IconText icon={MessageCircle} tone="soft">
 									Ask anything about this story, or start with:
 								</IconText>
-								{STARTER_PROMPTS.map((prompt) => (
-									<Button
-										key={prompt}
-										variant="secondary"
-										onClick={() => chat.send(prompt)}
-									>
-										{prompt}
-									</Button>
-								))}
+								<Row gap="sm" align="start" wrap stackOnMobile>
+									{STARTER_PROMPTS.map((prompt) => (
+										<Button
+											key={prompt}
+											variant="secondary"
+											onClick={() => chat.send(prompt)}
+										>
+											{prompt}
+										</Button>
+									))}
+								</Row>
 							</Stack>
 						) : null}
 

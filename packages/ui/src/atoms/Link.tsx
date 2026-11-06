@@ -10,6 +10,9 @@ const VARIANT_CLASSES = {
 		"rounded-sm text-sm font-medium text-(--lagoon-deep) underline decoration-(--lagoon)/40 underline-offset-[3px] hover:text-(--lagoon-deep) hover:decoration-(--lagoon)",
 	/** Top navigation item; tinted when the router marks it active. */
 	nav: "min-h-9 gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium whitespace-nowrap text-(--sea-ink-soft) no-underline hover:bg-(--chip-bg) hover:text-(--sea-ink) data-[status=active]:bg-(--lagoon-tint) data-[status=active]:text-(--lagoon-deep) sm:px-3",
+	/** A link inside running text (chat replies): green and underlined, no layout of its own. */
+	inline:
+		"text-(--lagoon-deep) underline decoration-(--lagoon)/40 underline-offset-[3px] hover:text-(--lagoon-deep) hover:decoration-(--lagoon)",
 	/** Inherits surrounding text styles; use for linked titles. */
 	plain:
 		"rounded-sm text-inherit no-underline decoration-(--lagoon)/50 underline-offset-[3px] hover:text-inherit hover:underline visited:text-(--sea-ink-soft)",
@@ -29,7 +32,7 @@ function StyledAnchor({ variant = "subtle", ...props }: StyledAnchorProps) {
 	return (
 		<a
 			{...props}
-			className={`inline-flex items-center gap-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--lagoon) ${VARIANT_CLASSES[variant]}`}
+			className={`${variant === "inline" ? "" : "inline-flex items-center gap-1 "}focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--lagoon) ${VARIANT_CLASSES[variant]}`}
 		/>
 	);
 }

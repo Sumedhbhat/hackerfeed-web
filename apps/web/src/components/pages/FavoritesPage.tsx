@@ -177,7 +177,11 @@ export function FavoritesPage({
 									) : isStories ? (
 										<ReadingList aria-label="Saved stories">
 											{visibleStories.map((story) => (
-												<StoryCard key={story.id} story={story} />
+												<StoryCard
+													key={story.id}
+													story={story}
+													markSaved={false}
+												/>
 											))}
 										</ReadingList>
 									) : (
@@ -186,6 +190,7 @@ export function FavoritesPage({
 												<PaperRow
 													key={paper.arxivId}
 													paper={paper}
+													markSaved={false}
 													canFavorite={papers.canFavorite}
 													isFavorited={papers.isFavorited(paper.arxivId)}
 													isPending={

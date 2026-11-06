@@ -5,15 +5,23 @@ import {
 } from "@hackerfeed/ui/atoms/Collapsible";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
 import { PaperSummaryText } from "@hackerfeed/ui/atoms/PaperSummaryText";
+import { Row } from "@hackerfeed/ui/atoms/Row";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import type { PaperPresentation } from "#/lib/papers/presentation";
 
 /**
  * A paper's short summary cut to 3 lines, with "Show more" for the full
- * abstract when there is more to read.
+ * abstract when there is more to read; `links` share that line.
  */
-export function PaperSummary({ paper }: { paper: PaperPresentation }) {
+export function PaperSummary({
+	paper,
+	links,
+}: {
+	paper: PaperPresentation;
+	/** Secondary links (project, code) shown on the same line as Show more. */
+	links?: ReactNode;
+}) {
 	const [open, setOpen] = useState(false);
 	const [overflows, setOverflows] = useState(false);
 	const clampedRef = useRef<HTMLParagraphElement>(null);
@@ -37,11 +45,16 @@ export function PaperSummary({ paper }: { paper: PaperPresentation }) {
 			<CollapsiblePanel>
 				<PaperSummaryText>{paper.abstract ?? paper.summary}</PaperSummaryText>
 			</CollapsiblePanel>
-			{canExpand ? (
-				<CollapsibleTrigger flush>
-					{open ? "Show less" : "Show more"}
-					<Icon icon={open ? ChevronUp : ChevronDown} />
-				</CollapsibleTrigger>
+			{canExpand || links ? (
+				<Row gap="xs" wrap>
+					{canExpand ? (
+						<CollapsibleTrigger flush>
+							{open ? "Show less" : "Show more"}
+							<Icon icon={open ? ChevronUp : ChevronDown} />
+						</CollapsibleTrigger>
+					) : null}
+					{links}
+				</Row>
 			) : null}
 		</Collapsible>
 	);

@@ -19,6 +19,8 @@ import { PaperSummary } from "./PaperSummary";
 
 type PaperRowProps = {
 	canFavorite: boolean;
+	/** Hang the saved ribbon; off in the Saved list, where everything is saved. */
+	markSaved?: boolean;
 	isFavorited: boolean;
 	isPending: boolean;
 	onToggleFavorite: () => void;
@@ -28,6 +30,7 @@ type PaperRowProps = {
 
 export function PaperRow({
 	canFavorite,
+	markSaved = true,
 	isFavorited: saved,
 	isPending: pending,
 	onToggleFavorite,
@@ -35,7 +38,7 @@ export function PaperRow({
 	paper,
 }: PaperRowProps) {
 	return (
-		<PaperCard saved={saved}>
+		<PaperCard saved={markSaved && saved}>
 			<PaperTitle href={paper.paperUrl} onClick={() => onView("read")}>
 				{paper.title}
 			</PaperTitle>
@@ -45,23 +48,25 @@ export function PaperRow({
 				publishedLabel={formatPaperDate(paper.paperPublishedAt)}
 				topics={paper.keywords}
 			/>
-			<PaperSummary paper={paper} />
+			<PaperSummary
+				paper={paper}
+				links={
+					<PaperResourceLinks
+						title={paper.title}
+						projectPage={paper.projectPage}
+						githubRepo={paper.githubRepo}
+					/>
+				}
+			/>
 			<PaperCardFooter
 				actions={
-					<>
-						<PaperLinks
-							title={paper.title}
-							paperUrl={paper.paperUrl}
-							discussUrl={buildChatGptPaperDiscussionUrl(paper)}
-							onRead={() => onView("read")}
-							onDiscuss={() => onView("chat_opened")}
-						/>
-						<PaperResourceLinks
-							title={paper.title}
-							projectPage={paper.projectPage}
-							githubRepo={paper.githubRepo}
-						/>
-					</>
+					<PaperLinks
+						title={paper.title}
+						paperUrl={paper.paperUrl}
+						discussUrl={buildChatGptPaperDiscussionUrl(paper)}
+						onRead={() => onView("read")}
+						onDiscuss={() => onView("chat_opened")}
+					/>
 				}
 				save={
 					canFavorite ? (

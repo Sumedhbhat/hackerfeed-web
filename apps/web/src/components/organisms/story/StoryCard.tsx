@@ -23,9 +23,11 @@ type StoryCardProps = {
 	story: HackerNewsStoryRecord;
 	/** Position in a ranked feed; omit for unranked lists such as favorites. */
 	rank?: number;
+	/** Hang the saved ribbon; off in the Saved list, where everything is saved. */
+	markSaved?: boolean;
 };
 
-export function StoryCard({ story, rank }: StoryCardProps) {
+export function StoryCard({ story, rank, markSaved = true }: StoryCardProps) {
 	const { isFavorited, toggleFavorite } = useFavorites();
 	const { recordStoryView } = useViewActivity();
 	const aiChat = useFeatureFlag("aiChat");
@@ -48,7 +50,7 @@ export function StoryCard({ story, rank }: StoryCardProps) {
 	return (
 		<FeedRow
 			rank={rank}
-			saved={isFav}
+			saved={markSaved && isFav}
 			title={
 				<Heading level={2} size="row">
 					<ExternalLink

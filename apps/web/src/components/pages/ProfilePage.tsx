@@ -1,4 +1,4 @@
-import { Button, ButtonLink } from "@hackerfeed/ui/atoms/Button";
+import { Button } from "@hackerfeed/ui/atoms/Button";
 import { Heading } from "@hackerfeed/ui/atoms/Heading";
 import { IconBadge } from "@hackerfeed/ui/atoms/IconBadge";
 import { PageContainer } from "@hackerfeed/ui/atoms/PageContainer";
@@ -106,12 +106,6 @@ export function ProfilePage({ search }: { search: ProfileSearch }) {
 							reason={search.reason}
 						/>
 					) : null}
-
-					<div>
-						<ButtonLink to="/favorites" variant="secondary">
-							View saved
-						</ButtonLink>
-					</div>
 				</Stack>
 			</Panel>
 		</PageContainer>

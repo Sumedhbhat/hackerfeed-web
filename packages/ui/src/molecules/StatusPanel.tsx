@@ -31,7 +31,7 @@ export function StatusPanel({
 	children,
 }: StatusPanelProps) {
 	return (
-		<Panel width="md">
+		<Panel width="lg">
 			<IconBadge icon={icon} tone={iconTone} spinning={iconSpinning} />
 			<div className="mt-5">
 				<Kicker>{kicker}</Kicker>

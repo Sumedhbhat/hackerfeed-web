@@ -1,5 +1,5 @@
 import { Button } from "@hackerfeed/ui/atoms/Button";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, SunMoon } from "lucide-react";
 import { useTheme } from "#/hooks/useTheme";
 
 export default function ThemeToggle() {
@@ -16,8 +16,10 @@ export default function ThemeToggle() {
 		>
 			{mode === "dark" ? (
 				<Moon size={16} aria-hidden="true" />
-			) : (
+			) : mode === "light" ? (
 				<Sun size={16} aria-hidden="true" />
+			) : (
+				<SunMoon size={16} aria-hidden="true" />
 			)}
 		</Button>
 	);
