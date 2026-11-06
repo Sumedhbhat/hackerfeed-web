@@ -27,7 +27,7 @@ export function formatPaperDate(value: string): string {
 }
 
 export function matchesFilters(
-	paper: PaperFeedPaper,
+	paper: Pick<PaperFeedPaper, "title" | "summary" | "authors" | "keywords">,
 	query: string,
 	topic?: string,
 ): boolean {

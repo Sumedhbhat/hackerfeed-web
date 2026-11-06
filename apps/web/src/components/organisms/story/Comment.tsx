@@ -76,7 +76,7 @@ export function Comment({ comment, depth = 0 }: CommentProps) {
 					</Row>
 
 					<CollapsiblePanel>
-						<Stack gap="md">
+						<Stack gap="sm">
 							{comment.text && <Prose html={comment.text} />}
 
 							{replyCount > 0 && (
@@ -84,6 +84,7 @@ export function Comment({ comment, depth = 0 }: CommentProps) {
 									<Stack gap="md">
 										<Row>
 											<CollapsibleTrigger flush>
+												<Icon icon={repliesOpen ? ChevronDown : ChevronRight} />
 												{repliesOpen
 													? "Hide replies"
 													: `${replyCount} ${replyCount === 1 ? "reply" : "replies"}`}

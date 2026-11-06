@@ -19,6 +19,12 @@
   --text-badge: 0.6875rem;
   --text-badge--line-height: 1;
   /* Page titles and the story title. */
+  --text-page-sm: 1.75rem;
+  --text-page-sm--line-height: 1.2;
+  --text-headline-sm: 1.625rem;
+  --text-headline-sm--line-height: 1.2;
+  --text-row-sm: 1.0625rem;
+  --text-row-sm--line-height: 1.375;
   --text-page: 2rem;
   --text-page--line-height: 1.15;
   --text-headline: 2.125rem;

@@ -2,7 +2,8 @@ import { Fragment, type ReactNode } from "react";
 
 /*
  * The small part of Markdown that chat replies actually use: paragraphs,
- * numbered and bulleted lists, fenced code blocks, **bold** and `code`. Everything renders as
+ * headings, numbered and bulleted lists, fenced code blocks, **bold**,
+ * `code` and [links](https://…) (http and https only). Everything renders as
  * React text, never as HTML, so a reply cannot inject markup.
  */
 
@@ -10,7 +11,10 @@ type Block =
 	| { kind: "p"; lines: string[] }
 	| { kind: "ul"; items: string[] }
 	| { kind: "ol"; items: string[]; start: number }
-	| { kind: "pre"; lines: string[] };
+	| { kind: "pre"; lines: string[] }
+	| { kind: "h"; text: string };
+
+const HEADING = /^\s{0,3}#{1,6}\s+(.*?)\s*#*\s*$/;
 
 const FENCE = /^\s*(```|~~~)/;
 
@@ -46,6 +50,12 @@ function toBlocks(text: string): Block[] {
 			afterBlank = true;
 			continue;
 		}
+		const heading = HEADING.exec(line);
+		if (heading) {
+			blocks.push({ kind: "h", text: heading[1] ?? "" });
+			afterBlank = false;
+			continue;
+		}
 		const last = blocks.at(-1);
 		const ordered = ORDERED.exec(line);
 		const kind = ordered ? "ol" : BULLET.test(line) ? "ul" : null;
@@ -65,8 +75,21 @@ function toBlocks(text: string): Block[] {
 	return blocks;
 }
 
+const INLINE = /(\*\*[^*]+\*\*|`[^`]+`|\[[^\]]+\]\([^)\s]+\))/g;
+const LINK = /^\[([^\]]+)\]\(([^)\s]+)\)$/;
+
+/** Only web links become anchors; anything else (javascript:, data:) stays text. */
+function safeHref(url: string): string | null {
+	try {
+		const { protocol } = new URL(url);
+		return protocol === "https:" || protocol === "http:" ? url : null;
+	} catch {
+		return null;
+	}
+}
+
 function inline(text: string): ReactNode[] {
-	return text.split(/(\*\*[^*]+\*\*|`[^`]+`)/g).map((part, index) => {
+	return text.split(INLINE).map((part, index) => {
 		const key = `${index}:${part}`;
 		if (part.startsWith("**") && part.endsWith("**") && part.length > 4) {
 			return (
@@ -77,6 +100,21 @@ function inline(text: string): ReactNode[] {
 		}
 		if (part.startsWith("`") && part.endsWith("`") && part.length > 2) {
 			return <code key={key}>{part.slice(1, -1)}</code>;
+		}
+		const link = LINK.exec(part);
+		const href = link?.[2] ? safeHref(link[2]) : null;
+		if (link && href) {
+			return (
+				<a
+					key={key}
+					href={href}
+					target="_blank"
+					rel="noopener noreferrer"
+					className="text-(--lagoon-deep) underline decoration-(--lagoon)/40 underline-offset-[3px] hover:decoration-(--lagoon)"
+				>
+					{link[1]}
+				</a>
+			);
 		}
 		return <Fragment key={key}>{part}</Fragment>;
 	});
@@ -89,11 +127,18 @@ export function ChatMarkdown({ text }: { text: string }) {
 			{toBlocks(text).map((block, index) => {
 				// Blocks are positional and a reply never reorders them.
 				const key = `${block.kind}-${index}`;
+				if (block.kind === "h") {
+					return (
+						<p key={key} className="m-0 mt-1 font-semibold text-(--sea-ink)">
+							{inline(block.text)}
+						</p>
+					);
+				}
 				if (block.kind === "pre") {
 					return (
 						<pre
 							key={key}
-							className="m-0 overflow-x-auto rounded-lg bg-(--chip-bg) px-3.5 py-3 text-[0.8125rem] leading-relaxed"
+							className="m-0 overflow-x-auto rounded-lg bg-(--chip-bg) px-3.5 py-3 text-meta"
 						>
 							<code>{block.lines.join("\n")}</code>
 						</pre>

@@ -2,11 +2,11 @@ import type { ReactNode } from "react";
 import { Ribbon } from "../atoms/Ribbon";
 
 /**
- * One story in a ReadingList: optional rank in the margin, the title, then a
- * line with the facts on the left and the actions on the right (stacked on
- * phones). On wide screens the actions sit in fixed columns so they line up
- * from row to row. `save` always sits at the far end of that line, right under
- * the brass ribbon that hangs from the corner once the story is saved.
+ * One story in a ReadingList: optional rank in the margin, the title, then the
+ * facts and the actions. From `lg` up facts and actions share one line, with
+ * the actions in fixed columns so they line up from row to row; below that the
+ * actions get their own line. `save` always sits at the far right, directly
+ * under the brass ribbon that hangs from the row once the story is saved.
  */
 export function FeedRow({
 	rank,
@@ -35,14 +35,14 @@ export function FeedRow({
 				</span>
 			) : null}
 			<div className="flex min-w-0 flex-1 flex-col gap-1">
-				<div className="pr-6">{title}</div>
-				<div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+				<div className="pr-8">{title}</div>
+				<div className="flex flex-col gap-1 lg:flex-row lg:items-center lg:justify-between lg:gap-4">
 					{meta}
-					<div className="-ml-1.5 flex items-center gap-0.5 sm:-mr-2 sm:ml-0 sm:shrink-0">
-						<div className="flex items-center gap-0.5 sm:grid sm:grid-cols-[6.5rem_7.5rem_5.25rem] sm:justify-items-start">
+					<div className="-ml-1.5 flex items-center sm:-mr-2 lg:ml-0 lg:shrink-0">
+						<div className="grid grid-cols-[7rem_6.75rem_auto] items-center justify-items-start sm:grid-cols-[7.25rem_7.5rem_auto] lg:grid-cols-[7.25rem_7.5rem_5.25rem]">
 							{actions}
 						</div>
-						<div className="ml-auto sm:ml-0">{save}</div>
+						<div className="ml-auto lg:ml-0">{save}</div>
 					</div>
 				</div>
 			</div>

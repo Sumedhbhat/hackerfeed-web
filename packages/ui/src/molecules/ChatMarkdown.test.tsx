@@ -67,6 +67,25 @@ describe("ChatMarkdown", () => {
 		);
 	});
 
+	it("renders headings as bold lines and web links as new-tab anchors", () => {
+		const { container } = render(
+			<ChatMarkdown
+				text={
+					"## Sources\n\nSee [the paper](https://arxiv.org/abs/1) and [this](javascript:alert(1))."
+				}
+			/>,
+		);
+
+		expect(container.textContent).not.toContain("##");
+		expect(screen.getByText("Sources").className).toContain("font-semibold");
+		const link = screen.getByRole("link", { name: "the paper" });
+		expect(link.getAttribute("href")).toBe("https://arxiv.org/abs/1");
+		expect(link.getAttribute("target")).toBe("_blank");
+		expect(link.getAttribute("rel")).toContain("noopener");
+		expect(screen.queryByRole("link", { name: "this" })).toBeNull();
+		expect(container.textContent).toContain("[this](javascript:alert(1))");
+	});
+
 	it("shows markup in a reply as text instead of rendering it", () => {
 		const { container } = render(
 			<ChatMarkdown text={'<img src=x onerror="alert(1)"> **hi**'} />,

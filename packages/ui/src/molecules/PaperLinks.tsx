@@ -1,54 +1,44 @@
-import { Code2, ExternalLink as ExternalIcon, Globe } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { ExternalButtonLink } from "../atoms/Button";
 import { Icon } from "../atoms/Icon";
 
 /**
- * Links out from a paper: hand it to ChatGPT (there is no in-app paper chat,
- * so no sparkle, which means in-app AI), plus optional project and code pages.
+ * A paper's two main actions: read it (the green main action, like Read
+ * article on stories) and hand it to ChatGPT in a new tab. There is no in-app
+ * paper chat yet, so this hand-off has no sparkle, which means in-app AI.
  */
 export function PaperLinks({
 	title,
+	paperUrl,
 	discussUrl,
-	projectPage,
-	githubRepo,
+	onRead,
 	onDiscuss,
 }: {
 	title: string;
+	paperUrl: string;
 	discussUrl: string;
-	projectPage: string | null;
-	githubRepo: string | null;
+	onRead?: () => void;
 	onDiscuss?: () => void;
 }) {
 	return (
 		<>
 			<ExternalButtonLink
 				variant="accent"
+				href={paperUrl}
+				aria-label={`Read paper: ${title}`}
+				onClick={onRead}
+			>
+				Read paper <Icon icon={ArrowUpRight} size={14} />
+			</ExternalButtonLink>
+			<ExternalButtonLink
+				variant="ghost"
 				href={discussUrl}
 				aria-label={`Open in ChatGPT: ${title}`}
+				title="Opens ChatGPT in a new tab with this paper"
 				onClick={onDiscuss}
 			>
-				Open in ChatGPT <Icon icon={ExternalIcon} size={14} muted />
+				Open in ChatGPT <Icon icon={ArrowUpRight} size={14} />
 			</ExternalButtonLink>
-			{projectPage ? (
-				<ExternalButtonLink
-					variant="ghost"
-					href={projectPage}
-					aria-label={`Project page for ${title}`}
-				>
-					<Icon icon={Globe} />
-					Project
-				</ExternalButtonLink>
-			) : null}
-			{githubRepo ? (
-				<ExternalButtonLink
-					variant="ghost"
-					href={githubRepo}
-					aria-label={`Code for ${title}`}
-				>
-					<Icon icon={Code2} />
-					Code
-				</ExternalButtonLink>
-			) : null}
 		</>
 	);
 }

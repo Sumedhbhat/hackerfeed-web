@@ -186,6 +186,36 @@ describe("FavoritesPage backend source of truth", () => {
 });
 
 describe("FavoritesPage paper collection", () => {
+	it("filters saved papers by title, author or topic", async () => {
+		authMock.user = { id: "paper-search-user" };
+		trpcMock.paperList.mockResolvedValue({
+			items: [
+				savedPaper(),
+				savedPaper({
+					arxivId: "2607.00002",
+					title: "Older Paper",
+					savedAt: "2026-07-10T00:00:00.000Z",
+				}),
+			],
+			nextCursor: null,
+		});
+		render(<FavoritesPage activeType="papers" />);
+		await screen.findByText("Older Paper");
+
+		fireEvent.change(
+			screen.getByRole("searchbox", { name: "Search saved papers" }),
+			{ target: { value: "older" } },
+		);
+		expect(screen.getByText("Older Paper")).toBeTruthy();
+		expect(screen.queryByText("Saved Reasoning Paper")).toBeNull();
+
+		fireEvent.change(
+			screen.getByRole("searchbox", { name: "Search saved papers" }),
+			{ target: { value: "nothing like this" } },
+		);
+		expect(screen.getByText(/No saved papers match/)).toBeTruthy();
+	});
+
 	it("renders canonical paper links in newest-saved order and removes with the star", async () => {
 		authMock.user = { id: "paper-page-user" };
 		trpcMock.paperList.mockResolvedValue({

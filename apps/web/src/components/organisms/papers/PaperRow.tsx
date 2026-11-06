@@ -6,6 +6,7 @@ import { ToggleLabel } from "@hackerfeed/ui/atoms/ToggleLabel";
 import { KeywordList } from "@hackerfeed/ui/molecules/KeywordList";
 import { PaperCardFooter } from "@hackerfeed/ui/molecules/PaperCardFooter";
 import { PaperLinks } from "@hackerfeed/ui/molecules/PaperLinks";
+import { PaperResourceLinks } from "@hackerfeed/ui/molecules/PaperResourceLinks";
 import { PaperSignals } from "@hackerfeed/ui/molecules/PaperSignals";
 import { PaperTitle } from "@hackerfeed/ui/molecules/PaperTitle";
 import { Bookmark } from "lucide-react";
@@ -35,10 +36,32 @@ export function PaperRow({
 	paper,
 }: PaperRowProps) {
 	return (
-		<PaperCard saved={saved}>
-			<PaperTitle href={paper.paperUrl} onClick={() => onView("read")}>
-				{paper.title}
-			</PaperTitle>
+		<PaperCard
+			saved={saved}
+			title={
+				<PaperTitle href={paper.paperUrl} onClick={() => onView("read")}>
+					{paper.title}
+				</PaperTitle>
+			}
+			save={
+				canFavorite ? (
+					<ToggleButton
+						aria-label={`Save ${paper.title}`}
+						pressed={saved}
+						disabled={pending}
+						onPressedChange={onToggleFavorite}
+					>
+						<Icon icon={Bookmark} filled={saved} />
+						<ToggleLabel
+							on={saved}
+							offLabel="Save"
+							onLabel="Saved"
+							iconOnlyOnPhones
+						/>
+					</ToggleButton>
+				) : null
+			}
+		>
 			<PaperSignals
 				authors={formatAuthors(paper.authors)}
 				upvotes={paper.upvotes}
@@ -49,29 +72,18 @@ export function PaperRow({
 				actions={
 					<PaperLinks
 						title={paper.title}
+						paperUrl={paper.paperUrl}
 						discussUrl={buildChatGptPaperDiscussionUrl(paper)}
-						projectPage={paper.projectPage}
-						githubRepo={paper.githubRepo}
+						onRead={() => onView("read")}
 						onDiscuss={() => onView("chat_opened")}
 					/>
 				}
-				save={
-					canFavorite ? (
-						<ToggleButton
-							aria-label={`Save ${paper.title}`}
-							pressed={saved}
-							disabled={pending}
-							onPressedChange={onToggleFavorite}
-						>
-							<Icon icon={Bookmark} filled={saved} />
-							<ToggleLabel
-								on={saved}
-								offLabel="Save"
-								onLabel="Saved"
-								iconOnlyOnPhones
-							/>
-						</ToggleButton>
-					) : null
+				resources={
+					<PaperResourceLinks
+						title={paper.title}
+						projectPage={paper.projectPage}
+						githubRepo={paper.githubRepo}
+					/>
 				}
 				keywords={
 					paper.keywords.length > 0 ? (

@@ -13,7 +13,7 @@ import { ToggleButton } from "@hackerfeed/ui/atoms/Toggle";
 import { ToggleLabel } from "@hackerfeed/ui/atoms/ToggleLabel";
 import { FeedRow } from "@hackerfeed/ui/molecules/FeedRow";
 import { StoryMeta } from "@hackerfeed/ui/molecules/StoryMeta";
-import { Bookmark, MessageSquare, Sparkles } from "lucide-react";
+import { ArrowUpRight, Bookmark, MessageSquare, Sparkles } from "lucide-react";
 import { useFavorites } from "#/hooks/useFavorites";
 import { useFeatureFlag } from "#/hooks/useFeatureFlags";
 import { useViewActivity } from "#/hooks/useViewActivity";
@@ -75,6 +75,7 @@ export function StoryCard({ story, rank }: StoryCardProps) {
 						onAuxClick={recordMiddleClickRead}
 					>
 						{story.url ? "Read article" : "Open post"}
+						<Icon icon={ArrowUpRight} size={14} />
 					</ExternalButtonLink>
 
 					<ButtonLink

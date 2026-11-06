@@ -3,7 +3,7 @@ import { createLink } from "@tanstack/react-router";
 import type { AnchorHTMLAttributes } from "react";
 
 const BASE_CLASSES =
-	"inline-flex shrink-0 items-center justify-center gap-1.5 rounded-md text-sm font-medium no-underline transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--lagoon) disabled:cursor-not-allowed disabled:opacity-55";
+	"inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium no-underline transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--lagoon) disabled:cursor-not-allowed disabled:opacity-55";
 
 const VARIANT_CLASSES = {
 	/** The one main action in a view. */
@@ -19,7 +19,7 @@ const VARIANT_CLASSES = {
 		"min-h-9 border border-(--chip-line) bg-(--surface-strong) px-3 py-1.5 text-left text-(--sea-ink) hover:border-(--field-line) hover:bg-(--chip-bg) aria-pressed:border-(--lagoon) aria-pressed:bg-(--lagoon-tint) aria-pressed:text-(--lagoon-deep)",
 	/** Text-only action; pressed means saved, so it turns brass. */
 	ghost:
-		"min-h-11 min-w-11 px-1.5 py-1.5 text-(--sea-ink-soft) sm:min-h-9 sm:min-w-9 sm:px-2 hover:bg-(--chip-bg) hover:text-(--sea-ink) aria-pressed:text-(--bookmark) aria-pressed:hover:text-(--bookmark)",
+		"min-h-11 min-w-11 px-1.5 py-1.5 font-normal text-(--sea-ink-soft) sm:min-h-9 sm:min-w-9 sm:px-2 hover:bg-(--chip-bg) hover:text-(--sea-ink) aria-pressed:text-(--bookmark) aria-pressed:hover:text-(--bookmark)",
 	/** One option in a segmented control (pick one of a few views). */
 	segment:
 		"min-h-8 px-3 py-1 text-(--sea-ink-soft) hover:text-(--sea-ink) aria-pressed:bg-(--surface-strong) aria-pressed:text-(--sea-ink) aria-pressed:shadow-(--shadow-raised)",

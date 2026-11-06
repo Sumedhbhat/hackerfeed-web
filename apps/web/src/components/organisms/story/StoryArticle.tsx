@@ -54,7 +54,7 @@ export function StoryArticle({ story }: { story: HackerNewsStoryRecord }) {
 						href={story.url}
 						onClick={() => recordStoryView(story, "read")}
 					>
-						Read article <Icon icon={ArrowUpRight} />
+						Read article <Icon icon={ArrowUpRight} size={14} />
 					</ExternalButtonLink>
 				)}
 				{aiChat ? (

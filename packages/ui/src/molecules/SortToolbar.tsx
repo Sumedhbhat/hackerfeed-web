@@ -17,7 +17,7 @@ export function SortToolbar<T extends string>({
 }) {
 	const labelId = useId();
 	return (
-		<div className="mb-4 flex items-center justify-between gap-3">
+		<div className="flex items-center justify-between gap-3">
 			<div className="flex min-w-0 items-center gap-3">
 				<span
 					id={labelId}

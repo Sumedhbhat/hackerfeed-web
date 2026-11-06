@@ -11,6 +11,7 @@ import { ConfirmButton } from "@hackerfeed/ui/molecules/ConfirmButton";
 import { EmptyState } from "@hackerfeed/ui/molecules/EmptyState";
 import { InlineNotice } from "@hackerfeed/ui/molecules/InlineNotice";
 import { PageHeader } from "@hackerfeed/ui/molecules/PageHeader";
+import { SearchField } from "@hackerfeed/ui/molecules/SearchField";
 import { SortToolbar } from "@hackerfeed/ui/molecules/SortToolbar";
 import { ArrowRight, RefreshCw } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -20,6 +21,7 @@ import { StoryCard } from "#/components/organisms/story/StoryCard";
 import { useFavorites } from "#/hooks/useFavorites";
 import { usePaperFavorites } from "#/hooks/usePaperFavorites";
 import { useViewActivity } from "#/hooks/useViewActivity";
+import { matchesFilters } from "#/lib/papers/presentation";
 import type { FavoritesType } from "#/routes/favorites";
 
 type SortOrder = "newest" | "oldest" | "score";
@@ -36,6 +38,7 @@ export function FavoritesPage({
 	onTypeChange = () => undefined,
 }: FavoritesPageProps) {
 	const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
+	const [query, setQuery] = useState("");
 	const stories = useFavorites();
 	const papers = usePaperFavorites();
 	// Without a tab in the URL, open the one that has something in it.
@@ -60,6 +63,20 @@ export function FavoritesPage({
 		return all;
 	}, [papers.savedPapers, sortOrder]);
 
+	const needle = query.trim().toLocaleLowerCase();
+	const visibleStories = needle
+		? sortedStories.filter((story) =>
+				[story.title, story.url, story.by]
+					.join(" ")
+					.toLocaleLowerCase()
+					.includes(needle),
+			)
+		: sortedStories;
+	const visiblePapers = needle
+		? sortedPapers.filter((paper) => matchesFilters(paper, needle))
+		: sortedPapers;
+	const visibleCount = isStories ? visibleStories.length : visiblePapers.length;
+
 	function clearAll() {
 		if (isStories) stories.clearAllFavorites();
 		else papers.clearAll();
@@ -68,7 +85,7 @@ export function FavoritesPage({
 	const browseLabel = `Browse ${isStories ? "the feed" : "papers"}`;
 
 	return (
-		<PageContainer spacing="compact">
+		<PageContainer>
 			<Tabs value={activeType} onValueChange={onTypeChange}>
 				<Stack gap="lg">
 					<PageHeader title="Saved">
@@ -103,7 +120,15 @@ export function FavoritesPage({
 									}
 								/>
 							) : (
-								<>
+								<Stack gap="md">
+									<SearchField
+										value={query}
+										onChange={setQuery}
+										label={`Search saved ${isStories ? "stories" : "papers"}`}
+										placeholder={
+											isStories ? "Search saved stories" : "Search saved papers"
+										}
+									/>
 									<SortToolbar
 										options={[
 											{ value: "newest", label: "Newest" },
@@ -144,15 +169,20 @@ export function FavoritesPage({
 											}
 										/>
 									) : null}
-									{isStories ? (
+									{visibleCount === 0 ? (
+										<Text tone="soft">
+											No saved {isStories ? "stories" : "papers"} match “
+											{query.trim()}”.
+										</Text>
+									) : isStories ? (
 										<ReadingList aria-label="Saved stories">
-											{sortedStories.map((story) => (
+											{visibleStories.map((story) => (
 												<StoryCard key={story.id} story={story} />
 											))}
 										</ReadingList>
 									) : (
 										<PaperList aria-label="Saved papers">
-											{sortedPapers.map((paper) => (
+											{visiblePapers.map((paper) => (
 												<PaperRow
 													key={paper.arxivId}
 													paper={paper}
@@ -170,7 +200,7 @@ export function FavoritesPage({
 											))}
 										</PaperList>
 									)}
-								</>
+								</Stack>
 							)}
 						</TabPanel>
 					))}

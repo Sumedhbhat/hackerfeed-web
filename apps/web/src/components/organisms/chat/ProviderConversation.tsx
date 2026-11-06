@@ -188,7 +188,7 @@ export function ProviderConversation({
 					onStop={chat.stop}
 					isStreaming={chat.isStreaming}
 					maxLength={MAX_CHAT_MESSAGE_LENGTH}
-					placeholder="Ask a question about this story…"
+					placeholder="Ask about this story…"
 				/>
 			</Stack>
 		</Card>

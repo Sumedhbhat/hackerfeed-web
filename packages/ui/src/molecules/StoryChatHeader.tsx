@@ -1,4 +1,4 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { Heading } from "../atoms/Heading";
 import { Icon } from "../atoms/Icon";
 import { Kicker } from "../atoms/Kicker";
@@ -23,7 +23,7 @@ export function StoryChatHeader({
 			{url ? (
 				<div className="mt-2">
 					<ExternalLink href={url} variant="accent">
-						Read article <Icon icon={ArrowRight} muted />
+						Read article <Icon icon={ArrowUpRight} size={14} />
 					</ExternalLink>
 				</div>
 			) : null}
