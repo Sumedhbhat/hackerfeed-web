@@ -1,16 +1,10 @@
-import {
-	Code2,
-	ExternalLink as ExternalIcon,
-	Globe,
-	Sparkles,
-} from "lucide-react";
+import { Code2, ExternalLink as ExternalIcon, Globe } from "lucide-react";
 import { ExternalButtonLink } from "../atoms/Button";
-import { ButtonLabel } from "../atoms/ButtonLabel";
 import { Icon } from "../atoms/Icon";
 
 /**
- * "Ask ChatGPT" (hands the paper to chatgpt.com in a new tab) plus optional
- * project and code links. Project (globe) and Code show as icons on phones.
+ * Links out from a paper: hand it to ChatGPT (there is no in-app paper chat,
+ * so no sparkle, which means in-app AI), plus optional project and code pages.
  */
 export function PaperLinks({
 	title,
@@ -30,11 +24,10 @@ export function PaperLinks({
 			<ExternalButtonLink
 				variant="accent"
 				href={discussUrl}
-				aria-label={`Ask ChatGPT about ${title} (opens chatgpt.com)`}
+				aria-label={`Open in ChatGPT: ${title}`}
 				onClick={onDiscuss}
 			>
-				<Icon icon={Sparkles} />
-				Ask ChatGPT <Icon icon={ExternalIcon} size={14} muted />
+				Open in ChatGPT <Icon icon={ExternalIcon} size={14} muted />
 			</ExternalButtonLink>
 			{projectPage ? (
 				<ExternalButtonLink
@@ -43,7 +36,7 @@ export function PaperLinks({
 					aria-label={`Project page for ${title}`}
 				>
 					<Icon icon={Globe} />
-					<ButtonLabel>Project</ButtonLabel>
+					Project
 				</ExternalButtonLink>
 			) : null}
 			{githubRepo ? (
@@ -53,7 +46,7 @@ export function PaperLinks({
 					aria-label={`Code for ${title}`}
 				>
 					<Icon icon={Code2} />
-					<ButtonLabel>Code</ButtonLabel>
+					Code
 				</ExternalButtonLink>
 			) : null}
 		</>

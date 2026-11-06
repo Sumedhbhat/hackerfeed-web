@@ -15,10 +15,7 @@ export function PaperEditionToolbar({
 	onDateChange: (date: string) => void;
 }) {
 	return (
-		<section
-			className="flex flex-col gap-2 sm:flex-row"
-			aria-label="Find a paper edition"
-		>
+		<section className="flex gap-2" aria-label="Find a paper edition">
 			<FieldFrame grow>
 				<Icon icon={Search} />
 				<TextInput
@@ -26,7 +23,7 @@ export function PaperEditionToolbar({
 					type="search"
 					value={query}
 					onChange={(event) => onQueryChange(event.target.value)}
-					placeholder="Search papers, authors, or topics"
+					placeholder="Search papers"
 					aria-label="Search papers"
 				/>
 			</FieldFrame>

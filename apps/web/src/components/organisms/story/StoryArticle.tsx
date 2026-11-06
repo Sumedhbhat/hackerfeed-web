@@ -13,6 +13,7 @@ import { Prose } from "@hackerfeed/ui/atoms/Prose";
 import { Row } from "@hackerfeed/ui/atoms/Row";
 import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { ToggleButton } from "@hackerfeed/ui/atoms/Toggle";
+import { ToggleLabel } from "@hackerfeed/ui/atoms/ToggleLabel";
 import { StoryMeta } from "@hackerfeed/ui/molecules/StoryMeta";
 import { ArrowUpRight, Bookmark, Sparkles } from "lucide-react";
 import { useFavorites } from "#/hooks/useFavorites";
@@ -74,7 +75,7 @@ export function StoryArticle({ story }: { story: HackerNewsStoryRecord }) {
 					onPressedChange={() => toggleFavorite(story)}
 				>
 					<Icon icon={Bookmark} filled={isFav} />
-					Save
+					<ToggleLabel on={isFav} offLabel="Save" onLabel="Saved" />
 				</ToggleButton>
 			</Row>
 		</Stack>

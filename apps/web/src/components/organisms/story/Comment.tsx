@@ -64,7 +64,7 @@ export function Comment({ comment, depth = 0 }: CommentProps) {
 						)}
 
 						{!isGone && (
-							<Row as="span" pushEnd>
+							<Row as="span">
 								<CollapsibleTrigger
 									inline
 									aria-label={`Comment by ${comment.by ?? "unknown"}`}

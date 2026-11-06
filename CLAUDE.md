@@ -84,7 +84,7 @@ Every component lives in one of four layers: atoms and molecules in `packages/ui
 | Layer | What goes here | Styling (`className`/`style`) | Data / hooks |
 |---|---|---|---|
 | `packages/ui/src/atoms/` | One styled element: `Button`, `ButtonLink`, `TextLink`, `Text`, `Heading`, `Kicker`, `Stack`, `Row`, `Card`, `Panel`, `PageContainer`, `Skeleton`, `Icon`, `Avatar`, `TextInput`… | Yes, the only place Tailwind classes are written | No |
-| `packages/ui/src/molecules/` | A few atoms composed into a reusable piece: `TabList`, `EmptyState`, `StatusPanel`, `BackLink`, `MetaLine`, `LoadingScreen`… | Yes, layout glue only | No, props in, callbacks out |
+| `packages/ui/src/molecules/` | A few atoms composed into a reusable piece: `TabList`, `EmptyState`, `StatusPanel`, `BackLink`, `StoryMeta`, `FeedRow`, `LoadingScreen`… | Yes, layout glue only | No, props in, callbacks out |
 | `components/organisms/<feature>/` | A feature section with behavior: `StoryCard`, `SiteHeader`, `Comment`, `PapersFeed`… | **No** | Yes |
 | `components/pages/` | The full body of one screen, rendered by a route: `FeedPage`, `StoryPage`, `PapersPage`… | **No** | Yes |
 
@@ -114,7 +114,7 @@ Rules, enforced by Biome (`bun run check`) and guarded by `tools/workspace/src/l
 - `noRestrictedImports` stops atoms and molecules from importing app code (`#/*`) or any workspace package but `@hackerfeed/ui`, so they stay presentational, and stops atoms from importing molecules. It also stops everything outside `packages/ui/src/atoms/` from importing `@base-ui/*`.
 - Exempt (in `biome.json` overrides, never inline): tests, and the stylesheet-free error UI in `apps/web/src/client-entry.tsx`, `router.tsx` and `src/server/errors/`.
 
-When a rule blocks you, change the component, not the rule. Do not edit `biome.json` or `lint/`, add `biome-ignore` for these rules (the test fails on it), restyle elements from `packages/ui/src/styles.css`, or move files to dodge a rule. If the request can't be met within the layers, stop and say so. Colors come from the CSS variables in `packages/ui/src/styles.css` (`--lagoon`, `--sea-ink`…); add a token there rather than using raw Tailwind palette colors or hex values.
+When a rule blocks you, change the component, not the rule. Do not edit `biome.json` or `lint/`, add `biome-ignore` for these rules (the test fails on it), restyle elements from `packages/ui/src/styles.css`, or move files to dodge a rule. If the request can't be met within the layers, stop and say so. Colors come from the CSS variables in `packages/ui/src/styles.css` (`--lagoon`, `--sea-ink`…), each defined once as `light-dark(<light>, <dark>)`; add a token there rather than using raw Tailwind palette colors or hex values. Text sizes that repeat (`text-meta`, `text-read`, `text-row`…) are `@theme` tokens in the same file. Brass (`--bookmark*`) means "saved" and nothing else.
 
 Prefer props that describe intent (`tone="soft"`, `size="page"`, `variant="accent"`) over props that leak CSS. Tests that mock `@tanstack/react-router` must provide `createLink` (see `src/test/createLinkMock.tsx`), because the link atoms are built with it.
 

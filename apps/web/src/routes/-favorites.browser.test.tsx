@@ -133,11 +133,14 @@ afterEach(() => {
 });
 
 describe("favorites route search", () => {
-	it("defaults missing and invalid values to stories and accepts papers", () => {
+	it("keeps an explicit tab and drops missing or invalid values", () => {
 		expect(parseFavoritesSearch({})).toEqual({});
 		expect(parseFavoritesSearch({ type: "unknown" })).toEqual({});
 		expect(parseFavoritesSearch({ type: "papers" })).toEqual({
 			type: "papers",
+		});
+		expect(parseFavoritesSearch({ type: "stories" })).toEqual({
+			type: "stories",
 		});
 	});
 });
@@ -211,7 +214,7 @@ describe("FavoritesPage paper collection", () => {
 		).toBe("https://huggingface.co/papers/2607.00001");
 		expect(
 			screen.getByRole("link", {
-				name: /ask chatgpt about saved reasoning paper/i,
+				name: /open in chatgpt: saved reasoning paper/i,
 			}),
 		).toBeTruthy();
 		expect(screen.getAllByRole("link", { name: /project/i })).toHaveLength(2);
@@ -270,6 +273,32 @@ describe("FavoritesPage paper collection", () => {
 		expect(await screen.findByText("Saved Reasoning Paper")).toBeTruthy();
 		expect(trpcMock.paperList).toHaveBeenCalledTimes(2);
 		expect(screen.queryByRole("alert")).toBeNull();
+	});
+
+	it("opens the papers tab when only papers are saved, and still lets you pick Stories", async () => {
+		authMock.user = { id: "favorites-default-tab" };
+		trpcMock.paperList.mockResolvedValue({
+			items: [savedPaper()],
+			nextCursor: null,
+		});
+		// Mirrors the route: no type in the URL until a tab is chosen.
+		function RoutedFavorites() {
+			const [type, setType] = useState<FavoritesType | undefined>();
+			return <FavoritesPage activeType={type} onTypeChange={setType} />;
+		}
+		render(<RoutedFavorites />);
+
+		const papers = await screen.findByRole("tab", { name: "Papers 1" });
+		await waitFor(() =>
+			expect(papers.getAttribute("aria-selected")).toBe("true"),
+		);
+
+		const stories = screen.getByRole("tab", { name: "Stories 0" });
+		fireEvent.click(stories);
+		await waitFor(() =>
+			expect(stories.getAttribute("aria-selected")).toBe("true"),
+		);
+		expect(screen.getByText("No saved stories yet")).toBeTruthy();
 	});
 
 	it("exposes accessible URL-driven tabs", async () => {

@@ -3,10 +3,13 @@ import { FavoritesPage } from "#/components/pages/FavoritesPage";
 
 export type FavoritesType = "stories" | "papers";
 
+/** The tab the URL asks for; none means "open whichever tab has items". */
 export function parseFavoritesSearch(search: Record<string, unknown>): {
 	type?: FavoritesType;
 } {
-	return search.type === "papers" ? { type: "papers" } : {};
+	return search.type === "papers" || search.type === "stories"
+		? { type: search.type }
+		: {};
 }
 
 export const Route = createFileRoute("/favorites")({
@@ -21,9 +24,7 @@ function FavoritesRoute() {
 	return (
 		<FavoritesPage
 			activeType={search.type}
-			onTypeChange={(type) =>
-				void navigate({ search: type === "papers" ? { type } : {} })
-			}
+			onTypeChange={(type) => void navigate({ search: { type } })}
 		/>
 	);
 }

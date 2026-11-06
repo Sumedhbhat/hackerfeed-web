@@ -58,6 +58,7 @@
   --bookmark-tint: light-dark(#FBF3E2, #2A2416);
   --danger: light-dark(#A3322A, #F08A80);
   --header-bg: light-dark(rgba(246, 247, 244, 0.92), rgba(14, 21, 18, 0.9));
+  --overlay: light-dark(rgba(21, 33, 28, 0.4), rgba(0, 0, 0, 0.6));
   --shadow-tone: light-dark(rgba(21, 33, 28, 0.12), rgba(0, 0, 0, 0.5));
   --shadow-raised: 0 1px 2px var(--shadow-tone), 0 4px 16px -8px var(--shadow-tone);
   --shadow-popup: 0 12px 32px -12px var(--shadow-tone);

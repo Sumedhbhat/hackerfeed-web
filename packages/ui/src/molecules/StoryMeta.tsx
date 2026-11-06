@@ -29,7 +29,11 @@ export function StoryMeta({
 					{score} {score === 1 ? "point" : "points"}
 				</span>
 			) : null}
-			{by ? <span className="hidden sm:inline">by {by}</span> : null}
+			{by ? (
+				<span data-shrink className="hidden sm:inline">
+					by {by}
+				</span>
+			) : null}
 			{age ? <span>{age}</span> : null}
 			{trailing}
 		</FactLine>

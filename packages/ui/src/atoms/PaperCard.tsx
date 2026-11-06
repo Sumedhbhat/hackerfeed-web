@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Ribbon } from "./Ribbon";
 
 /** One paper in a PaperList. A brass ribbon hangs from the corner once it is saved. */
 export function PaperCard({
@@ -10,13 +11,8 @@ export function PaperCard({
 }) {
 	return (
 		<li className="relative">
-			{saved ? (
-				<span
-					aria-hidden="true"
-					className="ribbon absolute top-0 right-5 h-5 w-3 sm:right-8"
-				/>
-			) : null}
-			<article className="flex flex-col gap-3 px-4 py-5 sm:px-6">
+			{saved ? <Ribbon /> : null}
+			<article className="flex flex-col gap-2 px-4 pt-4 pb-3 sm:px-6">
 				{children}
 			</article>
 		</li>

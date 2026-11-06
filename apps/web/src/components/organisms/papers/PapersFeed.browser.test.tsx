@@ -162,7 +162,7 @@ describe("PapersFeed", () => {
 
 		fireEvent.click(
 			screen.getByRole("link", {
-				name: "Ask ChatGPT about Reasoning Paper (opens chatgpt.com)",
+				name: "Open in ChatGPT: Reasoning Paper",
 			}),
 		);
 
@@ -220,7 +220,7 @@ describe("PapersFeed", () => {
 		expect(screen.getByRole("link", { name: "Reasoning Paper" })).toBeTruthy();
 		expect(
 			screen.getByRole("link", {
-				name: "Ask ChatGPT about Reasoning Paper (opens chatgpt.com)",
+				name: "Open in ChatGPT: Reasoning Paper",
 			}),
 		).toBeTruthy();
 	});
@@ -269,7 +269,7 @@ describe("PapersFeed", () => {
 		);
 
 		const discussLink = screen.getByRole("link", {
-			name: "Ask ChatGPT about Reasoning Paper (opens chatgpt.com)",
+			name: "Open in ChatGPT: Reasoning Paper",
 		});
 		const chatUrl = new URL(discussLink.getAttribute("href") ?? "");
 		const prompt = chatUrl.searchParams.get("q") ?? "";

@@ -1,9 +1,8 @@
 import type { PaperViewAction } from "@hackerfeed/contracts/view-activity";
-import { ButtonLabel } from "@hackerfeed/ui/atoms/ButtonLabel";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
 import { PaperCard } from "@hackerfeed/ui/atoms/PaperCard";
-import { Text } from "@hackerfeed/ui/atoms/Text";
 import { ToggleButton } from "@hackerfeed/ui/atoms/Toggle";
+import { ToggleLabel } from "@hackerfeed/ui/atoms/ToggleLabel";
 import { KeywordList } from "@hackerfeed/ui/molecules/KeywordList";
 import { PaperCardFooter } from "@hackerfeed/ui/molecules/PaperCardFooter";
 import { PaperLinks } from "@hackerfeed/ui/molecules/PaperLinks";
@@ -40,17 +39,13 @@ export function PaperRow({
 			<PaperTitle href={paper.paperUrl} onClick={() => onView("read")}>
 				{paper.title}
 			</PaperTitle>
-			<Text size="sm" tone="soft">
-				{formatAuthors(paper.authors)}
-			</Text>
+			<PaperSignals
+				authors={formatAuthors(paper.authors)}
+				upvotes={paper.upvotes}
+				publishedLabel={formatPaperDate(paper.paperPublishedAt)}
+			/>
 			<PaperSummary paper={paper} />
 			<PaperCardFooter
-				signals={
-					<PaperSignals
-						upvotes={paper.upvotes}
-						publishedLabel={formatPaperDate(paper.paperPublishedAt)}
-					/>
-				}
 				actions={
 					<PaperLinks
 						title={paper.title}
@@ -69,7 +64,12 @@ export function PaperRow({
 							onPressedChange={onToggleFavorite}
 						>
 							<Icon icon={Bookmark} filled={saved} />
-							<ButtonLabel>Save</ButtonLabel>
+							<ToggleLabel
+								on={saved}
+								offLabel="Save"
+								onLabel="Saved"
+								iconOnlyOnPhones
+							/>
 						</ToggleButton>
 					) : null
 				}

@@ -2,8 +2,9 @@ import type { ReactNode } from "react";
 
 /**
  * A small faint line of facts under a title, separated by space rather than
- * punctuation. `singleLine` keeps it on one line from `sm` up, shortening the
- * first fact (usually the domain) instead of wrapping.
+ * punctuation. `singleLine` keeps it on one line from `sm` up: facts marked
+ * `data-shrink` (the least important, such as the poster) are cut with an
+ * ellipsis instead of wrapping.
  */
 export function FactLine({
 	children,
@@ -14,7 +15,7 @@ export function FactLine({
 }) {
 	return (
 		<div
-			className={`flex min-w-0 flex-wrap items-center gap-x-3 gap-y-0.5 text-meta text-(--sea-ink-faint)${singleLine ? " sm:flex-nowrap sm:whitespace-nowrap sm:[&>*]:shrink-0 sm:[&>:first-child]:min-w-0 sm:[&>:first-child]:shrink sm:[&>:first-child]:truncate" : ""}`}
+			className={`flex min-w-0 flex-wrap items-center gap-x-3 gap-y-0.5 text-meta text-(--sea-ink-faint)${singleLine ? " sm:flex-nowrap sm:whitespace-nowrap sm:[&>*]:shrink-0 sm:[&>[data-shrink]]:min-w-0 sm:[&>[data-shrink]]:shrink sm:[&>[data-shrink]]:truncate" : ""}`}
 		>
 			{children}
 		</div>

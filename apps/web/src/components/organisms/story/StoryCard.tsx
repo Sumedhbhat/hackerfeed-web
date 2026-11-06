@@ -6,11 +6,11 @@ import {
 	getStoryTitle,
 } from "@hackerfeed/hacker-news/utils";
 import { ButtonLink, ExternalButtonLink } from "@hackerfeed/ui/atoms/Button";
-import { ButtonLabel } from "@hackerfeed/ui/atoms/ButtonLabel";
 import { Heading } from "@hackerfeed/ui/atoms/Heading";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
 import { ExternalLink } from "@hackerfeed/ui/atoms/Link";
 import { ToggleButton } from "@hackerfeed/ui/atoms/Toggle";
+import { ToggleLabel } from "@hackerfeed/ui/atoms/ToggleLabel";
 import { FeedRow } from "@hackerfeed/ui/molecules/FeedRow";
 import { StoryMeta } from "@hackerfeed/ui/molecules/StoryMeta";
 import { Bookmark, MessageSquare, Sparkles } from "lucide-react";
@@ -108,7 +108,12 @@ export function StoryCard({ story, rank }: StoryCardProps) {
 					onPressedChange={() => toggleFavorite(story)}
 				>
 					<Icon icon={Bookmark} filled={isFav} />
-					<ButtonLabel>Save</ButtonLabel>
+					<ToggleLabel
+						on={isFav}
+						offLabel="Save"
+						onLabel="Saved"
+						iconOnlyOnPhones
+					/>
 				</ToggleButton>
 			}
 		/>
