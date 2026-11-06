@@ -80,10 +80,12 @@ read-all permissions unless the workflow is changed to use those services.
 
 The workflows use two GitHub environments:
 
-- `production`: `deploy.yaml`. Only `master` may deploy from it.
+- `production`: `deploy.yaml`'s `deploy` job, the one that needs approval.
+  Only `master` may deploy from it, and it has a required reviewer.
 - `preview`: `preview.yaml`, for pull requests.
 
-1. In GitHub, open this repository's **Settings** > **Environments**.
+1. In GitHub, open this repository's **Settings** > **Environments**. In
+   `production`, enable **Required reviewers** and add at least one reviewer.
 2. In `production`, add or update the secret `CLOUDFLARE_API_TOKEN` with the
    token value. It must never be added to `preview`: it can mint any token.
 3. In both environments, add `CLOUDFLARE_ACCOUNT_ID`. The account id is an
