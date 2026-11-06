@@ -159,7 +159,7 @@ describe("FavoritesPage backend source of truth", () => {
 		expect(screen.getByText("Database oldest saved")).toBeDefined();
 		expect(
 			screen
-				.getAllByRole("heading", { level: 3 })
+				.getAllByRole("heading", { level: 2 })
 				.map((heading) => heading.textContent),
 		).toEqual(["Database newest saved", "Database oldest saved"]);
 	});

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 const SIZE = {
-	xs: "text-xs",
+	xs: "text-[0.8125rem] leading-5",
 	sm: "text-sm",
 	base: "text-base",
 } as const;
@@ -9,8 +9,9 @@ const SIZE = {
 const TONE = {
 	default: "text-(--sea-ink)",
 	soft: "text-(--sea-ink-soft)",
-	faint: "text-(--sea-ink-soft) opacity-70",
-	accent: "text-(--kicker)",
+	faint: "text-(--sea-ink-faint)",
+	accent: "text-(--lagoon-deep)",
+	danger: "text-(--danger)",
 } as const;
 
 const WEIGHT = {
@@ -37,7 +38,7 @@ type TextProps = {
 	"aria-live"?: "polite" | "assertive" | "off";
 };
 
-const MEASURE = { sm: "max-w-sm", md: "max-w-md", lg: "max-w-lg" } as const;
+const MEASURE = { sm: "max-w-sm", md: "max-w-md", lg: "max-w-prose" } as const;
 
 /** Body copy. Pick a size and tone instead of styling text by hand. */
 export function Text({

@@ -13,7 +13,7 @@ export function PaperSummaryText({
 	return (
 		<p
 			ref={ref}
-			className={`papers-summary is-compact${clamped ? " line-clamp-3" : ""}`}
+			className={`m-0 max-w-[68ch] text-[0.9375rem] leading-relaxed text-(--sea-ink-soft)${clamped ? " line-clamp-3" : ""}`}
 		>
 			{children}
 		</p>

@@ -5,36 +5,33 @@ import {
 	getStoryDomain,
 	getStoryTitle,
 } from "@hackerfeed/hacker-news/utils";
-import { ExternalButtonLink } from "@hackerfeed/ui/atoms/Button";
-import { Card } from "@hackerfeed/ui/atoms/Card";
+import { ButtonLink, ExternalButtonLink } from "@hackerfeed/ui/atoms/Button";
 import { Heading } from "@hackerfeed/ui/atoms/Heading";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
-import { ExternalLink, TextLink } from "@hackerfeed/ui/atoms/Link";
-import { Row } from "@hackerfeed/ui/atoms/Row";
-import { Stack } from "@hackerfeed/ui/atoms/Stack";
+import { ExternalLink } from "@hackerfeed/ui/atoms/Link";
 import { ToggleButton } from "@hackerfeed/ui/atoms/Toggle";
-import { MetaLine } from "@hackerfeed/ui/molecules/MetaLine";
-import { StoryStats } from "@hackerfeed/ui/molecules/StoryStats";
-import { MessageCircle, Star } from "lucide-react";
+import { FeedRow } from "@hackerfeed/ui/molecules/FeedRow";
+import { StoryMeta } from "@hackerfeed/ui/molecules/StoryMeta";
+import { Bookmark, MessageSquare, Sparkles } from "lucide-react";
 import { useFavorites } from "#/hooks/useFavorites";
 import { useFeatureFlag } from "#/hooks/useFeatureFlags";
 import { useViewActivity } from "#/hooks/useViewActivity";
 
 type StoryCardProps = {
 	story: HackerNewsStoryRecord;
-	animationDelay?: number;
+	/** Position in a ranked feed; omit for unranked lists such as favorites. */
+	rank?: number;
 };
 
-export function StoryCard({ story, animationDelay }: StoryCardProps) {
+export function StoryCard({ story, rank }: StoryCardProps) {
 	const { isFavorited, toggleFavorite } = useFavorites();
 	const { recordStoryView } = useViewActivity();
 	const aiChat = useFeatureFlag("aiChat");
 	const isFav = isFavorited(story.id);
 
-	const domain = getStoryDomain(story.url);
-	const age = formatStoryAge(story.time);
 	const title = getStoryTitle(story);
 	const storyUrl = story.url ?? getDiscussionUrl(story.id);
+	const comments = story.descendants ?? 0;
 
 	function recordRead() {
 		recordStoryView(story, "read");
@@ -45,10 +42,11 @@ export function StoryCard({ story, animationDelay }: StoryCardProps) {
 	}
 
 	return (
-		<Card animated animationDelay={animationDelay}>
-			<MetaLine items={[domain, age]} />
-			<Stack gap="md">
-				<Heading level={3} size="card">
+		<FeedRow
+			rank={rank}
+			saved={isFav}
+			title={
+				<Heading level={2} size="row">
 					<ExternalLink
 						href={storyUrl}
 						variant="plain"
@@ -58,41 +56,47 @@ export function StoryCard({ story, animationDelay }: StoryCardProps) {
 						{title}
 					</ExternalLink>
 				</Heading>
-
-				<StoryStats
+			}
+			meta={
+				<StoryMeta
+					domain={getStoryDomain(story.url)}
 					score={story.score}
 					by={story.by}
-					commentCount={story.descendants}
+					age={formatStoryAge(story.time)}
 				/>
-
-				<Row gap="lg" wrap>
+			}
+			actions={
+				<>
 					<ExternalButtonLink
 						href={storyUrl}
-						variant="primary"
+						variant="soft"
 						onClick={recordRead}
 						onAuxClick={recordMiddleClickRead}
 					>
 						{story.url ? "Read article" : "Open post"}
 					</ExternalButtonLink>
 
-					<TextLink
+					<ButtonLink
+						variant="ghost"
 						to="/story/$storyId"
 						params={{ storyId: story.id }}
 						onClick={() => recordStoryView(story, "discussion_opened")}
 					>
-						Discussion
-					</TextLink>
+						<Icon icon={MessageSquare} />
+						{comments} {comments === 1 ? "comment" : "comments"}
+					</ButtonLink>
 
 					{aiChat ? (
-						<TextLink
+						<ButtonLink
+							variant="ghost"
 							to="/chat/$storyId"
 							params={{ storyId: story.id }}
-							aria-label={`Discuss ${title} with AI`}
+							aria-label={`Ask AI about ${title}`}
 							onClick={() => recordStoryView(story, "chat_opened")}
 						>
-							<Icon icon={MessageCircle} />
-							Discuss
-						</TextLink>
+							<Icon icon={Sparkles} />
+							Ask AI
+						</ButtonLink>
 					) : null}
 
 					<ToggleButton
@@ -100,18 +104,11 @@ export function StoryCard({ story, animationDelay }: StoryCardProps) {
 						pressed={isFav}
 						onPressedChange={() => toggleFavorite(story)}
 					>
-						{isFav ? (
-							<>
-								<Icon key="star-filled" icon={Star} filled pop /> Saved
-							</>
-						) : (
-							<>
-								<Icon key="star-empty" icon={Star} /> Save
-							</>
-						)}
+						<Icon icon={Bookmark} filled={isFav} />
+						{isFav ? "Saved" : "Save"}
 					</ToggleButton>
-				</Row>
-			</Stack>
-		</Card>
+				</>
+			}
+		/>
 	);
 }

@@ -1,5 +1,4 @@
 import { type ReactNode, useId } from "react";
-import { Kicker } from "../atoms/Kicker";
 import { ToggleButton, ToggleGroup } from "../atoms/Toggle";
 
 type SortOption<T extends string> = { value: T; label: string };
@@ -18,10 +17,10 @@ export function SortToolbar<T extends string>({
 }) {
 	const labelId = useId();
 	return (
-		<div className="flex flex-wrap gap-3 justify-between items-center mb-6 rise-in">
+		<div className="mb-4 flex flex-wrap items-center justify-between gap-3">
 			<div className="flex gap-3 items-center">
-				<span id={labelId}>
-					<Kicker as="span">Sort by</Kicker>
+				<span id={labelId} className="text-sm text-(--sea-ink-soft)">
+					Sort by
 				</span>
 				<ToggleGroup
 					value={value}

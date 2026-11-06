@@ -33,7 +33,7 @@ export function Skeleton({
 	return (
 		<div
 			aria-hidden="true"
-			className={`shrink-0 bg-(--sand) ${HEIGHT[height]} ${SHAPE[shape]}`}
+			className={`shrink-0 bg-(--chip-line) ${HEIGHT[height]} ${SHAPE[shape]}`}
 			style={{ width, opacity }}
 		/>
 	);

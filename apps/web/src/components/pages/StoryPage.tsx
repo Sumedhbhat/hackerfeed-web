@@ -35,7 +35,7 @@ function StoryContent({ storyId }: StoryPageProps) {
 			<BackLink
 				label={
 					<>
-						<Icon icon={ArrowLeft} /> Feed
+						<Icon icon={ArrowLeft} /> Stories
 					</>
 				}
 			/>
@@ -44,7 +44,7 @@ function StoryContent({ storyId }: StoryPageProps) {
 				<StoryArticle story={story} />
 
 				<Stack as="section" gap="lg">
-					<Heading level={2} size="small">
+					<Heading level={2} size="section">
 						{story.descendants != null
 							? `${story.descendants} comments`
 							: "Discussion"}

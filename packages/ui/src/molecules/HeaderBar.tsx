@@ -12,13 +12,15 @@ export function HeaderBar({
 }) {
 	return (
 		<header className="sticky top-0 z-50 border-b border-(--line) bg-(--header-bg) backdrop-blur-md">
-			<nav className="page-wrap flex items-center gap-3 px-4 py-3.5 sm:gap-8">
+			<div className="page-wrap flex min-h-14 items-center gap-2 px-3 sm:gap-6 sm:px-6">
 				{brand}
-				<div className="flex items-center gap-3 text-xs sm:gap-5 sm:text-sm">
+				<nav aria-label="Main" className="flex min-w-0 items-center gap-0.5">
 					{links}
+				</nav>
+				<div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
+					{actions}
 				</div>
-				<div className="ml-auto flex items-center gap-2">{actions}</div>
-			</nav>
+			</div>
 		</header>
 	);
 }

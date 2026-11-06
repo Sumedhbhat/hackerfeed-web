@@ -8,23 +8,37 @@ type BrandAnchorProps = Omit<
 	ref?: React.Ref<HTMLAnchorElement>;
 };
 
-/** HackerFeed logo: the app icon on phones, the wordmark from `sm` up. */
+/** A green page with a brass bookmark hanging from it: the app's whole idea in one mark. */
+function BrandMark() {
+	return (
+		<svg
+			viewBox="0 0 28 28"
+			width="28"
+			height="28"
+			aria-hidden="true"
+			className="block shrink-0"
+		>
+			<rect width="28" height="28" rx="7" fill="var(--lagoon)" />
+			<path
+				d="M8 9.5h9M8 14h12M8 18.5h7"
+				stroke="var(--on-lagoon)"
+				strokeWidth="2"
+				strokeLinecap="round"
+			/>
+			<path d="M19 0h5v9l-2.5-2-2.5 2z" fill="var(--bookmark-ribbon)" />
+		</svg>
+	);
+}
+
+/** HackerFeed logo: the mark on phones, mark and wordmark from `sm` up. */
 function BrandAnchor(props: BrandAnchorProps) {
 	return (
 		<a
 			{...props}
-			className="group flex flex-shrink-0 items-center gap-2.5 no-underline"
+			className="flex flex-shrink-0 items-center gap-2.5 rounded-md no-underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--lagoon)"
 		>
-			<img
-				src="/logo192.png"
-				alt="HackerFeed"
-				className="block h-7 w-7 rounded-md sm:hidden"
-			/>
-			<span
-				className="hidden h-5 w-[1.5px] bg-(--lagoon) opacity-80 transition-opacity group-hover:opacity-100 sm:block"
-				aria-hidden="true"
-			/>
-			<span className="hidden text-base font-semibold tracking-tight text-(--sea-ink) sm:block">
+			<BrandMark />
+			<span className="sr-only font-serif text-[1.1875rem] font-semibold tracking-[-0.01em] text-(--sea-ink) sm:not-sr-only">
 				HackerFeed
 			</span>
 		</a>

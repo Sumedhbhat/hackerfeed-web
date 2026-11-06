@@ -8,7 +8,7 @@ import { PaperCardFooter } from "@hackerfeed/ui/molecules/PaperCardFooter";
 import { PaperLinks } from "@hackerfeed/ui/molecules/PaperLinks";
 import { PaperSignals } from "@hackerfeed/ui/molecules/PaperSignals";
 import { PaperTitle } from "@hackerfeed/ui/molecules/PaperTitle";
-import { Star } from "lucide-react";
+import { Bookmark } from "lucide-react";
 import {
 	buildChatGptPaperDiscussionUrl,
 	formatAuthors,
@@ -19,7 +19,6 @@ import { PaperSummary } from "./PaperSummary";
 
 type PaperRowProps = {
 	canFavorite: boolean;
-	index: number;
 	isFavorited: boolean;
 	isPending: boolean;
 	onToggleFavorite: () => void;
@@ -29,7 +28,6 @@ type PaperRowProps = {
 
 export function PaperRow({
 	canFavorite,
-	index,
 	isFavorited: saved,
 	isPending: pending,
 	onToggleFavorite,
@@ -37,7 +35,7 @@ export function PaperRow({
 	paper,
 }: PaperRowProps) {
 	return (
-		<PaperCard animationDelay={Math.min(index * 35, 210)}>
+		<PaperCard saved={saved}>
 			<PaperTitle href={paper.paperUrl} onClick={() => onView("read")}>
 				{paper.title}
 			</PaperTitle>
@@ -70,7 +68,7 @@ export function PaperRow({
 								disabled={pending}
 								onPressedChange={onToggleFavorite}
 							>
-								<Icon icon={Star} filled={saved} pop={saved} />{" "}
+								<Icon icon={Bookmark} filled={saved} />
 								{saved ? "Saved" : "Save"}
 							</ToggleButton>
 						) : null}

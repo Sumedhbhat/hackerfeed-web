@@ -19,8 +19,8 @@ export function InlineNotice({
 		<Element
 			className={
 				boxed
-					? "flex flex-wrap items-center gap-3 rounded-md border border-(--chip-line) p-3 text-sm text-(--sea-ink)"
-					: "papers-favorites-error"
+					? "flex flex-wrap items-center gap-3 rounded-lg border border-(--chip-line) bg-(--chip-bg) p-3 text-sm text-(--sea-ink)"
+					: "flex min-h-7 items-center gap-2 text-[0.8125rem] text-(--danger)"
 			}
 			role={role}
 		>

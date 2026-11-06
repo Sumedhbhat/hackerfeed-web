@@ -11,7 +11,7 @@ export function LoadMoreButton({
 	disabled?: boolean;
 }) {
 	return (
-		<div className="flex justify-center pt-7">
+		<div className="flex justify-center pt-4">
 			<Button variant="secondary" onClick={onClick} disabled={disabled}>
 				{label}
 			</Button>

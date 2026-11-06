@@ -1,4 +1,4 @@
-import { Send, Square } from "lucide-react";
+import { ArrowUp, Square } from "lucide-react";
 import type { FormEvent } from "react";
 import { Button } from "../atoms/Button";
 import { Icon } from "../atoms/Icon";
@@ -30,12 +30,16 @@ export function ChatComposer({
 	};
 
 	return (
-		<form onSubmit={submit} className="flex items-end gap-2">
+		<form
+			onSubmit={submit}
+			className="flex items-end gap-2 rounded-xl border border-(--field-line) bg-(--surface-strong) p-2 focus-within:border-(--lagoon) focus-within:outline-2 focus-within:outline-(--lagoon)"
+		>
 			<label htmlFor={id} className="sr-only">
 				Message
 			</label>
 			<TextArea
 				id={id}
+				variant="bare"
 				value={value}
 				onChange={(event) => onChange(event.target.value)}
 				onKeyDown={(event) => {
@@ -47,11 +51,11 @@ export function ChatComposer({
 			/>
 			{isStreaming ? (
 				<Button variant="secondary" onClick={onStop}>
-					<Icon icon={Square} /> Stop
+					<Icon icon={Square} size={14} filled /> Stop
 				</Button>
 			) : (
 				<Button type="submit" disabled={!value.trim()}>
-					<Icon icon={Send} /> Send
+					<Icon icon={ArrowUp} /> Send
 				</Button>
 			)}
 		</form>

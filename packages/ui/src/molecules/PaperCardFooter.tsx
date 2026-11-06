@@ -11,9 +11,9 @@ export function PaperCardFooter({
 	keywords?: ReactNode;
 }) {
 	return (
-		<footer className="papers-row-footer">
+		<footer className="flex min-w-0 flex-col gap-2.5">
 			{signals}
-			<div className="papers-row-actions">{actions}</div>
+			<div className="-ml-0.5 flex flex-wrap items-center gap-1">{actions}</div>
 			{keywords}
 		</footer>
 	);

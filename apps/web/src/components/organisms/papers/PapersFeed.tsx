@@ -4,6 +4,7 @@ import { Icon } from "@hackerfeed/ui/atoms/Icon";
 import { PaperList } from "@hackerfeed/ui/atoms/PaperList";
 import { InlineNotice } from "@hackerfeed/ui/molecules/InlineNotice";
 import { LoadMoreButton } from "@hackerfeed/ui/molecules/LoadMoreButton";
+import { PageHeader } from "@hackerfeed/ui/molecules/PageHeader";
 import { PaperEditionToolbar } from "@hackerfeed/ui/molecules/PaperEditionToolbar";
 import { PaperFeedMessage } from "@hackerfeed/ui/molecules/PaperFeedMessage";
 import { PaperPageShell } from "@hackerfeed/ui/molecules/PaperPageShell";
@@ -59,6 +60,10 @@ export function PapersFeed({
 
 	return (
 		<PaperPageShell>
+			<PageHeader
+				title="Papers"
+				description="The day's most discussed research papers."
+			/>
 			<PaperEditionToolbar
 				query={filters.query ?? ""}
 				date={selectedDate}
@@ -99,10 +104,9 @@ export function PapersFeed({
 			{visiblePapers.length > 0 ? (
 				<>
 					<PaperList aria-label="Papers">
-						{visiblePapers.map((paper, index) => (
+						{visiblePapers.map((paper) => (
 							<PaperRow
 								canFavorite={favorites.canFavorite}
-								index={index}
 								isFavorited={favorites.isFavorited(paper.arxivId)}
 								isPending={favorites.isPending(paper.arxivId)}
 								key={paper.arxivId}

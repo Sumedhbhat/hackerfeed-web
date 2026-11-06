@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { PageContainer } from "../atoms/PageContainer";
 
 /** Centered message with actions, for empty and error states of the papers feed. */
 export function PaperFeedMessage({
@@ -13,17 +14,12 @@ export function PaperFeedMessage({
 	standalone?: boolean;
 }) {
 	const content = (
-		<>
-			<p>{message}</p>
+		<section className="flex min-h-64 flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-(--chip-line) px-6 py-12 text-center">
+			<p className="m-0 max-w-md text-[0.9375rem] text-(--sea-ink-soft)">
+				{message}
+			</p>
 			{children}
-		</>
+		</section>
 	);
-	if (standalone) {
-		return (
-			<main className="papers-page">
-				<section className="papers-shell papers-state">{content}</section>
-			</main>
-		);
-	}
-	return <section className="papers-state">{content}</section>;
+	return standalone ? <PageContainer>{content}</PageContainer> : content;
 }

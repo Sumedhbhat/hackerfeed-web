@@ -1,4 +1,6 @@
-/** One message in a chat transcript; the user's own messages sit on the right. */
+import { ChatMarkdown } from "./ChatMarkdown";
+
+/** One message in a chat transcript; your own questions sit on the right in a tinted bubble. */
 export function ChatMessage({
 	author,
 	authorName,
@@ -19,14 +21,14 @@ export function ChatMessage({
 			className={`flex ${isUser ? "justify-end" : "justify-start"}`}
 		>
 			<div
-				className={`max-w-[85%] whitespace-pre-wrap break-words rounded-lg px-3 py-2 text-sm leading-6 ${
+				className={
 					isUser
-						? "bg-(--lagoon) text-white"
-						: "border border-(--line) bg-(--surface-strong) text-(--sea-ink)"
-				}`}
+						? "max-w-[85%] whitespace-pre-wrap break-words rounded-xl rounded-br-sm bg-(--lagoon-tint) px-3.5 py-2 text-[0.9375rem] leading-relaxed text-(--sea-ink)"
+						: "max-w-[68ch] break-words border-l-2 border-(--lagoon) py-0.5 pl-4 text-[0.9375rem] leading-relaxed text-(--sea-ink)"
+				}
 			>
 				<span className="sr-only">{isUser ? "You: " : `${authorName}: `}</span>
-				{content}
+				{isUser ? content : <ChatMarkdown text={content} />}
 			</div>
 		</li>
 	);

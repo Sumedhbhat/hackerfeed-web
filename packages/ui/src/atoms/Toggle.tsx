@@ -27,7 +27,8 @@ export function ToggleButton({
 
 const LAYOUT = {
 	wrap: "flex flex-wrap gap-1",
-	scroll: "papers-topics",
+	scroll:
+		"-mx-1 flex gap-2 overflow-x-auto px-1 py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
 } as const;
 
 export function ToggleGroup<T extends string>({

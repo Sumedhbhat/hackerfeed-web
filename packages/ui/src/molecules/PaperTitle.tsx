@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
+import { Heading } from "../atoms/Heading";
+import { ExternalLink } from "../atoms/Link";
 
-/** Paper title linking out to the paper. Must sit inside a PaperCard. */
+/** Paper title linking out to the paper. */
 export function PaperTitle({
 	children,
 	href,
@@ -11,10 +13,10 @@ export function PaperTitle({
 	onClick?: () => void;
 }) {
 	return (
-		<h2>
-			<a href={href} target="_blank" rel="noreferrer" onClick={onClick}>
+		<Heading level={2} size="card">
+			<ExternalLink href={href} variant="plain" onClick={onClick}>
 				{children}
-			</a>
-		</h2>
+			</ExternalLink>
+		</Heading>
 	);
 }

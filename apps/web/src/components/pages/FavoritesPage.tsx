@@ -3,12 +3,14 @@ import { Icon } from "@hackerfeed/ui/atoms/Icon";
 import { TextLink } from "@hackerfeed/ui/atoms/Link";
 import { PageContainer } from "@hackerfeed/ui/atoms/PageContainer";
 import { PaperList } from "@hackerfeed/ui/atoms/PaperList";
+import { ReadingList } from "@hackerfeed/ui/atoms/ReadingList";
 import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { TabPanel, Tabs } from "@hackerfeed/ui/atoms/Tabs";
 import { Text } from "@hackerfeed/ui/atoms/Text";
 import { ConfirmButton } from "@hackerfeed/ui/molecules/ConfirmButton";
 import { EmptyState } from "@hackerfeed/ui/molecules/EmptyState";
 import { InlineNotice } from "@hackerfeed/ui/molecules/InlineNotice";
+import { PageHeader } from "@hackerfeed/ui/molecules/PageHeader";
 import { SortToolbar } from "@hackerfeed/ui/molecules/SortToolbar";
 import { ArrowRight, RefreshCw } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -65,7 +67,9 @@ export function FavoritesPage({
 		<PageContainer spacing="compact">
 			<Tabs value={activeType} onValueChange={onTypeChange}>
 				<Stack gap="lg">
-					<FavoritesTabs />
+					<PageHeader title="Saved">
+						<FavoritesTabs />
+					</PageHeader>
 
 					{TYPES.map((type) => (
 						<TabPanel key={type} value={type}>
@@ -87,7 +91,7 @@ export function FavoritesPage({
 								<EmptyState
 									kicker="Nothing saved yet"
 									title={`Your saved ${isStories ? "stories" : "papers"} list is empty.`}
-									description={`${browseLabel} and use the star to save items here.`}
+									description={`${browseLabel} and press Save on anything you want to keep.`}
 									action={
 										<TextLink to={isStories ? "/" : "/papers"} variant="accent">
 											{browseLabel} <Icon icon={ArrowRight} />
@@ -137,22 +141,17 @@ export function FavoritesPage({
 										/>
 									) : null}
 									{isStories ? (
-										<Stack as="section" gap="md" aria-label="Saved stories">
-											{sortedStories.map((story, index) => (
-												<StoryCard
-													key={story.id}
-													story={story}
-													animationDelay={index * 50 + 60}
-												/>
+										<ReadingList aria-label="Saved stories">
+											{sortedStories.map((story) => (
+												<StoryCard key={story.id} story={story} />
 											))}
-										</Stack>
+										</ReadingList>
 									) : (
 										<PaperList aria-label="Saved papers">
-											{sortedPapers.map((paper, index) => (
+											{sortedPapers.map((paper) => (
 												<PaperRow
 													key={paper.arxivId}
 													paper={paper}
-													index={index}
 													canFavorite={papers.canFavorite}
 													isFavorited={papers.isFavorited(paper.arxivId)}
 													isPending={

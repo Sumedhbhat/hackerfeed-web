@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
+import { ReadingList } from "./ReadingList";
 
+/** The sheet of PaperCards. */
 export function PaperList({
 	children,
 	"aria-label": ariaLabel,
@@ -7,9 +9,5 @@ export function PaperList({
 	children: ReactNode;
 	"aria-label": string;
 }) {
-	return (
-		<section className="papers-list" aria-label={ariaLabel}>
-			{children}
-		</section>
-	);
+	return <ReadingList aria-label={ariaLabel}>{children}</ReadingList>;
 }

@@ -1,4 +1,6 @@
-import { ExternalLink, MessageCircle } from "lucide-react";
+import { ExternalLink as ExternalIcon, MessageCircle } from "lucide-react";
+import { ExternalButtonLink } from "../atoms/Button";
+import { Icon } from "../atoms/Icon";
 
 /** "Discuss" in ChatGPT plus optional project and code links for a paper. */
 export function PaperLinks({
@@ -15,28 +17,26 @@ export function PaperLinks({
 	onDiscuss?: () => void;
 }) {
 	return (
-		<div className="papers-external-links is-compact">
-			<a
-				className="papers-chat-link"
+		<>
+			<ExternalButtonLink
+				variant="soft"
 				href={discussUrl}
-				target="_blank"
-				rel="noreferrer"
 				aria-label={`Discuss ${title} in ChatGPT`}
 				onClick={onDiscuss}
 			>
-				<MessageCircle size={14} aria-hidden="true" />
+				<Icon icon={MessageCircle} />
 				Discuss
-			</a>
+			</ExternalButtonLink>
 			{projectPage ? (
-				<a href={projectPage} target="_blank" rel="noreferrer">
-					Project <ExternalLink size={14} aria-hidden="true" />
-				</a>
+				<ExternalButtonLink variant="ghost" href={projectPage}>
+					Project <Icon icon={ExternalIcon} size={14} muted />
+				</ExternalButtonLink>
 			) : null}
 			{githubRepo ? (
-				<a href={githubRepo} target="_blank" rel="noreferrer">
-					Code <ExternalLink size={14} aria-hidden="true" />
-				</a>
+				<ExternalButtonLink variant="ghost" href={githubRepo}>
+					Code <Icon icon={ExternalIcon} size={14} muted />
+				</ExternalButtonLink>
 			) : null}
-		</div>
+		</>
 	);
 }

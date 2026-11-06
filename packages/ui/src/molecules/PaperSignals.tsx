@@ -1,5 +1,3 @@
-import { CalendarDays, Code2, ThumbsUp } from "lucide-react";
-
 /** Upvotes, publish date and "has code" facts under a paper. */
 export function PaperSignals({
 	upvotes,
@@ -12,18 +10,12 @@ export function PaperSignals({
 	hasCode: boolean;
 }) {
 	return (
-		<div className="papers-signals">
-			<span>
-				<ThumbsUp size={14} aria-hidden="true" /> {upvotes}
+		<div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[0.8125rem] leading-5 text-(--sea-ink-faint)">
+			<span className="tabular-nums">
+				{upvotes} {upvotes === 1 ? "upvote" : "upvotes"}
 			</span>
-			<span>
-				<CalendarDays size={14} aria-hidden="true" /> {publishedLabel}
-			</span>
-			{hasCode ? (
-				<span>
-					<Code2 size={14} aria-hidden="true" /> Code
-				</span>
-			) : null}
+			<span>{publishedLabel}</span>
+			{hasCode ? <span>Code available</span> : null}
 		</div>
 	);
 }

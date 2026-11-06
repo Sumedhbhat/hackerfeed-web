@@ -1,4 +1,4 @@
-/** Horizontally scrolling row of keyword tags. */
+/** Wrapping row of keyword tags. */
 export function KeywordList({
 	keywords,
 	"aria-label": ariaLabel,
@@ -7,9 +7,17 @@ export function KeywordList({
 	"aria-label": string;
 }) {
 	return (
-		<ul className="papers-keyword-strip" aria-label={ariaLabel}>
+		<ul
+			className="m-0 flex list-none flex-wrap gap-1.5 p-0"
+			aria-label={ariaLabel}
+		>
 			{keywords.map((keyword) => (
-				<li key={keyword}>{keyword}</li>
+				<li
+					key={keyword}
+					className="rounded-full bg-(--chip-bg) px-2.5 py-0.5 text-xs text-(--sea-ink-soft)"
+				>
+					{keyword}
+				</li>
 			))}
 		</ul>
 	);

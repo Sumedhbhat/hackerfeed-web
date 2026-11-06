@@ -1,14 +1,19 @@
 import type { ReactNode } from "react";
 
+/* Things you read (story and paper titles) are set in the serif; interface
+   headings stay in the sans. */
 const SIZE = {
 	/** Large page title. */
-	page: "text-2xl font-semibold tracking-tight",
+	page: "font-serif text-[1.75rem] font-semibold leading-tight tracking-[-0.01em] sm:text-[2rem]",
 	/** Article/story title at the top of a detail page. */
-	title: "text-xl font-semibold leading-snug sm:text-2xl",
+	title:
+		"font-serif text-[1.625rem] font-semibold leading-[1.2] tracking-[-0.01em] sm:text-[2.125rem]",
 	/** Section heading inside a page or card. */
-	section: "text-xl font-semibold tracking-tight",
-	/** Card or list item title. */
-	card: "text-lg font-semibold leading-snug sm:text-xl",
+	section: "text-lg font-semibold tracking-tight",
+	/** Card title, e.g. a paper. */
+	card: "font-serif text-[1.1875rem] font-semibold leading-snug sm:text-xl",
+	/** Title of one row in a reading list. */
+	row: "font-serif text-[1.0625rem] font-semibold leading-snug sm:text-[1.1875rem]",
 	/** Small heading for panels and groups. */
 	small: "text-base font-semibold tracking-tight",
 } as const;
@@ -20,20 +25,20 @@ type HeadingProps = {
 	id?: string;
 	/** Cut off with an ellipsis instead of wrapping. */
 	truncate?: boolean;
+	/** Only for screen readers; names a region that is obvious visually. */
+	visuallyHidden?: boolean;
 };
 
 export function Heading({
 	level = 2,
 	size = "section",
 	truncate = false,
+	visuallyHidden = false,
 	...props
 }: HeadingProps) {
 	const Element = `h${level}` as const;
-	const truncation = truncate ? " truncate" : "";
-	return (
-		<Element
-			className={`m-0 text-(--sea-ink) ${SIZE[size]}${truncation}`}
-			{...props}
-		/>
-	);
+	const className = visuallyHidden
+		? "sr-only"
+		: `m-0 text-(--sea-ink) text-pretty ${SIZE[size]}${truncate ? " truncate" : ""}`;
+	return <Element className={className} {...props} />;
 }

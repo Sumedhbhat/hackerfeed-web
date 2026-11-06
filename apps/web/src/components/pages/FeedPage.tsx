@@ -1,6 +1,7 @@
 import { PageContainer } from "@hackerfeed/ui/atoms/PageContainer";
 import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { Tab, TabList, TabPanel, Tabs } from "@hackerfeed/ui/atoms/Tabs";
+import { PageHeader } from "@hackerfeed/ui/molecules/PageHeader";
 import { StoryListSkeleton } from "@hackerfeed/ui/molecules/StoryListSkeleton";
 import * as Sentry from "@sentry/react";
 import { Activity, Suspense, useEffect, useState } from "react";
@@ -32,13 +33,15 @@ export function FeedPage() {
 		<PageContainer>
 			<Tabs value={activeFeed} onValueChange={openFeed}>
 				<Stack gap="lg">
-					<TabList aria-label="Feeds">
-						{feedTabs.map((feed) => (
-							<Tab key={feed.key} value={feed.key}>
-								{feed.label}
-							</Tab>
-						))}
-					</TabList>
+					<PageHeader title="Stories">
+						<TabList aria-label="Feeds">
+							{feedTabs.map((feed) => (
+								<Tab key={feed.key} value={feed.key}>
+									{feed.label}
+								</Tab>
+							))}
+						</TabList>
+					</PageHeader>
 
 					{feedTabs.map((feed) => (
 						<TabPanel key={feed.key} value={feed.key} keepMounted>

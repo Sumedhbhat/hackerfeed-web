@@ -1,5 +1,6 @@
 import { Button } from "@hackerfeed/ui/atoms/Button";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
+import { ReadingList } from "@hackerfeed/ui/atoms/ReadingList";
 import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { EmptyState } from "@hackerfeed/ui/molecules/EmptyState";
 import { LoadMoreButton } from "@hackerfeed/ui/molecules/LoadMoreButton";
@@ -60,13 +61,15 @@ export function FeedPane({ feed, prefetchNextBatch }: FeedPaneProps) {
 
 	return (
 		<Stack gap="md">
-			<Stack gap="md">
+			<ReadingList ordered aria-label={`${feedLabel} stories`}>
 				{displayedIds.map((storyId, i) => {
 					const story = storyQueries[i]?.data;
 					if (!story) return null;
-					return <StoryCard key={`${feed}-${storyId}`} story={story} />;
+					return (
+						<StoryCard key={`${feed}-${storyId}`} story={story} rank={i + 1} />
+					);
 				})}
-			</Stack>
+			</ReadingList>
 
 			{hasMore && (
 				<LoadMoreButton

@@ -4,12 +4,14 @@ import {
 	CollapsiblePanel,
 	CollapsibleTrigger,
 } from "@hackerfeed/ui/atoms/Collapsible";
+import { Icon } from "@hackerfeed/ui/atoms/Icon";
 import { Prose } from "@hackerfeed/ui/atoms/Prose";
 import { Row } from "@hackerfeed/ui/atoms/Row";
 import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { Text } from "@hackerfeed/ui/atoms/Text";
 import { ThreadItem } from "@hackerfeed/ui/atoms/ThreadItem";
 import { CommentSkeleton } from "@hackerfeed/ui/molecules/CommentSkeleton";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { Suspense } from "react";
 import { useComment } from "#/hooks/useComment";
 
@@ -52,7 +54,7 @@ export function Comment({ comment, depth = 0 }: CommentProps) {
 							</Text>
 						) : (
 							<>
-								<Text as="span" size="xs" weight="semibold">
+								<Text as="span" size="sm" weight="semibold">
 									{comment.by ?? "unknown"}
 								</Text>
 								<Text as="span" size="xs" tone="faint">
@@ -66,7 +68,7 @@ export function Comment({ comment, depth = 0 }: CommentProps) {
 								<CollapsibleTrigger
 									aria-label={`Comment by ${comment.by ?? "unknown"}`}
 								>
-									{collapsed ? "[+]" : "[-]"}
+									<Icon icon={collapsed ? ChevronRight : ChevronDown} />
 								</CollapsibleTrigger>
 							</Row>
 						)}

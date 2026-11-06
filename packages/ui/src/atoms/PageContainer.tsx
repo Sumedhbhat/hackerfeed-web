@@ -2,11 +2,11 @@ import type { HTMLAttributes } from "react";
 
 const SPACING = {
 	/** Standard page: room above for the header, generous space below. */
-	default: "px-4 pt-6 pb-16 sm:pt-10",
+	default: "px-4 pt-6 pb-16 sm:px-6 sm:pt-8",
 	/** Tighter list pages such as favorites. */
-	compact: "px-4 pt-6 pb-14",
+	compact: "px-4 pt-6 pb-14 sm:px-6",
 	/** Short status pages (signed out, auth callback). */
-	status: "min-h-[calc(100vh-9rem)] px-4 py-8",
+	status: "min-h-[calc(100vh-9rem)] px-4 py-10 sm:px-6",
 } as const;
 
 type PageContainerProps = Omit<

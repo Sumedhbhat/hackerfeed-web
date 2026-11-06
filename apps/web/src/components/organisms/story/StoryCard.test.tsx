@@ -144,7 +144,7 @@ describe("StoryCard rendering", () => {
 
 	it("renders the score", () => {
 		render(<StoryCard story={makeStory()} />);
-		expect(screen.getByText(/210 pts/i)).toBeDefined();
+		expect(screen.getByText(/210 points/i)).toBeDefined();
 	});
 
 	it("renders the comment count", () => {
@@ -202,24 +202,24 @@ describe("StoryCard link actions", () => {
 		).toBe("https://news.ycombinator.com/item?id=12345");
 	});
 
-	it("'Discussion' renders a link to the internal discussion page", () => {
+	it("the comment count links to the internal discussion page", () => {
 		render(<StoryCard story={makeStory({ id: 99999 })} />);
-		const link = screen.getByRole("link", { name: /^discussion$/i });
+		const link = screen.getByRole("link", { name: /^17 comments$/i });
 		expect(link).toBeDefined();
 		expect(link.getAttribute("href")).toContain("99999");
 	});
 
-	it("'Discuss' opens the in-app AI chat for the story", () => {
+	it("'Ask AI' opens the in-app AI chat for the story", () => {
 		render(<StoryCard story={makeStory({ id: 4242 })} />);
-		const link = screen.getByRole("link", { name: /with ai$/i });
+		const link = screen.getByRole("link", { name: /^ask ai about/i });
 		expect(link.getAttribute("href")).toBe("/chat/4242");
 		expect(link.getAttribute("target")).toBeNull();
 	});
 
-	it("hides 'Discuss' while the aiChat flag is off", () => {
+	it("hides 'Ask AI' while the aiChat flag is off", () => {
 		flagsMock.aiChat = false;
 		render(<StoryCard story={makeStory()} />);
-		expect(screen.queryByRole("link", { name: /with ai$/i })).toBeNull();
+		expect(screen.queryByRole("link", { name: /^ask ai about/i })).toBeNull();
 	});
 
 	it("records signed-in title and primary-action clicks as separate views", () => {
@@ -266,8 +266,8 @@ describe("StoryCard link actions", () => {
 		const story = makeStory();
 		render(<StoryCard story={story} />);
 
-		fireEvent.click(screen.getByRole("link", { name: "Discussion" }));
-		fireEvent.click(screen.getByRole("link", { name: /with ai$/i }));
+		fireEvent.click(screen.getByRole("link", { name: "17 comments" }));
+		fireEvent.click(screen.getByRole("link", { name: /^ask ai about/i }));
 
 		expect(trpcMock.viewStory.mock.calls).toEqual([
 			[{ action: "discussion_opened", story }],

@@ -35,6 +35,6 @@ describe("router link atoms", () => {
 		const [brand, feed] = await screen.findAllByRole("link");
 		expect(brand.getAttribute("data-status")).toBe("active");
 		expect(brand.className).toContain("flex");
-		expect(feed.className).toContain("nav-link");
+		expect(feed.className).toContain("data-[status=active]:bg-(--lagoon-tint)");
 	});
 });

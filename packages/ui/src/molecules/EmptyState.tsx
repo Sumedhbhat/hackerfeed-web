@@ -29,7 +29,7 @@ export function EmptyState({
 	children,
 }: EmptyStateProps) {
 	return (
-		<Card padding="lg" animated>
+		<Card padding="lg">
 			<Stack gap="md">
 				<Kicker>{kicker}</Kicker>
 				<Heading level={headingLevel} size={headingSize}>
