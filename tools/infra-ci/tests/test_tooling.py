@@ -399,23 +399,27 @@ class WorkflowTests(unittest.TestCase):
         production = (ROOT / ".github/workflows/deploy.yaml").read_text()
         self.assertNotIn("event.before", production)
         self.assertNotIn("needs.changes", production)
-        self.assertIn("needs: state-backend", production)
-        self.assertIn("needs: infrastructure", production)
-        for job in ("state-backend", "infrastructure"):
-            body = re.split(r"\n  [a-z][a-z-]*:", production.split(f"  {job}:\n", 1)[1], maxsplit=1)[0]
-            self.assertNotRegex(body, r"(?m)^    if:")
+        deploy = production.split("  deploy:\n", 1)[1]
+        self.assertIn("needs: [checks, plan]", deploy)
+        self.assertNotRegex(deploy, r"(?m)^    if:")
+        # deploy is the one job that waits for approval.
+        self.assertEqual(production.count("environment: production"), 1)
+        self.assertIn("environment: production", deploy)
         preview = (ROOT / ".github/workflows/preview.yaml").read_text()
         self.assertNotIn("d1 ", preview)
         self.assertNotIn("AI_TOKEN_ENCRYPTION_KEY", preview)
         self.assertNotIn("VITE_WORKOS_CLIENT_ID", preview)
         self.assertIn("--config apps/web/wrangler.preview.jsonc", preview)
         self.assertNotIn("wrangler deploy", preview)
-        self.assertIn("needs.infrastructure.outputs.database_id", production)
-        self.assertIn("needs.infrastructure.outputs.database_name", production)
+        self.assertIn("terraform.sh prod output -raw database_id", deploy)
+        self.assertIn("terraform.sh prod output -raw database_name", deploy)
         self.assertIn("--config apps/web/dist/server/wrangler.json", production)
         # Only Terraform and the state server below it get the stored token.
         self.assertNotIn("secrets.CLOUDFLARE_API_TOKEN", preview)
-        self.assertNotIn("secrets.CLOUDFLARE_API_TOKEN", production.split("  deploy:\n", 1)[1])
+        self.assertNotIn("secrets.CLOUDFLARE_API_TOKEN", production.split("  deploy:\n", 1)[0])
+        steps = re.split(r"\n      - ", deploy)
+        holders = [step.split("\n", 1)[0] for step in steps if "secrets.CLOUDFLARE_API_TOKEN" in step]
+        self.assertEqual(holders, ["name: Deploy state server", "name: Plan infrastructure", "name: Apply infrastructure"])
         self.assertIn("tools/infra-ci/cloudflare-token.sh deploy deploy_token", production)
         self.assertIn("tools/infra-ci/cloudflare-token.sh prod preview_token", preview)
         self.assertNotIn(" deploy ", preview)
