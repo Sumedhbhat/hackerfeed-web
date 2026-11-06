@@ -7,6 +7,8 @@ type IconProps = {
 	filled?: boolean;
 	/** Dim the icon next to text. */
 	muted?: boolean;
+	/** Colour the icon green to mark an in-app AI action. */
+	accent?: boolean;
 };
 
 /** Decorative icon that sits inline with text. */
@@ -15,6 +17,7 @@ export function Icon({
 	size = 16,
 	filled = false,
 	muted = false,
+	accent = false,
 }: IconProps) {
 	return (
 		<Glyph
@@ -22,7 +25,7 @@ export function Icon({
 			aria-hidden="true"
 			strokeWidth={1.75}
 			fill={filled ? "currentColor" : "none"}
-			className={muted ? "inline shrink-0 opacity-70" : "inline shrink-0"}
+			className={`inline shrink-0${muted ? " opacity-70" : ""}${accent ? " text-(--lagoon)" : ""}`}
 		/>
 	);
 }

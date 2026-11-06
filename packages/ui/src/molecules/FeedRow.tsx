@@ -3,9 +3,9 @@ import { Ribbon } from "../atoms/Ribbon";
 
 /**
  * One story in a ReadingList: optional rank in the margin, the title, then the
- * facts and the actions. From `lg` up facts and actions share one line, with
- * the actions in fixed columns so they line up from row to row; below that the
- * actions get their own line. `save` always sits at the far right, directly
+ * facts and the actions. From `lg` up facts and actions share one line; from
+ * `sm` up the actions sit in columns (minimum widths) so they line up from row
+ * to row; phones size them to their content. `save` always sits at the far right, directly
  * under the brass ribbon that hangs from the row once the story is saved.
  */
 export function FeedRow({
@@ -38,8 +38,8 @@ export function FeedRow({
 				<div className="pr-8">{title}</div>
 				<div className="flex flex-col gap-1 lg:flex-row lg:items-center lg:justify-between lg:gap-4">
 					{meta}
-					<div className="-ml-1.5 flex items-center sm:-mr-2 lg:ml-0 lg:shrink-0">
-						<div className="grid grid-cols-[7rem_6.75rem_auto] items-center justify-items-start sm:grid-cols-[7.25rem_7.5rem_auto] lg:grid-cols-[7.25rem_7.5rem_5.25rem]">
+					<div className="-mt-1 -ml-1.5 flex items-center gap-1 sm:-mr-2 lg:mt-0 lg:ml-0 lg:shrink-0">
+						<div className="flex min-w-0 items-center gap-x-1 sm:grid sm:grid-cols-[minmax(7.25rem,auto)_minmax(7.5rem,auto)_auto] sm:justify-items-start sm:gap-x-0 lg:grid-cols-[minmax(7.25rem,auto)_minmax(7.5rem,auto)_minmax(5.25rem,auto)]">
 							{actions}
 						</div>
 						<div className="ml-auto lg:ml-0">{save}</div>

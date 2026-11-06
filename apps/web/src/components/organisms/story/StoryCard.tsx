@@ -11,6 +11,7 @@ import { Icon } from "@hackerfeed/ui/atoms/Icon";
 import { ExternalLink } from "@hackerfeed/ui/atoms/Link";
 import { ToggleButton } from "@hackerfeed/ui/atoms/Toggle";
 import { ToggleLabel } from "@hackerfeed/ui/atoms/ToggleLabel";
+import { WideText } from "@hackerfeed/ui/atoms/WideText";
 import { FeedRow } from "@hackerfeed/ui/molecules/FeedRow";
 import { StoryMeta } from "@hackerfeed/ui/molecules/StoryMeta";
 import { ArrowUpRight, Bookmark, MessageSquare, Sparkles } from "lucide-react";
@@ -33,6 +34,8 @@ export function StoryCard({ story, rank }: StoryCardProps) {
 	const title = getStoryTitle(story);
 	const storyUrl = story.url ?? getDiscussionUrl(story.id);
 	const comments = story.descendants ?? 0;
+	const readLabel = story.url ? "Read article" : "Open post";
+	const commentLabel = `${comments} ${comments === 1 ? "comment" : "comments"}`;
 
 	function recordRead() {
 		recordStoryView(story, "read");
@@ -71,10 +74,11 @@ export function StoryCard({ story, rank }: StoryCardProps) {
 					<ExternalButtonLink
 						href={storyUrl}
 						variant="accent"
+						aria-label={`${readLabel}: ${title}`}
 						onClick={recordRead}
 						onAuxClick={recordMiddleClickRead}
 					>
-						{story.url ? "Read article" : "Open post"}
+						{readLabel}
 						<Icon icon={ArrowUpRight} size={14} />
 					</ExternalButtonLink>
 
@@ -82,10 +86,12 @@ export function StoryCard({ story, rank }: StoryCardProps) {
 						variant="ghost"
 						to="/story/$storyId"
 						params={{ storyId: story.id }}
+						aria-label={`${commentLabel}: ${title}`}
 						onClick={() => recordStoryView(story, "discussion_opened")}
 					>
 						<Icon icon={MessageSquare} />
-						{comments} {comments === 1 ? "comment" : "comments"}
+						{comments}
+						<WideText>{comments === 1 ? "comment" : "comments"}</WideText>
 					</ButtonLink>
 
 					{aiChat ? (
@@ -96,7 +102,7 @@ export function StoryCard({ story, rank }: StoryCardProps) {
 							aria-label={`Ask AI about ${title}`}
 							onClick={() => recordStoryView(story, "chat_opened")}
 						>
-							<Icon icon={Sparkles} />
+							<Icon icon={Sparkles} accent />
 							Ask AI
 						</ButtonLink>
 					) : null}

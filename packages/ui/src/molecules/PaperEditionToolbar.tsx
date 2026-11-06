@@ -15,7 +15,10 @@ export function PaperEditionToolbar({
 	onDateChange: (date: string) => void;
 }) {
 	return (
-		<section className="flex gap-2" aria-label="Find a paper edition">
+		<section
+			className="flex flex-col gap-2 sm:flex-row"
+			aria-label="Find a paper edition"
+		>
 			<FieldFrame grow>
 				<Icon icon={Search} />
 				<TextInput

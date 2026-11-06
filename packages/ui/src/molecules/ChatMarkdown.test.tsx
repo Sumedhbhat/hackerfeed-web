@@ -86,6 +86,25 @@ describe("ChatMarkdown", () => {
 		expect(container.textContent).toContain("[this](javascript:alert(1))");
 	});
 
+	it("nests indented items and joins continuation lines into their item", () => {
+		const { container } = render(
+			<ChatMarkdown
+				text={
+					"- Parent\n  - Child one\n  - Child two\n    continues here\n- Sibling"
+				}
+			/>,
+		);
+
+		const top = container.querySelector("ul");
+		expect(top?.querySelectorAll(":scope > li")).toHaveLength(2);
+		const nested = top?.querySelector("li ul");
+		expect(nested?.querySelectorAll("li")).toHaveLength(2);
+		expect(nested?.querySelectorAll("li")[1]?.textContent).toBe(
+			"Child two continues here",
+		);
+		expect(container.querySelectorAll("p")).toHaveLength(0);
+	});
+
 	it("shows markup in a reply as text instead of rendering it", () => {
 		const { container } = render(
 			<ChatMarkdown text={'<img src=x onerror="alert(1)"> **hi**'} />,

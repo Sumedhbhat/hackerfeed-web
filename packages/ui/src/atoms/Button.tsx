@@ -8,7 +8,7 @@ const BASE_CLASSES =
 const VARIANT_CLASSES = {
 	/** The one main action in a view. */
 	primary:
-		"min-h-9 bg-(--lagoon) px-3.5 py-1.5 text-(--on-lagoon) hover:bg-(--lagoon-deep) hover:text-(--on-lagoon)",
+		"min-h-11 bg-(--lagoon) px-3.5 py-1.5 text-(--on-lagoon) sm:min-h-9 hover:bg-(--lagoon-deep) hover:text-(--on-lagoon)",
 	/** A main action that repeats down a list, where a solid button would shout. */
 	soft: "whitespace-nowrap min-h-11 bg-(--lagoon-tint) px-2.5 py-1.5 text-(--lagoon-deep) hover:bg-(--lagoon) hover:text-(--on-lagoon) sm:min-h-9 sm:px-3",
 	/** The main action of a list row: green text, no fill, so a column of rows stays calm. */

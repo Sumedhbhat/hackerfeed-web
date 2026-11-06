@@ -1,26 +1,22 @@
 import type { ReactNode } from "react";
 
-/** Bottom of a PaperCard: the main actions, then secondary links beside the keywords. */
+/**
+ * Bottom of a PaperCard: the paper's links, with `save` always at the far
+ * right of the first line (under the ribbon), as on story rows.
+ */
 export function PaperCardFooter({
 	actions,
-	resources,
-	keywords,
+	save,
 }: {
 	actions: ReactNode;
-	resources?: ReactNode;
-	keywords?: ReactNode;
+	save?: ReactNode;
 }) {
 	return (
-		<footer className="flex min-w-0 flex-col gap-1">
-			<div className="-ml-1.5 flex flex-wrap items-center gap-0.5">
+		<footer className="-ml-1.5 flex items-start gap-1 sm:-mr-2">
+			<div className="flex min-w-0 flex-wrap items-center gap-x-0.5">
 				{actions}
 			</div>
-			{resources || keywords ? (
-				<div className="-ml-1.5 flex flex-wrap items-center gap-x-1 gap-y-1">
-					{resources}
-					{keywords ? <div className="pl-1.5">{keywords}</div> : null}
-				</div>
-			) : null}
+			{save ? <div className="ml-auto shrink-0">{save}</div> : null}
 		</footer>
 	);
 }

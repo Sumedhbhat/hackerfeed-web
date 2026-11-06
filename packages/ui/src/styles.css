@@ -15,9 +15,6 @@
   /* Title of one row in a reading list. */
   --text-row: 1.1875rem;
   --text-row--line-height: 1.375;
-  /* Small count inside a pill. */
-  --text-badge: 0.6875rem;
-  --text-badge--line-height: 1;
   /* Page titles and the story title. */
   --text-page-sm: 1.75rem;
   --text-page-sm--line-height: 1.2;

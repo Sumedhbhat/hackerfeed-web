@@ -65,7 +65,7 @@ export function StoryArticle({ story }: { story: HackerNewsStoryRecord }) {
 						aria-label={`Ask AI about ${title}`}
 						onClick={() => recordStoryView(story, "chat_opened")}
 					>
-						<Icon icon={Sparkles} />
+						<Icon icon={Sparkles} accent />
 						Ask AI
 					</ButtonLink>
 				) : null}

@@ -152,7 +152,7 @@ describe("StoryCard rendering", () => {
 
 	it("renders the comment count", () => {
 		render(<StoryCard story={makeStory()} />);
-		expect(screen.getByRole("link", { name: "17 comments" })).toBeDefined();
+		expect(screen.getByRole("link", { name: /^17 comments: / })).toBeDefined();
 	});
 
 	it("renders the domain extracted from the URL", () => {
@@ -207,7 +207,7 @@ describe("StoryCard link actions", () => {
 
 	it("the comment count links to the internal discussion page", () => {
 		render(<StoryCard story={makeStory({ id: 99999 })} />);
-		const link = screen.getByRole("link", { name: /^17 comments$/i });
+		const link = screen.getByRole("link", { name: /^17 comments: /i });
 		expect(link).toBeDefined();
 		expect(link.getAttribute("href")).toContain("99999");
 	});
@@ -269,7 +269,7 @@ describe("StoryCard link actions", () => {
 		const story = makeStory();
 		render(<StoryCard story={story} />);
 
-		fireEvent.click(screen.getByRole("link", { name: "17 comments" }));
+		fireEvent.click(screen.getByRole("link", { name: /^17 comments: / }));
 		fireEvent.click(screen.getByRole("link", { name: /^ask ai about/i }));
 
 		expect(trpcMock.viewStory.mock.calls).toEqual([
