@@ -21,6 +21,7 @@ vi.mock("./ThemeToggle", () => ({ default: () => null }));
 vi.mock("./UserMenu", () => ({ default: () => null }));
 vi.mock("@tanstack/react-router", async () => ({
 	createLink: (await import("#/test/createLinkMock")).createLinkMock,
+	useLocation: () => ({ pathname: "/" }),
 }));
 
 afterEach(() => {

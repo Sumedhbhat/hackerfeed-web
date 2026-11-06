@@ -10,13 +10,21 @@ const VARIANT_CLASSES = {
 	primary:
 		"min-h-9 bg-(--lagoon) px-3.5 py-1.5 text-(--on-lagoon) hover:bg-(--lagoon-deep) hover:text-(--on-lagoon)",
 	/** A main action that repeats down a list, where a solid button would shout. */
-	soft: "min-h-9 bg-(--lagoon-tint) px-2.5 py-1.5 sm:px-3 text-(--lagoon-deep) hover:bg-(--lagoon) hover:text-(--on-lagoon)",
+	soft: "min-h-11 bg-(--lagoon-tint) px-2.5 py-1.5 text-(--lagoon-deep) hover:bg-(--lagoon) hover:text-(--on-lagoon) sm:min-h-9 sm:px-3",
+	/** The main action of a list row: green text, no fill, so a column of rows stays calm. */
+	accent:
+		"min-h-11 min-w-11 px-1.5 py-1.5 font-semibold text-(--lagoon-deep) hover:bg-(--lagoon-tint) hover:text-(--lagoon-deep) sm:min-h-9 sm:min-w-9 sm:px-2",
 	/** Bordered button for secondary actions and pick-one chips. */
 	secondary:
 		"min-h-9 border border-(--chip-line) bg-(--surface-strong) px-3 py-1.5 text-left text-(--sea-ink) hover:border-(--field-line) hover:bg-(--chip-bg) aria-pressed:border-(--lagoon) aria-pressed:bg-(--lagoon-tint) aria-pressed:text-(--lagoon-deep)",
 	/** Text-only action; pressed means saved, so it turns brass. */
 	ghost:
-		"min-h-9 min-w-9 px-1.5 py-1.5 text-(--sea-ink-soft) sm:px-2 hover:bg-(--chip-bg) hover:text-(--sea-ink) aria-pressed:text-(--bookmark) aria-pressed:hover:text-(--bookmark)",
+		"min-h-11 min-w-11 px-1.5 py-1.5 text-(--sea-ink-soft) sm:min-h-9 sm:min-w-9 sm:px-2 hover:bg-(--chip-bg) hover:text-(--sea-ink) aria-pressed:text-(--bookmark) aria-pressed:hover:text-(--bookmark)",
+	/** One option in a segmented control (pick one of a few views). */
+	segment:
+		"min-h-8 px-3 py-1 text-(--sea-ink-soft) hover:text-(--sea-ink) aria-pressed:bg-(--surface-strong) aria-pressed:text-(--sea-ink) aria-pressed:shadow-(--shadow-raised)",
+	/** A filter chip in a wrapping set. */
+	chip: "min-h-9 rounded-full border border-(--chip-line) bg-(--surface-strong) px-3 py-1 font-normal text-(--sea-ink-soft) hover:border-(--field-line) hover:text-(--sea-ink) aria-pressed:border-(--lagoon) aria-pressed:bg-(--lagoon-tint) aria-pressed:font-medium aria-pressed:text-(--lagoon-deep)",
 	/** Square icon-only button. */
 	icon: "h-9 w-9 overflow-hidden border border-(--chip-line) bg-(--surface-strong) text-(--sea-ink-soft) hover:border-(--field-line) hover:text-(--sea-ink)",
 } as const;

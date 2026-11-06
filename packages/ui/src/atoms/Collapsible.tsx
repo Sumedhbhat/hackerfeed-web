@@ -24,18 +24,21 @@ export function Collapsible({
 export function CollapsibleTrigger({
 	variant = "ghost",
 	flush = false,
+	inline = false,
 	children,
 	"aria-label": ariaLabel,
 }: {
 	variant?: ButtonVariant;
 	/** Starts a line under text: shift left by the padding so the label lines up with the text. */
 	flush?: boolean;
+	/** Sits in a line of text: don't let the tap area push the line taller. */
+	inline?: boolean;
 	children: ReactNode;
 	"aria-label"?: string;
 }) {
 	return (
 		<BaseCollapsible.Trigger
-			className={`${buttonClassName(variant)}${flush ? " -ml-1.5 sm:-ml-2" : ""}`}
+			className={`${buttonClassName(variant)}${flush ? " -ml-1.5 sm:-ml-2" : ""}${inline ? " -my-2.5 sm:-my-1.5" : ""}`}
 			aria-label={ariaLabel}
 		>
 			{children}

@@ -13,7 +13,7 @@ export function PaperCard({
 			{saved ? (
 				<span
 					aria-hidden="true"
-					className="ribbon-drop absolute top-0 right-4 h-6 w-3.5 bg-(--bookmark-ribbon) [clip-path:polygon(0_0,100%_0,100%_100%,50%_72%,0_100%)] sm:right-6"
+					className="ribbon absolute top-0 right-5 h-5 w-3 sm:right-8"
 				/>
 			) : null}
 			<article className="flex flex-col gap-3 px-4 py-5 sm:px-6">

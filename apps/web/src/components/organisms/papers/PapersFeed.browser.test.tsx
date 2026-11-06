@@ -161,7 +161,9 @@ describe("PapersFeed", () => {
 		);
 
 		fireEvent.click(
-			screen.getByRole("link", { name: "Ask ChatGPT about Reasoning Paper" }),
+			screen.getByRole("link", {
+				name: "Ask ChatGPT about Reasoning Paper (opens chatgpt.com)",
+			}),
 		);
 
 		expect(trpcMock.viewPaper).toHaveBeenCalledWith({
@@ -203,22 +205,23 @@ describe("PapersFeed", () => {
 		);
 
 		const save = screen.getByRole("button", {
-			name: "Save Reasoning Paper to favorites",
+			name: "Save Reasoning Paper",
 		});
 		expect(save.getAttribute("aria-pressed")).toBe("false");
 		expect(save.textContent).toContain("Save");
 		fireEvent.click(save);
 
 		const remove = await screen.findByRole("button", {
-			name: "Save Reasoning Paper to favorites",
+			name: "Save Reasoning Paper",
 			pressed: true,
 		});
 		expect(remove.getAttribute("aria-pressed")).toBe("true");
-		expect(remove.textContent).toContain("Saved");
 		expect(trpcMock.add).toHaveBeenCalledWith({ arxivId: "2606.00001" });
 		expect(screen.getByRole("link", { name: "Reasoning Paper" })).toBeTruthy();
 		expect(
-			screen.getByRole("link", { name: "Ask ChatGPT about Reasoning Paper" }),
+			screen.getByRole("link", {
+				name: "Ask ChatGPT about Reasoning Paper (opens chatgpt.com)",
+			}),
 		).toBeTruthy();
 	});
 
@@ -238,7 +241,7 @@ describe("PapersFeed", () => {
 		);
 		fireEvent.click(
 			screen.getByRole("button", {
-				name: "Save Reasoning Paper to favorites",
+				name: "Save Reasoning Paper",
 			}),
 		);
 
@@ -254,7 +257,7 @@ describe("PapersFeed", () => {
 		fireEvent.click(refresh);
 
 		await screen.findByRole("button", {
-			name: "Save Reasoning Paper to favorites",
+			name: "Save Reasoning Paper",
 		});
 		expect(trpcMock.list).toHaveBeenCalledTimes(2);
 		expect(trpcMock.add).toHaveBeenCalledTimes(1);
@@ -266,7 +269,7 @@ describe("PapersFeed", () => {
 		);
 
 		const discussLink = screen.getByRole("link", {
-			name: "Ask ChatGPT about Reasoning Paper",
+			name: "Ask ChatGPT about Reasoning Paper (opens chatgpt.com)",
 		});
 		const chatUrl = new URL(discussLink.getAttribute("href") ?? "");
 		const prompt = chatUrl.searchParams.get("q") ?? "";

@@ -4,10 +4,10 @@ import type { ReactNode } from "react";
    headings stay in the sans. */
 const SIZE = {
 	/** Large page title. */
-	page: "font-serif text-[1.75rem] font-semibold leading-tight tracking-[-0.01em] sm:text-[2rem]",
+	page: "font-serif text-[1.75rem] font-semibold leading-tight tracking-[-0.01em] sm:text-page",
 	/** Article/story title at the top of a detail page. */
 	title:
-		"font-serif text-[1.625rem] font-semibold leading-[1.2] tracking-[-0.01em] sm:text-[2.125rem]",
+		"font-serif text-[1.625rem] font-semibold leading-[1.2] tracking-[-0.01em] sm:text-headline",
 	/** Section heading inside a page or card. */
 	section: "text-lg font-semibold tracking-tight",
 	/** Card title, e.g. a paper. */

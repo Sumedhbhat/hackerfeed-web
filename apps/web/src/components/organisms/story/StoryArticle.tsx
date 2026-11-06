@@ -8,12 +8,13 @@ import {
 import { ButtonLink, ExternalButtonLink } from "@hackerfeed/ui/atoms/Button";
 import { Heading } from "@hackerfeed/ui/atoms/Heading";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
+import { ExternalLink } from "@hackerfeed/ui/atoms/Link";
 import { Prose } from "@hackerfeed/ui/atoms/Prose";
 import { Row } from "@hackerfeed/ui/atoms/Row";
 import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { ToggleButton } from "@hackerfeed/ui/atoms/Toggle";
 import { StoryMeta } from "@hackerfeed/ui/molecules/StoryMeta";
-import { ArrowUpRight, Bookmark, ExternalLink, Sparkles } from "lucide-react";
+import { ArrowUpRight, Bookmark, Sparkles } from "lucide-react";
 import { useFavorites } from "#/hooks/useFavorites";
 import { useFeatureFlag } from "#/hooks/useFeatureFlags";
 import { useViewActivity } from "#/hooks/useViewActivity";
@@ -29,10 +30,15 @@ export function StoryArticle({ story }: { story: HackerNewsStoryRecord }) {
 	return (
 		<Stack as="header" gap="md">
 			<StoryMeta
-				domain={getStoryDomain(story.url)}
+				domain={story.url ? getStoryDomain(story.url) : null}
 				score={story.score}
 				by={story.by}
 				age={formatStoryAge(story.time)}
+				trailing={
+					<ExternalLink href={getDiscussionUrl(story.id)} variant="accent">
+						View on HN
+					</ExternalLink>
+				}
 			/>
 			<Heading level={1} size="title">
 				{title}
@@ -63,16 +69,13 @@ export function StoryArticle({ story }: { story: HackerNewsStoryRecord }) {
 					</ButtonLink>
 				) : null}
 				<ToggleButton
-					aria-label="Save to favorites"
+					aria-label={`Save ${title}`}
 					pressed={isFav}
 					onPressedChange={() => toggleFavorite(story)}
 				>
 					<Icon icon={Bookmark} filled={isFav} />
-					{isFav ? "Saved" : "Save"}
+					Save
 				</ToggleButton>
-				<ExternalButtonLink variant="ghost" href={getDiscussionUrl(story.id)}>
-					View on HN <Icon icon={ExternalLink} size={14} muted />
-				</ExternalButtonLink>
 			</Row>
 		</Stack>
 	);

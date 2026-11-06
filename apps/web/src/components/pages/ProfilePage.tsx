@@ -109,7 +109,7 @@ export function ProfilePage({ search }: { search: ProfileSearch }) {
 
 					<div>
 						<ButtonLink to="/favorites" variant="secondary">
-							View favorites
+							View saved
 						</ButtonLink>
 					</div>
 				</Stack>

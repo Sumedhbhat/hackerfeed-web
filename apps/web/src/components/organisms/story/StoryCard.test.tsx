@@ -162,9 +162,9 @@ describe("StoryCard rendering", () => {
 		expect(screen.getByText(/blog\.example\.org/i)).toBeDefined();
 	});
 
-	it("falls back to HN domain when URL is null", () => {
+	it("leaves the domain out for posts without a URL", () => {
 		render(<StoryCard story={makeStory({ url: null })} />);
-		expect(screen.getByText(/news\.ycombinator\.com/i)).toBeDefined();
+		expect(screen.queryByText(/news\.ycombinator\.com/i)).toBeNull();
 	});
 
 	it("omits the author when by is null", () => {
@@ -288,9 +288,11 @@ describe("StoryCard link actions", () => {
 });
 
 describe("StoryCard favorite toggle", () => {
-	it("renders with 'Save to favorites' aria-label when not yet saved", () => {
+	it("names the save button after the story when not yet saved", () => {
 		render(<StoryCard story={makeStory()} />);
-		const btn = screen.getByRole("button", { name: /save to favorites/i });
+		const btn = screen.getByRole("button", {
+			name: /^save a test story title$/i,
+		});
 		expect(btn).toBeDefined();
 		expect(btn.getAttribute("aria-pressed")).toBe("false");
 	});
@@ -299,25 +301,36 @@ describe("StoryCard favorite toggle", () => {
 		const story = makeStory({ id: 777 });
 		render(<StoryCard story={story} />);
 
-		fireEvent.click(screen.getByRole("button", { name: /save to favorites/i }));
+		fireEvent.click(
+			screen.getByRole("button", { name: /^save a test story title$/i }),
+		);
 
 		expect(isFavorited(777)).toBe(true);
 	});
 
 	it("keeps its label and reports the saved state through aria-pressed", () => {
 		render(<StoryCard story={makeStory()} />);
-		fireEvent.click(screen.getByRole("button", { name: /save to favorites/i }));
+		fireEvent.click(
+			screen.getByRole("button", { name: /^save a test story title$/i }),
+		);
 
 		expect(
-			screen.getByRole("button", { name: /save to favorites/i, pressed: true }),
+			screen.getByRole("button", {
+				name: /^save a test story title$/i,
+				pressed: true,
+			}),
 		).toBeDefined();
 	});
 
 	it("aria-pressed is true when the story is favorited", () => {
 		render(<StoryCard story={makeStory()} />);
-		fireEvent.click(screen.getByRole("button", { name: /save to favorites/i }));
+		fireEvent.click(
+			screen.getByRole("button", { name: /^save a test story title$/i }),
+		);
 
-		const btn = screen.getByRole("button", { name: /save to favorites/i });
+		const btn = screen.getByRole("button", {
+			name: /^save a test story title$/i,
+		});
 		expect(btn.getAttribute("aria-pressed")).toBe("true");
 	});
 
@@ -325,19 +338,31 @@ describe("StoryCard favorite toggle", () => {
 		const story = makeStory({ id: 888 });
 		render(<StoryCard story={story} />);
 
-		fireEvent.click(screen.getByRole("button", { name: /save to favorites/i }));
+		fireEvent.click(
+			screen.getByRole("button", { name: /^save a test story title$/i }),
+		);
 		expect(isFavorited(888)).toBe(true);
 
 		fireEvent.click(
-			screen.getByRole("button", { name: /save to favorites/i, pressed: true }),
+			screen.getByRole("button", {
+				name: /^save a test story title$/i,
+				pressed: true,
+			}),
 		);
 		expect(isFavorited(888)).toBe(false);
 	});
 
-	it("shows 'Saved' text when favorited", () => {
+	it("keeps the Save label when favorited so the row does not shift", () => {
 		render(<StoryCard story={makeStory()} />);
-		fireEvent.click(screen.getByRole("button", { name: /save to favorites/i }));
-		expect(screen.getByText("Saved")).toBeDefined();
+		fireEvent.click(
+			screen.getByRole("button", { name: /^save a test story title$/i }),
+		);
+		expect(
+			screen.getByRole("button", {
+				name: /^save a test story title$/i,
+				pressed: true,
+			}).textContent,
+		).toContain("Save");
 	});
 
 	it("shows 'Save' text when not favorited", () => {
@@ -355,7 +380,7 @@ describe("StoryCard favorite toggle", () => {
 		await waitFor(() => {
 			expect(
 				screen.getByRole("button", {
-					name: /save to favorites/i,
+					name: /^save a test story title$/i,
 					pressed: true,
 				}),
 			).toBeDefined();
@@ -370,7 +395,9 @@ describe("StoryCard favorite toggle", () => {
 		render(<StoryCard story={story} />);
 		await waitFor(() => expect(trpcMock.list).toHaveBeenCalled());
 
-		fireEvent.click(screen.getByRole("button", { name: /save to favorites/i }));
+		fireEvent.click(
+			screen.getByRole("button", { name: /^save a test story title$/i }),
+		);
 
 		expect(trpcMock.add).toHaveBeenCalledWith(story);
 	});
@@ -384,14 +411,17 @@ describe("StoryCard favorite toggle", () => {
 		await waitFor(() => {
 			expect(
 				screen.getByRole("button", {
-					name: /save to favorites/i,
+					name: /^save a test story title$/i,
 					pressed: true,
 				}),
 			).toBeDefined();
 		});
 
 		fireEvent.click(
-			screen.getByRole("button", { name: /save to favorites/i, pressed: true }),
+			screen.getByRole("button", {
+				name: /^save a test story title$/i,
+				pressed: true,
+			}),
 		);
 
 		expect(trpcMock.remove).toHaveBeenCalledWith({ hnStoryId: 903 });

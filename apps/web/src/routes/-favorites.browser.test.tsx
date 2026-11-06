@@ -219,7 +219,7 @@ describe("FavoritesPage paper collection", () => {
 
 		fireEvent.click(
 			screen.getByRole("button", {
-				name: "Save Saved Reasoning Paper to favorites",
+				name: "Save Saved Reasoning Paper",
 				pressed: true,
 			}),
 		);

@@ -3,7 +3,7 @@ import { ToggleButton, ToggleGroup } from "../atoms/Toggle";
 
 type SortOption<T extends string> = { value: T; label: string };
 
-/** "Sort by" chips on the left, an extra action (e.g. "Clear") on the right. */
+/** "Sort by" segmented control on the left, an extra action (e.g. "Clear") on the right. */
 export function SortToolbar<T extends string>({
 	options,
 	value,
@@ -17,12 +17,16 @@ export function SortToolbar<T extends string>({
 }) {
 	const labelId = useId();
 	return (
-		<div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-			<div className="flex gap-3 items-center">
-				<span id={labelId} className="text-sm text-(--sea-ink-soft)">
+		<div className="mb-4 flex items-center justify-between gap-3">
+			<div className="flex min-w-0 items-center gap-3">
+				<span
+					id={labelId}
+					className="sr-only text-sm text-(--sea-ink-soft) sm:not-sr-only"
+				>
 					Sort by
 				</span>
 				<ToggleGroup
+					layout="segmented"
 					value={value}
 					onValueChange={onChange}
 					aria-labelledby={labelId}
@@ -30,7 +34,7 @@ export function SortToolbar<T extends string>({
 					{options.map((option) => (
 						<ToggleButton
 							key={option.value}
-							variant="secondary"
+							variant="segment"
 							value={option.value}
 						>
 							{option.label}

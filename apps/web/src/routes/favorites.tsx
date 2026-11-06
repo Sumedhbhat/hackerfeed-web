@@ -20,7 +20,7 @@ function FavoritesRoute() {
 
 	return (
 		<FavoritesPage
-			activeType={search.type ?? "stories"}
+			activeType={search.type}
 			onTypeChange={(type) =>
 				void navigate({ search: type === "papers" ? { type } : {} })
 			}

@@ -60,7 +60,7 @@ export function StoryCard({ story, rank }: StoryCardProps) {
 			}
 			meta={
 				<StoryMeta
-					domain={getStoryDomain(story.url)}
+					domain={story.url ? getStoryDomain(story.url) : null}
 					score={story.score}
 					by={story.by}
 					age={formatStoryAge(story.time)}
@@ -70,7 +70,7 @@ export function StoryCard({ story, rank }: StoryCardProps) {
 				<>
 					<ExternalButtonLink
 						href={storyUrl}
-						variant="soft"
+						variant="accent"
 						onClick={recordRead}
 						onAuxClick={recordMiddleClickRead}
 					>
@@ -84,8 +84,7 @@ export function StoryCard({ story, rank }: StoryCardProps) {
 						onClick={() => recordStoryView(story, "discussion_opened")}
 					>
 						<Icon icon={MessageSquare} />
-						{comments}
-						<ButtonLabel>{comments === 1 ? "comment" : "comments"}</ButtonLabel>
+						{comments} {comments === 1 ? "comment" : "comments"}
 					</ButtonLink>
 
 					{aiChat ? (
@@ -100,16 +99,17 @@ export function StoryCard({ story, rank }: StoryCardProps) {
 							Ask AI
 						</ButtonLink>
 					) : null}
-
-					<ToggleButton
-						aria-label="Save to favorites"
-						pressed={isFav}
-						onPressedChange={() => toggleFavorite(story)}
-					>
-						<Icon icon={Bookmark} filled={isFav} />
-						<ButtonLabel>{isFav ? "Saved" : "Save"}</ButtonLabel>
-					</ToggleButton>
 				</>
+			}
+			save={
+				<ToggleButton
+					aria-label={`Save ${title}`}
+					pressed={isFav}
+					onPressedChange={() => toggleFavorite(story)}
+				>
+					<Icon icon={Bookmark} filled={isFav} />
+					<ButtonLabel>Save</ButtonLabel>
+				</ToggleButton>
 			}
 		/>
 	);

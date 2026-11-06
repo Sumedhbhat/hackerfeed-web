@@ -66,6 +66,7 @@ export function Comment({ comment, depth = 0 }: CommentProps) {
 						{!isGone && (
 							<Row as="span" pushEnd>
 								<CollapsibleTrigger
+									inline
 									aria-label={`Comment by ${comment.by ?? "unknown"}`}
 								>
 									<Icon icon={collapsed ? ChevronRight : ChevronDown} />

@@ -2,14 +2,17 @@ import { Fragment, type ReactNode } from "react";
 
 /*
  * The small part of Markdown that chat replies actually use: paragraphs,
- * numbered and bulleted lists, **bold** and `code`. Everything renders as
+ * numbered and bulleted lists, fenced code blocks, **bold** and `code`. Everything renders as
  * React text, never as HTML, so a reply cannot inject markup.
  */
 
 type Block =
 	| { kind: "p"; lines: string[] }
 	| { kind: "ul"; items: string[] }
-	| { kind: "ol"; items: string[]; start: number };
+	| { kind: "ol"; items: string[]; start: number }
+	| { kind: "pre"; lines: string[] };
+
+const FENCE = /^\s*(```|~~~)/;
 
 const ORDERED = /^\s*(\d+)[.)]\s+/;
 const BULLET = /^\s*[-*•]\s+/;
@@ -19,7 +22,26 @@ function toBlocks(text: string): Block[] {
 	// A blank line ends a paragraph, but a list carries on across blank lines
 	// ("1. a\n\n2. b" is one list), as Markdown renderers do.
 	let afterBlank = false;
+	let fence: {
+		marker: string;
+		block: { kind: "pre"; lines: string[] };
+	} | null = null;
 	for (const line of text.split("\n")) {
+		// Inside a fence every line is kept as written, blank or not, until the
+		// matching closing fence (or the end of a reply that is still streaming).
+		if (fence) {
+			if (line.trim() === fence.marker) fence = null;
+			else fence.block.lines.push(line);
+			continue;
+		}
+		const opening = FENCE.exec(line);
+		if (opening?.[1]) {
+			const block = { kind: "pre" as const, lines: [] };
+			blocks.push(block);
+			fence = { marker: opening[1], block };
+			afterBlank = false;
+			continue;
+		}
 		if (!line.trim()) {
 			afterBlank = true;
 			continue;
@@ -67,6 +89,16 @@ export function ChatMarkdown({ text }: { text: string }) {
 			{toBlocks(text).map((block, index) => {
 				// Blocks are positional and a reply never reorders them.
 				const key = `${block.kind}-${index}`;
+				if (block.kind === "pre") {
+					return (
+						<pre
+							key={key}
+							className="m-0 overflow-x-auto rounded-lg bg-(--chip-bg) px-3.5 py-3 text-[0.8125rem] leading-relaxed"
+						>
+							<code>{block.lines.join("\n")}</code>
+						</pre>
+					);
+				}
 				if (block.kind === "p") {
 					return (
 						<p key={key} className="m-0">

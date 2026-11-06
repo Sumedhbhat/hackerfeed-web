@@ -1,4 +1,5 @@
 import type { PaperViewAction } from "@hackerfeed/contracts/view-activity";
+import { ButtonLabel } from "@hackerfeed/ui/atoms/ButtonLabel";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
 import { PaperCard } from "@hackerfeed/ui/atoms/PaperCard";
 import { Text } from "@hackerfeed/ui/atoms/Text";
@@ -48,31 +49,29 @@ export function PaperRow({
 					<PaperSignals
 						upvotes={paper.upvotes}
 						publishedLabel={formatPaperDate(paper.paperPublishedAt)}
-						hasCode={Boolean(paper.githubRepo)}
 					/>
 				}
 				actions={
-					<>
-						<PaperLinks
-							title={paper.title}
-							discussUrl={buildChatGptPaperDiscussionUrl(paper)}
-							projectPage={paper.projectPage}
-							githubRepo={paper.githubRepo}
-							onDiscuss={() => onView("chat_opened")}
-						/>
-						{canFavorite ? (
-							<ToggleButton
-								aria-label={`Save ${paper.title} to favorites`}
-								pressed={saved}
-								title={saved ? "Remove from favorites" : "Save to favorites"}
-								disabled={pending}
-								onPressedChange={onToggleFavorite}
-							>
-								<Icon icon={Bookmark} filled={saved} />
-								{saved ? "Saved" : "Save"}
-							</ToggleButton>
-						) : null}
-					</>
+					<PaperLinks
+						title={paper.title}
+						discussUrl={buildChatGptPaperDiscussionUrl(paper)}
+						projectPage={paper.projectPage}
+						githubRepo={paper.githubRepo}
+						onDiscuss={() => onView("chat_opened")}
+					/>
+				}
+				save={
+					canFavorite ? (
+						<ToggleButton
+							aria-label={`Save ${paper.title}`}
+							pressed={saved}
+							disabled={pending}
+							onPressedChange={onToggleFavorite}
+						>
+							<Icon icon={Bookmark} filled={saved} />
+							<ButtonLabel>Save</ButtonLabel>
+						</ToggleButton>
+					) : null
 				}
 				keywords={
 					paper.keywords.length > 0 ? (

@@ -1,4 +1,4 @@
-import { CalendarDays, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { Icon } from "../atoms/Icon";
 import { FieldFrame, TextInput } from "../atoms/TextField";
 
@@ -31,7 +31,6 @@ export function PaperEditionToolbar({
 				/>
 			</FieldFrame>
 			<FieldFrame>
-				<Icon icon={CalendarDays} />
 				<TextInput
 					variant="bare"
 					type="date"

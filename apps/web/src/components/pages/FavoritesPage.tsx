@@ -32,12 +32,16 @@ type FavoritesPageProps = {
 };
 
 export function FavoritesPage({
-	activeType = "stories",
+	activeType: requestedType,
 	onTypeChange = () => undefined,
 }: FavoritesPageProps) {
 	const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
 	const stories = useFavorites();
 	const papers = usePaperFavorites();
+	// Without a tab in the URL, open the one that has something in it.
+	const activeType: FavoritesType =
+		requestedType ??
+		(stories.count === 0 && papers.count > 0 ? "papers" : "stories");
 	const { recordPaperView } = useViewActivity();
 	const isStories = activeType === "stories";
 	const activeCount = isStories ? stories.count : papers.count;

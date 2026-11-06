@@ -46,6 +46,27 @@ describe("ChatMarkdown", () => {
 		expect(lists[1]?.getAttribute("start")).toBe("4");
 	});
 
+	it("renders fenced code verbatim, keeping indentation and blank lines", () => {
+		const code = "function add(a, b) {\n\n  return a + b; // **not bold**\n}";
+		const { container } = render(
+			<ChatMarkdown text={`Here:\n\n\`\`\`js\n${code}\n\`\`\`\n\nDone.`} />,
+		);
+
+		const pre = container.querySelector("pre code");
+		expect(pre?.textContent).toBe(code);
+		expect(container.querySelector("pre strong")).toBeNull();
+		expect(container.textContent).not.toContain("```");
+		expect(container.querySelectorAll("p")).toHaveLength(2);
+	});
+
+	it("shows an unclosed fence (a reply still streaming) as code so far", () => {
+		const { container } = render(<ChatMarkdown text={"```\nconst x = 1;"} />);
+
+		expect(container.querySelector("pre code")?.textContent).toBe(
+			"const x = 1;",
+		);
+	});
+
 	it("shows markup in a reply as text instead of rendering it", () => {
 		const { container } = render(
 			<ChatMarkdown text={'<img src=x onerror="alert(1)"> **hi**'} />,
