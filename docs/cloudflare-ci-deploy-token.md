@@ -82,7 +82,8 @@ The workflows use two GitHub environments:
 
 - `production`: `deploy.yaml`'s `deploy` job, the one that needs approval.
   Only `master` may deploy from it, and it has a required reviewer.
-- `preview`: `preview.yaml`, for pull requests.
+- `preview`: `preview.yaml`, for pull requests, and `deploy.yaml`'s read-only
+  `plan` job.
 
 1. In GitHub, open this repository's **Settings** > **Environments**. In
    `production`, enable **Required reviewers** and add at least one reviewer.
