@@ -32,6 +32,20 @@ describe("ChatMarkdown", () => {
 		expect(screen.getAllByRole("listitem")).toHaveLength(3);
 	});
 
+	it("keeps a numbered list together across blank lines and keeps its start", () => {
+		const { container } = render(
+			<ChatMarkdown
+				text={"1. First\n\n2. Second\n\nThen prose.\n\n4. Fourth"}
+			/>,
+		);
+
+		const lists = container.querySelectorAll("ol");
+		expect(lists).toHaveLength(2);
+		expect(lists[0]?.querySelectorAll("li")).toHaveLength(2);
+		expect(lists[0]?.getAttribute("start")).toBeNull();
+		expect(lists[1]?.getAttribute("start")).toBe("4");
+	});
+
 	it("shows markup in a reply as text instead of rendering it", () => {
 		const { container } = render(
 			<ChatMarkdown text={'<img src=x onerror="alert(1)"> **hi**'} />,

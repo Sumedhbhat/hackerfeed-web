@@ -210,7 +210,9 @@ describe("FavoritesPage paper collection", () => {
 				.getAttribute("href"),
 		).toBe("https://huggingface.co/papers/2607.00001");
 		expect(
-			screen.getByRole("link", { name: /discuss saved reasoning paper/i }),
+			screen.getByRole("link", {
+				name: /ask chatgpt about saved reasoning paper/i,
+			}),
 		).toBeTruthy();
 		expect(screen.getAllByRole("link", { name: /project/i })).toHaveLength(2);
 		expect(screen.getAllByRole("link", { name: /code/i })).toHaveLength(2);
@@ -247,9 +249,7 @@ describe("FavoritesPage paper collection", () => {
 		fireEvent.click(within(dialog).getByRole("button", { name: "Clear" }));
 		await waitFor(() => expect(trpcMock.paperClear).toHaveBeenCalledTimes(1));
 		expect(trpcMock.clear).not.toHaveBeenCalled();
-		expect(
-			await screen.findByText("Your saved papers list is empty."),
-		).toBeTruthy();
+		expect(await screen.findByText("No saved papers yet")).toBeTruthy();
 	});
 
 	it("shows an initial paper load failure and recovers on refresh", async () => {
@@ -262,7 +262,7 @@ describe("FavoritesPage paper collection", () => {
 		expect((await screen.findByRole("alert")).textContent).toContain(
 			"Could not load saved favorites.",
 		);
-		expect(screen.queryByText(/list is empty/i)).toBeNull();
+		expect(screen.queryByText(/no saved papers yet/i)).toBeNull();
 		fireEvent.click(
 			screen.getByRole("button", { name: "Refresh saved favorites" }),
 		);
@@ -287,8 +287,8 @@ describe("FavoritesPage paper collection", () => {
 			);
 		}
 		render(<UrlDrivenFavorites />);
-		const stories = screen.getByRole("tab", { name: "Stories" });
-		const papers = screen.getByRole("tab", { name: "Papers" });
+		const stories = screen.getByRole("tab", { name: /^Stories \d+$/ });
+		const papers = screen.getByRole("tab", { name: /^Papers \d+$/ });
 		expect(stories.getAttribute("aria-selected")).toBe("true");
 		expect(stories.getAttribute("tabindex")).toBe("0");
 		expect(papers.getAttribute("tabindex")).toBe("-1");

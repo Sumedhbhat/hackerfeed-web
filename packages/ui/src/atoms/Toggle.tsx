@@ -27,8 +27,9 @@ export function ToggleButton({
 
 const LAYOUT = {
 	wrap: "flex flex-wrap gap-1",
+	/** One scrolling line on phones, with a fade showing there is more; wraps from `sm` up. */
 	scroll:
-		"-mx-1 flex gap-2 overflow-x-auto px-1 py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+		"-mx-1 flex gap-2 overflow-x-auto px-1 py-1 [mask-image:linear-gradient(to_right,black_85%,transparent)] [scrollbar-width:none] sm:flex-wrap sm:overflow-visible sm:[mask-image:none] [&::-webkit-scrollbar]:hidden",
 } as const;
 
 export function ToggleGroup<T extends string>({

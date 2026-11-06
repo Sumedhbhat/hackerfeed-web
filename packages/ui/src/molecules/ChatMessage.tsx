@@ -23,8 +23,8 @@ export function ChatMessage({
 			<div
 				className={
 					isUser
-						? "max-w-[85%] whitespace-pre-wrap break-words rounded-xl rounded-br-sm bg-(--lagoon-tint) px-3.5 py-2 text-[0.9375rem] leading-relaxed text-(--sea-ink)"
-						: "max-w-[68ch] break-words border-l-2 border-(--lagoon) py-0.5 pl-4 text-[0.9375rem] leading-relaxed text-(--sea-ink)"
+						? "max-w-[85%] whitespace-pre-wrap break-words rounded-xl rounded-br-sm bg-(--lagoon-tint) px-3.5 py-2 text-read text-(--sea-ink)"
+						: "max-w-[68ch] break-words border-l-2 border-(--lagoon) py-0.5 pl-4 text-read text-(--sea-ink)"
 				}
 			>
 				<span className="sr-only">{isUser ? "You: " : `${authorName}: `}</span>

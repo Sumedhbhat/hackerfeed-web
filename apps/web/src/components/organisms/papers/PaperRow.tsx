@@ -39,7 +39,7 @@ export function PaperRow({
 			<PaperTitle href={paper.paperUrl} onClick={() => onView("read")}>
 				{paper.title}
 			</PaperTitle>
-			<Text size="xs" tone="soft">
+			<Text size="sm" tone="soft">
 				{formatAuthors(paper.authors)}
 			</Text>
 			<PaperSummary paper={paper} />

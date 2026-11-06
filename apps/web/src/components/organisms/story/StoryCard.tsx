@@ -6,6 +6,7 @@ import {
 	getStoryTitle,
 } from "@hackerfeed/hacker-news/utils";
 import { ButtonLink, ExternalButtonLink } from "@hackerfeed/ui/atoms/Button";
+import { ButtonLabel } from "@hackerfeed/ui/atoms/ButtonLabel";
 import { Heading } from "@hackerfeed/ui/atoms/Heading";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
 import { ExternalLink } from "@hackerfeed/ui/atoms/Link";
@@ -83,7 +84,8 @@ export function StoryCard({ story, rank }: StoryCardProps) {
 						onClick={() => recordStoryView(story, "discussion_opened")}
 					>
 						<Icon icon={MessageSquare} />
-						{comments} {comments === 1 ? "comment" : "comments"}
+						{comments}
+						<ButtonLabel>{comments === 1 ? "comment" : "comments"}</ButtonLabel>
 					</ButtonLink>
 
 					{aiChat ? (
@@ -105,7 +107,7 @@ export function StoryCard({ story, rank }: StoryCardProps) {
 						onPressedChange={() => toggleFavorite(story)}
 					>
 						<Icon icon={Bookmark} filled={isFav} />
-						{isFav ? "Saved" : "Save"}
+						<ButtonLabel>{isFav ? "Saved" : "Save"}</ButtonLabel>
 					</ToggleButton>
 				</>
 			}

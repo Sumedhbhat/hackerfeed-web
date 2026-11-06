@@ -38,7 +38,7 @@ function BrandAnchor(props: BrandAnchorProps) {
 			className="flex flex-shrink-0 items-center gap-2.5 rounded-md no-underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--lagoon)"
 		>
 			<BrandMark />
-			<span className="sr-only font-serif text-[1.1875rem] font-semibold tracking-[-0.01em] text-(--sea-ink) sm:not-sr-only">
+			<span className="sr-only font-serif text-row font-semibold tracking-[-0.01em] text-(--sea-ink) sm:not-sr-only">
 				HackerFeed
 			</span>
 		</a>

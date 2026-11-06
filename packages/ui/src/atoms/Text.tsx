@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 const SIZE = {
-	xs: "text-[0.8125rem] leading-5",
+	xs: "text-meta",
 	sm: "text-sm",
 	base: "text-base",
 } as const;

@@ -11,9 +11,9 @@ const SIZE = {
 	/** Section heading inside a page or card. */
 	section: "text-lg font-semibold tracking-tight",
 	/** Card title, e.g. a paper. */
-	card: "font-serif text-[1.1875rem] font-semibold leading-snug sm:text-xl",
+	card: "font-serif text-row font-semibold leading-snug sm:text-xl",
 	/** Title of one row in a reading list. */
-	row: "font-serif text-[1.0625rem] font-semibold leading-snug sm:text-[1.1875rem]",
+	row: "font-serif text-[1.0625rem] font-semibold leading-snug sm:text-row",
 	/** Small heading for panels and groups. */
 	small: "text-base font-semibold tracking-tight",
 } as const;

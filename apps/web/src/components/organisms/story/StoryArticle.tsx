@@ -8,13 +8,12 @@ import {
 import { ButtonLink, ExternalButtonLink } from "@hackerfeed/ui/atoms/Button";
 import { Heading } from "@hackerfeed/ui/atoms/Heading";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
-import { ExternalLink } from "@hackerfeed/ui/atoms/Link";
 import { Prose } from "@hackerfeed/ui/atoms/Prose";
 import { Row } from "@hackerfeed/ui/atoms/Row";
 import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { ToggleButton } from "@hackerfeed/ui/atoms/Toggle";
 import { StoryMeta } from "@hackerfeed/ui/molecules/StoryMeta";
-import { ArrowUpRight, Bookmark, Sparkles } from "lucide-react";
+import { ArrowUpRight, Bookmark, ExternalLink, Sparkles } from "lucide-react";
 import { useFavorites } from "#/hooks/useFavorites";
 import { useFeatureFlag } from "#/hooks/useFeatureFlags";
 import { useViewActivity } from "#/hooks/useViewActivity";
@@ -71,9 +70,9 @@ export function StoryArticle({ story }: { story: HackerNewsStoryRecord }) {
 					<Icon icon={Bookmark} filled={isFav} />
 					{isFav ? "Saved" : "Save"}
 				</ToggleButton>
-				<ExternalLink href={getDiscussionUrl(story.id)}>
-					View on HN
-				</ExternalLink>
+				<ExternalButtonLink variant="ghost" href={getDiscussionUrl(story.id)}>
+					View on HN <Icon icon={ExternalLink} size={14} muted />
+				</ExternalButtonLink>
 			</Row>
 		</Stack>
 	);

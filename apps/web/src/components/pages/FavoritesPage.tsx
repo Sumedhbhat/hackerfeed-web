@@ -89,8 +89,8 @@ export function FavoritesPage({
 								/>
 							) : activeCount === 0 ? (
 								<EmptyState
-									kicker="Nothing saved yet"
-									title={`Your saved ${isStories ? "stories" : "papers"} list is empty.`}
+									title={`No saved ${isStories ? "stories" : "papers"} yet`}
+									headingSize="section"
 									description={`${browseLabel} and press Save on anything you want to keep.`}
 									action={
 										<TextLink to={isStories ? "/" : "/papers"} variant="accent">

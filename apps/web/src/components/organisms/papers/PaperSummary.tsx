@@ -38,7 +38,7 @@ export function PaperSummary({ paper }: { paper: PaperPresentation }) {
 				<PaperSummaryText>{paper.abstract ?? paper.summary}</PaperSummaryText>
 			</CollapsiblePanel>
 			{canExpand ? (
-				<CollapsibleTrigger>
+				<CollapsibleTrigger flush>
 					{open ? "Show less" : "Show more"}
 					<Icon icon={open ? ChevronUp : ChevronDown} />
 				</CollapsibleTrigger>

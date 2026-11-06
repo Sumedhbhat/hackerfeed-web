@@ -1,8 +1,10 @@
 import type { ReactNode } from "react";
 
 /**
- * One story in a ReadingList: optional rank in the margin, then title, facts
- * and actions. A brass ribbon hangs from the corner once it is saved.
+ * One story in a ReadingList: optional rank in the margin, the title, then a
+ * line with the facts on the left and the actions on the right (stacked on
+ * phones). Save is expected last, so it lands under the brass ribbon that
+ * hangs from the row's corner once the story is saved.
  */
 export function FeedRow({
 	rank,
@@ -18,26 +20,28 @@ export function FeedRow({
 	actions: ReactNode;
 }) {
 	return (
-		<li className="relative flex gap-3 px-4 py-4 sm:gap-4 sm:px-6">
+		<li className="relative flex gap-4 px-4 pt-4 pb-3 sm:px-6 sm:pb-3.5">
 			{saved ? (
 				<span
 					aria-hidden="true"
-					className="ribbon-drop absolute top-0 right-4 h-6 w-3.5 bg-(--bookmark-ribbon) [clip-path:polygon(0_0,100%_0,100%_100%,50%_72%,0_100%)] sm:right-6"
+					className="ribbon-drop absolute top-0 right-5 h-5 w-3 bg-(--bookmark-ribbon) [clip-path:polygon(0_0,100%_0,100%_100%,50%_72%,0_100%)] sm:right-8"
 				/>
 			) : null}
 			{rank != null ? (
 				<span
 					aria-hidden="true"
-					className="hidden w-7 shrink-0 pt-px text-right font-serif text-[1.1875rem] leading-snug text-(--sea-ink-faint) tabular-nums sm:block"
+					className="hidden w-7 shrink-0 text-right font-serif text-row text-(--sea-ink-faint) tabular-nums sm:block"
 				>
 					{rank}
 				</span>
 			) : null}
-			<div className="flex min-w-0 flex-1 flex-col gap-1.5 pr-4 sm:pr-5">
-				{title}
-				{meta}
-				<div className="-ml-2 flex flex-wrap items-center gap-x-0.5 gap-y-1 pt-1 sm:gap-x-1">
-					{actions}
+			<div className="flex min-w-0 flex-1 flex-col gap-1">
+				<div className="pr-6">{title}</div>
+				<div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+					{meta}
+					<div className="flex items-center gap-0.5 sm:-mr-2 sm:shrink-0 [&>:last-child]:ml-auto sm:[&>:last-child]:ml-0">
+						{actions}
+					</div>
 				</div>
 			</div>
 		</li>

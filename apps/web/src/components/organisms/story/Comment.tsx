@@ -82,7 +82,7 @@ export function Comment({ comment, depth = 0 }: CommentProps) {
 								<Collapsible open={repliesOpen} onOpenChange={setRepliesOpen}>
 									<Stack gap="md">
 										<Row>
-											<CollapsibleTrigger>
+											<CollapsibleTrigger flush>
 												{repliesOpen
 													? "Hide replies"
 													: `${replyCount} ${replyCount === 1 ? "reply" : "replies"}`}

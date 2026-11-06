@@ -14,7 +14,7 @@ export function KeywordList({
 			{keywords.map((keyword) => (
 				<li
 					key={keyword}
-					className="rounded-full bg-(--chip-bg) px-2.5 py-0.5 text-xs text-(--sea-ink-soft)"
+					className="rounded-full bg-(--chip-bg) px-2.5 py-1 text-xs leading-none text-(--sea-ink-soft)"
 				>
 					{keyword}
 				</li>

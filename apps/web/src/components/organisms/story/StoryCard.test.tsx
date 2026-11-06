@@ -152,7 +152,7 @@ describe("StoryCard rendering", () => {
 
 	it("renders the comment count", () => {
 		render(<StoryCard story={makeStory()} />);
-		expect(screen.getByText(/17 comments/i)).toBeDefined();
+		expect(screen.getByRole("link", { name: "17 comments" })).toBeDefined();
 	});
 
 	it("renders the domain extracted from the URL", () => {

@@ -26,7 +26,7 @@ export default function SiteHeader() {
 						Papers
 					</TextLink>
 					<TextLink to="/favorites" variant="nav">
-						Favorites
+						Saved
 						{totalCount > 0 ? <CountBadge count={totalCount} /> : null}
 					</TextLink>
 				</>

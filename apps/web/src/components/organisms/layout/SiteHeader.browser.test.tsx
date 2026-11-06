@@ -36,13 +36,13 @@ describe("SiteHeader favorites count", () => {
 		state.storyCount = 2;
 		state.paperCount = 3;
 		render(<SiteHeader />);
-		expect(screen.getByRole("link", { name: "Favorites 5" })).toBeTruthy();
+		expect(screen.getByRole("link", { name: "Saved 5" })).toBeTruthy();
 	});
 
 	it("shows only guest story favorites when signed out", () => {
 		state.storyCount = 2;
 		state.paperCount = 9;
 		render(<SiteHeader />);
-		expect(screen.getByRole("link", { name: "Favorites 2" })).toBeTruthy();
+		expect(screen.getByRole("link", { name: "Saved 2" })).toBeTruthy();
 	});
 });

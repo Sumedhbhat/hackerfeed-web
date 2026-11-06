@@ -161,7 +161,7 @@ describe("PapersFeed", () => {
 		);
 
 		fireEvent.click(
-			screen.getByRole("link", { name: "Discuss Reasoning Paper in ChatGPT" }),
+			screen.getByRole("link", { name: "Ask ChatGPT about Reasoning Paper" }),
 		);
 
 		expect(trpcMock.viewPaper).toHaveBeenCalledWith({
@@ -218,7 +218,7 @@ describe("PapersFeed", () => {
 		expect(trpcMock.add).toHaveBeenCalledWith({ arxivId: "2606.00001" });
 		expect(screen.getByRole("link", { name: "Reasoning Paper" })).toBeTruthy();
 		expect(
-			screen.getByRole("link", { name: "Discuss Reasoning Paper in ChatGPT" }),
+			screen.getByRole("link", { name: "Ask ChatGPT about Reasoning Paper" }),
 		).toBeTruthy();
 	});
 
@@ -266,7 +266,7 @@ describe("PapersFeed", () => {
 		);
 
 		const discussLink = screen.getByRole("link", {
-			name: "Discuss Reasoning Paper in ChatGPT",
+			name: "Ask ChatGPT about Reasoning Paper",
 		});
 		const chatUrl = new URL(discussLink.getAttribute("href") ?? "");
 		const prompt = chatUrl.searchParams.get("q") ?? "";

@@ -15,7 +15,7 @@ export function StoryChatHeader({
 	return (
 		<header className="mb-6">
 			<div className="mb-2">
-				<Kicker>Discuss with AI</Kicker>
+				<Kicker>Ask AI</Kicker>
 			</div>
 			<Heading level={1} size="title">
 				{title}

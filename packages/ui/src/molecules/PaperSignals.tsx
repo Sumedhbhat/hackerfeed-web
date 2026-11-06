@@ -1,3 +1,5 @@
+import { FactLine } from "../atoms/FactLine";
+
 /** Upvotes, publish date and "has code" facts under a paper. */
 export function PaperSignals({
 	upvotes,
@@ -10,12 +12,12 @@ export function PaperSignals({
 	hasCode: boolean;
 }) {
 	return (
-		<div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[0.8125rem] leading-5 text-(--sea-ink-faint)">
+		<FactLine>
 			<span className="tabular-nums">
 				{upvotes} {upvotes === 1 ? "upvote" : "upvotes"}
 			</span>
 			<span>{publishedLabel}</span>
 			{hasCode ? <span>Code available</span> : null}
-		</div>
+		</FactLine>
 	);
 }

@@ -1,8 +1,8 @@
-import { ExternalLink as ExternalIcon, MessageCircle } from "lucide-react";
+import { ExternalLink as ExternalIcon, Sparkles } from "lucide-react";
 import { ExternalButtonLink } from "../atoms/Button";
 import { Icon } from "../atoms/Icon";
 
-/** "Discuss" in ChatGPT plus optional project and code links for a paper. */
+/** "Ask ChatGPT" (opens chatgpt.com) plus optional project and code links for a paper. */
 export function PaperLinks({
 	title,
 	discussUrl,
@@ -21,11 +21,11 @@ export function PaperLinks({
 			<ExternalButtonLink
 				variant="soft"
 				href={discussUrl}
-				aria-label={`Discuss ${title} in ChatGPT`}
+				aria-label={`Ask ChatGPT about ${title}`}
 				onClick={onDiscuss}
 			>
-				<Icon icon={MessageCircle} />
-				Discuss
+				<Icon icon={Sparkles} />
+				Ask ChatGPT <Icon icon={ExternalIcon} size={14} muted />
 			</ExternalButtonLink>
 			{projectPage ? (
 				<ExternalButtonLink variant="ghost" href={projectPage}>
