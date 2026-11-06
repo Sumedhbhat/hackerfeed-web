@@ -5,6 +5,8 @@ const HEIGHT = {
 	lg: "h-5",
 	xl: "h-6",
 	block: "h-16",
+	/** The height of a button. */
+	control: "h-9",
 	avatar: "h-20",
 } as const;
 

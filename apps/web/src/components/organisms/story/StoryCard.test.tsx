@@ -123,9 +123,12 @@ afterEach(() => {
 
 describe("StoryCardSkeleton", () => {
 	it("renders without throwing", () => {
-		render(<StoryCardSkeleton />);
-		const article = document.querySelector("article");
-		expect(article).not.toBeNull();
+		render(
+			<ul>
+				<StoryCardSkeleton />
+			</ul>,
+		);
+		expect(document.querySelector("li")).not.toBeNull();
 	});
 });
 

@@ -59,7 +59,6 @@
 		"./molecules/KeywordList": "./src/molecules/KeywordList.tsx",
 		"./molecules/LoadMoreButton": "./src/molecules/LoadMoreButton.tsx",
 		"./molecules/LoadingScreen": "./src/molecules/LoadingScreen.tsx",
-		"./molecules/MetaLine": "./src/molecules/MetaLine.tsx",
 		"./molecules/NoticeCard": "./src/molecules/NoticeCard.tsx",
 		"./molecules/PageHeader": "./src/molecules/PageHeader.tsx",
 		"./molecules/PaperCardFooter": "./src/molecules/PaperCardFooter.tsx",
@@ -81,7 +80,6 @@
 		"./molecules/StoryListSkeleton": "./src/molecules/StoryListSkeleton.tsx",
 		"./molecules/StoryMeta": "./src/molecules/StoryMeta.tsx",
 		"./molecules/StoryPageSkeleton": "./src/molecules/StoryPageSkeleton.tsx",
-		"./molecules/StoryStats": "./src/molecules/StoryStats.tsx",
 		"./molecules/TraceIdNote": "./src/molecules/TraceIdNote.tsx",
 		"./styles.css": "./src/styles.css"
 	},
