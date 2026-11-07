@@ -23,6 +23,8 @@ type StackProps = Omit<HTMLAttributes<HTMLElement>, "className" | "style"> & {
 	divided?: boolean;
 	/** Take the remaining width in a Row and allow children to shrink. */
 	grow?: boolean;
+	/** Cap the width at a comfortable reading measure (dividers included). */
+	measure?: boolean;
 };
 
 /** Lays children out top to bottom with even spacing. */
@@ -32,6 +34,7 @@ export function Stack({
 	align = "stretch",
 	divided = false,
 	grow = false,
+	measure = false,
 	...props
 }: StackProps) {
 	const className = [
@@ -40,6 +43,7 @@ export function Stack({
 		ALIGN[align],
 		divided && "divide-y divide-(--line)",
 		grow && "min-w-0 flex-1",
+		measure && "max-w-[72ch]",
 	]
 		.filter(Boolean)
 		.join(" ");

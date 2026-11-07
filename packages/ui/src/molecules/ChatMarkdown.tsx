@@ -23,7 +23,7 @@ type Block =
 
 const HEADING = /^\s{0,3}(#{1,6})\s+(.*?)\s*#*\s*$/;
 
-const FENCE = /^\s*(```|~~~)/;
+const FENCE = /^\s*(`{3,}|~{3,})/;
 
 const ORDERED = /^(\s*)(\d+)[.)]\s+/;
 const BULLET = /^(\s*)[-*•]\s+/;
@@ -89,8 +89,13 @@ function toBlocks(text: string): Block[] {
 		// Inside a fence every line is kept as written, blank or not, until the
 		// matching closing fence (or the end of a reply that is still streaming).
 		if (fence) {
-			if (line.trim() === fence.marker) fence = null;
-			else fence.block.lines.push(line);
+			const closing = line.trim();
+			if (
+				closing.length >= fence.marker.length &&
+				closing === (fence.marker[0] ?? "`").repeat(closing.length)
+			) {
+				fence = null;
+			} else fence.block.lines.push(line);
 			continue;
 		}
 		const opening = FENCE.exec(line);

@@ -35,7 +35,12 @@ export default function SiteHeader() {
 					</TextLink>
 					<TextLink to="/favorites" variant="nav">
 						Saved
-						{totalCount > 0 ? <CountBadge count={totalCount} /> : null}
+						{totalCount > 0 ? (
+							<>
+								{" "}
+								<CountBadge count={totalCount} />
+							</>
+						) : null}
 					</TextLink>
 				</>
 			}

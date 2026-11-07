@@ -60,7 +60,9 @@
   --on-lagoon: light-dark(#FFFFFF, #08130E);
   --bookmark: light-dark(#94600F, #E3B159);
   --bookmark-ribbon: light-dark(#A97418, #D9A443);
-  --bookmark-tint: light-dark(#FBF3E2, #2A2416);
+  --bookmark-tint: light-dark(#FBF3E2, #221E17);
+  /* Hover on something already saved: one step deeper than the tint. */
+  --bookmark-tint-strong: light-dark(#F8ECD3, #3A3122);
   --danger: light-dark(#A3322A, #F08A80);
   --header-bg: light-dark(rgba(246, 247, 244, 0.92), rgba(14, 21, 18, 0.9));
   --overlay: light-dark(rgba(21, 33, 28, 0.4), rgba(0, 0, 0, 0.6));

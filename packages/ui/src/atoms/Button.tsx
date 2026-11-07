@@ -19,14 +19,14 @@ const VARIANT_CLASSES = {
 		"rounded-md min-h-9 border border-(--chip-line) bg-(--surface-strong) justify-start px-3 py-1.5 text-left text-(--sea-ink) hover:border-(--field-line) hover:bg-(--chip-bg) aria-pressed:border-(--lagoon) aria-pressed:bg-(--lagoon-tint) aria-pressed:text-(--lagoon-deep)",
 	/** Text-only action; pressed means saved, so it turns brass. */
 	ghost:
-		"rounded-md whitespace-nowrap min-h-11 min-w-11 px-1.5 py-1.5 font-normal text-(--sea-ink-soft) sm:min-h-8 sm:min-w-8 sm:px-2 hover:bg-(--chip-bg) hover:text-(--sea-ink) focus-visible:text-(--sea-ink) aria-pressed:text-(--bookmark) aria-pressed:hover:text-(--bookmark)",
+		"rounded-md whitespace-nowrap min-h-11 min-w-11 px-1.5 py-1.5 font-normal text-(--sea-ink-soft) sm:min-h-8 sm:min-w-8 sm:px-2 hover:bg-(--chip-bg) hover:text-(--sea-ink) focus-visible:text-(--sea-ink) aria-pressed:text-(--bookmark) aria-pressed:hover:bg-(--bookmark-tint-strong) aria-pressed:hover:text-(--bookmark)",
 	/** One option in a segmented control (pick one of a few views). */
 	segment:
 		"rounded-md whitespace-nowrap min-h-8 px-3 py-1 text-(--sea-ink-soft) hover:text-(--sea-ink) aria-pressed:bg-(--surface-strong) aria-pressed:text-(--sea-ink) aria-pressed:shadow-(--shadow-raised)",
 	/** A filter chip in a wrapping set. */
 	chip: "whitespace-nowrap min-h-9 rounded-full border border-(--chip-line) bg-(--surface-strong) px-3 py-1 font-normal text-(--sea-ink-soft) hover:border-(--field-line) hover:text-(--sea-ink) aria-pressed:border-(--lagoon) aria-pressed:bg-(--lagoon-tint) aria-pressed:font-medium aria-pressed:text-(--lagoon-deep)",
 	/** Square icon-only button. */
-	icon: "rounded-md h-9 w-9 overflow-hidden border border-(--chip-line) bg-(--surface-strong) text-(--sea-ink-soft) hover:border-(--field-line) hover:text-(--sea-ink)",
+	icon: "rounded-md h-11 w-11 sm:h-9 sm:w-9 overflow-hidden border border-(--chip-line) bg-(--surface-strong) text-(--sea-ink-soft) hover:border-(--field-line) hover:text-(--sea-ink)",
 } as const;
 
 export type ButtonVariant = keyof typeof VARIANT_CLASSES;

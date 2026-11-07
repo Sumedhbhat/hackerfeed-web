@@ -62,6 +62,9 @@ export function StoryCard({ story, rank, markSaved = true }: StoryCardProps) {
 					<ExternalLink
 						href={storyUrl}
 						variant="plain"
+						// "Read article" right after goes to the same place and carries the
+						// full name, so keyboard users get one stop per destination.
+						tabIndex={-1}
 						onClick={recordRead}
 						onAuxClick={recordMiddleClickRead}
 					>

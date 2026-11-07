@@ -53,7 +53,7 @@ function StoryContent({ storyId }: StoryPageProps) {
 					{story.kids.length === 0 ? (
 						<Text tone="soft">No comments yet.</Text>
 					) : (
-						<Stack gap="xs" divided>
+						<Stack gap="xs" divided measure>
 							{commentQueries.map((q) => {
 								if (!q.data) return null;
 								return <Comment key={q.data.id} comment={q.data} depth={0} />;

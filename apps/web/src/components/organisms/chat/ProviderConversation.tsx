@@ -54,10 +54,12 @@ export function ProviderConversation({
 	const lastCountRef = useRef(messageCount);
 	// Sending a question always scrolls to it; a reply finishing does not.
 	useEffect(() => {
+		// Following stops only when the end of the chat (not the page, which has
+		// a footer below) is more than a short way below the viewport.
 		const onScroll = () => {
-			followRef.current =
-				window.innerHeight + window.scrollY >=
-				document.documentElement.scrollHeight - 160;
+			const end = endRef.current?.getBoundingClientRect().top;
+			if (end !== undefined)
+				followRef.current = end <= window.innerHeight + 160;
 		};
 		window.addEventListener("scroll", onScroll, { passive: true });
 		return () => window.removeEventListener("scroll", onScroll);

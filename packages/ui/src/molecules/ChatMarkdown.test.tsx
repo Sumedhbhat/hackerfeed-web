@@ -59,6 +59,18 @@ describe("ChatMarkdown", () => {
 		expect(container.querySelectorAll("p")).toHaveLength(2);
 	});
 
+	it("closes a longer fence only with a fence at least as long", () => {
+		const { container } = render(
+			<ChatMarkdown text={"````md\n```js\nx\n```\n````\n\nDone."} />,
+		);
+
+		expect(container.querySelector("pre code")?.textContent).toBe(
+			"```js\nx\n```",
+		);
+		expect(container.querySelector("pre")?.textContent).not.toContain("Done.");
+		expect(screen.getByText("Done.").tagName).toBe("P");
+	});
+
 	it("shows an unclosed fence (a reply still streaming) as code so far", () => {
 		const { container } = render(<ChatMarkdown text={"```\nconst x = 1;"} />);
 
