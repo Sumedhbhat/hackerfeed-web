@@ -10,7 +10,7 @@ type StatusPanelProps = {
 	icon: LucideIcon;
 	iconTone?: "accent" | "soft";
 	iconSpinning?: boolean;
-	kicker: string;
+	kicker?: string;
 	title: string;
 	description?: ReactNode;
 	/** Buttons or links shown under the description. */
@@ -33,9 +33,7 @@ export function StatusPanel({
 	return (
 		<Panel>
 			<IconBadge icon={icon} tone={iconTone} spinning={iconSpinning} />
-			<div className="mt-5">
-				<Kicker>{kicker}</Kicker>
-			</div>
+			<div className="mt-5">{kicker ? <Kicker>{kicker}</Kicker> : null}</div>
 			<div className="mt-2">
 				<Heading level={1} size="page">
 					{title}

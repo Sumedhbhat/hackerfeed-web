@@ -9,7 +9,6 @@ export function SignedOutPage() {
 		<PageContainer spacing="status">
 			<StatusPanel
 				icon={LogOut}
-				kicker="HackerFeed"
 				title="You’re signed out"
 				description="Your HackerFeed session has been cleared on this device."
 				actions={

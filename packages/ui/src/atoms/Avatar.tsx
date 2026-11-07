@@ -4,6 +4,8 @@ const SIZE = {
 	sm: "h-8 w-8 text-xs",
 	md: "h-11 w-11 text-sm",
 	lg: "h-20 w-20 text-xl",
+	/** 48px on phones, 80px from `sm` up. */
+	profile: "h-12 w-12 text-base sm:h-20 sm:w-20 sm:text-xl",
 } as const;
 
 type AvatarProps = {

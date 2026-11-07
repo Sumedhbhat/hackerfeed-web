@@ -1,8 +1,9 @@
 import type { ReactNode } from "react";
 
 /**
- * Bottom of a PaperCard: the paper's links, with `save` always at the far
- * right of the first line (under the ribbon), as on story rows.
+ * Bottom of a PaperCard: the paper's main actions, with `save` at the far
+ * right of that line. (The saved ribbon hangs from the card's top edge in the
+ * same column.)
  */
 export function PaperCardFooter({
 	actions,

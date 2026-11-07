@@ -43,10 +43,10 @@ function StoryContent({ storyId }: StoryPageProps) {
 				}
 			/>
 
-			<Stack gap="xl">
+			<Stack gap="xl" measure>
 				<StoryArticle story={story} />
 
-				<Stack as="section" gap="lg" measure>
+				<Stack as="section" gap="lg">
 					<Row justify="between" align="center" wrap>
 						<Heading level={2} size="section">
 							{story.descendants != null

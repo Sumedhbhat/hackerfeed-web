@@ -1,7 +1,6 @@
 import { Mail } from "lucide-react";
 import { Avatar } from "../atoms/Avatar";
 import { Heading } from "../atoms/Heading";
-import { Kicker } from "../atoms/Kicker";
 import { IconText } from "./IconText";
 
 /** Picture, name and email at the top of the profile page. */
@@ -17,17 +16,16 @@ export function ProfileSummary({
 	initials: string;
 }) {
 	return (
-		<div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+		<div className="flex items-center gap-4 sm:gap-5">
 			<Avatar
 				name={name}
 				imageUrl={imageUrl}
 				initials={initials}
-				size="lg"
+				size="profile"
 				labelled
 			/>
 			<div className="min-w-0">
-				<Kicker>Profile</Kicker>
-				<div className="mt-1">
+				<div>
 					<Heading level={1} size="page" truncate>
 						{name}
 					</Heading>
