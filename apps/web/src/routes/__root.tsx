@@ -18,6 +18,7 @@ import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { type ReactNode, useEffect } from "react";
 import { env } from "#/env";
 import { ErrorNotifications } from "../components/organisms/layout/ErrorNotifications";
+import { RouteAnnouncer } from "../components/organisms/layout/RouteAnnouncer";
 import SiteFooter from "../components/organisms/layout/SiteFooter";
 import SiteHeader from "../components/organisms/layout/SiteHeader";
 import { signIn, useAuthSession } from "../hooks/useAuthSession";
@@ -76,6 +77,16 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 			{
 				rel: "manifest",
 				href: "/manifest.json",
+			},
+			{
+				rel: "icon",
+				href: "/favicon.svg",
+				type: "image/svg+xml",
+			},
+			{
+				rel: "icon",
+				href: "/favicon.ico",
+				sizes: "16x16 32x32 48x48",
 			},
 			{
 				rel: "apple-touch-icon",
@@ -147,6 +158,7 @@ function AppLayout() {
 			<TanStackQueryProvider>
 				<ToastProvider>
 					<ErrorNotifications />
+					<RouteAnnouncer />
 					{import.meta.env.VITE_DEMO_DATA !== "true" && (
 						<LocalFavoritesMigration />
 					)}

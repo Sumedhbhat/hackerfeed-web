@@ -1,16 +1,19 @@
 import type { ReactNode } from "react";
 
 const SIZE = {
-	xs: "text-xs",
+	xs: "text-meta",
 	sm: "text-sm",
 	base: "text-base",
+	/** Keep the size the parent set (e.g. inside a chat reply). */
+	inherit: "",
 } as const;
 
 const TONE = {
 	default: "text-(--sea-ink)",
 	soft: "text-(--sea-ink-soft)",
-	faint: "text-(--sea-ink-soft) opacity-70",
-	accent: "text-(--kicker)",
+	faint: "text-(--sea-ink-faint)",
+	accent: "text-(--lagoon-deep)",
+	danger: "text-(--danger)",
 } as const;
 
 const WEIGHT = {
@@ -28,8 +31,8 @@ type TextProps = {
 	/** Relaxed line height for paragraphs of copy. */
 	relaxed?: boolean;
 	italic?: boolean;
-	/** Cut off with an ellipsis instead of wrapping. */
-	truncate?: boolean;
+	/** Long unbroken text (an email) wraps anywhere instead of overflowing; never cut off (WCAG 1.4.10). */
+	breakAnywhere?: boolean;
 	/** Cap the line length for readable copy. */
 	measure?: "sm" | "md" | "lg";
 	id?: string;
@@ -37,7 +40,7 @@ type TextProps = {
 	"aria-live"?: "polite" | "assertive" | "off";
 };
 
-const MEASURE = { sm: "max-w-sm", md: "max-w-md", lg: "max-w-lg" } as const;
+const MEASURE = { sm: "max-w-sm", md: "max-w-md", lg: "max-w-prose" } as const;
 
 /** Body copy. Pick a size and tone instead of styling text by hand. */
 export function Text({
@@ -47,7 +50,7 @@ export function Text({
 	weight = "normal",
 	relaxed = false,
 	italic = false,
-	truncate = false,
+	breakAnywhere = false,
 	measure,
 	...props
 }: TextProps) {
@@ -58,7 +61,7 @@ export function Text({
 		WEIGHT[weight],
 		relaxed && "leading-relaxed",
 		italic && "italic",
-		truncate && "truncate",
+		breakAnywhere && "min-w-0 [overflow-wrap:anywhere]",
 		measure && MEASURE[measure],
 	]
 		.filter(Boolean)

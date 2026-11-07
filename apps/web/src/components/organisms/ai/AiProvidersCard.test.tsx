@@ -7,6 +7,7 @@ import {
 	within,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { expectNoAxeViolations } from "#/test/axe";
 import { renderWithQueryClient as render } from "#/test/renderWithQueryClient";
 import { AiProvidersCard, getAiResultMessage } from "./AiProvidersCard";
 
@@ -181,6 +182,39 @@ describe("AiProvidersCard", () => {
 		);
 	});
 
+	it("keeps focus and announces the result when disconnecting by keyboard", async () => {
+		providers = [
+			provider({ connected: true, account: { email: "a@b.c", name: null } }),
+		];
+		render(<AiProvidersCard />);
+
+		const disconnect = await screen.findByRole("button", {
+			name: "Disconnect ChatGPT",
+		});
+		disconnect.focus();
+		fireEvent.click(disconnect);
+
+		// Focus moves to the button that replaces Disconnect (WCAG 2.4.3), and
+		// the change is announced (4.1.3).
+		const signIn = await screen.findByRole("button", {
+			name: "Sign in with ChatGPT",
+		});
+		await waitFor(() => expect(document.activeElement).toBe(signIn));
+		expect(
+			screen.getByText("ChatGPT disconnected.", { selector: "output" }),
+		).toBeDefined();
+	});
+
+	it("has no axe violations with connected and disconnected rows", async () => {
+		providers = [
+			provider({ connected: true, account: { email: "a@b.c", name: null } }),
+			provider({ id: "claude", name: "Claude" }),
+		];
+		const { container } = render(<AiProvidersCard />);
+		await screen.findByRole("button", { name: "Disconnect ChatGPT" });
+		await expectNoAxeViolations(container);
+	});
+
 	it("shows a disconnect failure", async () => {
 		providers = [
 			provider({ connected: true, account: { email: "a@b.c", name: null } }),
@@ -207,8 +241,12 @@ describe("AiProvidersCard", () => {
 		];
 		render(<AiProvidersCard result="connected" resultProviderId="chatgpt" />);
 
-		expect((await screen.findByRole("status")).textContent).toContain(
-			"ChatGPT is connected.",
+		// Each provider row also has its own (empty) status for disconnects.
+		const statuses = await screen.findAllByRole("status");
+		await waitFor(() =>
+			expect(statuses.map((status) => status.textContent).join(" ")).toContain(
+				"ChatGPT is connected.",
+			),
 		);
 	});
 

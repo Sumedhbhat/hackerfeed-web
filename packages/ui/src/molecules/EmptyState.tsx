@@ -6,7 +6,7 @@ import { Stack } from "../atoms/Stack";
 import { Text } from "../atoms/Text";
 
 type EmptyStateProps = {
-	kicker: string;
+	kicker?: string;
 	title: string;
 	description?: ReactNode;
 	/** Link or button that gets the user unstuck. */
@@ -29,9 +29,9 @@ export function EmptyState({
 	children,
 }: EmptyStateProps) {
 	return (
-		<Card padding="lg" animated>
+		<Card padding="lg">
 			<Stack gap="md">
-				<Kicker>{kicker}</Kicker>
+				{kicker ? <Kicker>{kicker}</Kicker> : null}
 				<Heading level={headingLevel} size={headingSize}>
 					{title}
 				</Heading>

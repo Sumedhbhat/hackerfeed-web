@@ -10,8 +10,8 @@ describe("Button", () => {
 		expect(button.className).toBe(buttonClassName("primary"));
 	});
 
-	it("keeps primary text white and secondary text in the ink color", () => {
-		expect(buttonClassName("primary")).toContain("text-white");
+	it("keeps primary text on its paired token and secondary text in the ink color", () => {
+		expect(buttonClassName("primary")).toContain("text-(--on-lagoon)");
 		expect(buttonClassName("secondary")).toContain("text-(--sea-ink)");
 	});
 });

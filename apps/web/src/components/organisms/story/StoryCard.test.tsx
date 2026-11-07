@@ -123,9 +123,12 @@ afterEach(() => {
 
 describe("StoryCardSkeleton", () => {
 	it("renders without throwing", () => {
-		render(<StoryCardSkeleton />);
-		const article = document.querySelector("article");
-		expect(article).not.toBeNull();
+		render(
+			<ul>
+				<StoryCardSkeleton />
+			</ul>,
+		);
+		expect(document.querySelector("li")).not.toBeNull();
 	});
 });
 
@@ -144,12 +147,12 @@ describe("StoryCard rendering", () => {
 
 	it("renders the score", () => {
 		render(<StoryCard story={makeStory()} />);
-		expect(screen.getByText(/210 pts/i)).toBeDefined();
+		expect(screen.getByText(/210 points/i)).toBeDefined();
 	});
 
 	it("renders the comment count", () => {
 		render(<StoryCard story={makeStory()} />);
-		expect(screen.getByText(/17 comments/i)).toBeDefined();
+		expect(screen.getByRole("link", { name: /^17 comments: / })).toBeDefined();
 	});
 
 	it("renders the domain extracted from the URL", () => {
@@ -159,9 +162,9 @@ describe("StoryCard rendering", () => {
 		expect(screen.getByText(/blog\.example\.org/i)).toBeDefined();
 	});
 
-	it("falls back to HN domain when URL is null", () => {
+	it("leaves the domain out for posts without a URL", () => {
 		render(<StoryCard story={makeStory({ url: null })} />);
-		expect(screen.getByText(/news\.ycombinator\.com/i)).toBeDefined();
+		expect(screen.queryByText(/news\.ycombinator\.com/i)).toBeNull();
 	});
 
 	it("omits the author when by is null", () => {
@@ -169,94 +172,80 @@ describe("StoryCard rendering", () => {
 		expect(screen.queryByText(/unknown/i)).toBeNull();
 	});
 
-	it("shows 'Read article' for stories with a URL", () => {
+	it("has no separate 'Read article' action: the title is the link", () => {
 		render(<StoryCard story={makeStory({ url: "https://example.com" })} />);
-		expect(screen.getByRole("link", { name: /read article/i })).toBeDefined();
-	});
-
-	it("shows 'Open post' for URL-less stories", () => {
-		render(<StoryCard story={makeStory({ url: null })} />);
-		expect(screen.getByRole("link", { name: /open post/i })).toBeDefined();
+		expect(screen.queryByRole("link", { name: /read article/i })).toBeNull();
+		expect(
+			screen.getByRole("link", { name: "A Test Story Title" }),
+		).toBeDefined();
 	});
 });
 
 describe("StoryCard link actions", () => {
-	it("links the title and 'Read article' to the story URL in a new tab", () => {
+	it("links an article's title to the story URL in a new tab", () => {
 		render(
 			<StoryCard story={makeStory({ url: "https://article.example.com" })} />,
 		);
-		for (const link of [
-			screen.getByRole("link", { name: "A Test Story Title" }),
-			screen.getByRole("link", { name: /read article/i }),
-		]) {
-			expect(link.getAttribute("href")).toBe("https://article.example.com");
-			expect(link.getAttribute("target")).toBe("_blank");
-			expect(link.getAttribute("rel")).toBe("noopener noreferrer");
-		}
+		const link = screen.getByRole("link", { name: "A Test Story Title" });
+		expect(link.getAttribute("href")).toBe("https://article.example.com");
+		expect(link.getAttribute("target")).toBe("_blank");
+		expect(link.getAttribute("rel")).toBe("noopener noreferrer");
 	});
 
-	it("links 'Open post' to the HN discussion when story has no URL", () => {
-		render(<StoryCard story={makeStory({ id: 12345, url: null })} />);
-		expect(
-			screen.getByRole("link", { name: /open post/i }).getAttribute("href"),
-		).toBe("https://news.ycombinator.com/item?id=12345");
+	it.each([
+		["Ask HN: How do you plan?", null],
+		["Show HN: A tiny tool", "https://tool.example.com"],
+		["A post with no link", null],
+	])("opens the in-app discussion for %s", (title, url) => {
+		render(<StoryCard story={makeStory({ id: 777, title, url })} />);
+		const heading = screen.getByRole("heading", { level: 2 });
+		const link = heading.querySelector("a");
+		expect(link?.getAttribute("href")).toBe("/story/777");
+		expect(link?.getAttribute("target")).toBeNull();
 	});
 
-	it("'Discussion' renders a link to the internal discussion page", () => {
+	it("the comment count links to the internal discussion page", () => {
 		render(<StoryCard story={makeStory({ id: 99999 })} />);
-		const link = screen.getByRole("link", { name: /^discussion$/i });
+		const link = screen.getByRole("link", { name: /^17 comments: /i });
 		expect(link).toBeDefined();
 		expect(link.getAttribute("href")).toContain("99999");
 	});
 
-	it("'Discuss' opens the in-app AI chat for the story", () => {
+	it("'Discuss with AI' opens the in-app AI chat for the story", () => {
 		render(<StoryCard story={makeStory({ id: 4242 })} />);
-		const link = screen.getByRole("link", { name: /with ai$/i });
+		const link = screen.getByRole("link", { name: /^discuss with ai: /i });
 		expect(link.getAttribute("href")).toBe("/chat/4242");
 		expect(link.getAttribute("target")).toBeNull();
 	});
 
-	it("hides 'Discuss' while the aiChat flag is off", () => {
+	it("hides 'Discuss with AI' while the aiChat flag is off", () => {
 		flagsMock.aiChat = false;
 		render(<StoryCard story={makeStory()} />);
-		expect(screen.queryByRole("link", { name: /with ai$/i })).toBeNull();
+		expect(
+			screen.queryByRole("link", { name: /^discuss with ai: /i }),
+		).toBeNull();
 	});
 
-	it("records signed-in title and primary-action clicks as separate views", () => {
+	it("records signed-in title clicks as reads", () => {
 		authMock.user = { id: "workos-story-viewer" };
 		const story = makeStory();
 		render(<StoryCard story={story} />);
 
 		fireEvent.click(screen.getByRole("link", { name: story.title ?? "" }));
-		fireEvent.click(screen.getByRole("link", { name: /read article/i }));
 
-		expect(trpcMock.viewStory).toHaveBeenCalledTimes(2);
-		expect(trpcMock.viewStory).toHaveBeenNthCalledWith(1, {
-			action: "read",
-			story,
-		});
+		expect(trpcMock.viewStory).toHaveBeenCalledWith({ action: "read", story });
 	});
 
 	it("records middle-click reads but not other auxiliary clicks", () => {
 		authMock.user = { id: "workos-story-viewer" };
 		const story = makeStory();
 		render(<StoryCard story={story} />);
+		const title = screen.getByRole("link", { name: story.title ?? "" });
 
-		fireEvent(
-			screen.getByRole("link", { name: story.title ?? "" }),
-			new MouseEvent("auxclick", { bubbles: true, button: 1 }),
-		);
-		fireEvent(
-			screen.getByRole("link", { name: /read article/i }),
-			new MouseEvent("auxclick", { bubbles: true, button: 1 }),
-		);
-		fireEvent(
-			screen.getByRole("link", { name: /read article/i }),
-			new MouseEvent("auxclick", { bubbles: true, button: 2 }),
-		);
+		fireEvent(title, new MouseEvent("auxclick", { bubbles: true, button: 1 }));
+		fireEvent(title, new MouseEvent("auxclick", { bubbles: true, button: 2 }));
 
 		expect(trpcMock.viewStory.mock.calls).toEqual([
-			[{ action: "read", story }],
 			[{ action: "read", story }],
 		]);
 	});
@@ -266,8 +255,8 @@ describe("StoryCard link actions", () => {
 		const story = makeStory();
 		render(<StoryCard story={story} />);
 
-		fireEvent.click(screen.getByRole("link", { name: "Discussion" }));
-		fireEvent.click(screen.getByRole("link", { name: /with ai$/i }));
+		fireEvent.click(screen.getByRole("link", { name: /^17 comments: / }));
+		fireEvent.click(screen.getByRole("link", { name: /^discuss with ai: /i }));
 
 		expect(trpcMock.viewStory.mock.calls).toEqual([
 			[{ action: "discussion_opened", story }],
@@ -278,16 +267,18 @@ describe("StoryCard link actions", () => {
 	it("does not record signed-out story clicks", () => {
 		render(<StoryCard story={makeStory()} />);
 
-		fireEvent.click(screen.getByRole("link", { name: /read article/i }));
+		fireEvent.click(screen.getByRole("link", { name: "A Test Story Title" }));
 
 		expect(trpcMock.viewStory).not.toHaveBeenCalled();
 	});
 });
 
 describe("StoryCard favorite toggle", () => {
-	it("renders with 'Save to favorites' aria-label when not yet saved", () => {
+	it("names the save button after the story when not yet saved", () => {
 		render(<StoryCard story={makeStory()} />);
-		const btn = screen.getByRole("button", { name: /save to favorites/i });
+		const btn = screen.getByRole("button", {
+			name: /^save a test story title$/i,
+		});
 		expect(btn).toBeDefined();
 		expect(btn.getAttribute("aria-pressed")).toBe("false");
 	});
@@ -296,25 +287,36 @@ describe("StoryCard favorite toggle", () => {
 		const story = makeStory({ id: 777 });
 		render(<StoryCard story={story} />);
 
-		fireEvent.click(screen.getByRole("button", { name: /save to favorites/i }));
+		fireEvent.click(
+			screen.getByRole("button", { name: /^save a test story title$/i }),
+		);
 
 		expect(isFavorited(777)).toBe(true);
 	});
 
-	it("keeps its label and reports the saved state through aria-pressed", () => {
+	it("reports the saved state through its name and aria-pressed", () => {
 		render(<StoryCard story={makeStory()} />);
-		fireEvent.click(screen.getByRole("button", { name: /save to favorites/i }));
+		fireEvent.click(
+			screen.getByRole("button", { name: /^save a test story title$/i }),
+		);
 
 		expect(
-			screen.getByRole("button", { name: /save to favorites/i, pressed: true }),
+			screen.getByRole("button", {
+				name: /^saved a test story title$/i,
+				pressed: true,
+			}),
 		).toBeDefined();
 	});
 
 	it("aria-pressed is true when the story is favorited", () => {
 		render(<StoryCard story={makeStory()} />);
-		fireEvent.click(screen.getByRole("button", { name: /save to favorites/i }));
+		fireEvent.click(
+			screen.getByRole("button", { name: /^save a test story title$/i }),
+		);
 
-		const btn = screen.getByRole("button", { name: /save to favorites/i });
+		const btn = screen.getByRole("button", {
+			name: /^saved a test story title$/i,
+		});
 		expect(btn.getAttribute("aria-pressed")).toBe("true");
 	});
 
@@ -322,19 +324,31 @@ describe("StoryCard favorite toggle", () => {
 		const story = makeStory({ id: 888 });
 		render(<StoryCard story={story} />);
 
-		fireEvent.click(screen.getByRole("button", { name: /save to favorites/i }));
+		fireEvent.click(
+			screen.getByRole("button", { name: /^save a test story title$/i }),
+		);
 		expect(isFavorited(888)).toBe(true);
 
 		fireEvent.click(
-			screen.getByRole("button", { name: /save to favorites/i, pressed: true }),
+			screen.getByRole("button", {
+				name: /^saved a test story title$/i,
+				pressed: true,
+			}),
 		);
 		expect(isFavorited(888)).toBe(false);
 	});
 
-	it("shows 'Saved' text when favorited", () => {
+	it("starts its name with the word it shows, Saved, once favorited (WCAG 2.5.3)", () => {
 		render(<StoryCard story={makeStory()} />);
-		fireEvent.click(screen.getByRole("button", { name: /save to favorites/i }));
-		expect(screen.getByText("Saved")).toBeDefined();
+		fireEvent.click(
+			screen.getByRole("button", { name: /^save a test story title$/i }),
+		);
+		expect(
+			screen.getByRole("button", {
+				name: /^saved a test story title$/i,
+				pressed: true,
+			}).textContent,
+		).toContain("Saved");
 	});
 
 	it("shows 'Save' text when not favorited", () => {
@@ -352,7 +366,7 @@ describe("StoryCard favorite toggle", () => {
 		await waitFor(() => {
 			expect(
 				screen.getByRole("button", {
-					name: /save to favorites/i,
+					name: /^saved a test story title$/i,
 					pressed: true,
 				}),
 			).toBeDefined();
@@ -367,7 +381,9 @@ describe("StoryCard favorite toggle", () => {
 		render(<StoryCard story={story} />);
 		await waitFor(() => expect(trpcMock.list).toHaveBeenCalled());
 
-		fireEvent.click(screen.getByRole("button", { name: /save to favorites/i }));
+		fireEvent.click(
+			screen.getByRole("button", { name: /^save a test story title$/i }),
+		);
 
 		expect(trpcMock.add).toHaveBeenCalledWith(story);
 	});
@@ -381,14 +397,17 @@ describe("StoryCard favorite toggle", () => {
 		await waitFor(() => {
 			expect(
 				screen.getByRole("button", {
-					name: /save to favorites/i,
+					name: /^saved a test story title$/i,
 					pressed: true,
 				}),
 			).toBeDefined();
 		});
 
 		fireEvent.click(
-			screen.getByRole("button", { name: /save to favorites/i, pressed: true }),
+			screen.getByRole("button", {
+				name: /^saved a test story title$/i,
+				pressed: true,
+			}),
 		);
 
 		expect(trpcMock.remove).toHaveBeenCalledWith({ hnStoryId: 903 });

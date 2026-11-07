@@ -1,7 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 
 const TONE = {
-	accent: "text-(--lagoon)",
+	accent: "text-(--lagoon-deep)",
 	soft: "text-(--sea-ink-soft)",
 } as const;
 
@@ -19,7 +19,7 @@ export function IconBadge({
 }) {
 	return (
 		<div
-			className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-(--chip-line) bg-(--chip-bg) ${TONE[tone]}`}
+			className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-(--lagoon-tint) ${TONE[tone]}`}
 		>
 			<Glyph
 				size={size}

@@ -1,4 +1,5 @@
 import { Button } from "@hackerfeed/ui/atoms/Button";
+import { LiveStatus } from "@hackerfeed/ui/atoms/LiveStatus";
 import { PanelSection } from "@hackerfeed/ui/atoms/PanelSection";
 import { Row } from "@hackerfeed/ui/atoms/Row";
 import { Skeleton, SkeletonGroup } from "@hackerfeed/ui/atoms/Skeleton";
@@ -7,6 +8,7 @@ import { Text } from "@hackerfeed/ui/atoms/Text";
 import { IconHeading } from "@hackerfeed/ui/molecules/IconHeading";
 import { IconText } from "@hackerfeed/ui/molecules/IconText";
 import { CheckCircle2, Sparkles, TriangleAlert } from "lucide-react";
+import { useState } from "react";
 import { AiProviderRow } from "#/components/organisms/ai/AiProviderRow";
 import { useAiProviders } from "#/hooks/useAiProviders";
 
@@ -47,6 +49,7 @@ export function AiProvidersCard({
 	returnTo = "/profile",
 }: AiProvidersCardProps) {
 	const { data: providers, isError, isLoading, refetch } = useAiProviders();
+	const [rowStatus, setRowStatus] = useState("");
 	const resultProvider = providers?.find(
 		(provider) => provider.id === resultProviderId,
 	);
@@ -91,15 +94,20 @@ export function AiProvidersCard({
 				) : providers.length === 0 ? (
 					<Text tone="soft">No AI apps are available yet.</Text>
 				) : (
-					<Stack as="ul" gap="md" aria-label="AI apps">
-						{providers.map((provider) => (
-							<AiProviderRow
-								key={provider.id}
-								provider={provider}
-								returnTo={returnTo}
-							/>
-						))}
-					</Stack>
+					<>
+						{/* One status for all rows, outside the list (a <ul> may only hold <li>). */}
+						<LiveStatus message={rowStatus} />
+						<Stack as="ul" gap="md" aria-label="AI apps">
+							{providers.map((provider) => (
+								<AiProviderRow
+									key={provider.id}
+									provider={provider}
+									returnTo={returnTo}
+									onAnnounce={setRowStatus}
+								/>
+							))}
+						</Stack>
+					</>
 				)}
 			</Stack>
 		</PanelSection>

@@ -1,5 +1,6 @@
 import { Button } from "@hackerfeed/ui/atoms/Button";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
+import { ReadingList } from "@hackerfeed/ui/atoms/ReadingList";
 import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { EmptyState } from "@hackerfeed/ui/molecules/EmptyState";
 import { LoadMoreButton } from "@hackerfeed/ui/molecules/LoadMoreButton";
@@ -9,6 +10,8 @@ import { Activity, Suspense } from "react";
 import { feedTabs } from "#/components/organisms/feed/feedTabs";
 import { StoryCard } from "#/components/organisms/story/StoryCard";
 import { FeedStatus, useFeed } from "#/hooks/useFeed";
+import { useLoadMoreFocus } from "#/hooks/useLoadMoreFocus";
+import { useRestoreReturnFocus } from "#/hooks/useRestoreReturnFocus";
 import {
 	type HackerNewsFeedKey,
 	storyQueryOptions,
@@ -38,6 +41,13 @@ export function FeedPane({ feed, prefetchNextBatch }: FeedPaneProps) {
 		refetch,
 	} = useFeed(feed);
 
+	const listId = `feed-${feed}-stories`;
+	const renderedCount = storyQueries
+		.slice(0, displayedIds.length)
+		.filter((query) => query?.data).length;
+	const withFocus = useLoadMoreFocus(listId, renderedCount);
+	useRestoreReturnFocus(renderedCount > 0);
+
 	const feedLabel =
 		(feedTabs.find((f) => f.key === feed) ?? feedTabs[0])?.label ?? feed;
 
@@ -60,19 +70,19 @@ export function FeedPane({ feed, prefetchNextBatch }: FeedPaneProps) {
 
 	return (
 		<Stack gap="md">
-			<Stack gap="md">
+			<ReadingList ordered id={listId} aria-label={`${feedLabel} stories`}>
 				{displayedIds.map((storyId, i) => {
 					const story = storyQueries[i]?.data;
 					if (!story) return null;
 					return <StoryCard key={`${feed}-${storyId}`} story={story} />;
 				})}
-			</Stack>
+			</ReadingList>
 
 			{hasMore && (
 				<LoadMoreButton
 					label={isPending ? "Loading..." : `Load ${nextBatchSize} more`}
-					onClick={loadMore}
-					disabled={isPending}
+					onClick={withFocus(loadMore)}
+					busy={isPending}
 				/>
 			)}
 

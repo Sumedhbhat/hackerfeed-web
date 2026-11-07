@@ -1,14 +1,14 @@
 import type { PaperViewAction } from "@hackerfeed/contracts/view-activity";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
 import { PaperCard } from "@hackerfeed/ui/atoms/PaperCard";
-import { Text } from "@hackerfeed/ui/atoms/Text";
 import { ToggleButton } from "@hackerfeed/ui/atoms/Toggle";
-import { KeywordList } from "@hackerfeed/ui/molecules/KeywordList";
+import { ToggleLabel } from "@hackerfeed/ui/atoms/ToggleLabel";
 import { PaperCardFooter } from "@hackerfeed/ui/molecules/PaperCardFooter";
 import { PaperLinks } from "@hackerfeed/ui/molecules/PaperLinks";
+import { PaperResourceLinks } from "@hackerfeed/ui/molecules/PaperResourceLinks";
 import { PaperSignals } from "@hackerfeed/ui/molecules/PaperSignals";
 import { PaperTitle } from "@hackerfeed/ui/molecules/PaperTitle";
-import { Star } from "lucide-react";
+import { Bookmark } from "lucide-react";
 import {
 	buildChatGptPaperDiscussionUrl,
 	formatAuthors,
@@ -19,7 +19,8 @@ import { PaperSummary } from "./PaperSummary";
 
 type PaperRowProps = {
 	canFavorite: boolean;
-	index: number;
+	/** Tint the row once saved; off in the Saved list, where everything is saved. */
+	markSaved?: boolean;
 	isFavorited: boolean;
 	isPending: boolean;
 	onToggleFavorite: () => void;
@@ -29,7 +30,7 @@ type PaperRowProps = {
 
 export function PaperRow({
 	canFavorite,
-	index,
+	markSaved = true,
 	isFavorited: saved,
 	isPending: pending,
 	onToggleFavorite,
@@ -37,51 +38,47 @@ export function PaperRow({
 	paper,
 }: PaperRowProps) {
 	return (
-		<PaperCard animationDelay={Math.min(index * 35, 210)}>
+		<PaperCard saved={markSaved && saved}>
 			<PaperTitle href={paper.paperUrl} onClick={() => onView("read")}>
 				{paper.title}
 			</PaperTitle>
-			<Text size="xs" tone="soft">
-				{formatAuthors(paper.authors)}
-			</Text>
-			<PaperSummary paper={paper} />
-			<PaperCardFooter
-				signals={
-					<PaperSignals
-						upvotes={paper.upvotes}
-						publishedLabel={formatPaperDate(paper.paperPublishedAt)}
-						hasCode={Boolean(paper.githubRepo)}
+			<PaperSignals
+				authors={formatAuthors(paper.authors)}
+				upvotes={paper.upvotes}
+				publishedLabel={formatPaperDate(paper.paperPublishedAt)}
+				topics={paper.keywords}
+			/>
+			<PaperSummary
+				paper={paper}
+				links={
+					<PaperResourceLinks
+						title={paper.title}
+						projectPage={paper.projectPage}
+						githubRepo={paper.githubRepo}
 					/>
 				}
+			/>
+			<PaperCardFooter
 				actions={
-					<>
-						<PaperLinks
-							title={paper.title}
-							discussUrl={buildChatGptPaperDiscussionUrl(paper)}
-							projectPage={paper.projectPage}
-							githubRepo={paper.githubRepo}
-							onDiscuss={() => onView("chat_opened")}
-						/>
-						{canFavorite ? (
-							<ToggleButton
-								aria-label={`Save ${paper.title} to favorites`}
-								pressed={saved}
-								title={saved ? "Remove from favorites" : "Save to favorites"}
-								disabled={pending}
-								onPressedChange={onToggleFavorite}
-							>
-								<Icon icon={Star} filled={saved} pop={saved} />{" "}
-								{saved ? "Saved" : "Save"}
-							</ToggleButton>
-						) : null}
-					</>
+					<PaperLinks
+						title={paper.title}
+						paperUrl={paper.paperUrl}
+						discussUrl={buildChatGptPaperDiscussionUrl(paper)}
+						onRead={() => onView("read")}
+						onDiscuss={() => onView("chat_opened")}
+					/>
 				}
-				keywords={
-					paper.keywords.length > 0 ? (
-						<KeywordList
-							keywords={paper.keywords}
-							aria-label="Paper keywords"
-						/>
+				save={
+					canFavorite ? (
+						<ToggleButton
+							aria-label={`${saved ? "Saved" : "Save"} ${paper.title}`}
+							pressed={saved}
+							disabled={pending}
+							onPressedChange={onToggleFavorite}
+						>
+							<Icon icon={Bookmark} filled={saved} />
+							<ToggleLabel on={saved} offLabel="Save" onLabel="Saved" />
+						</ToggleButton>
 					) : null
 				}
 			/>

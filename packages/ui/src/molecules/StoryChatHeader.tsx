@@ -1,32 +1,39 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
+import type { ReactNode } from "react";
+import { ExternalButtonLink } from "../atoms/Button";
 import { Heading } from "../atoms/Heading";
 import { Icon } from "../atoms/Icon";
 import { Kicker } from "../atoms/Kicker";
-import { ExternalLink } from "../atoms/Link";
+import { ActionLine } from "./ActionLine";
 
-/** Title block of the story chat screen, with a link to the article. */
+/** Title block of the story chat screen: the article link, then `actions` (save, comments). */
 export function StoryChatHeader({
 	title,
 	url,
+	actions,
 }: {
-	title: string;
+	title: ReactNode;
 	url?: string | null;
+	actions?: ReactNode;
 }) {
 	return (
 		<header className="mb-6">
 			<div className="mb-2">
-				<Kicker>Discuss with AI</Kicker>
+				<Kicker>Ask AI</Kicker>
 			</div>
 			<Heading level={1} size="title">
 				{title}
 			</Heading>
-			{url ? (
-				<div className="mt-2">
-					<ExternalLink href={url} variant="accent">
-						Read article <Icon icon={ArrowRight} muted />
-					</ExternalLink>
-				</div>
-			) : null}
+			<div className="mt-1">
+				<ActionLine>
+					{url ? (
+						<ExternalButtonLink href={url} variant="accent">
+							Read article <Icon icon={ArrowUpRight} size={14} />
+						</ExternalButtonLink>
+					) : null}
+					{actions}
+				</ActionLine>
+			</div>
 		</header>
 	);
 }

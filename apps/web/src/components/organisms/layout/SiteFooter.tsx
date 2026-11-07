@@ -6,7 +6,7 @@ export default function SiteFooter() {
 	return (
 		<FooterBar
 			title="HackerFeed"
-			tagline="A clean reader for Hacker News stories and daily research papers."
+			tagline="Today’s stories and papers, and the ones you kept."
 			copyright={<>&copy; {year} HackerFeed</>}
 		/>
 	);

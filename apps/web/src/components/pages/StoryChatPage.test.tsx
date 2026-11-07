@@ -11,6 +11,7 @@ import {
 } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { expectNoAxeViolations } from "#/test/axe";
 import { StoryChatPage } from "./StoryChatPage";
 
 const authMock = vi.hoisted(() => ({
@@ -169,6 +170,7 @@ beforeEach(() => {
 afterEach(() => {
 	cleanup();
 	vi.unstubAllGlobals();
+	sessionStorage.clear();
 });
 
 describe("StoryChatPage", () => {
@@ -184,7 +186,7 @@ describe("StoryChatPage", () => {
 		expect(
 			screen.getByRole("link", { name: /read article/i }).getAttribute("href"),
 		).toBe("https://example.com/article");
-		await screen.findByLabelText("Message");
+		await screen.findByLabelText("Ask about this story");
 	});
 
 	it("asks signed-out users to sign in and returns them to the chat", () => {
@@ -210,13 +212,13 @@ describe("StoryChatPage", () => {
 		expect(new URL(fallback.getAttribute("href") ?? "").origin).toBe(
 			"https://chatgpt.com",
 		);
-		expect(screen.queryByLabelText("Message")).toBeNull();
+		expect(screen.queryByLabelText("Ask about this story")).toBeNull();
 	});
 
 	it("streams a reply to a typed question", async () => {
 		renderPage();
 
-		const input = await screen.findByLabelText("Message");
+		const input = await screen.findByLabelText("Ask about this story");
 		fireEvent.change(input, { target: { value: "What is this about?" } });
 		fireEvent.click(screen.getByRole("button", { name: "Send" }));
 
@@ -237,7 +239,7 @@ describe("StoryChatPage", () => {
 	it("sends the whole conversation on follow-up questions", async () => {
 		renderPage();
 
-		const input = await screen.findByLabelText("Message");
+		const input = await screen.findByLabelText("Ask about this story");
 		fireEvent.change(input, { target: { value: "First?" } });
 		fireEvent.keyDown(input, { key: "Enter" });
 		await screen.findByText("It is about X.");
@@ -258,7 +260,7 @@ describe("StoryChatPage", () => {
 	it("does not send on Shift+Enter or with an empty draft", async () => {
 		renderPage();
 
-		const input = await screen.findByLabelText("Message");
+		const input = await screen.findByLabelText("Ask about this story");
 		expect(
 			(screen.getByRole("button", { name: "Send" }) as HTMLButtonElement)
 				.disabled,
@@ -284,11 +286,31 @@ describe("StoryChatPage", () => {
 		);
 	});
 
+	it("keeps the conversation when the reader leaves and comes back", async () => {
+		renderPage();
+		fireEvent.click(
+			await screen.findByRole("button", {
+				name: "Summarize this article in a few bullet points.",
+			}),
+		);
+		await screen.findByText("It is about X.");
+
+		cleanup();
+		renderPage();
+
+		expect(await screen.findByText("It is about X.")).toBeTruthy();
+		expect(
+			screen.queryByRole("button", {
+				name: "Summarize this article in a few bullet points.",
+			}),
+		).toBeNull();
+	});
+
 	it("uses the selected model", async () => {
 		renderPage();
 
-		await choose("Model", "GPT B");
-		fireEvent.change(screen.getByLabelText("Message"), {
+		await choose("ChatGPT model", "GPT B");
+		fireEvent.change(screen.getByLabelText("Ask about this story"), {
 			target: { value: "Hi" },
 		});
 		fireEvent.click(screen.getByRole("button", { name: "Send" }));
@@ -309,7 +331,7 @@ describe("StoryChatPage", () => {
 			);
 		renderPage();
 
-		fireEvent.change(await screen.findByLabelText("Message"), {
+		fireEvent.change(await screen.findByLabelText("Ask about this story"), {
 			target: { value: "Hello?" },
 		});
 		fireEvent.click(screen.getByRole("button", { name: "Send" }));
@@ -341,7 +363,7 @@ describe("StoryChatPage", () => {
 			);
 		renderPage();
 
-		fireEvent.change(await screen.findByLabelText("Message"), {
+		fireEvent.change(await screen.findByLabelText("Ask about this story"), {
 			target: { value: "Go" },
 		});
 		fireEvent.click(screen.getByRole("button", { name: "Send" }));
@@ -353,6 +375,56 @@ describe("StoryChatPage", () => {
 		expect(screen.queryByRole("button", { name: "Try again" })).toBeNull();
 	});
 
+	it("marks a reply cut off by a retryable error and asks again without it", async () => {
+		let calls = 0;
+		chatHandler = () => {
+			calls += 1;
+			return calls === 1
+				? ndjson(
+						{ type: "delta", text: "Partial answer" },
+						{
+							type: "error",
+							code: "network_error",
+							message: "Stream dropped",
+							retryable: true,
+						},
+					)
+				: ndjson({ type: "delta", text: "Full answer" }, { type: "done" });
+		};
+		renderPage();
+
+		fireEvent.change(await screen.findByLabelText("Ask about this story"), {
+			target: { value: "Go" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: "Send" }));
+
+		// Shown and announced as cut off, not "replied" (WCAG 4.1.3).
+		expect(await screen.findByText("Reply cut off.")).toBeTruthy();
+		expect(
+			await screen.findByText("ChatGPT's reply was cut off.", {
+				selector: "output",
+			}),
+		).toBeTruthy();
+
+		fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+		expect(await screen.findByText("Full answer")).toBeTruthy();
+		expect(screen.queryByText("Partial answer")).toBeNull();
+	});
+
+	it("says how far over the limit a long message is and won't send it", async () => {
+		renderPage();
+		const box = await screen.findByLabelText("Ask about this story");
+		fireEvent.change(box, { target: { value: "x".repeat(8_005) } });
+
+		// Not cut off silently: the whole paste stays, with the overage described.
+		expect((box as HTMLTextAreaElement).value).toHaveLength(8_005);
+		expect(box.getAttribute("aria-invalid")).toBe("true");
+		expect(screen.getByText(/^5 characters over the 8,000 limit/)).toBeTruthy();
+		expect(
+			screen.getByRole("button", { name: "Send" }).hasAttribute("disabled"),
+		).toBe(true);
+	});
+
 	it("offers a reconnect link when the connection expired", async () => {
 		chatHandler = () =>
 			Response.json(
@@ -361,7 +433,7 @@ describe("StoryChatPage", () => {
 			);
 		renderPage();
 
-		fireEvent.change(await screen.findByLabelText("Message"), {
+		fireEvent.change(await screen.findByLabelText("Ask about this story"), {
 			target: { value: "Go" },
 		});
 		fireEvent.click(screen.getByRole("button", { name: "Send" }));
@@ -391,24 +463,42 @@ describe("StoryChatPage", () => {
 			);
 		renderPage();
 
-		fireEvent.change(await screen.findByLabelText("Message"), {
+		fireEvent.change(await screen.findByLabelText("Ask about this story"), {
 			target: { value: "Go" },
 		});
 		fireEvent.click(screen.getByRole("button", { name: "Send" }));
 
 		await screen.findByText("Slow");
-		fireEvent.click(screen.getByRole("button", { name: "Stop" }));
+		const stop = screen.getByRole("button", { name: "Stop" });
+		stop.focus();
+		fireEvent.click(stop);
 
 		await screen.findByRole("button", { name: "Send" });
+		// Stop turned back into a disabled Send; focus moved to the message box.
+		await waitFor(() =>
+			expect(document.activeElement).toBe(
+				screen.getByLabelText("Ask about this story"),
+			),
+		);
 		// The partial reply is kept and no error is shown for a user cancel.
 		expect(screen.getByText("Slow")).toBeDefined();
 		expect(screen.queryByRole("alert")).toBeNull();
 	});
 
+	it("has no axe violations with a conversation", async () => {
+		const { container } = renderPage();
+		fireEvent.change(await screen.findByLabelText("Ask about this story"), {
+			target: { value: "Hi" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: "Send" }));
+		await screen.findByText("It is about X.");
+		await expectNoAxeViolations(container);
+	});
+
 	it("clears the conversation with New chat", async () => {
 		renderPage();
 
-		fireEvent.change(await screen.findByLabelText("Message"), {
+		fireEvent.change(await screen.findByLabelText("Ask about this story"), {
 			target: { value: "Hi" },
 		});
 		fireEvent.click(screen.getByRole("button", { name: "Send" }));
@@ -422,6 +512,24 @@ describe("StoryChatPage", () => {
 				name: "Summarize this article in a few bullet points.",
 			}),
 		).toBeDefined();
+	});
+
+	it("brings a cleared conversation back with Undo", async () => {
+		renderPage();
+
+		fireEvent.change(await screen.findByLabelText("Ask about this story"), {
+			target: { value: "Hi" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: "Send" }));
+		await screen.findByText("It is about X.");
+
+		fireEvent.click(screen.getByRole("button", { name: "New chat" }));
+		// Shown next to Undo and announced through the chat status.
+		expect(screen.getAllByText("Started a new chat.")).toHaveLength(2);
+		fireEvent.click(screen.getByRole("button", { name: "Undo new chat" }));
+
+		expect(screen.getByText("It is about X.")).toBeTruthy();
+		expect(screen.queryByText("Started a new chat.")).toBeNull();
 	});
 
 	it("shows model loading errors with a retry", async () => {
@@ -453,7 +561,7 @@ describe("StoryChatPage", () => {
 	it("shows the provider's name and labels replies with it", async () => {
 		renderPage();
 
-		fireEvent.change(await screen.findByLabelText("Message"), {
+		fireEvent.change(await screen.findByLabelText("Ask about this story"), {
 			target: { value: "Hi" },
 		});
 		fireEvent.click(screen.getByRole("button", { name: "Send" }));
@@ -476,7 +584,7 @@ describe("StoryChatPage", () => {
 		];
 		renderPage();
 
-		await screen.findByLabelText("Message");
+		await screen.findByLabelText("Ask about this story");
 		expect(screen.queryByRole("combobox", { name: "Assistant" })).toBeNull();
 		expect(screen.getByText("ChatGPT")).toBeDefined();
 	});
@@ -490,7 +598,7 @@ describe("StoryChatPage", () => {
 		renderPage();
 
 		await screen.findByRole("combobox", { name: "Assistant" });
-		fireEvent.change(screen.getByLabelText("Message"), {
+		fireEvent.change(screen.getByLabelText("Ask about this story"), {
 			target: { value: "Hi" },
 		});
 		fireEvent.click(screen.getByRole("button", { name: "Send" }));
@@ -500,11 +608,11 @@ describe("StoryChatPage", () => {
 
 		await waitFor(() =>
 			expect(
-				screen.getByRole("combobox", { name: "Model" }).textContent,
+				screen.getByRole("combobox", { name: "Claude model" }).textContent,
 			).toContain("claude"),
 		);
 		expect(screen.queryByText("It is about X.")).toBeNull();
-		fireEvent.change(screen.getByLabelText("Message"), {
+		fireEvent.change(screen.getByLabelText("Ask about this story"), {
 			target: { value: "Hello Claude" },
 		});
 		fireEvent.click(screen.getByRole("button", { name: "Send" }));

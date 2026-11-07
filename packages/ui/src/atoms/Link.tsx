@@ -4,14 +4,23 @@ import type { AnchorHTMLAttributes } from "react";
 const VARIANT_CLASSES = {
 	/** Quiet grey link that darkens on hover (secondary actions, "Back"). */
 	subtle:
-		"text-sm text-(--sea-ink-soft) no-underline transition-colors hover:text-(--sea-ink)",
-	/** Orange call-to-action link. */
+		"rounded-sm text-sm text-(--sea-ink-soft) no-underline hover:text-(--sea-ink) hover:underline",
+	/** Green call-to-action link standing on its own (not inside a sentence); underlined on hover. */
 	accent:
-		"text-sm font-medium text-(--lagoon-deep) no-underline underline-offset-2 hover:text-(--lagoon) hover:underline",
-	/** Top navigation item; darkens when the router marks it active. */
-	nav: "nav-link gap-1.5",
+		"rounded-sm text-sm font-medium text-(--lagoon-deep) no-underline underline-offset-[3px] hover:text-(--lagoon-deep) hover:underline",
+	/** Top navigation item; tinted when the router marks it active. */
+	nav: "min-h-9 gap-1.5 rounded-md px-2 py-1.5 xs:px-2.5 text-sm font-medium whitespace-nowrap text-(--sea-ink-soft) no-underline hover:bg-(--chip-bg) hover:text-(--sea-ink) data-[status=active]:bg-(--lagoon-tint) data-[status=active]:text-(--lagoon-deep) sm:px-3",
+	/** A link inside text or a line of facts: green and always underlined, so it reads as a link, not more text. */
+	inline:
+		"text-(--lagoon-deep) underline decoration-(--lagoon)/40 underline-offset-[3px] hover:text-(--lagoon-deep) hover:decoration-(--lagoon)",
+	/**
+	 * A row's title link whose hit area covers the whole row (the row needs
+	 * `position: relative`), so a click anywhere on the card opens it.
+	 */
+	card: "rounded-sm text-inherit no-underline decoration-(--lagoon)/50 underline-offset-[3px] after:absolute after:inset-0 after:content-[''] hover:text-inherit hover:underline visited:text-(--sea-ink-soft)",
 	/** Inherits surrounding text styles; use for linked titles. */
-	plain: "text-inherit no-underline hover:underline",
+	plain:
+		"rounded-sm text-inherit no-underline decoration-(--lagoon)/50 underline-offset-[3px] hover:text-inherit hover:underline visited:text-(--sea-ink-soft)",
 } as const;
 
 export type LinkVariant = keyof typeof VARIANT_CLASSES;
@@ -28,13 +37,20 @@ function StyledAnchor({ variant = "subtle", ...props }: StyledAnchorProps) {
 	return (
 		<a
 			{...props}
-			className={`inline-flex items-center gap-1 ${VARIANT_CLASSES[variant]}`}
+			className={`${variant === "inline" || variant === "plain" || variant === "card" ? "" : "inline-flex items-center gap-1 "}focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--lagoon) ${VARIANT_CLASSES[variant]}`}
 		/>
 	);
 }
 
 /** In-app link (`to="/favorites"`) styled as text. */
 export const TextLink = createLink(StyledAnchor);
+
+/**
+ * Id of the hidden "Opens in a new tab" note that AppShell renders once; links
+ * that open a new tab point at it with aria-describedby, since the ↗ icon
+ * that shows it is hidden from assistive tech.
+ */
+export const NEW_TAB_NOTE_ID = "opens-in-new-tab";
 
 /** Link to another website, opened in a new tab. */
 export function ExternalLink({
@@ -43,7 +59,13 @@ export function ExternalLink({
 }: StyledAnchorProps & { href: string; newTab?: boolean }) {
 	return (
 		<StyledAnchor
-			{...(newTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+			{...(newTab
+				? {
+						target: "_blank",
+						rel: "noopener noreferrer",
+						"aria-describedby": NEW_TAB_NOTE_ID,
+					}
+				: {})}
 			{...props}
 		/>
 	);

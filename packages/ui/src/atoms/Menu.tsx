@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { buttonClassName } from "./Button";
 
 const ITEM_CLASSES =
-	"flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-(--sea-ink-soft) no-underline outline-none select-none data-highlighted:bg-(--chip-bg) data-highlighted:text-(--sea-ink)";
+	"flex min-h-9 cursor-pointer items-center gap-2 rounded-md px-2.5 py-1.5 text-sm text-(--sea-ink) no-underline outline-none select-none data-highlighted:bg-(--chip-bg) data-highlighted:outline-2 data-highlighted:-outline-offset-2 data-highlighted:outline-(--lagoon) data-highlighted:outline-solid";
 
 export function Menu({ children }: { children: ReactNode }) {
 	return <BaseMenu.Root>{children}</BaseMenu.Root>;
@@ -31,7 +31,7 @@ export function MenuPopup({ children }: { children: ReactNode }) {
 	return (
 		<BaseMenu.Portal>
 			<BaseMenu.Positioner align="end" sideOffset={8} className="z-50">
-				<BaseMenu.Popup className="w-[min(18rem,calc(100vw-1.5rem))] rounded-lg border border-(--chip-line) bg-(--surface-strong) shadow-lg outline-none">
+				<BaseMenu.Popup className="w-[min(18rem,calc(100vw-1.5rem))] rounded-xl border border-(--line) bg-(--surface-strong) shadow-(--shadow-popup) outline-none">
 					{children}
 				</BaseMenu.Popup>
 			</BaseMenu.Positioner>

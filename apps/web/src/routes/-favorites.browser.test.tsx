@@ -12,6 +12,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { FavoritesPage } from "#/components/pages/FavoritesPage";
 import { clearAllFavorites, toggleFavorite } from "#/lib/favorites-store";
 import { type FavoritesType, parseFavoritesSearch } from "#/routes/favorites";
+import { expectNoAxeViolations } from "#/test/axe";
 import { renderWithQueryClient as render } from "#/test/renderWithQueryClient";
 
 const authMock = vi.hoisted(() => ({
@@ -24,6 +25,7 @@ const trpcMock = vi.hoisted(() => ({
 	clear: vi.fn(),
 	list: vi.fn(),
 	remove: vi.fn(),
+	paperAdd: vi.fn(),
 	paperClear: vi.fn(),
 	paperList: vi.fn(),
 	paperRemove: vi.fn(),
@@ -47,7 +49,7 @@ vi.mock("#/lib/trpc/client", () => ({
 			remove: { mutate: trpcMock.remove },
 		},
 		paperFavorites: {
-			add: { mutate: vi.fn() },
+			add: { mutate: trpcMock.paperAdd },
 			clear: { mutate: trpcMock.paperClear },
 			list: { query: trpcMock.paperList },
 			remove: { mutate: trpcMock.paperRemove },
@@ -133,11 +135,14 @@ afterEach(() => {
 });
 
 describe("favorites route search", () => {
-	it("defaults missing and invalid values to stories and accepts papers", () => {
+	it("keeps an explicit tab and drops missing or invalid values", () => {
 		expect(parseFavoritesSearch({})).toEqual({});
 		expect(parseFavoritesSearch({ type: "unknown" })).toEqual({});
 		expect(parseFavoritesSearch({ type: "papers" })).toEqual({
 			type: "papers",
+		});
+		expect(parseFavoritesSearch({ type: "stories" })).toEqual({
+			type: "stories",
 		});
 	});
 });
@@ -159,9 +164,99 @@ describe("FavoritesPage backend source of truth", () => {
 		expect(screen.getByText("Database oldest saved")).toBeDefined();
 		expect(
 			screen
-				.getAllByRole("heading", { level: 3 })
+				.getAllByRole("heading", { level: 2 })
 				.map((heading) => heading.textContent),
 		).toEqual(["Database newest saved", "Database oldest saved"]);
+	});
+
+	it("moves focus to the row that takes an unsaved story's place", async () => {
+		authMock.user = { id: "workos-favorites-page-focus" };
+		trpcMock.list.mockResolvedValue([
+			makeStory({ id: 1, title: "First" }),
+			makeStory({ id: 2, title: "Second" }),
+			makeStory({ id: 3, title: "Third" }),
+		]);
+		render(<FavoritesPage />);
+
+		const second = await screen.findByRole("button", {
+			name: "Saved Second",
+			pressed: true,
+		});
+		second.focus();
+		fireEvent.click(second);
+
+		// Not back to the top of the list: the next row, where "Second" was.
+		// The row's first control is its title link.
+		await waitFor(() =>
+			expect(document.activeElement?.textContent).toBe("Third"),
+		);
+	});
+
+	it("offers Undo after unsaving, which puts the story back", async () => {
+		authMock.user = { id: "workos-favorites-page-undo" };
+		trpcMock.list.mockResolvedValue([
+			makeStory({ id: 1, title: "Keep" }),
+			makeStory({ id: 2, title: "Oops" }),
+		]);
+		render(<FavoritesPage />);
+
+		fireEvent.click(
+			await screen.findByRole("button", { name: "Saved Oops", pressed: true }),
+		);
+		const undo = await screen.findByRole("button", {
+			name: "Undo: put “Oops” back in Saved",
+		});
+		fireEvent.click(undo);
+
+		expect(trpcMock.add).toHaveBeenCalledWith(
+			expect.objectContaining({ id: 2, title: "Oops" }),
+		);
+		await waitFor(() =>
+			expect(screen.queryByRole("button", { name: /^Undo/ })).toBeNull(),
+		);
+	});
+
+	it("puts focus on a paper's Saved button once Undo brings it back", async () => {
+		authMock.user = { id: "paper-undo-user" };
+		trpcMock.paperList.mockResolvedValue({
+			items: [
+				savedPaper(),
+				savedPaper({ arxivId: "2607.00002", title: "Older Paper" }),
+			],
+			nextCursor: null,
+		});
+		// The server takes a moment, so the row returns after Undo is gone.
+		trpcMock.paperAdd.mockImplementation(
+			() => new Promise((resolve) => setTimeout(resolve, 150)),
+		);
+		render(<FavoritesPage activeType="papers" />);
+
+		fireEvent.click(
+			await screen.findByRole("button", {
+				name: "Saved Older Paper",
+				pressed: true,
+			}),
+		);
+		const undo = await screen.findByRole("button", { name: /^Undo/ });
+		undo.focus();
+		fireEvent.click(undo);
+
+		await waitFor(() =>
+			expect(document.activeElement?.getAttribute("aria-label")).toBe(
+				"Saved Older Paper",
+			),
+		);
+	});
+
+	it("has no axe violations with saved stories", async () => {
+		authMock.user = { id: "workos-favorites-page-axe" };
+		trpcMock.list.mockResolvedValue([
+			makeStory({ id: 1, title: "First" }),
+			makeStory({ id: 2, title: "Second" }),
+		]);
+		const { container } = render(<FavoritesPage />);
+		await screen.findByRole("button", { name: "Saved First", pressed: true });
+		await expectNoAxeViolations(container);
 	});
 
 	it("does not render local favorites after backend favorites load", async () => {
@@ -183,6 +278,36 @@ describe("FavoritesPage backend source of truth", () => {
 });
 
 describe("FavoritesPage paper collection", () => {
+	it("filters saved papers by title, author or topic", async () => {
+		authMock.user = { id: "paper-search-user" };
+		trpcMock.paperList.mockResolvedValue({
+			items: [
+				savedPaper(),
+				savedPaper({
+					arxivId: "2607.00002",
+					title: "Older Paper",
+					savedAt: "2026-07-10T00:00:00.000Z",
+				}),
+			],
+			nextCursor: null,
+		});
+		render(<FavoritesPage activeType="papers" />);
+		await screen.findByText("Older Paper");
+
+		fireEvent.change(
+			screen.getByRole("searchbox", { name: "Search saved papers" }),
+			{ target: { value: "older" } },
+		);
+		expect(screen.getByText("Older Paper")).toBeTruthy();
+		expect(screen.queryByText("Saved Reasoning Paper")).toBeNull();
+
+		fireEvent.change(
+			screen.getByRole("searchbox", { name: "Search saved papers" }),
+			{ target: { value: "nothing like this" } },
+		);
+		expect(screen.getByText(/No saved papers match/)).toBeTruthy();
+	});
+
 	it("renders canonical paper links in newest-saved order and removes with the star", async () => {
 		authMock.user = { id: "paper-page-user" };
 		trpcMock.paperList.mockResolvedValue({
@@ -210,14 +335,16 @@ describe("FavoritesPage paper collection", () => {
 				.getAttribute("href"),
 		).toBe("https://huggingface.co/papers/2607.00001");
 		expect(
-			screen.getByRole("link", { name: /discuss saved reasoning paper/i }),
+			screen.getByRole("link", {
+				name: /open in chatgpt: saved reasoning paper/i,
+			}),
 		).toBeTruthy();
 		expect(screen.getAllByRole("link", { name: /project/i })).toHaveLength(2);
 		expect(screen.getAllByRole("link", { name: /code/i })).toHaveLength(2);
 
 		fireEvent.click(
 			screen.getByRole("button", {
-				name: "Save Saved Reasoning Paper to favorites",
+				name: "Saved Saved Reasoning Paper",
 				pressed: true,
 			}),
 		);
@@ -227,12 +354,19 @@ describe("FavoritesPage paper collection", () => {
 			}),
 		);
 		expect(screen.queryByText("Saved Reasoning Paper")).toBeNull();
+		// The removal is announced, since the row and its button are gone.
+		expect(
+			await screen.findByText(/^Removed from Saved\./, { selector: "output" }),
+		).toBeTruthy();
 	});
 
 	it("clears only papers after confirmation", async () => {
 		authMock.user = { id: "paper-clear-user" };
 		trpcMock.paperList.mockResolvedValue({
-			items: [savedPaper()],
+			items: [
+				savedPaper(),
+				savedPaper({ arxivId: "2607.00002", title: "Older Paper" }),
+			],
 			nextCursor: null,
 		});
 		render(<FavoritesPage activeType="papers" />);
@@ -247,9 +381,13 @@ describe("FavoritesPage paper collection", () => {
 		fireEvent.click(within(dialog).getByRole("button", { name: "Clear" }));
 		await waitFor(() => expect(trpcMock.paperClear).toHaveBeenCalledTimes(1));
 		expect(trpcMock.clear).not.toHaveBeenCalled();
-		expect(
-			await screen.findByText("Your saved papers list is empty."),
-		).toBeTruthy();
+		expect(await screen.findByText("No saved papers yet")).toBeTruthy();
+		// Clear has no Undo, so the status must not promise one.
+		const status = await screen.findByText(/^Removed from Saved\./, {
+			selector: "output",
+		});
+		expect(status.textContent).not.toContain("Undo");
+		expect(screen.queryByRole("button", { name: /^Undo/ })).toBeNull();
 	});
 
 	it("shows an initial paper load failure and recovers on refresh", async () => {
@@ -262,7 +400,7 @@ describe("FavoritesPage paper collection", () => {
 		expect((await screen.findByRole("alert")).textContent).toContain(
 			"Could not load saved favorites.",
 		);
-		expect(screen.queryByText(/list is empty/i)).toBeNull();
+		expect(screen.queryByText(/no saved papers yet/i)).toBeNull();
 		fireEvent.click(
 			screen.getByRole("button", { name: "Refresh saved favorites" }),
 		);
@@ -270,6 +408,60 @@ describe("FavoritesPage paper collection", () => {
 		expect(await screen.findByText("Saved Reasoning Paper")).toBeTruthy();
 		expect(trpcMock.paperList).toHaveBeenCalledTimes(2);
 		expect(screen.queryByRole("alert")).toBeNull();
+	});
+
+	it("shows saved papers loading, not an empty Saved page, while they load", async () => {
+		authMock.user = { id: "favorites-slow-papers" };
+		let resolve: (value: unknown) => void = () => undefined;
+		trpcMock.paperList.mockReturnValue(
+			new Promise((done) => {
+				resolve = done;
+			}),
+		);
+		render(<FavoritesPage />);
+
+		expect(await screen.findByText("Loading saved papers...")).toBeTruthy();
+		expect(screen.queryByText("No saved stories yet")).toBeNull();
+
+		resolve({ items: [savedPaper()], nextCursor: null });
+		expect(await screen.findByText("Saved Reasoning Paper")).toBeTruthy();
+	});
+
+	it("shows a failed paper load instead of an empty Saved page", async () => {
+		authMock.user = { id: "favorites-failed-papers" };
+		trpcMock.paperList.mockRejectedValue(new Error("load failed"));
+		render(<FavoritesPage />);
+
+		expect((await screen.findByRole("alert")).textContent).toContain(
+			"Could not load saved favorites.",
+		);
+		expect(screen.queryByText("No saved stories yet")).toBeNull();
+	});
+
+	it("opens the papers tab when only papers are saved, and still lets you pick Stories", async () => {
+		authMock.user = { id: "favorites-default-tab" };
+		trpcMock.paperList.mockResolvedValue({
+			items: [savedPaper()],
+			nextCursor: null,
+		});
+		// Mirrors the route: no type in the URL until a tab is chosen.
+		function RoutedFavorites() {
+			const [type, setType] = useState<FavoritesType | undefined>();
+			return <FavoritesPage activeType={type} onTypeChange={setType} />;
+		}
+		render(<RoutedFavorites />);
+
+		const papers = await screen.findByRole("tab", { name: "Papers 1" });
+		await waitFor(() =>
+			expect(papers.getAttribute("aria-selected")).toBe("true"),
+		);
+
+		const stories = screen.getByRole("tab", { name: "Stories" });
+		fireEvent.click(stories);
+		await waitFor(() =>
+			expect(stories.getAttribute("aria-selected")).toBe("true"),
+		);
+		expect(screen.getByText("No saved stories yet")).toBeTruthy();
 	});
 
 	it("exposes accessible URL-driven tabs", async () => {
@@ -287,8 +479,8 @@ describe("FavoritesPage paper collection", () => {
 			);
 		}
 		render(<UrlDrivenFavorites />);
-		const stories = screen.getByRole("tab", { name: "Stories" });
-		const papers = screen.getByRole("tab", { name: "Papers" });
+		const stories = screen.getByRole("tab", { name: /^Stories( \d+)?$/ });
+		const papers = screen.getByRole("tab", { name: /^Papers( \d+)?$/ });
 		expect(stories.getAttribute("aria-selected")).toBe("true");
 		expect(stories.getAttribute("tabindex")).toBe("0");
 		expect(papers.getAttribute("tabindex")).toBe("-1");

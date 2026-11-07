@@ -1,42 +1,48 @@
-import { ExternalLink, MessageCircle } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
+import { ExternalButtonLink } from "../atoms/Button";
+import { Icon } from "../atoms/Icon";
+import { WideText } from "../atoms/WideText";
 
-/** "Discuss" in ChatGPT plus optional project and code links for a paper. */
+/**
+ * A paper's two main actions: read it (the green main action, like Read
+ * article on stories) and hand it to ChatGPT in a new tab. There is no in-app
+ * paper chat yet, so this hand-off has no sparkle, which means in-app AI.
+ */
 export function PaperLinks({
 	title,
+	paperUrl,
 	discussUrl,
-	projectPage,
-	githubRepo,
+	onRead,
 	onDiscuss,
 }: {
 	title: string;
+	paperUrl: string;
 	discussUrl: string;
-	projectPage: string | null;
-	githubRepo: string | null;
+	onRead?: () => void;
 	onDiscuss?: () => void;
 }) {
 	return (
-		<div className="papers-external-links is-compact">
-			<a
-				className="papers-chat-link"
+		<>
+			<ExternalButtonLink
+				variant="accent"
+				href={paperUrl}
+				aria-label={`Read paper: ${title}`}
+				onClick={onRead}
+			>
+				<span>
+					Read<WideText from="xs"> paper</WideText>
+				</span>
+				<Icon icon={ArrowUpRight} size={14} />
+			</ExternalButtonLink>
+			<ExternalButtonLink
+				variant="ghost"
 				href={discussUrl}
-				target="_blank"
-				rel="noreferrer"
-				aria-label={`Discuss ${title} in ChatGPT`}
+				aria-label={`Open in ChatGPT: ${title}`}
+				title="Opens ChatGPT in a new tab with this paper"
 				onClick={onDiscuss}
 			>
-				<MessageCircle size={14} aria-hidden="true" />
-				Discuss
-			</a>
-			{projectPage ? (
-				<a href={projectPage} target="_blank" rel="noreferrer">
-					Project <ExternalLink size={14} aria-hidden="true" />
-				</a>
-			) : null}
-			{githubRepo ? (
-				<a href={githubRepo} target="_blank" rel="noreferrer">
-					Code <ExternalLink size={14} aria-hidden="true" />
-				</a>
-			) : null}
-		</div>
+				Open in ChatGPT <Icon icon={ArrowUpRight} size={14} />
+			</ExternalButtonLink>
+		</>
 	);
 }

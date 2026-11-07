@@ -4,37 +4,44 @@ import {
 	getDiscussionUrl,
 	getStoryDomain,
 	getStoryTitle,
+	isDiscussionPost,
+	splitPostKind,
 } from "@hackerfeed/hacker-news/utils";
-import { ExternalButtonLink } from "@hackerfeed/ui/atoms/Button";
-import { Card } from "@hackerfeed/ui/atoms/Card";
+import { ButtonLink } from "@hackerfeed/ui/atoms/Button";
 import { Heading } from "@hackerfeed/ui/atoms/Heading";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
 import { ExternalLink, TextLink } from "@hackerfeed/ui/atoms/Link";
-import { Row } from "@hackerfeed/ui/atoms/Row";
-import { Stack } from "@hackerfeed/ui/atoms/Stack";
+import { TitleTag } from "@hackerfeed/ui/atoms/TitleTag";
 import { ToggleButton } from "@hackerfeed/ui/atoms/Toggle";
-import { MetaLine } from "@hackerfeed/ui/molecules/MetaLine";
-import { StoryStats } from "@hackerfeed/ui/molecules/StoryStats";
-import { MessageCircle, Star } from "lucide-react";
+import { ToggleLabel } from "@hackerfeed/ui/atoms/ToggleLabel";
+import { WideText } from "@hackerfeed/ui/atoms/WideText";
+import { FeedRow } from "@hackerfeed/ui/molecules/FeedRow";
+import { StoryMeta } from "@hackerfeed/ui/molecules/StoryMeta";
+import { Bookmark, MessageSquare, Sparkles } from "lucide-react";
 import { useFavorites } from "#/hooks/useFavorites";
 import { useFeatureFlag } from "#/hooks/useFeatureFlags";
 import { useViewActivity } from "#/hooks/useViewActivity";
+import { rememberReturnFocus } from "#/lib/a11y/return-focus";
 
 type StoryCardProps = {
 	story: HackerNewsStoryRecord;
-	animationDelay?: number;
+	/** Tint the row once saved; off in the Saved list, where everything is saved. */
+	markSaved?: boolean;
 };
 
-export function StoryCard({ story, animationDelay }: StoryCardProps) {
+export function StoryCard({ story, markSaved = true }: StoryCardProps) {
 	const { isFavorited, toggleFavorite } = useFavorites();
 	const { recordStoryView } = useViewActivity();
 	const aiChat = useFeatureFlag("aiChat");
 	const isFav = isFavorited(story.id);
 
-	const domain = getStoryDomain(story.url);
-	const age = formatStoryAge(story.time);
 	const title = getStoryTitle(story);
-	const storyUrl = story.url ?? getDiscussionUrl(story.id);
+	const { kind: postKind, text: titleText } = splitPostKind(title);
+	const comments = story.descendants ?? 0;
+	// Ask HN, Show HN and link-less posts are their HN thread: open the
+	// discussion view (question or description, then replies) instead.
+	const opensDiscussion = isDiscussionPost(story);
+	const commentLabel = `${comments} ${comments === 1 ? "comment" : "comments"}`;
 
 	function recordRead() {
 		recordStoryView(story, "read");
@@ -45,73 +52,92 @@ export function StoryCard({ story, animationDelay }: StoryCardProps) {
 	}
 
 	return (
-		<Card animated animationDelay={animationDelay}>
-			<MetaLine items={[domain, age]} />
-			<Stack gap="md">
-				<Heading level={3} size="card">
-					<ExternalLink
-						href={storyUrl}
-						variant="plain"
-						onClick={recordRead}
-						onAuxClick={recordMiddleClickRead}
-					>
-						{title}
-					</ExternalLink>
+		<FeedRow
+			saved={markSaved && isFav}
+			title={
+				<Heading level={2} size="row">
+					{/* The "card" link: a click anywhere on the row opens the story. */}
+					{opensDiscussion ? (
+						<TextLink
+							to="/story/$storyId"
+							params={{ storyId: story.id }}
+							variant="card"
+							onClick={(event) => {
+								rememberReturnFocus(event.currentTarget);
+								recordStoryView(story, "discussion_opened");
+							}}
+						>
+							{postKind ? <TitleTag>{postKind}</TitleTag> : null}
+							{titleText}
+						</TextLink>
+					) : (
+						<ExternalLink
+							href={story.url ?? getDiscussionUrl(story.id)}
+							variant="card"
+							onClick={recordRead}
+							onAuxClick={recordMiddleClickRead}
+						>
+							{postKind ? <TitleTag>{postKind}</TitleTag> : null}
+							{titleText}
+						</ExternalLink>
+					)}
 				</Heading>
-
-				<StoryStats
+			}
+			meta={
+				<StoryMeta
+					domain={story.url ? getStoryDomain(story.url) : null}
 					score={story.score}
 					by={story.by}
-					commentCount={story.descendants}
+					age={formatStoryAge(story.time)}
 				/>
-
-				<Row gap="lg" wrap>
-					<ExternalButtonLink
-						href={storyUrl}
-						variant="primary"
-						onClick={recordRead}
-						onAuxClick={recordMiddleClickRead}
-					>
-						{story.url ? "Read article" : "Open post"}
-					</ExternalButtonLink>
-
-					<TextLink
-						to="/story/$storyId"
+			}
+			actions={[
+				aiChat ? (
+					<ButtonLink
+						key="ai"
+						variant="accent"
+						to="/chat/$storyId"
 						params={{ storyId: story.id }}
-						onClick={() => recordStoryView(story, "discussion_opened")}
+						aria-label={`Discuss with AI: ${title}`}
+						onClick={(event) => {
+							rememberReturnFocus(event.currentTarget);
+							recordStoryView(story, "chat_opened");
+						}}
 					>
-						Discussion
-					</TextLink>
-
-					{aiChat ? (
-						<TextLink
-							to="/chat/$storyId"
-							params={{ storyId: story.id }}
-							aria-label={`Discuss ${title} with AI`}
-							onClick={() => recordStoryView(story, "chat_opened")}
-						>
-							<Icon icon={MessageCircle} />
-							Discuss
-						</TextLink>
-					) : null}
-
-					<ToggleButton
-						aria-label="Save to favorites"
-						pressed={isFav}
-						onPressedChange={() => toggleFavorite(story)}
-					>
-						{isFav ? (
-							<>
-								<Icon key="star-filled" icon={Star} filled pop /> Saved
-							</>
-						) : (
-							<>
-								<Icon key="star-empty" icon={Star} /> Save
-							</>
-						)}
-					</ToggleButton>
-				</Row>
-			</Stack>
-		</Card>
+						<Icon icon={Sparkles} accent />
+						<span>
+							Discuss<WideText from="xs"> with AI</WideText>
+						</span>
+					</ButtonLink>
+				) : null,
+				<ButtonLink
+					key="comments"
+					variant={comments > 0 ? "ghost" : "quiet"}
+					to="/story/$storyId"
+					params={{ storyId: story.id }}
+					aria-label={`${commentLabel}: ${title}`}
+					onClick={(event) => {
+						rememberReturnFocus(event.currentTarget);
+						recordStoryView(story, "discussion_opened");
+					}}
+				>
+					<Icon icon={MessageSquare} />
+					<span>
+						{comments}
+						<WideText>{comments === 1 ? " comment" : " comments"}</WideText>
+					</span>
+				</ButtonLink>,
+			]}
+			save={
+				<ToggleButton
+					aria-label={`${isFav ? "Saved" : "Save"} ${title}`}
+					pressed={isFav}
+					onPressedChange={() => toggleFavorite(story)}
+				>
+					<Icon icon={Bookmark} filled={isFav} />
+					<ToggleLabel on={isFav} offLabel="Save" onLabel="Saved" />
+				</ToggleButton>
+			}
+		/>
 	);
 }
