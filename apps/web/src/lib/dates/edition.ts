@@ -20,11 +20,3 @@ export function formatEditionDate(isoDate: string): string {
 	const day = new Date(`${isoDate}T00:00:00Z`);
 	return Number.isNaN(day.getTime()) ? "" : dateline(day, true);
 }
-
-/** The reader's local today as "Saturday 7 November". */
-export function formatToday(now: Date): string {
-	return dateline(
-		new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())),
-		false,
-	);
-}

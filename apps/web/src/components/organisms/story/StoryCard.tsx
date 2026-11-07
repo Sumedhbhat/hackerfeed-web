@@ -18,7 +18,6 @@ import { WideText } from "@hackerfeed/ui/atoms/WideText";
 import { FeedRow } from "@hackerfeed/ui/molecules/FeedRow";
 import { StoryMeta } from "@hackerfeed/ui/molecules/StoryMeta";
 import { ArrowUpRight, Bookmark, MessageSquare, Sparkles } from "lucide-react";
-import { useState } from "react";
 import { useFavorites } from "#/hooks/useFavorites";
 import { useFeatureFlag } from "#/hooks/useFeatureFlags";
 import { useViewActivity } from "#/hooks/useViewActivity";
@@ -28,7 +27,7 @@ type StoryCardProps = {
 	story: HackerNewsStoryRecord;
 	/** Position in a ranked feed; omit for unranked lists such as favorites. */
 	rank?: number;
-	/** Hang the saved ribbon; off in the Saved list, where everything is saved. */
+	/** Tint the row once saved; off in the Saved list, where everything is saved. */
 	markSaved?: boolean;
 };
 
@@ -37,7 +36,6 @@ export function StoryCard({ story, rank, markSaved = true }: StoryCardProps) {
 	const { recordStoryView } = useViewActivity();
 	const aiChat = useFeatureFlag("aiChat");
 	const isFav = isFavorited(story.id);
-	const [justSaved, setJustSaved] = useState(false);
 
 	const title = getStoryTitle(story);
 	const { kind: postKind, text: titleText } = splitPostKind(title);
@@ -58,7 +56,6 @@ export function StoryCard({ story, rank, markSaved = true }: StoryCardProps) {
 		<FeedRow
 			rank={rank}
 			saved={markSaved && isFav}
-			justSaved={justSaved}
 			title={
 				<Heading level={2} size="row">
 					<ExternalLink
@@ -144,10 +141,7 @@ export function StoryCard({ story, rank, markSaved = true }: StoryCardProps) {
 				<ToggleButton
 					aria-label={`${isFav ? "Saved" : "Save"} ${title}`}
 					pressed={isFav}
-					onPressedChange={(pressed) => {
-						setJustSaved(pressed);
-						toggleFavorite(story);
-					}}
+					onPressedChange={() => toggleFavorite(story)}
 				>
 					<Icon icon={Bookmark} filled={isFav} />
 					<ToggleLabel on={isFav} offLabel="Save" onLabel="Saved" />

@@ -8,7 +8,6 @@ import { Activity, Suspense, useEffect, useState } from "react";
 import { FeedError } from "#/components/organisms/feed/FeedError";
 import { FeedPane } from "#/components/organisms/feed/FeedPane";
 import { feedTabs } from "#/components/organisms/feed/feedTabs";
-import { formatToday } from "#/lib/dates/edition";
 import { HackerNewsFeedKey, PAGE_SIZE } from "#/lib/hacker-news/queries";
 
 export function FeedPage() {
@@ -16,10 +15,6 @@ export function FeedPage() {
 		HackerNewsFeedKey.Top,
 	);
 	const [openedFeeds, setOpenedFeeds] = useState(() => new Set([activeFeed]));
-	// Today depends on the reader's clock, so it fills in after hydration; the
-	// dateline keeps its height meanwhile.
-	const [today, setToday] = useState("");
-	useEffect(() => setToday(formatToday(new Date())), []);
 
 	function openFeed(feed: HackerNewsFeedKey) {
 		setActiveFeed(feed);
@@ -38,7 +33,7 @@ export function FeedPage() {
 		<PageContainer>
 			<Tabs value={activeFeed} onValueChange={openFeed}>
 				<Stack gap="lg">
-					<PageHeader title="Stories" dateline={today}>
+					<PageHeader title="Stories">
 						<TabList aria-label="Feeds">
 							{feedTabs.map((feed) => (
 								<Tab key={feed.key} value={feed.key}>

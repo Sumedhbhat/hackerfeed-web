@@ -9,7 +9,6 @@ import { PaperResourceLinks } from "@hackerfeed/ui/molecules/PaperResourceLinks"
 import { PaperSignals } from "@hackerfeed/ui/molecules/PaperSignals";
 import { PaperTitle } from "@hackerfeed/ui/molecules/PaperTitle";
 import { Bookmark } from "lucide-react";
-import { useState } from "react";
 import {
 	buildChatGptPaperDiscussionUrl,
 	formatAuthors,
@@ -20,7 +19,7 @@ import { PaperSummary } from "./PaperSummary";
 
 type PaperRowProps = {
 	canFavorite: boolean;
-	/** Hang the saved ribbon; off in the Saved list, where everything is saved. */
+	/** Tint the row once saved; off in the Saved list, where everything is saved. */
 	markSaved?: boolean;
 	isFavorited: boolean;
 	isPending: boolean;
@@ -38,9 +37,8 @@ export function PaperRow({
 	onView,
 	paper,
 }: PaperRowProps) {
-	const [justSaved, setJustSaved] = useState(false);
 	return (
-		<PaperCard saved={markSaved && saved} justSaved={justSaved}>
+		<PaperCard saved={markSaved && saved}>
 			<PaperTitle href={paper.paperUrl} onClick={() => onView("read")}>
 				{paper.title}
 			</PaperTitle>
@@ -76,10 +74,7 @@ export function PaperRow({
 							aria-label={`${saved ? "Saved" : "Save"} ${paper.title}`}
 							pressed={saved}
 							disabled={pending}
-							onPressedChange={(pressed) => {
-								setJustSaved(pressed);
-								onToggleFavorite();
-							}}
+							onPressedChange={onToggleFavorite}
 						>
 							<Icon icon={Bookmark} filled={saved} />
 							<ToggleLabel on={saved} offLabel="Save" onLabel="Saved" />

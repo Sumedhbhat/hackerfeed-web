@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatEditionDate, formatToday } from "./edition";
+import { formatEditionDate } from "./edition";
 
 describe("edition dates", () => {
 	it("formats an edition date without shifting it by time zone", () => {
@@ -9,11 +9,5 @@ describe("edition dates", () => {
 	it("returns nothing for a value that isn't a date", () => {
 		expect(formatEditionDate("")).toBe("");
 		expect(formatEditionDate("not-a-date")).toBe("");
-	});
-
-	it("formats the reader's local day", () => {
-		expect(formatToday(new Date(2026, 10, 7, 23, 30))).toBe(
-			"Saturday 7 November",
-		);
 	});
 });

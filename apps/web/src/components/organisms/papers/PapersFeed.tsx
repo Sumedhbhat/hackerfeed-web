@@ -81,7 +81,6 @@ export function PapersFeed({
 			<LiveStatus message={resultCount} />
 			<PageHeader
 				title="Papers"
-				dateline={formatEditionDate(selectedDate)}
 				description="The day’s most discussed research papers."
 			/>
 			<PaperEditionToolbar

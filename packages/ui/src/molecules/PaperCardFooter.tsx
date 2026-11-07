@@ -2,8 +2,7 @@ import type { ReactNode } from "react";
 
 /**
  * Bottom of a PaperCard: the paper's main actions, with `save` at the far
- * right of that line. (The saved ribbon hangs from the card's top edge in the
- * same column.)
+ * right of that line.
  */
 export function PaperCardFooter({
 	actions,

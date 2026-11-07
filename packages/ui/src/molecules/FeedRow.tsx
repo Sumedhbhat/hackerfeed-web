@@ -1,13 +1,12 @@
 import type { ReactNode } from "react";
-import { Ribbon } from "../atoms/Ribbon";
 
 /**
  * One story in a ReadingList: optional rank in the margin, the title, then the
  * facts and the actions. From `lg` up facts and actions share one line when
  * they fit. Each action sits in a cell with a minimum width, so they line up
  * from row to row, and wrap instead of overflowing when larger text doesn't
- * fit (WCAG 1.4.4). `save` always sits at the far right, directly under the brass ribbon
- * that hangs from the row once the story is saved.
+ * fit (WCAG 1.4.4). `save` always sits at the far right; a saved row is
+ * tinted.
  */
 /** Minimum widths of the action cells, so the actions form columns. */
 const CELL = [
@@ -19,7 +18,6 @@ const CELL = [
 export function FeedRow({
 	rank,
 	saved = false,
-	justSaved = false,
 	title,
 	meta,
 	actions,
@@ -27,8 +25,6 @@ export function FeedRow({
 }: {
 	rank?: number;
 	saved?: boolean;
-	/** The reader just pressed Save: let the ribbon drop in. */
-	justSaved?: boolean;
 	title: ReactNode;
 	meta: ReactNode;
 	/** Read, discussion, and AI actions, in that order (one cell each). */
@@ -39,7 +35,6 @@ export function FeedRow({
 		<li
 			className={`relative flex gap-4 px-4 pt-3 pb-1 sm:px-6 sm:pt-3.5 sm:pb-2.5 ${saved ? "bg-(--bookmark-tint)" : ""}`}
 		>
-			{saved ? <Ribbon drop={justSaved} /> : null}
 			{rank != null ? (
 				<span
 					aria-hidden="true"
@@ -49,12 +44,7 @@ export function FeedRow({
 				</span>
 			) : null}
 			<div className="flex min-w-0 flex-1 flex-col gap-1">
-				<div>
-					{/* Keeps the ribbon's spot free beside the first line on every row,
-					    so saving never re-wraps the title. */}
-					<span aria-hidden="true" className="float-right h-5 w-12 sm:w-10" />
-					{title}
-				</div>
+				<div>{title}</div>
 				<div className="flex flex-col gap-1 lg:flex-row lg:flex-wrap lg:items-center lg:justify-between lg:gap-x-8">
 					{meta}
 					<div className="-mt-1.5 -ml-1.5 flex flex-wrap items-center gap-1 sm:-mr-2 sm:-ml-2 lg:mt-0 lg:ml-0">
