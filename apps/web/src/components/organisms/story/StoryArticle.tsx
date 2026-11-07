@@ -36,7 +36,7 @@ export function StoryArticle({ story }: { story: HackerNewsStoryRecord }) {
 				by={story.by}
 				age={formatStoryAge(story.time)}
 				trailing={
-					<ExternalLink href={getDiscussionUrl(story.id)} variant="accent">
+					<ExternalLink href={getDiscussionUrl(story.id)} variant="inline">
 						View on HN
 					</ExternalLink>
 				}

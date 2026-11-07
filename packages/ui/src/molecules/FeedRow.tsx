@@ -40,7 +40,10 @@ export function FeedRow({
 				<div>
 					{/* Keeps the ribbon's spot free beside the first line on every row,
 					    so saving never re-wraps the title. */}
-					<span aria-hidden="true" className="float-right h-5 w-8 xs:w-12 sm:w-10" />
+					<span
+						aria-hidden="true"
+						className="float-right h-5 w-8 xs:w-12 sm:w-10"
+					/>
 					{title}
 				</div>
 				<div className="flex flex-col gap-1 lg:flex-row lg:items-center lg:justify-between lg:gap-4">

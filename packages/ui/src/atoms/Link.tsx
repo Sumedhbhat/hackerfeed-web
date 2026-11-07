@@ -5,12 +5,12 @@ const VARIANT_CLASSES = {
 	/** Quiet grey link that darkens on hover (secondary actions, "Back"). */
 	subtle:
 		"rounded-sm text-sm text-(--sea-ink-soft) no-underline hover:text-(--sea-ink) hover:underline",
-	/** Green call-to-action link. */
+	/** Green call-to-action link standing on its own (not inside a sentence); underlined on hover. */
 	accent:
-		"rounded-sm text-sm font-medium text-(--lagoon-deep) underline decoration-(--lagoon)/40 underline-offset-[3px] hover:text-(--lagoon-deep) hover:decoration-(--lagoon)",
+		"rounded-sm text-sm font-medium text-(--lagoon-deep) no-underline underline-offset-[3px] hover:text-(--lagoon-deep) hover:underline",
 	/** Top navigation item; tinted when the router marks it active. */
 	nav: "min-h-9 gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium whitespace-nowrap text-(--sea-ink-soft) no-underline hover:bg-(--chip-bg) hover:text-(--sea-ink) data-[status=active]:bg-(--lagoon-tint) data-[status=active]:text-(--lagoon-deep) sm:px-3",
-	/** A link inside running text (chat replies): green and underlined, no layout of its own. */
+	/** A link inside text or a line of facts: green and always underlined, so it reads as a link, not more text. */
 	inline:
 		"text-(--lagoon-deep) underline decoration-(--lagoon)/40 underline-offset-[3px] hover:text-(--lagoon-deep) hover:decoration-(--lagoon)",
 	/** Inherits surrounding text styles; use for linked titles. */

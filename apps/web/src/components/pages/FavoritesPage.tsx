@@ -82,7 +82,7 @@ export function FavoritesPage({
 		else papers.clearAll();
 	}
 
-	const browseLabel = `Browse ${isStories ? "the feed" : "papers"}`;
+	const browseLabel = `Browse ${isStories ? "stories" : "papers"}`;
 
 	return (
 		<PageContainer>

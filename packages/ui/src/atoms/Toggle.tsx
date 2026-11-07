@@ -35,7 +35,7 @@ const LAYOUT = {
 	 * after the last chip lets it scroll clear of the fade. Wraps from `sm` up.
 	 */
 	scroll:
-		"-mx-1 flex gap-2 overflow-x-auto px-1 py-1 [mask-image:linear-gradient(to_right,black_80%,transparent)] [scrollbar-width:none] after:w-20 after:shrink-0 after:content-[''] sm:flex-wrap sm:overflow-visible sm:[mask-image:none] sm:after:hidden [&::-webkit-scrollbar]:hidden",
+		"-mx-1 flex gap-2 overflow-x-auto px-1 py-1 [mask-image:linear-gradient(to_right,black_calc(100%-2.5rem),transparent)] [scrollbar-width:none] after:w-10 after:shrink-0 after:content-[''] sm:flex-wrap sm:overflow-visible sm:[mask-image:none] sm:after:hidden [&::-webkit-scrollbar]:hidden",
 } as const;
 
 export function ToggleGroup<T extends string>({

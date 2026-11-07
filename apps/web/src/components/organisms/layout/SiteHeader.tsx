@@ -28,7 +28,7 @@ export default function SiteHeader() {
 						// A story and its AI chat belong to the feed, so keep Feed marked there.
 						data-status={inFeed ? "active" : undefined}
 					>
-						Feed
+						Stories
 					</TextLink>
 					<TextLink to="/papers" variant="nav">
 						Papers

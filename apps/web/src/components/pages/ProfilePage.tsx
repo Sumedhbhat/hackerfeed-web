@@ -3,11 +3,9 @@ import { Heading } from "@hackerfeed/ui/atoms/Heading";
 import { IconBadge } from "@hackerfeed/ui/atoms/IconBadge";
 import { PageContainer } from "@hackerfeed/ui/atoms/PageContainer";
 import { Panel } from "@hackerfeed/ui/atoms/Panel";
-import { PanelSection } from "@hackerfeed/ui/atoms/PanelSection";
 import { Skeleton, SkeletonGroup } from "@hackerfeed/ui/atoms/Skeleton";
 import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { Text } from "@hackerfeed/ui/atoms/Text";
-import { DetailList } from "@hackerfeed/ui/molecules/DetailList";
 import { ProfileSummary } from "@hackerfeed/ui/molecules/ProfileSummary";
 import { User } from "lucide-react";
 import { AiProvidersCard } from "#/components/organisms/ai/AiProvidersCard";
@@ -89,15 +87,6 @@ export function ProfilePage({ search }: { search: ProfileSearch }) {
 						imageUrl={user.profilePictureUrl}
 						initials={getInitials(user.firstName, user.lastName, user.email)}
 					/>
-
-					<PanelSection as="div">
-						<DetailList
-							items={[
-								{ label: "First name", value: user.firstName || "Not set" },
-								{ label: "Last name", value: user.lastName || "Not set" },
-							]}
-						/>
-					</PanelSection>
 
 					{aiChat ? (
 						<AiProvidersCard

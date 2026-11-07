@@ -3,8 +3,7 @@ import { FactLine } from "../atoms/FactLine";
 
 /**
  * The facts under a story title: where it is from, how many points it has,
- * who posted it and when. The poster is left out on phones to keep the line
- * short; `trailing` adds a last item such as a link.
+ * who posted it and when. `trailing` adds a last item such as a link.
  */
 export function StoryMeta({
 	domain,
@@ -12,12 +11,15 @@ export function StoryMeta({
 	age,
 	score,
 	trailing,
+	compact = false,
 }: {
 	domain?: string | null;
 	by?: string | null;
 	age?: string | null;
 	score?: number | null;
 	trailing?: ReactNode;
+	/** List rows: leave the poster out on phones to keep the line short. */
+	compact?: boolean;
 }) {
 	return (
 		<FactLine singleLine>
@@ -30,7 +32,7 @@ export function StoryMeta({
 				</span>
 			) : null}
 			{by ? (
-				<span data-shrink className="hidden sm:inline">
+				<span data-shrink className={compact ? "hidden sm:inline" : undefined}>
 					by {by}
 				</span>
 			) : null}

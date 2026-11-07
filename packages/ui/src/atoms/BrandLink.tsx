@@ -8,7 +8,7 @@ type BrandAnchorProps = Omit<
 	ref?: React.Ref<HTMLAnchorElement>;
 };
 
-/** A brass bookmark hanging into a green page: the app's whole idea in one mark. */
+/** A page of text with a bookmark tucked in: the app's whole idea in one mark. (Brass is kept for saved items.) */
 function BrandMark() {
 	return (
 		<svg
@@ -19,7 +19,14 @@ function BrandMark() {
 			className="block shrink-0"
 		>
 			<rect width="28" height="28" rx="7" fill="var(--lagoon)" />
-			<path d="M9 0h10v20l-5-4.5L9 20z" fill="var(--bookmark-ribbon)" />
+			<path
+				d="M6.5 11h7M6.5 15h7M6.5 19h10"
+				stroke="var(--on-lagoon)"
+				strokeWidth="2"
+				strokeLinecap="round"
+				opacity="0.75"
+			/>
+			<path d="M16 0h6.5v13.5l-3.25-2.75L16 13.5z" fill="var(--on-lagoon)" />
 		</svg>
 	);
 }
