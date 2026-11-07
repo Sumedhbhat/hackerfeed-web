@@ -27,11 +27,19 @@ export function PaperSummary({
 	const clampedRef = useRef<HTMLParagraphElement>(null);
 
 	// Without an AI summary, `summary` is the full abstract; only the browser
-	// knows whether 3 lines cut it off.
+	// knows whether 3 lines cut it off, and that changes with the width (zoom,
+	// rotation, resizing) and once web fonts load, so measure on every resize.
+	// biome-ignore lint/correctness/useExhaustiveDependencies: the clamped text remounts when "Show less" closes the panel
 	useEffect(() => {
 		const text = clampedRef.current;
-		if (text) setOverflows(text.scrollHeight > text.clientHeight);
-	}, []);
+		if (!text) return;
+		const measure = () => setOverflows(text.scrollHeight > text.clientHeight);
+		measure();
+		if (typeof ResizeObserver === "undefined") return;
+		const observer = new ResizeObserver(measure);
+		observer.observe(text);
+		return () => observer.disconnect();
+	}, [open]);
 
 	const canExpand = paper.abstract !== null || overflows;
 

@@ -21,6 +21,7 @@ import { PaperRow } from "#/components/organisms/papers/PaperRow";
 import { StoryCard } from "#/components/organisms/story/StoryCard";
 import { useFavorites } from "#/hooks/useFavorites";
 import { usePaperFavorites } from "#/hooks/usePaperFavorites";
+import { useResultCountAnnouncement } from "#/hooks/useResultCountAnnouncement";
 import { useViewActivity } from "#/hooks/useViewActivity";
 import { focusFirstIn, focusIsLost } from "#/lib/a11y/focus";
 import { matchesFilters } from "#/lib/papers/presentation";
@@ -94,6 +95,13 @@ export function FavoritesPage({
 		: sortedPapers;
 	const visibleCount = isStories ? visibleStories.length : visiblePapers.length;
 	const removal = useRemovalFeedback(activeType, activeCount);
+	const searchResult = useResultCountAnnouncement(
+		visibleCount,
+		isStories
+			? ["saved story", "saved stories"]
+			: ["saved paper", "saved papers"],
+		needle,
+	);
 
 	function clearAll() {
 		if (isStories) stories.clearAllFavorites();
@@ -105,6 +113,7 @@ export function FavoritesPage({
 	return (
 		<PageContainer>
 			<LiveStatus message={removal} />
+			<LiveStatus message={searchResult} />
 			<Tabs value={activeType} onValueChange={onTypeChange}>
 				<Stack gap="lg">
 					<PageHeader title="Saved">

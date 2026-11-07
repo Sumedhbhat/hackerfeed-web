@@ -11,10 +11,11 @@ import { PaperFeedMessage } from "@hackerfeed/ui/molecules/PaperFeedMessage";
 import { PaperPageShell } from "@hackerfeed/ui/molecules/PaperPageShell";
 import { PaperTopicNav } from "@hackerfeed/ui/molecules/PaperTopicNav";
 import { RefreshCw } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { useLoadMoreFocus } from "#/hooks/useLoadMoreFocus";
 import { usePaperEdition } from "#/hooks/usePaperEdition";
 import { usePaperFavorites } from "#/hooks/usePaperFavorites";
+import { useResultCountAnnouncement } from "#/hooks/useResultCountAnnouncement";
 import { useViewActivity } from "#/hooks/useViewActivity";
 import { formatEditionDate } from "#/lib/dates/edition";
 import { matchesFilters } from "#/lib/papers/presentation";
@@ -56,6 +57,7 @@ export function PapersFeed({
 	const withFocus = useLoadMoreFocus("papers-list", visiblePapers.length);
 	const resultCount = useResultCountAnnouncement(
 		filteredPapers.length,
+		["paper", "papers"],
 		`${query}|${filters.topic ?? ""}|${edition.editionDate ?? ""}`,
 	);
 	const selectedDate = filters.date ?? edition.editionDate ?? "";
@@ -163,28 +165,4 @@ export function PapersFeed({
 			)}
 		</PaperPageShell>
 	);
-}
-
-/**
- * Tells screen readers how many papers match once typing or a topic change
- * settles (WCAG 4.1.3). Nothing is announced on first load.
- */
-function useResultCountAnnouncement(count: number, filterKey: string) {
-	const [message, setMessage] = useState("");
-	const firstKeyRef = useRef<string | null>(filterKey);
-	useEffect(() => {
-		if (filterKey === firstKeyRef.current) return;
-		firstKeyRef.current = null; // filters have changed at least once
-		const timer = setTimeout(
-			() =>
-				setMessage(
-					count === 0
-						? "No papers match these filters."
-						: `${count} ${count === 1 ? "paper" : "papers"}`,
-				),
-			700,
-		);
-		return () => clearTimeout(timer);
-	}, [count, filterKey]);
-	return message;
 }
