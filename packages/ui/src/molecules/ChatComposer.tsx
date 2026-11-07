@@ -43,7 +43,14 @@ export function ChatComposer({
 				value={value}
 				onChange={(event) => onChange(event.target.value)}
 				onKeyDown={(event) => {
-					if (event.key === "Enter" && !event.shiftKey) submit(event);
+					// Enter while an IME is composing (Japanese, Chinese, Korean) picks a
+					// candidate; it must not send a half-typed message.
+					if (
+						event.key === "Enter" &&
+						!event.shiftKey &&
+						!event.nativeEvent.isComposing
+					)
+						submit(event);
 				}}
 				maxLength={maxLength}
 				rows={2}

@@ -10,6 +10,7 @@ import { ButtonLink, ExternalButtonLink } from "@hackerfeed/ui/atoms/Button";
 import { Heading } from "@hackerfeed/ui/atoms/Heading";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
 import { ExternalLink } from "@hackerfeed/ui/atoms/Link";
+import { NarrowText } from "@hackerfeed/ui/atoms/NarrowText";
 import { TitleTag } from "@hackerfeed/ui/atoms/TitleTag";
 import { ToggleButton } from "@hackerfeed/ui/atoms/Toggle";
 import { ToggleLabel } from "@hackerfeed/ui/atoms/ToggleLabel";
@@ -41,7 +42,7 @@ export function StoryCard({ story, rank, markSaved = true }: StoryCardProps) {
 	const { kind: postKind, text: titleText } = splitPostKind(title);
 	const storyUrl = story.url ?? getDiscussionUrl(story.id);
 	const comments = story.descendants ?? 0;
-	const readLabel = story.url ? "Read article" : "Open post";
+	const readLabel = story.url ? "Read article" : "Open on HN";
 	const commentLabel = `${comments} ${comments === 1 ? "comment" : "comments"}`;
 
 	function recordRead() {
@@ -91,10 +92,16 @@ export function StoryCard({ story, rank, markSaved = true }: StoryCardProps) {
 						onClick={recordRead}
 						onAuxClick={recordMiddleClickRead}
 					>
-						<span>
-							{story.url ? "Read" : "Open"}
-							<WideText from="xs">{story.url ? " article" : " post"}</WideText>
-						</span>
+						{story.url ? (
+							<span>
+								Read<WideText from="xs"> article</WideText>
+							</span>
+						) : (
+							<span>
+								<WideText from="xs">Open on HN</WideText>
+								<NarrowText>On HN</NarrowText>
+							</span>
+						)}
 						<Icon icon={ArrowUpRight} size={14} />
 					</ExternalButtonLink>
 

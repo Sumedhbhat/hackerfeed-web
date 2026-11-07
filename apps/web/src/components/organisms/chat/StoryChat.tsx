@@ -110,7 +110,7 @@ function StoryTitle({ title }: { title: string }) {
 	const { kind, text } = splitPostKind(title);
 	return (
 		<>
-			{kind ? <TitleTag>{kind}</TitleTag> : null}
+			{kind ? <TitleTag size="headline">{kind}</TitleTag> : null}
 			{text}
 		</>
 	);

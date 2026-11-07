@@ -126,6 +126,7 @@ export function ProviderConversation({
 						)}
 						<SelectField
 							label="Model"
+							hideLabel
 							value={model}
 							onChange={setSelectedModel}
 							disabled={chat.isStreaming}

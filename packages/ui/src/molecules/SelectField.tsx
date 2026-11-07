@@ -13,8 +13,11 @@ export function SelectField({
 	options,
 	onChange,
 	disabled,
+	hideLabel = false,
 }: {
 	label: string;
+	/** Keep the label for screen readers only. */
+	hideLabel?: boolean;
 	value: string;
 	options: SelectOption[];
 	onChange: (value: string) => void;
@@ -28,7 +31,7 @@ export function SelectField({
 			disabled={disabled}
 		>
 			<div className="flex items-center gap-2">
-				<SelectLabel>{label}</SelectLabel>
+				<SelectLabel visuallyHidden={hideLabel}>{label}</SelectLabel>
 				<SelectTrigger />
 			</div>
 			<SelectOptions options={options} />

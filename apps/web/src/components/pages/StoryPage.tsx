@@ -1,11 +1,14 @@
+import { getDiscussionUrl } from "@hackerfeed/hacker-news/utils";
 import { Heading } from "@hackerfeed/ui/atoms/Heading";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
+import { ExternalLink } from "@hackerfeed/ui/atoms/Link";
 import { PageContainer } from "@hackerfeed/ui/atoms/PageContainer";
+import { Row } from "@hackerfeed/ui/atoms/Row";
 import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { Text } from "@hackerfeed/ui/atoms/Text";
 import { BackLink } from "@hackerfeed/ui/molecules/BackLink";
 import { StoryPageSkeleton } from "@hackerfeed/ui/molecules/StoryPageSkeleton";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { Suspense } from "react";
 import { Comment } from "#/components/organisms/story/Comment";
 import { StoryArticle } from "#/components/organisms/story/StoryArticle";
@@ -44,11 +47,16 @@ function StoryContent({ storyId }: StoryPageProps) {
 				<StoryArticle story={story} />
 
 				<Stack as="section" gap="lg">
-					<Heading level={2} size="section">
-						{story.descendants != null
-							? `${story.descendants} comments`
-							: "Discussion"}
-					</Heading>
+					<Row justify="between" align="center" wrap>
+						<Heading level={2} size="section">
+							{story.descendants != null
+								? `${story.descendants} comments`
+								: "Discussion"}
+						</Heading>
+						<ExternalLink href={getDiscussionUrl(story.id)} variant="accent">
+							View on HN <Icon icon={ArrowUpRight} size={14} />
+						</ExternalLink>
+					</Row>
 
 					{story.kids.length === 0 ? (
 						<Text tone="soft">No comments yet.</Text>

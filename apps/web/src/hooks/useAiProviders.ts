@@ -3,6 +3,11 @@ import type { ChatMessage } from "@hackerfeed/contracts/ai";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+	loadStoryChat,
+	saveStoryChat,
+	storyChatStorageKey,
+} from "#/lib/ai/chat-session";
+import {
 	disconnectAiProvider,
 	fetchAiModels,
 	fetchAiProviders,
@@ -74,7 +79,11 @@ function toStoryChatError(error: unknown): StoryChatError {
 	};
 }
 
-/** Holds one in-memory conversation about a story and streams replies into it. */
+/**
+ * Holds one conversation about a story and streams replies into it. The
+ * conversation is kept for the browser session (per story and assistant), so
+ * opening the HN comments and coming back doesn't lose it.
+ */
 export function useStoryChat(
 	storyId: number,
 	providerId: string | undefined,
@@ -89,6 +98,24 @@ export function useStoryChat(
 	const generationRef = useRef(0);
 
 	useEffect(() => () => abortRef.current?.abort(), []);
+
+	// Load the saved conversation for this story and assistant, then keep it
+	// saved. `loadedKey` stops the previous assistant's messages being written
+	// under the new key in the render before the load lands.
+	const storageKey = providerId
+		? storyChatStorageKey(storyId, providerId)
+		: null;
+	const [loadedKey, setLoadedKey] = useState<string | null>(null);
+	useEffect(() => {
+		if (!storageKey) return;
+		setMessages(loadStoryChat(storageKey));
+		setLoadedKey(storageKey);
+	}, [storageKey]);
+	useEffect(() => {
+		if (storageKey && loadedKey === storageKey) {
+			saveStoryChat(storageKey, messages);
+		}
+	}, [messages, storageKey, loadedKey]);
 
 	const run = useCallback(
 		async (history: ChatMessage[]) => {

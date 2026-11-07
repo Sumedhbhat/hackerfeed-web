@@ -169,6 +169,7 @@ beforeEach(() => {
 afterEach(() => {
 	cleanup();
 	vi.unstubAllGlobals();
+	sessionStorage.clear();
 });
 
 describe("StoryChatPage", () => {
@@ -282,6 +283,26 @@ describe("StoryChatPage", () => {
 		expect(chatBodies[0]?.messages[0]?.content).toBe(
 			"Summarize this article in a few bullet points.",
 		);
+	});
+
+	it("keeps the conversation when the reader leaves and comes back", async () => {
+		renderPage();
+		fireEvent.click(
+			await screen.findByRole("button", {
+				name: "Summarize this article in a few bullet points.",
+			}),
+		);
+		await screen.findByText("It is about X.");
+
+		cleanup();
+		renderPage();
+
+		expect(await screen.findByText("It is about X.")).toBeTruthy();
+		expect(
+			screen.queryByRole("button", {
+				name: "Summarize this article in a few bullet points.",
+			}),
+		).toBeNull();
 	});
 
 	it("uses the selected model", async () => {

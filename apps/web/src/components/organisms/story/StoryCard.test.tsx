@@ -177,9 +177,9 @@ describe("StoryCard rendering", () => {
 		expect(screen.getByRole("link", { name: /read article/i })).toBeDefined();
 	});
 
-	it("shows 'Open post' for URL-less stories", () => {
+	it("shows 'Open on HN' for URL-less stories", () => {
 		render(<StoryCard story={makeStory({ url: null })} />);
-		expect(screen.getByRole("link", { name: /open post/i })).toBeDefined();
+		expect(screen.getByRole("link", { name: /^open on hn: /i })).toBeDefined();
 	});
 });
 
@@ -201,7 +201,7 @@ describe("StoryCard link actions", () => {
 	it("links 'Open post' to the HN discussion when story has no URL", () => {
 		render(<StoryCard story={makeStory({ id: 12345, url: null })} />);
 		expect(
-			screen.getByRole("link", { name: /open post/i }).getAttribute("href"),
+			screen.getByRole("link", { name: /^open on hn: /i }).getAttribute("href"),
 		).toBe("https://news.ycombinator.com/item?id=12345");
 	});
 

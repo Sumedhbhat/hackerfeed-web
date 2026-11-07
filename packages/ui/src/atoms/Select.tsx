@@ -31,9 +31,18 @@ export function Select({
 	);
 }
 
-export function SelectLabel({ children }: { children: ReactNode }) {
+export function SelectLabel({
+	children,
+	visuallyHidden = false,
+}: {
+	children: ReactNode;
+	/** Name the field for screen readers only, when the context already says it. */
+	visuallyHidden?: boolean;
+}) {
 	return (
-		<BaseSelect.Label className="text-sm text-(--sea-ink-soft)">
+		<BaseSelect.Label
+			className={visuallyHidden ? "sr-only" : "text-sm text-(--sea-ink-soft)"}
+		>
 			{children}
 		</BaseSelect.Label>
 	);
