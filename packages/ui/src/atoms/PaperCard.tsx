@@ -1,6 +1,10 @@
 import type { ReactNode } from "react";
+import { readingCardClassName } from "./ReadingList";
 
-/** One paper in a PaperList, tinted once it is saved. */
+/**
+ * One paper in a PaperList, as its own card, tinted once saved. Its title is
+ * a `card` link, so a click anywhere on the card opens the paper.
+ */
 export function PaperCard({
 	children,
 	saved = false,
@@ -9,10 +13,8 @@ export function PaperCard({
 	saved?: boolean;
 }) {
 	return (
-		<li className={`relative ${saved ? "bg-(--bookmark-tint)" : ""}`}>
-			<article className="flex flex-col gap-2 px-4 pt-4 pb-2 sm:px-6 sm:pb-3">
-				{children}
-			</article>
+		<li className={readingCardClassName(saved)}>
+			<article className="flex flex-col gap-2 p-4 sm:p-6">{children}</article>
 		</li>
 	);
 }

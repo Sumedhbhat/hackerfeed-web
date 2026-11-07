@@ -12,7 +12,7 @@ export function PaperCardFooter({
 	save?: ReactNode;
 }) {
 	return (
-		<footer className="-mt-1 -ml-1.5 flex flex-wrap items-start gap-1 sm:-mr-2 sm:-ml-2">
+		<footer className="relative z-10 -mt-1 -ml-1.5 flex flex-wrap items-start gap-1 sm:-mr-2 sm:-ml-2">
 			{/* Save drops to its own line rather than overlapping the actions when
 			    large text doesn't fit (WCAG 1.4.4). */}
 			<div className="flex flex-wrap items-center gap-x-0.5">{actions}</div>

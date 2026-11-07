@@ -15,9 +15,12 @@ export function PaperFeedSkeleton({
 						<Skeleton width="100%" height="xl" shape="block" />
 						<Skeleton width="9rem" height="xl" shape="block" />
 					</div>
-					<div className="flex flex-col divide-y divide-(--line) rounded-xl border border-(--line) bg-(--surface-strong)">
+					<div className="flex flex-col gap-3">
 						{[0, 1, 2].map((row) => (
-							<div key={row} className="flex flex-col gap-3 px-6 py-5">
+							<div
+								key={row}
+								className="flex flex-col gap-3 rounded-xl border border-(--line) bg-(--surface-strong) p-4 shadow-(--shadow-raised) sm:p-6"
+							>
 								<Skeleton width="70%" height="lg" />
 								<Skeleton width="30%" height="xs" />
 								<Skeleton width="95%" height="sm" opacity={0.35} />

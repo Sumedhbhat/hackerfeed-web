@@ -62,9 +62,7 @@ export function PaperRow({
 				actions={
 					<PaperLinks
 						title={paper.title}
-						paperUrl={paper.paperUrl}
 						discussUrl={buildChatGptPaperDiscussionUrl(paper)}
-						onRead={() => onView("read")}
 						onDiscuss={() => onView("chat_opened")}
 					/>
 				}

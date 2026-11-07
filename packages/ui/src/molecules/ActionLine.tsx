@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
  */
 export function ActionLine({ children }: { children: ReactNode }) {
 	return (
-		<div className="-ml-1.5 flex flex-wrap items-center gap-x-0.5 sm:-ml-2">
+		<div className="relative z-10 -ml-1.5 flex flex-wrap items-center gap-x-0.5 sm:-ml-2">
 			{children}
 		</div>
 	);

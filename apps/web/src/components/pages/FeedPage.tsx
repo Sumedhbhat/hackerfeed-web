@@ -33,7 +33,7 @@ export function FeedPage() {
 		<PageContainer>
 			<Tabs value={activeFeed} onValueChange={openFeed}>
 				<Stack gap="lg">
-					<PageHeader title="Stories">
+					<PageHeader title="Stories" hideTitle>
 						<TabList aria-label="Feeds">
 							{feedTabs.map((feed) => (
 								<Tab key={feed.key} value={feed.key}>

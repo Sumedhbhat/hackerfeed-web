@@ -1,11 +1,12 @@
-@import "./fonts/fonts.css";
+@import "./fonts/poppins.css";
 @import "tailwindcss";
 @source ".";
 @plugin "@tailwindcss/typography";
 
 @theme {
-  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Source Serif 4", ui-serif, Georgia, serif;
+  /* One family everywhere: Poppins (self-hosted, SIL OFL 1.1, see fonts/OFL.txt). */
+  --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-sans);
   /* Facts under a title: source, points, author, age. */
   --text-meta: 0.8125rem;
   --text-meta--line-height: 1.25rem;

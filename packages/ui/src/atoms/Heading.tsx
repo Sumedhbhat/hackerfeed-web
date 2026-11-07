@@ -13,7 +13,7 @@ const SIZE = {
 	/** Card title, e.g. a paper. */
 	card: "font-serif text-row font-semibold leading-snug sm:text-xl",
 	/** Title of one row in a reading list. */
-	row: "font-serif text-row-sm font-semibold sm:text-row",
+	row: "text-lg font-semibold leading-snug sm:text-xl",
 	/** A heading inside running text, e.g. a chat reply: the text's own size, bold. */
 	inline: "text-read font-semibold",
 	/** Small heading for panels and groups. */

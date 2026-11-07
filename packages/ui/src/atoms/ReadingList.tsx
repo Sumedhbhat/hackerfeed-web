@@ -1,6 +1,14 @@
 import type { ReactNode } from "react";
 
-/** One bordered sheet holding a list of stories or papers, rows split by hairlines. */
+/**
+ * The look of one item in a ReadingList: its own bordered card, tinted once
+ * saved. Rows use it so each story or paper reads as a block of its own.
+ */
+export function readingCardClassName(saved = false): string {
+	return `relative rounded-xl border border-(--line) shadow-(--shadow-raised) ${saved ? "bg-(--bookmark-tint)" : "bg-(--surface-strong)"}`;
+}
+
+/** A list of stories or papers, each in its own card with space between. */
 export function ReadingList({
 	children,
 	ordered = false,
@@ -19,7 +27,7 @@ export function ReadingList({
 		<Element
 			id={id}
 			aria-label={ariaLabel}
-			className="m-0 list-none divide-y divide-(--line) overflow-hidden rounded-xl border border-(--line) bg-(--surface-strong) p-0 shadow-(--shadow-raised)"
+			className="m-0 flex list-none flex-col gap-3 p-0"
 		>
 			{children}
 		</Element>
