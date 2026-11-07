@@ -18,7 +18,7 @@ export function ToggleLabel({
 	return (
 		<span
 			aria-hidden="true"
-			className={`grid ${iconOnlyOnPhones ? "max-[379px]:hidden" : ""}`}
+			className={`grid ${iconOnlyOnPhones ? "max-xs:hidden" : ""}`}
 		>
 			<span className={`col-start-1 row-start-1 ${on ? "invisible" : ""}`}>
 				{offLabel}

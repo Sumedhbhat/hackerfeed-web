@@ -8,12 +8,17 @@ import {
 	ButtonLink,
 	ExternalButtonLink,
 } from "@hackerfeed/ui/atoms/Button";
+import { Icon } from "@hackerfeed/ui/atoms/Icon";
+import { ToggleButton } from "@hackerfeed/ui/atoms/Toggle";
+import { ToggleLabel } from "@hackerfeed/ui/atoms/ToggleLabel";
 import { CardSkeleton } from "@hackerfeed/ui/molecules/CardSkeleton";
 import { NoticeCard } from "@hackerfeed/ui/molecules/NoticeCard";
 import { StoryChatHeader } from "@hackerfeed/ui/molecules/StoryChatHeader";
+import { Bookmark, MessageSquare } from "lucide-react";
 import { ChatConversation } from "#/components/organisms/chat/ChatConversation";
 import { useAiProviders } from "#/hooks/useAiProviders";
 import { signIn } from "#/hooks/useAuthSession";
+import { useFavorites } from "#/hooks/useFavorites";
 
 /** Story header plus the chat, or what the user needs to do before chatting. */
 export function StoryChat({ story }: { story: HackerNewsStoryRecord }) {
@@ -23,7 +28,11 @@ export function StoryChat({ story }: { story: HackerNewsStoryRecord }) {
 
 	return (
 		<>
-			<StoryChatHeader title={getStoryTitle(story)} url={story.url} />
+			<StoryChatHeader
+				title={getStoryTitle(story)}
+				url={story.url}
+				actions={<StoryChatActions story={story} />}
+			/>
 
 			{status.isLoading ? (
 				<CardSkeleton width="50%" />
@@ -63,6 +72,33 @@ export function StoryChat({ story }: { story: HackerNewsStoryRecord }) {
 			) : (
 				<ChatConversation storyId={story.id} providers={connectedProviders} />
 			)}
+		</>
+	);
+}
+
+/** Save the story and jump to its HN comments without leaving the chat first. */
+function StoryChatActions({ story }: { story: HackerNewsStoryRecord }) {
+	const { isFavorited, toggleFavorite } = useFavorites();
+	const saved = isFavorited(story.id);
+	const comments = story.descendants ?? 0;
+	return (
+		<>
+			<ButtonLink
+				variant="ghost"
+				to="/story/$storyId"
+				params={{ storyId: story.id }}
+			>
+				<Icon icon={MessageSquare} />
+				{comments} {comments === 1 ? "comment" : "comments"}
+			</ButtonLink>
+			<ToggleButton
+				aria-label={`Save ${getStoryTitle(story)}`}
+				pressed={saved}
+				onPressedChange={() => toggleFavorite(story)}
+			>
+				<Icon icon={Bookmark} filled={saved} />
+				<ToggleLabel on={saved} offLabel="Save" onLabel="Saved" />
+			</ToggleButton>
 		</>
 	);
 }

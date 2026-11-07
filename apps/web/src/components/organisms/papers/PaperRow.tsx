@@ -9,6 +9,7 @@ import { PaperResourceLinks } from "@hackerfeed/ui/molecules/PaperResourceLinks"
 import { PaperSignals } from "@hackerfeed/ui/molecules/PaperSignals";
 import { PaperTitle } from "@hackerfeed/ui/molecules/PaperTitle";
 import { Bookmark } from "lucide-react";
+import { useState } from "react";
 import {
 	buildChatGptPaperDiscussionUrl,
 	formatAuthors,
@@ -37,8 +38,9 @@ export function PaperRow({
 	onView,
 	paper,
 }: PaperRowProps) {
+	const [justSaved, setJustSaved] = useState(false);
 	return (
-		<PaperCard saved={markSaved && saved}>
+		<PaperCard saved={markSaved && saved} justSaved={justSaved}>
 			<PaperTitle href={paper.paperUrl} onClick={() => onView("read")}>
 				{paper.title}
 			</PaperTitle>
@@ -74,7 +76,10 @@ export function PaperRow({
 							aria-label={`Save ${paper.title}`}
 							pressed={saved}
 							disabled={pending}
-							onPressedChange={onToggleFavorite}
+							onPressedChange={(pressed) => {
+								setJustSaved(pressed);
+								onToggleFavorite();
+							}}
 						>
 							<Icon icon={Bookmark} filled={saved} />
 							<ToggleLabel

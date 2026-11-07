@@ -13,6 +13,7 @@ import { RefreshCw } from "lucide-react";
 import { useMemo, useState } from "react";
 import { usePaperFavorites } from "#/hooks/usePaperFavorites";
 import { useViewActivity } from "#/hooks/useViewActivity";
+import { formatEditionDate } from "#/lib/dates/edition";
 import { matchesFilters } from "#/lib/papers/presentation";
 import { PaperRow } from "./PaperRow";
 
@@ -62,11 +63,13 @@ export function PapersFeed({
 		<PaperPageShell>
 			<PageHeader
 				title="Papers"
+				dateline={formatEditionDate(selectedDate)}
 				description="The day's most discussed research papers."
 			/>
 			<PaperEditionToolbar
 				query={filters.query ?? ""}
 				date={selectedDate}
+				canGoNext={Boolean(filters.date)}
 				onQueryChange={(value) =>
 					onFiltersChange({ ...filters, query: value || undefined })
 				}

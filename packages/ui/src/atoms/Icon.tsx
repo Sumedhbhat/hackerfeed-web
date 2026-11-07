@@ -25,7 +25,7 @@ export function Icon({
 			aria-hidden="true"
 			strokeWidth={1.75}
 			fill={filled ? "currentColor" : "none"}
-			className={`inline shrink-0${muted ? " opacity-70" : ""}${accent ? " text-(--lagoon)" : ""}`}
+			className={`inline shrink-0 ${muted ? "opacity-70" : ""} ${accent ? "text-(--lagoon)" : ""}`}
 		/>
 	);
 }

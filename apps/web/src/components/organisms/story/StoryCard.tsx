@@ -15,6 +15,7 @@ import { WideText } from "@hackerfeed/ui/atoms/WideText";
 import { FeedRow } from "@hackerfeed/ui/molecules/FeedRow";
 import { StoryMeta } from "@hackerfeed/ui/molecules/StoryMeta";
 import { ArrowUpRight, Bookmark, MessageSquare, Sparkles } from "lucide-react";
+import { useState } from "react";
 import { useFavorites } from "#/hooks/useFavorites";
 import { useFeatureFlag } from "#/hooks/useFeatureFlags";
 import { useViewActivity } from "#/hooks/useViewActivity";
@@ -32,6 +33,7 @@ export function StoryCard({ story, rank, markSaved = true }: StoryCardProps) {
 	const { recordStoryView } = useViewActivity();
 	const aiChat = useFeatureFlag("aiChat");
 	const isFav = isFavorited(story.id);
+	const [justSaved, setJustSaved] = useState(false);
 
 	const title = getStoryTitle(story);
 	const storyUrl = story.url ?? getDiscussionUrl(story.id);
@@ -51,6 +53,7 @@ export function StoryCard({ story, rank, markSaved = true }: StoryCardProps) {
 		<FeedRow
 			rank={rank}
 			saved={markSaved && isFav}
+			justSaved={justSaved}
 			title={
 				<Heading level={2} size="row">
 					<ExternalLink
@@ -114,7 +117,10 @@ export function StoryCard({ story, rank, markSaved = true }: StoryCardProps) {
 				<ToggleButton
 					aria-label={`Save ${title}`}
 					pressed={isFav}
-					onPressedChange={() => toggleFavorite(story)}
+					onPressedChange={(pressed) => {
+						setJustSaved(pressed);
+						toggleFavorite(story);
+					}}
 				>
 					<Icon icon={Bookmark} filled={isFav} />
 					<ToggleLabel

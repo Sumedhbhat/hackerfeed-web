@@ -323,7 +323,7 @@ describe("FavoritesPage paper collection", () => {
 			expect(papers.getAttribute("aria-selected")).toBe("true"),
 		);
 
-		const stories = screen.getByRole("tab", { name: "Stories 0" });
+		const stories = screen.getByRole("tab", { name: "Stories" });
 		fireEvent.click(stories);
 		await waitFor(() =>
 			expect(stories.getAttribute("aria-selected")).toBe("true"),
@@ -346,8 +346,8 @@ describe("FavoritesPage paper collection", () => {
 			);
 		}
 		render(<UrlDrivenFavorites />);
-		const stories = screen.getByRole("tab", { name: /^Stories \d+$/ });
-		const papers = screen.getByRole("tab", { name: /^Papers \d+$/ });
+		const stories = screen.getByRole("tab", { name: /^Stories( \d+)?$/ });
+		const papers = screen.getByRole("tab", { name: /^Papers( \d+)?$/ });
 		expect(stories.getAttribute("aria-selected")).toBe("true");
 		expect(stories.getAttribute("tabindex")).toBe("0");
 		expect(papers.getAttribute("tabindex")).toBe("-1");

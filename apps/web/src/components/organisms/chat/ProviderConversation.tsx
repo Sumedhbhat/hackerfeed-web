@@ -80,7 +80,7 @@ export function ProviderConversation({
 
 	return (
 		<Card as="section" aria-label="Chat" padding="sm">
-			<Stack gap="md">
+			<Stack gap="lg">
 				<Row justify="between" wrap>
 					<Row wrap>
 						{providers.length > 1 ? (

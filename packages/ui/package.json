@@ -43,6 +43,7 @@
 		"./atoms/Toggle": "./src/atoms/Toggle.tsx",
 		"./atoms/ToggleLabel": "./src/atoms/ToggleLabel.tsx",
 		"./atoms/WideText": "./src/atoms/WideText.tsx",
+		"./molecules/ActionLine": "./src/molecules/ActionLine.tsx",
 		"./molecules/AppShell": "./src/molecules/AppShell.tsx",
 		"./molecules/BackLink": "./src/molecules/BackLink.tsx",
 		"./molecules/CardSkeleton": "./src/molecules/CardSkeleton.tsx",

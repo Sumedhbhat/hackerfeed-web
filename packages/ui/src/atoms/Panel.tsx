@@ -11,7 +11,7 @@ type PanelProps = Omit<HTMLAttributes<HTMLElement>, "className" | "style"> & {
 	width?: keyof typeof WIDTH;
 };
 
-/** Flat bordered box, centered when given a width. Used for forms and status screens. */
+/** Bordered box aligned to the page column, capped when given a width. Used for forms and status screens. */
 export function Panel({
 	as: Element = "section",
 	width = "full",
@@ -19,7 +19,7 @@ export function Panel({
 }: PanelProps) {
 	return (
 		<Element
-			className={`mx-auto w-full rounded-xl border border-(--line) bg-(--surface-strong) p-5 shadow-(--shadow-raised) sm:p-6 ${WIDTH[width]}`}
+			className={`w-full rounded-xl border border-(--line) bg-(--surface-strong) p-5 shadow-(--shadow-raised) sm:p-6 ${WIDTH[width]}`}
 			{...props}
 		/>
 	);

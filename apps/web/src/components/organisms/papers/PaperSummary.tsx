@@ -5,7 +5,7 @@ import {
 } from "@hackerfeed/ui/atoms/Collapsible";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
 import { PaperSummaryText } from "@hackerfeed/ui/atoms/PaperSummaryText";
-import { Row } from "@hackerfeed/ui/atoms/Row";
+import { ActionLine } from "@hackerfeed/ui/molecules/ActionLine";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import type { PaperPresentation } from "#/lib/papers/presentation";
@@ -46,15 +46,15 @@ export function PaperSummary({
 				<PaperSummaryText>{paper.abstract ?? paper.summary}</PaperSummaryText>
 			</CollapsiblePanel>
 			{canExpand || links ? (
-				<Row gap="xs" wrap>
+				<ActionLine>
 					{canExpand ? (
-						<CollapsibleTrigger flush>
+						<CollapsibleTrigger>
 							{open ? "Show less" : "Show more"}
 							<Icon icon={open ? ChevronUp : ChevronDown} />
 						</CollapsibleTrigger>
 					) : null}
 					{links}
-				</Row>
+				</ActionLine>
 			) : null}
 		</Collapsible>
 	);

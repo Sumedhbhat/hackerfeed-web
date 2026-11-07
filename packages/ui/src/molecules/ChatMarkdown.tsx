@@ -27,9 +27,19 @@ const FENCE = /^\s*(```|~~~)/;
 const ORDERED = /^(\s*)(\d+)[.)]\s+/;
 const BULLET = /^(\s*)[-*•]\s+/;
 
-/** Every two spaces of indent nest a list item one level deeper (up to 3). */
-function nestLevel(indent: string): number {
-	return Math.min(Math.floor(indent.replace(/\t/g, "  ").length / 2), 3);
+/**
+ * Nesting follows the indents actually used: an item indented further than
+ * the one before goes one level deeper, an item back at an earlier indent
+ * returns to that level, and equal indents are siblings (so 2-space and
+ * 4-space styles both work). `indents` holds the indent of each open level.
+ */
+function nestLevel(indents: number[], indent: string): number {
+	const width = indent.replace(/\t/g, "    ").length;
+	while (indents.length > 1 && width < (indents.at(-1) ?? 0)) indents.pop();
+	if (indents.length === 0) indents.push(width);
+	else if (width > (indents.at(-1) ?? 0) && indents.length < 4)
+		indents.push(width);
+	return indents.length - 1;
 }
 
 /** Adds an item `level` lists deep below the last item of `list`. */
@@ -61,6 +71,7 @@ function toBlocks(text: string): Block[] {
 	// A blank line ends a paragraph, but a list carries on across blank lines
 	// ("1. a\n\n2. b" is one list), as Markdown renderers do.
 	let afterBlank = false;
+	let indents: number[] = [];
 	let fence: {
 		marker: string;
 		block: { kind: "pre"; lines: string[] };
@@ -98,12 +109,16 @@ function toBlocks(text: string): Block[] {
 		const marker = ordered ?? bullet;
 		if (marker) {
 			const kind = ordered ? "ol" : "ul";
-			const level = nestLevel(marker[1] ?? "");
 			const text = line.slice(marker[0].length);
 			const start = ordered ? Number(ordered[2]) : 1;
-			if (lastList && (level > 0 || lastList.kind === kind)) {
+			const continues = lastList !== null && indents.length > 0;
+			if (!continues) indents = [];
+			const level = nestLevel(indents, marker[1] ?? "");
+			if (lastList && continues && (level > 0 || lastList.kind === kind)) {
 				addItem(lastList, level, kind, text, start);
 			} else {
+				indents = [];
+				nestLevel(indents, marker[1] ?? "");
 				blocks.push({ kind, start, items: [{ text }] });
 			}
 		} else if (lastList && !afterBlank) {
@@ -120,8 +135,16 @@ function toBlocks(text: string): Block[] {
 	return blocks;
 }
 
-const INLINE = /(\*\*[^*]+\*\*|`[^`]+`|\[[^\]]+\]\([^)\s]+\))/g;
-const LINK = /^\[([^\]]+)\]\(([^)\s]+)\)$/;
+// A link destination may hold one level of balanced parentheses, as in
+// https://en.wikipedia.org/wiki/Cache_(computing).
+const DESTINATION = String.raw`(?:[^()\s]|\([^()\s]*\))+`;
+const INLINE = new RegExp(
+	String.raw`(\*\*[^*]+\*\*|` +
+		"`[^`]+`" +
+		String.raw`|\[[^\]]+\]\(${DESTINATION}\))`,
+	"g",
+);
+const LINK = new RegExp(String.raw`^\[([^\]]+)\]\((${DESTINATION})\)$`);
 
 /** Only web links become anchors; anything else (javascript:, data:) stays text. */
 function safeHref(url: string): string | null {

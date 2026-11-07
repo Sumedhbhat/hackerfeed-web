@@ -105,6 +105,30 @@ describe("ChatMarkdown", () => {
 		expect(container.querySelectorAll("p")).toHaveLength(0);
 	});
 
+	it("treats items at the same indent as siblings, whatever the indent width", () => {
+		const { container } = render(
+			<ChatMarkdown
+				text={"1. Parent\n    - Child one\n    - Child two\n2. Next"}
+			/>,
+		);
+
+		const top = container.querySelector("ol");
+		expect(top?.querySelectorAll(":scope > li")).toHaveLength(2);
+		const nested = top?.querySelector(":scope > li > ul");
+		expect(nested?.querySelectorAll(":scope > li")).toHaveLength(2);
+		expect(nested?.querySelector("ul")).toBeNull();
+	});
+
+	it("keeps balanced parentheses inside a link destination", () => {
+		render(
+			<ChatMarkdown text="See [cache](https://en.wikipedia.org/wiki/Cache_(computing))." />,
+		);
+
+		expect(
+			screen.getByRole("link", { name: "cache" }).getAttribute("href"),
+		).toBe("https://en.wikipedia.org/wiki/Cache_(computing)");
+	});
+
 	it("shows markup in a reply as text instead of rendering it", () => {
 		const { container } = render(
 			<ChatMarkdown text={'<img src=x onerror="alert(1)"> **hi**'} />,
