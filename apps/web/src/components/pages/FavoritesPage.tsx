@@ -317,10 +317,12 @@ function useRemovalFeedback(type: FavoritesType, count: number) {
 		const last = lastRef.current;
 		lastRef.current = { type, count };
 		if (last.type !== type || count >= last.count) return;
+		// Undo (see useLastRemoved) is only offered for a single unsave, not Clear.
+		const undo = last.count - count === 1 ? " Undo is above the list." : "";
 		setMessage(
 			count === 0
-				? "Removed from Saved. Nothing saved here now. Undo is above the list."
-				: `Removed from Saved. ${count} left. Undo is above the list.`,
+				? `Removed from Saved. Nothing saved here now.${undo}`
+				: `Removed from Saved. ${count} left.${undo}`,
 		);
 		requestAnimationFrame(() => {
 			if (!focusIsLost()) return;

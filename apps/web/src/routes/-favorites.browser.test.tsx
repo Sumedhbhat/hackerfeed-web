@@ -319,7 +319,10 @@ describe("FavoritesPage paper collection", () => {
 	it("clears only papers after confirmation", async () => {
 		authMock.user = { id: "paper-clear-user" };
 		trpcMock.paperList.mockResolvedValue({
-			items: [savedPaper()],
+			items: [
+				savedPaper(),
+				savedPaper({ arxivId: "2607.00002", title: "Older Paper" }),
+			],
 			nextCursor: null,
 		});
 		render(<FavoritesPage activeType="papers" />);
@@ -335,6 +338,12 @@ describe("FavoritesPage paper collection", () => {
 		await waitFor(() => expect(trpcMock.paperClear).toHaveBeenCalledTimes(1));
 		expect(trpcMock.clear).not.toHaveBeenCalled();
 		expect(await screen.findByText("No saved papers yet")).toBeTruthy();
+		// Clear has no Undo, so the status must not promise one.
+		const status = await screen.findByText(/^Removed from Saved\./, {
+			selector: "output",
+		});
+		expect(status.textContent).not.toContain("Undo");
+		expect(screen.queryByRole("button", { name: /^Undo/ })).toBeNull();
 	});
 
 	it("shows an initial paper load failure and recovers on refresh", async () => {
