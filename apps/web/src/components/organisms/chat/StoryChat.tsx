@@ -37,7 +37,7 @@ export function StoryChat({ story }: { story: HackerNewsStoryRecord }) {
 			/>
 
 			{status.isLoading ? (
-				<CardSkeleton width="50%" />
+				<CardSkeleton width="50%" label="Loading AI assistants" />
 			) : !status.isSignedIn ? (
 				<NoticeCard
 					message="Sign in to HackerFeed, then connect an AI assistant from your profile to discuss this story here."

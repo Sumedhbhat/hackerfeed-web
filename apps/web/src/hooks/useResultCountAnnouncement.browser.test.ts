@@ -29,4 +29,23 @@ describe("useResultCountAnnouncement", () => {
 		act(() => vi.advanceTimersByTime(700));
 		expect(result.current).toBe("1 paper");
 	});
+
+	it("stays quiet when only the count changes (an unsave, Undo or Clear)", () => {
+		const { result, rerender } = renderHook(
+			({ count, filter }) => useResultCountAnnouncement(count, NOUNS, filter),
+			{ initialProps: { count: 3, filter: "" } },
+		);
+		rerender({ count: 3, filter: "q" });
+		act(() => vi.advanceTimersByTime(700));
+		rerender({ count: 3, filter: "" });
+		act(() => vi.advanceTimersByTime(700));
+		expect(result.current).toBe("3 papers");
+
+		// The list shrinks with no search change: nothing new is said.
+		rerender({ count: 2, filter: "" });
+		act(() => vi.advanceTimersByTime(1000));
+		rerender({ count: 0, filter: "" });
+		act(() => vi.advanceTimersByTime(1000));
+		expect(result.current).toBe("3 papers");
+	});
 });

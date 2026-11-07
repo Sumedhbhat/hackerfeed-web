@@ -33,7 +33,7 @@ export function StoryChatPage({ storyId }: StoryChatPageProps) {
 			/>
 
 			{isPending ? (
-				<CardSkeleton width="75%" height="xl" />
+				<CardSkeleton width="75%" height="xl" label="Loading story" />
 			) : isError || !story ? (
 				<NoticeCard
 					title="Story unavailable."

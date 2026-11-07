@@ -107,7 +107,7 @@ export function ProviderConversation({
 	}, [messageCount, streamingLength]);
 
 	if (models.isPending) {
-		return <CardSkeleton width="33%" />;
+		return <CardSkeleton width="33%" label="Loading models" />;
 	}
 
 	if (models.isError || !model) {
@@ -217,6 +217,7 @@ export function ProviderConversation({
 						{chat.canUndoReset && messageCount === 0 ? (
 							<InlineNotice
 								boxed
+								quiet
 								message="Started a new chat."
 								action={
 									<Button

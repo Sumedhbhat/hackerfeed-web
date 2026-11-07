@@ -61,7 +61,11 @@ export function PapersFeed({
 	const emptyMessage = hasPapers
 		? "No papers match these filters."
 		: filters.date
-			? "No successful paper edition exists for this date."
+			? `No papers for ${formatEditionDate(filters.date)}.${
+					latestDate && latestDate !== filters.date
+						? ` The latest edition is ${formatEditionDate(latestDate)}.`
+						: ""
+				}`
 			: selectedDate
 				? "No papers are available for this edition."
 				: "No paper editions have been ingested yet.";
@@ -83,6 +87,7 @@ export function PapersFeed({
 			<PaperEditionToolbar
 				query={filters.query ?? ""}
 				date={selectedDate}
+				latestDate={latestDate}
 				canGoNext={Boolean(
 					latestDate && selectedDate && selectedDate < latestDate,
 				)}

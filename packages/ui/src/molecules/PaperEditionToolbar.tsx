@@ -19,6 +19,7 @@ export function PaperEditionToolbar({
 	onQueryChange,
 	onDateChange,
 	canGoNext = true,
+	latestDate,
 }: {
 	query: string;
 	date: string;
@@ -26,6 +27,8 @@ export function PaperEditionToolbar({
 	onDateChange: (date: string) => void;
 	/** False on the latest edition, where there is no next day yet. */
 	canGoNext?: boolean;
+	/** The newest edition; later dates can't be picked (WCAG 3.3.3). */
+	latestDate?: string;
 }) {
 	// Typing a date fires a change per segment; only load the edition once the
 	// reader leaves the field or presses Enter (WCAG 3.2.2).
@@ -59,6 +62,7 @@ export function PaperEditionToolbar({
 					<TextInput
 						variant="bare"
 						type="date"
+						max={latestDate}
 						value={draft}
 						onChange={(event) => setDraft(event.target.value)}
 						onBlur={commit}
