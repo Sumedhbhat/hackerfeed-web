@@ -12,7 +12,7 @@ export function PaperCardFooter({
 	save?: ReactNode;
 }) {
 	return (
-		<footer className="-ml-1.5 flex items-start gap-1 sm:-mr-2 sm:-ml-2">
+		<footer className="-mt-1 -ml-1.5 flex items-start gap-1 sm:-mr-2 sm:-ml-2">
 			<div className="flex min-w-0 flex-wrap items-center gap-x-0.5">
 				{actions}
 			</div>

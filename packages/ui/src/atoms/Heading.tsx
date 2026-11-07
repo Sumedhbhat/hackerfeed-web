@@ -14,6 +14,8 @@ const SIZE = {
 	card: "font-serif text-row font-semibold leading-snug sm:text-xl",
 	/** Title of one row in a reading list. */
 	row: "font-serif text-row-sm font-semibold sm:text-row",
+	/** A heading inside running text, e.g. a chat reply: the text's own size, bold. */
+	inline: "text-read font-semibold",
 	/** Small heading for panels and groups. */
 	small: "text-base font-semibold tracking-tight",
 } as const;

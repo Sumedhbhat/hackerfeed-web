@@ -46,9 +46,27 @@ export function ProviderConversation({
 	const messageCount = chat.messages.length;
 	const streamingLength = chat.streamingText?.length ?? 0;
 
+	// Keep the newest text and the composer in view while a reply streams, but
+	// only while the reader is at the bottom: scrolling up to reread stops it.
+	const followRef = useRef(true);
+	const lastCountRef = useRef(messageCount);
+	useEffect(() => {
+		const onScroll = () => {
+			followRef.current =
+				window.innerHeight + window.scrollY >=
+				document.documentElement.scrollHeight - 160;
+		};
+		window.addEventListener("scroll", onScroll, { passive: true });
+		return () => window.removeEventListener("scroll", onScroll);
+	}, []);
+
 	// biome-ignore lint/correctness/useExhaustiveDependencies: scroll as content grows
 	useEffect(() => {
-		endRef.current?.scrollIntoView?.({ block: "end" });
+		const newMessage = messageCount !== lastCountRef.current;
+		lastCountRef.current = messageCount;
+		if (newMessage || followRef.current) {
+			endRef.current?.scrollIntoView?.({ block: "end" });
+		}
 	}, [messageCount, streamingLength]);
 
 	if (models.isPending) {
@@ -179,7 +197,6 @@ export function ProviderConversation({
 							/>
 						) : null}
 					</Stack>
-					<div ref={endRef} />
 				</div>
 
 				<ChatComposer
@@ -192,6 +209,8 @@ export function ProviderConversation({
 					maxLength={MAX_CHAT_MESSAGE_LENGTH}
 					placeholder="Ask about this story…"
 				/>
+				{/* Below the composer, so following the reply keeps the input in view. */}
+				<div ref={endRef} />
 			</Stack>
 		</Card>
 	);

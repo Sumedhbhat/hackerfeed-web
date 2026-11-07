@@ -47,7 +47,7 @@ export function ProfilePage({ search }: { search: ProfileSearch }) {
 	if (isLoading) {
 		return (
 			<PageContainer spacing="status">
-				<Panel as="div" width="lg">
+				<Panel as="div" width="full">
 					<SkeletonGroup>
 						<Stack gap="md">
 							<Skeleton width="5rem" height="avatar" shape="circle" />
@@ -63,7 +63,7 @@ export function ProfilePage({ search }: { search: ProfileSearch }) {
 	if (!user) {
 		return (
 			<PageContainer spacing="status">
-				<Panel width="lg">
+				<Panel width="full">
 					<Stack gap="md" align="start">
 						<IconBadge icon={User} tone="soft" size={20} />
 						<Heading level={1} size="section">
@@ -81,7 +81,7 @@ export function ProfilePage({ search }: { search: ProfileSearch }) {
 
 	return (
 		<PageContainer spacing="status">
-			<Panel width="lg">
+			<Panel width="full">
 				<Stack gap="lg">
 					<ProfileSummary
 						name={getDisplayName(user.firstName, user.lastName, user.email)}

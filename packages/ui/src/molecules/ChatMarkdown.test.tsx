@@ -77,7 +77,9 @@ describe("ChatMarkdown", () => {
 		);
 
 		expect(container.textContent).not.toContain("##");
-		expect(screen.getByText("Sources").className).toContain("font-semibold");
+		expect(
+			screen.getByRole("heading", { name: "Sources", level: 3 }),
+		).toBeTruthy();
 		const link = screen.getByRole("link", { name: "the paper" });
 		expect(link.getAttribute("href")).toBe("https://arxiv.org/abs/1");
 		expect(link.getAttribute("target")).toBe("_blank");

@@ -37,7 +37,12 @@ export function FeedRow({
 				</span>
 			) : null}
 			<div className="flex min-w-0 flex-1 flex-col gap-1">
-				<div className={saved ? "pr-8" : undefined}>{title}</div>
+				<div>
+					{/* Keeps the ribbon's spot free beside the first line on every row,
+					    so saving never re-wraps the title. */}
+					<span aria-hidden="true" className="float-right h-5 w-8 xs:w-12 sm:w-10" />
+					{title}
+				</div>
 				<div className="flex flex-col gap-1 lg:flex-row lg:items-center lg:justify-between lg:gap-4">
 					{meta}
 					<div className="-mt-1.5 -ml-1.5 flex items-center gap-1 sm:-mr-2 sm:-ml-2 lg:mt-0 lg:ml-0 lg:shrink-0">

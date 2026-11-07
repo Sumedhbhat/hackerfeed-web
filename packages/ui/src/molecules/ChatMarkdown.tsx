@@ -1,5 +1,6 @@
 import { Fragment, type ReactNode } from "react";
 import { CodeBlock } from "../atoms/CodeBlock";
+import { Heading } from "../atoms/Heading";
 import { ExternalLink } from "../atoms/Link";
 import { ProseList, ProseListItem } from "../atoms/ProseList";
 import { Text } from "../atoms/Text";
@@ -18,9 +19,9 @@ type Block =
 	| { kind: "p"; lines: string[] }
 	| ListBlock
 	| { kind: "pre"; lines: string[] }
-	| { kind: "h"; text: string };
+	| { kind: "h"; level: 3 | 4; text: string };
 
-const HEADING = /^\s{0,3}#{1,6}\s+(.*?)\s*#*\s*$/;
+const HEADING = /^\s{0,3}(#{1,6})\s+(.*?)\s*#*\s*$/;
 
 const FENCE = /^\s*(```|~~~)/;
 
@@ -98,7 +99,9 @@ function toBlocks(text: string): Block[] {
 		}
 		const heading = HEADING.exec(line);
 		if (heading) {
-			blocks.push({ kind: "h", text: heading[1] ?? "" });
+			// The page already has h1 and h2; a reply's own headings sit below them.
+			const level = (heading[1]?.length ?? 1) <= 2 ? 3 : 4;
+			blocks.push({ kind: "h", level, text: heading[2] ?? "" });
 			afterBlank = false;
 			continue;
 		}
@@ -201,9 +204,9 @@ export function ChatMarkdown({ text }: { text: string }) {
 				const key = `${block.kind}-${index}`;
 				if (block.kind === "h") {
 					return (
-						<Text key={key} size="inherit" weight="semibold">
+						<Heading key={key} level={block.level} size="inline">
 							{inline(block.text)}
-						</Text>
+						</Heading>
 					);
 				}
 				if (block.kind === "pre") {
