@@ -59,6 +59,15 @@ describe("ChatMarkdown", () => {
 		expect(container.querySelectorAll("p")).toHaveLength(2);
 	});
 
+	it("makes code blocks a named, focusable region so the keyboard can scroll them", () => {
+		const { container } = render(
+			<ChatMarkdown text={`\`\`\`\n${"x".repeat(200)}\n\`\`\``} />,
+		);
+		const region = container.querySelector("pre")?.closest("section");
+		expect(region?.getAttribute("tabindex")).toBe("0");
+		expect(region?.getAttribute("aria-label")).toBe("Code");
+	});
+
 	it("closes a longer fence only with a fence at least as long", () => {
 		const { container } = render(
 			<ChatMarkdown text={"````md\n```js\nx\n```\n````\n\nDone."} />,
