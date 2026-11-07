@@ -54,7 +54,7 @@ describe("StoryArticle activity", () => {
 		render(<StoryArticle story={story} />);
 
 		fireEvent.click(screen.getByRole("link", { name: /read article/i }));
-		fireEvent.click(screen.getByRole("link", { name: /^ask ai about/i }));
+		fireEvent.click(screen.getByRole("link", { name: /^discuss with ai: /i }));
 
 		expect(viewStory.mock.calls).toEqual([
 			[{ action: "read", story }],

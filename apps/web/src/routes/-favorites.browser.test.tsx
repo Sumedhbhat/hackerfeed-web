@@ -186,10 +186,9 @@ describe("FavoritesPage backend source of truth", () => {
 		fireEvent.click(second);
 
 		// Not back to the top of the list: the next row, where "Second" was.
+		// The row's first control is its title link.
 		await waitFor(() =>
-			expect(document.activeElement?.getAttribute("aria-label")).toMatch(
-				/Third$/,
-			),
+			expect(document.activeElement?.textContent).toBe("Third"),
 		);
 	});
 

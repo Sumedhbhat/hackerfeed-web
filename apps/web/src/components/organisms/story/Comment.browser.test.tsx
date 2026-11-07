@@ -4,6 +4,7 @@ import { act, cleanup, render, screen } from "@testing-library/react";
 import { Suspense } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { Comment } from "#/components/organisms/story/Comment";
+import { ThreadExpansionProvider } from "#/hooks/useThreadExpansion";
 
 const comment = (id: number, kids: number[] = []): HackerNewsCommentRecord => ({
 	id,
@@ -49,5 +50,27 @@ describe("Comment replies", () => {
 		expect(document.activeElement).toBe(trigger);
 		expect(await screen.findByText("Comment 2")).toBeTruthy();
 		expect(document.activeElement).toBe(trigger);
+	});
+
+	it("opens and closes every comment's replies with Expand all / Collapse all", async () => {
+		const client = new QueryClient();
+		const tree = (mode: "expand" | "collapse" | null, revision: number) => (
+			<QueryClientProvider client={client}>
+				<ThreadExpansionProvider value={{ mode, revision }}>
+					<ul>
+						<Comment comment={comment(1, [2])} />
+					</ul>
+				</ThreadExpansionProvider>
+			</QueryClientProvider>
+		);
+		const { rerender } = render(tree(null, 0));
+		expect(screen.queryByText("Comment 2")).toBeNull();
+
+		rerender(tree("expand", 1));
+		expect(await screen.findByText("Comment 2")).toBeTruthy();
+		expect(screen.getByRole("button", { name: /Hide replies/ })).toBeTruthy();
+
+		rerender(tree("collapse", 2));
+		expect(await screen.findByRole("button", { name: /1 reply/ })).toBeTruthy();
 	});
 });

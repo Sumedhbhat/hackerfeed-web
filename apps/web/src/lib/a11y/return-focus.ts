@@ -12,6 +12,15 @@ type ReturnFocus = {
 	path: string;
 };
 
+/** What identifies a control again after the page re-renders: its aria-label, or its text (title links). */
+function controlLabel(control: Element): string {
+	return (
+		control.getAttribute("aria-label") ??
+		control.textContent?.replace(/\s+/g, " ").trim() ??
+		""
+	);
+}
+
 type RouterHistoryState = { __TSR_key?: string; __TSR_index?: number } | null;
 
 /** The router's key for the current history entry. */
@@ -35,7 +44,7 @@ function readSaved(): ReturnFocus | null {
 export function rememberReturnFocus(control: Element) {
 	const entry = historyEntryKey();
 	const index = historyIndex();
-	const label = control.getAttribute("aria-label");
+	const label = controlLabel(control);
 	if (!entry || index === undefined || !label) return;
 	const path = window.location.pathname;
 	try {
@@ -56,8 +65,8 @@ export function restoreReturnFocus(): boolean {
 	const saved = readSaved();
 	if (!saved || saved.entry !== historyEntryKey()) return false;
 	const control = [
-		...document.querySelectorAll<HTMLElement>("[aria-label]"),
-	].find((element) => element.getAttribute("aria-label") === saved.label);
+		...document.querySelectorAll<HTMLElement>("a[href], button"),
+	].find((element) => controlLabel(element) === saved.label);
 	if (!control) return false;
 	try {
 		sessionStorage.removeItem(STORAGE_KEY);

@@ -90,3 +90,16 @@ export function splitPostKind(title: string): { kind?: string; text: string } {
 		? { kind: match[1], text: match[2] }
 		: { text: title };
 }
+
+/**
+ * Whether a story is mainly its own HN thread: Ask HN and Show HN posts (the
+ * question or the maker's description, then the replies) and posts with no
+ * link. These open the discussion view rather than an external page.
+ */
+export function isDiscussionPost(story: {
+	title?: string | null;
+	url?: string | null;
+}): boolean {
+	const { kind } = splitPostKind(story.title ?? "");
+	return !story.url || kind === "Ask HN" || kind === "Show HN";
+}

@@ -5,6 +5,7 @@ import {
 	getDiscussionUrl,
 	getStoryDomain,
 	getStoryTitle,
+	isDiscussionPost,
 	splitPostKind,
 	stripHtml,
 } from "./utils";
@@ -126,5 +127,18 @@ describe("splitPostKind", () => {
 			text: "Showing HN data",
 		});
 		expect(splitPostKind("Show HN:")).toEqual({ text: "Show HN:" });
+	});
+});
+
+describe("isDiscussionPost", () => {
+	it("is true for Ask HN, Show HN and link-less posts, false for articles", () => {
+		expect(isDiscussionPost({ title: "Ask HN: Why?", url: null })).toBe(true);
+		expect(
+			isDiscussionPost({ title: "Show HN: A tool", url: "https://a.example" }),
+		).toBe(true);
+		expect(isDiscussionPost({ title: "Tell HN: Hello" })).toBe(true);
+		expect(
+			isDiscussionPost({ title: "A good article", url: "https://a.example" }),
+		).toBe(false);
 	});
 });

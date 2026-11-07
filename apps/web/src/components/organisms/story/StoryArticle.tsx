@@ -60,14 +60,14 @@ export function StoryArticle({ story }: { story: HackerNewsStoryRecord }) {
 						variant="soft"
 						to="/chat/$storyId"
 						params={{ storyId: story.id }}
-						aria-label={`Ask AI about ${title}`}
+						aria-label={`Discuss with AI: ${title}`}
 						onClick={(event) => {
 							rememberReturnFocus(event.currentTarget);
 							recordStoryView(story, "chat_opened");
 						}}
 					>
 						<Icon icon={Sparkles} accent />
-						Ask AI
+						Discuss with AI
 					</ButtonLink>
 				) : null}
 				<ToggleButton

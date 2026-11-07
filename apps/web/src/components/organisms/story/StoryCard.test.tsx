@@ -172,37 +172,36 @@ describe("StoryCard rendering", () => {
 		expect(screen.queryByText(/unknown/i)).toBeNull();
 	});
 
-	it("shows 'Read article' for stories with a URL", () => {
+	it("has no separate 'Read article' action: the title is the link", () => {
 		render(<StoryCard story={makeStory({ url: "https://example.com" })} />);
-		expect(screen.getByRole("link", { name: /read article/i })).toBeDefined();
-	});
-
-	it("shows 'Open on HN' for URL-less stories", () => {
-		render(<StoryCard story={makeStory({ url: null })} />);
-		expect(screen.getByRole("link", { name: /^open on hn: /i })).toBeDefined();
+		expect(screen.queryByRole("link", { name: /read article/i })).toBeNull();
+		expect(
+			screen.getByRole("link", { name: "A Test Story Title" }),
+		).toBeDefined();
 	});
 });
 
 describe("StoryCard link actions", () => {
-	it("links the title and 'Read article' to the story URL in a new tab", () => {
+	it("links an article's title to the story URL in a new tab", () => {
 		render(
 			<StoryCard story={makeStory({ url: "https://article.example.com" })} />,
 		);
-		for (const link of [
-			screen.getByRole("link", { name: "A Test Story Title" }),
-			screen.getByRole("link", { name: /read article/i }),
-		]) {
-			expect(link.getAttribute("href")).toBe("https://article.example.com");
-			expect(link.getAttribute("target")).toBe("_blank");
-			expect(link.getAttribute("rel")).toBe("noopener noreferrer");
-		}
+		const link = screen.getByRole("link", { name: "A Test Story Title" });
+		expect(link.getAttribute("href")).toBe("https://article.example.com");
+		expect(link.getAttribute("target")).toBe("_blank");
+		expect(link.getAttribute("rel")).toBe("noopener noreferrer");
 	});
 
-	it("links 'Open post' to the HN discussion when story has no URL", () => {
-		render(<StoryCard story={makeStory({ id: 12345, url: null })} />);
-		expect(
-			screen.getByRole("link", { name: /^open on hn: /i }).getAttribute("href"),
-		).toBe("https://news.ycombinator.com/item?id=12345");
+	it.each([
+		["Ask HN: How do you plan?", null],
+		["Show HN: A tiny tool", "https://tool.example.com"],
+		["A post with no link", null],
+	])("opens the in-app discussion for %s", (title, url) => {
+		render(<StoryCard story={makeStory({ id: 777, title, url })} />);
+		const heading = screen.getByRole("heading", { level: 2 });
+		const link = heading.querySelector("a");
+		expect(link?.getAttribute("href")).toBe("/story/777");
+		expect(link?.getAttribute("target")).toBeNull();
 	});
 
 	it("the comment count links to the internal discussion page", () => {
@@ -212,54 +211,41 @@ describe("StoryCard link actions", () => {
 		expect(link.getAttribute("href")).toContain("99999");
 	});
 
-	it("'Ask AI' opens the in-app AI chat for the story", () => {
+	it("'Discuss with AI' opens the in-app AI chat for the story", () => {
 		render(<StoryCard story={makeStory({ id: 4242 })} />);
-		const link = screen.getByRole("link", { name: /^ask ai about/i });
+		const link = screen.getByRole("link", { name: /^discuss with ai: /i });
 		expect(link.getAttribute("href")).toBe("/chat/4242");
 		expect(link.getAttribute("target")).toBeNull();
 	});
 
-	it("hides 'Ask AI' while the aiChat flag is off", () => {
+	it("hides 'Discuss with AI' while the aiChat flag is off", () => {
 		flagsMock.aiChat = false;
 		render(<StoryCard story={makeStory()} />);
-		expect(screen.queryByRole("link", { name: /^ask ai about/i })).toBeNull();
+		expect(
+			screen.queryByRole("link", { name: /^discuss with ai: /i }),
+		).toBeNull();
 	});
 
-	it("records signed-in title and primary-action clicks as separate views", () => {
+	it("records signed-in title clicks as reads", () => {
 		authMock.user = { id: "workos-story-viewer" };
 		const story = makeStory();
 		render(<StoryCard story={story} />);
 
 		fireEvent.click(screen.getByRole("link", { name: story.title ?? "" }));
-		fireEvent.click(screen.getByRole("link", { name: /read article/i }));
 
-		expect(trpcMock.viewStory).toHaveBeenCalledTimes(2);
-		expect(trpcMock.viewStory).toHaveBeenNthCalledWith(1, {
-			action: "read",
-			story,
-		});
+		expect(trpcMock.viewStory).toHaveBeenCalledWith({ action: "read", story });
 	});
 
 	it("records middle-click reads but not other auxiliary clicks", () => {
 		authMock.user = { id: "workos-story-viewer" };
 		const story = makeStory();
 		render(<StoryCard story={story} />);
+		const title = screen.getByRole("link", { name: story.title ?? "" });
 
-		fireEvent(
-			screen.getByRole("link", { name: story.title ?? "" }),
-			new MouseEvent("auxclick", { bubbles: true, button: 1 }),
-		);
-		fireEvent(
-			screen.getByRole("link", { name: /read article/i }),
-			new MouseEvent("auxclick", { bubbles: true, button: 1 }),
-		);
-		fireEvent(
-			screen.getByRole("link", { name: /read article/i }),
-			new MouseEvent("auxclick", { bubbles: true, button: 2 }),
-		);
+		fireEvent(title, new MouseEvent("auxclick", { bubbles: true, button: 1 }));
+		fireEvent(title, new MouseEvent("auxclick", { bubbles: true, button: 2 }));
 
 		expect(trpcMock.viewStory.mock.calls).toEqual([
-			[{ action: "read", story }],
 			[{ action: "read", story }],
 		]);
 	});
@@ -270,7 +256,7 @@ describe("StoryCard link actions", () => {
 		render(<StoryCard story={story} />);
 
 		fireEvent.click(screen.getByRole("link", { name: /^17 comments: / }));
-		fireEvent.click(screen.getByRole("link", { name: /^ask ai about/i }));
+		fireEvent.click(screen.getByRole("link", { name: /^discuss with ai: /i }));
 
 		expect(trpcMock.viewStory.mock.calls).toEqual([
 			[{ action: "discussion_opened", story }],
@@ -281,7 +267,7 @@ describe("StoryCard link actions", () => {
 	it("does not record signed-out story clicks", () => {
 		render(<StoryCard story={makeStory()} />);
 
-		fireEvent.click(screen.getByRole("link", { name: /read article/i }));
+		fireEvent.click(screen.getByRole("link", { name: "A Test Story Title" }));
 
 		expect(trpcMock.viewStory).not.toHaveBeenCalled();
 	});

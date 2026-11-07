@@ -13,6 +13,11 @@ const VARIANT_CLASSES = {
 	/** A link inside text or a line of facts: green and always underlined, so it reads as a link, not more text. */
 	inline:
 		"text-(--lagoon-deep) underline decoration-(--lagoon)/40 underline-offset-[3px] hover:text-(--lagoon-deep) hover:decoration-(--lagoon)",
+	/**
+	 * A row's title link whose hit area covers the whole row (the row needs
+	 * `position: relative`), so a click anywhere on the card opens it.
+	 */
+	card: "rounded-sm text-inherit no-underline decoration-(--lagoon)/50 underline-offset-[3px] after:absolute after:inset-0 after:content-[''] hover:text-inherit hover:underline visited:text-(--sea-ink-soft)",
 	/** Inherits surrounding text styles; use for linked titles. */
 	plain:
 		"rounded-sm text-inherit no-underline decoration-(--lagoon)/50 underline-offset-[3px] hover:text-inherit hover:underline visited:text-(--sea-ink-soft)",
@@ -32,7 +37,7 @@ function StyledAnchor({ variant = "subtle", ...props }: StyledAnchorProps) {
 	return (
 		<a
 			{...props}
-			className={`${variant === "inline" || variant === "plain" ? "" : "inline-flex items-center gap-1 "}focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--lagoon) ${VARIANT_CLASSES[variant]}`}
+			className={`${variant === "inline" || variant === "plain" || variant === "card" ? "" : "inline-flex items-center gap-1 "}focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--lagoon) ${VARIANT_CLASSES[variant]}`}
 		/>
 	);
 }
