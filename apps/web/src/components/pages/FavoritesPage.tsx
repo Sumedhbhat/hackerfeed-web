@@ -41,10 +41,15 @@ export function FavoritesPage({
 	const [query, setQuery] = useState("");
 	const stories = useFavorites();
 	const papers = usePaperFavorites();
-	// Without a tab in the URL, open the one that has something in it.
+	// Without a tab in the URL, open the one that has something in it. With
+	// no saved stories, show Papers while they load or fail, so the reader sees
+	// "loading" or the error rather than a premature "nothing saved".
 	const activeType: FavoritesType =
 		requestedType ??
-		(stories.count === 0 && papers.count > 0 ? "papers" : "stories");
+		(stories.count === 0 &&
+		(papers.count > 0 || papers.isLoading || Boolean(papers.error))
+			? "papers"
+			: "stories");
 	const { recordPaperView } = useViewActivity();
 	const isStories = activeType === "stories";
 	const activeCount = isStories ? stories.count : papers.count;

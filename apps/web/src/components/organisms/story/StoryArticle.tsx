@@ -9,13 +9,13 @@ import {
 import { ButtonLink, ExternalButtonLink } from "@hackerfeed/ui/atoms/Button";
 import { Heading } from "@hackerfeed/ui/atoms/Heading";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
-import { ExternalLink } from "@hackerfeed/ui/atoms/Link";
 import { Prose } from "@hackerfeed/ui/atoms/Prose";
 import { Row } from "@hackerfeed/ui/atoms/Row";
 import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { TitleTag } from "@hackerfeed/ui/atoms/TitleTag";
 import { ToggleButton } from "@hackerfeed/ui/atoms/Toggle";
 import { ToggleLabel } from "@hackerfeed/ui/atoms/ToggleLabel";
+import { WideText } from "@hackerfeed/ui/atoms/WideText";
 import { StoryMeta } from "@hackerfeed/ui/molecules/StoryMeta";
 import { ArrowUpRight, Bookmark, Sparkles } from "lucide-react";
 import { useFavorites } from "#/hooks/useFavorites";
@@ -38,11 +38,6 @@ export function StoryArticle({ story }: { story: HackerNewsStoryRecord }) {
 				score={story.score}
 				by={story.by}
 				age={formatStoryAge(story.time)}
-				trailing={
-					<ExternalLink href={getDiscussionUrl(story.id)} variant="inline">
-						View on HN
-					</ExternalLink>
-				}
 			/>
 			<Heading level={1} size="title">
 				{postKind ? <TitleTag>{postKind}</TitleTag> : null}
@@ -81,6 +76,14 @@ export function StoryArticle({ story }: { story: HackerNewsStoryRecord }) {
 					<Icon icon={Bookmark} filled={isFav} />
 					<ToggleLabel on={isFav} offLabel="Save" onLabel="Saved" />
 				</ToggleButton>
+				<ExternalButtonLink
+					variant="ghost"
+					href={getDiscussionUrl(story.id)}
+					aria-label="View on HN"
+				>
+					<WideText>View on</WideText>
+					HN <Icon icon={ArrowUpRight} size={14} />
+				</ExternalButtonLink>
 			</Row>
 		</Stack>
 	);

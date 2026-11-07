@@ -4,10 +4,12 @@ import {
 } from "@hackerfeed/contracts/ai";
 import { Button } from "@hackerfeed/ui/atoms/Button";
 import { Card } from "@hackerfeed/ui/atoms/Card";
+import { Icon } from "@hackerfeed/ui/atoms/Icon";
 import { TextLink } from "@hackerfeed/ui/atoms/Link";
 import { Row } from "@hackerfeed/ui/atoms/Row";
 import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { Text } from "@hackerfeed/ui/atoms/Text";
+import { WideText } from "@hackerfeed/ui/atoms/WideText";
 import { CardSkeleton } from "@hackerfeed/ui/molecules/CardSkeleton";
 import { ChatComposer } from "@hackerfeed/ui/molecules/ChatComposer";
 import { ChatMessage } from "@hackerfeed/ui/molecules/ChatMessage";
@@ -15,7 +17,7 @@ import { IconText } from "@hackerfeed/ui/molecules/IconText";
 import { InlineNotice } from "@hackerfeed/ui/molecules/InlineNotice";
 import { NoticeCard } from "@hackerfeed/ui/molecules/NoticeCard";
 import { SelectField } from "@hackerfeed/ui/molecules/SelectField";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, Plus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useAiModels, useStoryChat } from "#/hooks/useAiProviders";
 
@@ -132,8 +134,13 @@ export function ProviderConversation({
 						/>
 					</Row>
 					{messageCount > 0 ? (
-						<Button variant="secondary" onClick={chat.reset}>
-							New chat
+						<Button
+							variant="secondary"
+							onClick={chat.reset}
+							aria-label="New chat"
+						>
+							<Icon icon={Plus} />
+							<WideText from="xs">New chat</WideText>
 						</Button>
 					) : null}
 				</Row>

@@ -89,7 +89,7 @@ export function StoryCard({ story, rank, markSaved = true }: StoryCardProps) {
 						onAuxClick={recordMiddleClickRead}
 					>
 						{story.url ? "Read" : "Open"}
-						<WideText from="xs">{story.url ? " article" : " post"}</WideText>
+						<WideText from="xs">{story.url ? "article" : "post"}</WideText>
 						<Icon icon={ArrowUpRight} size={14} />
 					</ExternalButtonLink>
 

@@ -305,6 +305,34 @@ describe("FavoritesPage paper collection", () => {
 		expect(screen.queryByRole("alert")).toBeNull();
 	});
 
+	it("shows saved papers loading, not an empty Saved page, while they load", async () => {
+		authMock.user = { id: "favorites-slow-papers" };
+		let resolve: (value: unknown) => void = () => undefined;
+		trpcMock.paperList.mockReturnValue(
+			new Promise((done) => {
+				resolve = done;
+			}),
+		);
+		render(<FavoritesPage />);
+
+		expect(await screen.findByText("Loading saved papers...")).toBeTruthy();
+		expect(screen.queryByText("No saved stories yet")).toBeNull();
+
+		resolve({ items: [savedPaper()], nextCursor: null });
+		expect(await screen.findByText("Saved Reasoning Paper")).toBeTruthy();
+	});
+
+	it("shows a failed paper load instead of an empty Saved page", async () => {
+		authMock.user = { id: "favorites-failed-papers" };
+		trpcMock.paperList.mockRejectedValue(new Error("load failed"));
+		render(<FavoritesPage />);
+
+		expect((await screen.findByRole("alert")).textContent).toContain(
+			"Could not load saved favorites.",
+		);
+		expect(screen.queryByText("No saved stories yet")).toBeNull();
+	});
+
 	it("opens the papers tab when only papers are saved, and still lets you pick Stories", async () => {
 		authMock.user = { id: "favorites-default-tab" };
 		trpcMock.paperList.mockResolvedValue({

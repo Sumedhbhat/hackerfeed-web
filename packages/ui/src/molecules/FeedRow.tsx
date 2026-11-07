@@ -4,8 +4,9 @@ import { Ribbon } from "../atoms/Ribbon";
 /**
  * One story in a ReadingList: optional rank in the margin, the title, then the
  * facts and the actions. From `lg` up facts and actions share one line. The
- * actions sit in columns with minimum widths, so they line up from row to row. `save` always sits at the far right, directly
- * under the brass ribbon that hangs from the row once the story is saved.
+ * actions sit in columns with minimum widths, so they line up from row to
+ * row. `save` always sits at the far right, directly under the brass ribbon
+ * that hangs from the row once the story is saved.
  */
 export function FeedRow({
 	rank,
