@@ -4,15 +4,16 @@ import { Button } from "../atoms/Button";
 export function LoadMoreButton({
 	label,
 	onClick,
-	disabled,
+	busy,
 }: {
 	label: string;
 	onClick: () => void;
-	disabled?: boolean;
+	/** Loading the next batch; stays focusable meanwhile. */
+	busy?: boolean;
 }) {
 	return (
 		<div className="flex justify-center pt-4">
-			<Button variant="secondary" onClick={onClick} disabled={disabled}>
+			<Button variant="secondary" onClick={onClick} busy={busy}>
 				{label}
 			</Button>
 		</div>

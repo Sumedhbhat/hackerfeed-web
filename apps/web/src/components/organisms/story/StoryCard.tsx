@@ -83,64 +83,63 @@ export function StoryCard({ story, rank, markSaved = true }: StoryCardProps) {
 					age={formatStoryAge(story.time)}
 				/>
 			}
-			actions={
-				<>
-					<ExternalButtonLink
-						href={storyUrl}
-						variant="accent"
-						aria-label={`${readLabel}: ${title}`}
-						onClick={recordRead}
-						onAuxClick={recordMiddleClickRead}
-					>
-						{story.url ? (
-							<span>
-								Read<WideText from="xs"> article</WideText>
-							</span>
-						) : (
-							<span>
-								<WideText from="xs">Open on HN</WideText>
-								<NarrowText>On HN</NarrowText>
-							</span>
-						)}
-						<Icon icon={ArrowUpRight} size={14} />
-					</ExternalButtonLink>
-
+			actions={[
+				<ExternalButtonLink
+					key="read"
+					href={storyUrl}
+					variant="accent"
+					aria-label={`${readLabel}: ${title}`}
+					onClick={recordRead}
+					onAuxClick={recordMiddleClickRead}
+				>
+					{story.url ? (
+						<span>
+							Read<WideText from="xs"> article</WideText>
+						</span>
+					) : (
+						<span>
+							<WideText from="xs">Open on HN</WideText>
+							<NarrowText>On HN</NarrowText>
+						</span>
+					)}
+					<Icon icon={ArrowUpRight} size={14} />
+				</ExternalButtonLink>,
+				<ButtonLink
+					key="comments"
+					variant={comments > 0 ? "ghost" : "quiet"}
+					to="/story/$storyId"
+					params={{ storyId: story.id }}
+					aria-label={`${commentLabel}: ${title}`}
+					onClick={(event) => {
+						rememberReturnFocus(event.currentTarget);
+						recordStoryView(story, "discussion_opened");
+					}}
+				>
+					<Icon icon={MessageSquare} />
+					<span>
+						{comments}
+						<WideText>{comments === 1 ? " comment" : " comments"}</WideText>
+					</span>
+				</ButtonLink>,
+				aiChat ? (
 					<ButtonLink
-						variant={comments > 0 ? "ghost" : "quiet"}
-						to="/story/$storyId"
+						key="ai"
+						variant="ghost"
+						to="/chat/$storyId"
 						params={{ storyId: story.id }}
-						aria-label={`${commentLabel}: ${title}`}
+						aria-label={`Ask AI about ${title}`}
 						onClick={(event) => {
 							rememberReturnFocus(event.currentTarget);
-							recordStoryView(story, "discussion_opened");
+							recordStoryView(story, "chat_opened");
 						}}
 					>
-						<Icon icon={MessageSquare} />
+						<Icon icon={Sparkles} accent />
 						<span>
-							{comments}
-							<WideText>{comments === 1 ? " comment" : " comments"}</WideText>
+							<WideText from="min">Ask </WideText>AI
 						</span>
 					</ButtonLink>
-
-					{aiChat ? (
-						<ButtonLink
-							variant="ghost"
-							to="/chat/$storyId"
-							params={{ storyId: story.id }}
-							aria-label={`Ask AI about ${title}`}
-							onClick={(event) => {
-								rememberReturnFocus(event.currentTarget);
-								recordStoryView(story, "chat_opened");
-							}}
-						>
-							<Icon icon={Sparkles} accent />
-							<span>
-								<WideText from="min">Ask </WideText>AI
-							</span>
-						</ButtonLink>
-					) : null}
-				</>
-			}
+				) : null,
+			]}
 			save={
 				<ToggleButton
 					aria-label={`${isFav ? "Saved" : "Save"} ${title}`}

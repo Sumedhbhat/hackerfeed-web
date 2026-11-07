@@ -3,11 +3,19 @@ import { Ribbon } from "../atoms/Ribbon";
 
 /**
  * One story in a ReadingList: optional rank in the margin, the title, then the
- * facts and the actions. From `lg` up facts and actions share one line. The
- * actions sit in columns with minimum widths, so they line up from row to
- * row. `save` always sits at the far right, directly under the brass ribbon
+ * facts and the actions. From `lg` up facts and actions share one line when
+ * they fit. Each action sits in a cell with a minimum width, so they line up
+ * from row to row, and wrap instead of overflowing when larger text doesn't
+ * fit (WCAG 1.4.4). `save` always sits at the far right, directly under the brass ribbon
  * that hangs from the row once the story is saved.
  */
+/** Minimum widths of the action cells, so the actions form columns. */
+const CELL = [
+	"min-w-[4.75rem] xs:min-w-[7rem] sm:min-w-[7.25rem]",
+	"min-w-[3.25rem] sm:min-w-[7.5rem]",
+	"lg:min-w-[5.25rem]",
+];
+
 export function FeedRow({
 	rank,
 	saved = false,
@@ -23,7 +31,8 @@ export function FeedRow({
 	justSaved?: boolean;
 	title: ReactNode;
 	meta: ReactNode;
-	actions: ReactNode;
+	/** Read, discussion, and AI actions, in that order (one cell each). */
+	actions: ReactNode[];
 	save: ReactNode;
 }) {
 	return (
@@ -46,11 +55,15 @@ export function FeedRow({
 					<span aria-hidden="true" className="float-right h-5 w-12 sm:w-10" />
 					{title}
 				</div>
-				<div className="flex flex-col gap-1 lg:flex-row lg:items-center lg:justify-between lg:gap-8">
+				<div className="flex flex-col gap-1 lg:flex-row lg:flex-wrap lg:items-center lg:justify-between lg:gap-x-8">
 					{meta}
-					<div className="-mt-1.5 -ml-1.5 flex flex-wrap items-center gap-1 sm:-mr-2 sm:-ml-2 lg:mt-0 lg:ml-0 lg:shrink-0">
-						<div className="grid grid-cols-[minmax(4.75rem,auto)_minmax(3.25rem,auto)_auto] xs:grid-cols-[minmax(7rem,auto)_minmax(3.25rem,auto)_auto] items-center justify-items-start sm:grid-cols-[minmax(7.25rem,auto)_minmax(7.5rem,auto)_auto] lg:grid-cols-[minmax(7.25rem,auto)_minmax(7.5rem,auto)_minmax(5.25rem,auto)]">
-							{actions}
+					<div className="-mt-1.5 -ml-1.5 flex flex-wrap items-center gap-1 sm:-mr-2 sm:-ml-2 lg:mt-0 lg:ml-0">
+						<div className="flex flex-wrap items-center">
+							{actions.filter(Boolean).map((action, index) => (
+								<div key={CELL[index]} className={CELL[index]}>
+									{action}
+								</div>
+							))}
 						</div>
 						<div className="ml-auto lg:ml-0">{save}</div>
 					</div>

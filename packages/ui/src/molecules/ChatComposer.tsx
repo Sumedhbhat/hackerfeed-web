@@ -14,6 +14,7 @@ export function ChatComposer({
 	isStreaming,
 	maxLength,
 	placeholder,
+	label = "Message",
 }: {
 	id: string;
 	value: string;
@@ -23,6 +24,8 @@ export function ChatComposer({
 	isStreaming: boolean;
 	maxLength?: number;
 	placeholder?: string;
+	/** The field's name; match the visible prompt so voice control can use it (WCAG 2.5.3). */
+	label?: string;
 }) {
 	// Send and Stop are the same button. When a reply ends it becomes a
 	// disabled Send (the box is empty), which drops keyboard focus to the
@@ -54,7 +57,7 @@ export function ChatComposer({
 			className="flex items-end gap-2 rounded-xl border border-(--field-line) bg-(--surface-strong) p-2 focus-within:border-(--lagoon) focus-within:outline-1 focus-within:outline-(--lagoon)"
 		>
 			<label htmlFor={id} className="sr-only">
-				Message
+				{label}
 			</label>
 			<span id={`${id}-keys`} className="sr-only">
 				Enter sends. Shift+Enter adds a new line.

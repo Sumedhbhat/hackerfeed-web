@@ -185,7 +185,7 @@ describe("StoryChatPage", () => {
 		expect(
 			screen.getByRole("link", { name: /read article/i }).getAttribute("href"),
 		).toBe("https://example.com/article");
-		await screen.findByLabelText("Message");
+		await screen.findByLabelText("Ask about this story");
 	});
 
 	it("asks signed-out users to sign in and returns them to the chat", () => {
@@ -211,13 +211,13 @@ describe("StoryChatPage", () => {
 		expect(new URL(fallback.getAttribute("href") ?? "").origin).toBe(
 			"https://chatgpt.com",
 		);
-		expect(screen.queryByLabelText("Message")).toBeNull();
+		expect(screen.queryByLabelText("Ask about this story")).toBeNull();
 	});
 
 	it("streams a reply to a typed question", async () => {
 		renderPage();
 
-		const input = await screen.findByLabelText("Message");
+		const input = await screen.findByLabelText("Ask about this story");
 		fireEvent.change(input, { target: { value: "What is this about?" } });
 		fireEvent.click(screen.getByRole("button", { name: "Send" }));
 
@@ -238,7 +238,7 @@ describe("StoryChatPage", () => {
 	it("sends the whole conversation on follow-up questions", async () => {
 		renderPage();
 
-		const input = await screen.findByLabelText("Message");
+		const input = await screen.findByLabelText("Ask about this story");
 		fireEvent.change(input, { target: { value: "First?" } });
 		fireEvent.keyDown(input, { key: "Enter" });
 		await screen.findByText("It is about X.");
@@ -259,7 +259,7 @@ describe("StoryChatPage", () => {
 	it("does not send on Shift+Enter or with an empty draft", async () => {
 		renderPage();
 
-		const input = await screen.findByLabelText("Message");
+		const input = await screen.findByLabelText("Ask about this story");
 		expect(
 			(screen.getByRole("button", { name: "Send" }) as HTMLButtonElement)
 				.disabled,
@@ -309,7 +309,7 @@ describe("StoryChatPage", () => {
 		renderPage();
 
 		await choose("ChatGPT model", "GPT B");
-		fireEvent.change(screen.getByLabelText("Message"), {
+		fireEvent.change(screen.getByLabelText("Ask about this story"), {
 			target: { value: "Hi" },
 		});
 		fireEvent.click(screen.getByRole("button", { name: "Send" }));
@@ -330,7 +330,7 @@ describe("StoryChatPage", () => {
 			);
 		renderPage();
 
-		fireEvent.change(await screen.findByLabelText("Message"), {
+		fireEvent.change(await screen.findByLabelText("Ask about this story"), {
 			target: { value: "Hello?" },
 		});
 		fireEvent.click(screen.getByRole("button", { name: "Send" }));
@@ -362,7 +362,7 @@ describe("StoryChatPage", () => {
 			);
 		renderPage();
 
-		fireEvent.change(await screen.findByLabelText("Message"), {
+		fireEvent.change(await screen.findByLabelText("Ask about this story"), {
 			target: { value: "Go" },
 		});
 		fireEvent.click(screen.getByRole("button", { name: "Send" }));
@@ -382,7 +382,7 @@ describe("StoryChatPage", () => {
 			);
 		renderPage();
 
-		fireEvent.change(await screen.findByLabelText("Message"), {
+		fireEvent.change(await screen.findByLabelText("Ask about this story"), {
 			target: { value: "Go" },
 		});
 		fireEvent.click(screen.getByRole("button", { name: "Send" }));
@@ -412,7 +412,7 @@ describe("StoryChatPage", () => {
 			);
 		renderPage();
 
-		fireEvent.change(await screen.findByLabelText("Message"), {
+		fireEvent.change(await screen.findByLabelText("Ask about this story"), {
 			target: { value: "Go" },
 		});
 		fireEvent.click(screen.getByRole("button", { name: "Send" }));
@@ -425,7 +425,9 @@ describe("StoryChatPage", () => {
 		await screen.findByRole("button", { name: "Send" });
 		// Stop turned back into a disabled Send; focus moved to the message box.
 		await waitFor(() =>
-			expect(document.activeElement).toBe(screen.getByLabelText("Message")),
+			expect(document.activeElement).toBe(
+				screen.getByLabelText("Ask about this story"),
+			),
 		);
 		// The partial reply is kept and no error is shown for a user cancel.
 		expect(screen.getByText("Slow")).toBeDefined();
@@ -435,7 +437,7 @@ describe("StoryChatPage", () => {
 	it("clears the conversation with New chat", async () => {
 		renderPage();
 
-		fireEvent.change(await screen.findByLabelText("Message"), {
+		fireEvent.change(await screen.findByLabelText("Ask about this story"), {
 			target: { value: "Hi" },
 		});
 		fireEvent.click(screen.getByRole("button", { name: "Send" }));
@@ -454,7 +456,7 @@ describe("StoryChatPage", () => {
 	it("brings a cleared conversation back with Undo", async () => {
 		renderPage();
 
-		fireEvent.change(await screen.findByLabelText("Message"), {
+		fireEvent.change(await screen.findByLabelText("Ask about this story"), {
 			target: { value: "Hi" },
 		});
 		fireEvent.click(screen.getByRole("button", { name: "Send" }));
@@ -498,7 +500,7 @@ describe("StoryChatPage", () => {
 	it("shows the provider's name and labels replies with it", async () => {
 		renderPage();
 
-		fireEvent.change(await screen.findByLabelText("Message"), {
+		fireEvent.change(await screen.findByLabelText("Ask about this story"), {
 			target: { value: "Hi" },
 		});
 		fireEvent.click(screen.getByRole("button", { name: "Send" }));
@@ -521,7 +523,7 @@ describe("StoryChatPage", () => {
 		];
 		renderPage();
 
-		await screen.findByLabelText("Message");
+		await screen.findByLabelText("Ask about this story");
 		expect(screen.queryByRole("combobox", { name: "Assistant" })).toBeNull();
 		expect(screen.getByText("ChatGPT")).toBeDefined();
 	});
@@ -535,7 +537,7 @@ describe("StoryChatPage", () => {
 		renderPage();
 
 		await screen.findByRole("combobox", { name: "Assistant" });
-		fireEvent.change(screen.getByLabelText("Message"), {
+		fireEvent.change(screen.getByLabelText("Ask about this story"), {
 			target: { value: "Hi" },
 		});
 		fireEvent.click(screen.getByRole("button", { name: "Send" }));
@@ -549,7 +551,7 @@ describe("StoryChatPage", () => {
 			).toContain("claude"),
 		);
 		expect(screen.queryByText("It is about X.")).toBeNull();
-		fireEvent.change(screen.getByLabelText("Message"), {
+		fireEvent.change(screen.getByLabelText("Ask about this story"), {
 			target: { value: "Hello Claude" },
 		});
 		fireEvent.click(screen.getByRole("button", { name: "Send" }));

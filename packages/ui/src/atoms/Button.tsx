@@ -41,15 +41,31 @@ export function buttonClassName(variant: ButtonVariant = "primary"): string {
 
 type ButtonProps = Omit<BaseButton.Props, "className" | "style" | "render"> & {
 	variant?: ButtonVariant;
+	/**
+	 * Working on its own action ("Disconnecting…", "Loading…"): unavailable
+	 * and aria-busy, but still focusable, so pressing it never drops keyboard
+	 * focus to the page (WCAG 2.4.3). Use this, not `disabled`, for pending.
+	 */
+	busy?: boolean;
 };
 
 export function Button({
 	variant = "primary",
 	type = "button",
+	busy = false,
+	disabled,
+	focusableWhenDisabled,
 	...props
 }: ButtonProps) {
 	return (
-		<BaseButton type={type} className={buttonClassName(variant)} {...props} />
+		<BaseButton
+			type={type}
+			className={buttonClassName(variant)}
+			disabled={disabled || busy}
+			focusableWhenDisabled={focusableWhenDisabled || busy}
+			aria-busy={busy || undefined}
+			{...props}
+		/>
 	);
 }
 

@@ -84,7 +84,7 @@ export function FeedPane({ feed, prefetchNextBatch }: FeedPaneProps) {
 				<LoadMoreButton
 					label={isPending ? "Loading..." : `Load ${nextBatchSize} more`}
 					onClick={withFocus(loadMore)}
-					disabled={isPending}
+					busy={isPending}
 				/>
 			)}
 
