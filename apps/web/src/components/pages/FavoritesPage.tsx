@@ -1,3 +1,5 @@
+import type { SavedPaper } from "@hackerfeed/contracts/paper-favorites";
+import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
 import { Button } from "@hackerfeed/ui/atoms/Button";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
 import { TextLink } from "@hackerfeed/ui/atoms/Link";
@@ -21,6 +23,7 @@ import { PaperRow } from "#/components/organisms/papers/PaperRow";
 import { StoryCard } from "#/components/organisms/story/StoryCard";
 import { useFavorites } from "#/hooks/useFavorites";
 import { usePaperFavorites } from "#/hooks/usePaperFavorites";
+import { useRestoreReturnFocus } from "#/hooks/useRestoreReturnFocus";
 import { useResultCountAnnouncement } from "#/hooks/useResultCountAnnouncement";
 import { useViewActivity } from "#/hooks/useViewActivity";
 import { focusFirstIn, focusIsLost } from "#/lib/a11y/focus";
@@ -95,6 +98,36 @@ export function FavoritesPage({
 		: sortedPapers;
 	const visibleCount = isStories ? visibleStories.length : visiblePapers.length;
 	const removal = useRemovalFeedback(activeType, activeCount);
+	const lastRemoved = useLastRemoved(
+		stories.getFavorites(),
+		papers.savedPapers,
+	);
+	const [undone, setUndone] = useState<string | null>(null);
+	const [undoMessage, setUndoMessage] = useState("");
+	useRestoreReturnFocus(activeCount > 0);
+
+	/** Put the last unsaved item back, then focus its Saved button. */
+	function undoRemove() {
+		if (!lastRemoved) return;
+		if (lastRemoved.kind === "story") stories.toggleFavorite(lastRemoved.item);
+		else papers.toggleFavorite(lastRemoved.item);
+		const title = lastRemoved.item.title;
+		setUndone(lastRemoved.key);
+		setUndoMessage(`Put “${title}” back in Saved.`);
+		requestAnimationFrame(() =>
+			[...document.querySelectorAll<HTMLElement>("button[aria-label]")]
+				.find(
+					(button) => button.getAttribute("aria-label") === `Saved ${title}`,
+				)
+				?.focus(),
+		);
+	}
+	const undoable =
+		lastRemoved &&
+		lastRemoved.kind === (isStories ? "story" : "paper") &&
+		undone !== lastRemoved.key
+			? lastRemoved
+			: null;
 	const searchResult = useResultCountAnnouncement(
 		visibleCount,
 		isStories
@@ -113,12 +146,29 @@ export function FavoritesPage({
 	return (
 		<PageContainer>
 			<LiveStatus message={removal} />
+			<LiveStatus message={undoMessage} />
 			<LiveStatus message={searchResult} />
 			<Tabs value={activeType} onValueChange={onTypeChange}>
 				<Stack gap="lg">
 					<PageHeader title="Saved">
 						<FavoritesTabs />
 					</PageHeader>
+
+					{undoable ? (
+						<InlineNotice
+							boxed
+							message={`Removed “${undoable.item.title}” from Saved.`}
+							action={
+								<Button
+									variant="secondary"
+									aria-label={`Undo: put “${undoable.item.title}” back in Saved`}
+									onClick={undoRemove}
+								>
+									Undo
+								</Button>
+							}
+						/>
+					) : null}
 
 					{TYPES.map((type) => (
 						<TabPanel key={type} value={type}>
@@ -283,4 +333,41 @@ function useRemovalFeedback(type: FavoritesType, count: number) {
 		});
 	}, [type, count]);
 	return message;
+}
+
+type Removed =
+	| { kind: "story"; key: string; item: HackerNewsStoryRecord }
+	| { kind: "paper"; key: string; item: SavedPaper };
+
+/** The item most recently unsaved one at a time (not by Clear), for Undo. */
+function useLastRemoved(
+	stories: HackerNewsStoryRecord[],
+	papers: SavedPaper[],
+): Removed | null {
+	const [removed, setRemoved] = useState<Removed | null>(null);
+	const previousRef = useRef({ stories, papers });
+	useEffect(() => {
+		const previous = previousRef.current;
+		previousRef.current = { stories, papers };
+		if (stories.length === previous.stories.length - 1) {
+			const ids = new Set(stories.map((story) => story.id));
+			const item = previous.stories.find((story) => !ids.has(story.id));
+			if (item)
+				setRemoved({
+					kind: "story",
+					key: `story:${item.id}:${Date.now()}`,
+					item,
+				});
+		} else if (papers.length === previous.papers.length - 1) {
+			const ids = new Set(papers.map((paper) => paper.arxivId));
+			const item = previous.papers.find((paper) => !ids.has(paper.arxivId));
+			if (item)
+				setRemoved({
+					kind: "paper",
+					key: `paper:${item.arxivId}:${Date.now()}`,
+					item,
+				});
+		}
+	}, [stories, papers]);
+	return removed;
 }

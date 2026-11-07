@@ -11,6 +11,7 @@ import { feedTabs } from "#/components/organisms/feed/feedTabs";
 import { StoryCard } from "#/components/organisms/story/StoryCard";
 import { FeedStatus, useFeed } from "#/hooks/useFeed";
 import { useLoadMoreFocus } from "#/hooks/useLoadMoreFocus";
+import { useRestoreReturnFocus } from "#/hooks/useRestoreReturnFocus";
 import {
 	type HackerNewsFeedKey,
 	storyQueryOptions,
@@ -45,6 +46,7 @@ export function FeedPane({ feed, prefetchNextBatch }: FeedPaneProps) {
 		.slice(0, displayedIds.length)
 		.filter((query) => query?.data).length;
 	const withFocus = useLoadMoreFocus(listId, renderedCount);
+	useRestoreReturnFocus(renderedCount > 0);
 
 	const feedLabel =
 		(feedTabs.find((f) => f.key === feed) ?? feedTabs[0])?.label ?? feed;

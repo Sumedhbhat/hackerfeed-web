@@ -191,6 +191,30 @@ describe("FavoritesPage backend source of truth", () => {
 		);
 	});
 
+	it("offers Undo after unsaving, which puts the story back", async () => {
+		authMock.user = { id: "workos-favorites-page-undo" };
+		trpcMock.list.mockResolvedValue([
+			makeStory({ id: 1, title: "Keep" }),
+			makeStory({ id: 2, title: "Oops" }),
+		]);
+		render(<FavoritesPage />);
+
+		fireEvent.click(
+			await screen.findByRole("button", { name: "Saved Oops", pressed: true }),
+		);
+		const undo = await screen.findByRole("button", {
+			name: "Undo: put “Oops” back in Saved",
+		});
+		fireEvent.click(undo);
+
+		expect(trpcMock.add).toHaveBeenCalledWith(
+			expect.objectContaining({ id: 2, title: "Oops" }),
+		);
+		await waitFor(() =>
+			expect(screen.queryByRole("button", { name: /^Undo/ })).toBeNull(),
+		);
+	});
+
 	it("does not render local favorites after backend favorites load", async () => {
 		toggleFavorite(makeStory({ id: 10, title: "Local saved story" }));
 		authMock.user = { id: "workos-favorites-page-source" };

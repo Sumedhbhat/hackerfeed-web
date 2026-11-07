@@ -8,8 +8,8 @@ const VARIANT_CLASSES = {
 	/** Green call-to-action link standing on its own (not inside a sentence); underlined on hover. */
 	accent:
 		"rounded-sm text-sm font-medium text-(--lagoon-deep) no-underline underline-offset-[3px] hover:text-(--lagoon-deep) hover:underline",
-	/** Top navigation item; tinted when the router marks it active. */
-	nav: "min-h-9 gap-1.5 rounded-md px-2 py-1.5 xs:px-2.5 text-sm font-medium whitespace-nowrap text-(--sea-ink-soft) no-underline hover:bg-(--chip-bg) hover:text-(--sea-ink) data-[status=active]:bg-(--lagoon-tint) data-[status=active]:text-(--lagoon-deep) forced-colors:data-[status=active]:underline forced-colors:data-[status=active]:underline-offset-4 sm:px-3",
+	/** Top navigation item. The active one is tinted and underlined, so it is not marked by colour alone (WCAG 1.4.1). */
+	nav: "min-h-9 gap-1.5 rounded-md px-2 py-1.5 xs:px-2.5 text-sm font-medium whitespace-nowrap text-(--sea-ink-soft) no-underline hover:bg-(--chip-bg) hover:text-(--sea-ink) data-[status=active]:bg-(--lagoon-tint) data-[status=active]:text-(--lagoon-deep) data-[status=active]:underline data-[status=active]:decoration-(--lagoon) data-[status=active]:decoration-2 data-[status=active]:underline-offset-[6px] sm:px-3",
 	/** A link inside text or a line of facts: green and always underlined, so it reads as a link, not more text. */
 	inline:
 		"text-(--lagoon-deep) underline decoration-(--lagoon)/40 underline-offset-[3px] hover:text-(--lagoon-deep) hover:decoration-(--lagoon)",

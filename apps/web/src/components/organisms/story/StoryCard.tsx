@@ -22,6 +22,7 @@ import { useState } from "react";
 import { useFavorites } from "#/hooks/useFavorites";
 import { useFeatureFlag } from "#/hooks/useFeatureFlags";
 import { useViewActivity } from "#/hooks/useViewActivity";
+import { rememberReturnFocus } from "#/lib/a11y/return-focus";
 
 type StoryCardProps = {
 	story: HackerNewsStoryRecord;
@@ -109,7 +110,10 @@ export function StoryCard({ story, rank, markSaved = true }: StoryCardProps) {
 						to="/story/$storyId"
 						params={{ storyId: story.id }}
 						aria-label={`${commentLabel}: ${title}`}
-						onClick={() => recordStoryView(story, "discussion_opened")}
+						onClick={(event) => {
+							rememberReturnFocus(event.currentTarget);
+							recordStoryView(story, "discussion_opened");
+						}}
 					>
 						<Icon icon={MessageSquare} />
 						<span>
@@ -124,7 +128,10 @@ export function StoryCard({ story, rank, markSaved = true }: StoryCardProps) {
 							to="/chat/$storyId"
 							params={{ storyId: story.id }}
 							aria-label={`Ask AI about ${title}`}
-							onClick={() => recordStoryView(story, "chat_opened")}
+							onClick={(event) => {
+								rememberReturnFocus(event.currentTarget);
+								recordStoryView(story, "chat_opened");
+							}}
 						>
 							<Icon icon={Sparkles} accent />
 							<span>

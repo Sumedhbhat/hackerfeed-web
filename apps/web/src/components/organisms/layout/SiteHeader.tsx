@@ -27,6 +27,7 @@ export default function SiteHeader() {
 						variant="nav"
 						// A story and its AI chat belong to the feed, so keep Feed marked there.
 						data-status={inFeed ? "active" : undefined}
+						aria-current={inFeed ? "true" : undefined}
 					>
 						Stories
 					</TextLink>
