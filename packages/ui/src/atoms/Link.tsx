@@ -40,6 +40,13 @@ function StyledAnchor({ variant = "subtle", ...props }: StyledAnchorProps) {
 /** In-app link (`to="/favorites"`) styled as text. */
 export const TextLink = createLink(StyledAnchor);
 
+/**
+ * Id of the hidden "Opens in a new tab" note that AppShell renders once; links
+ * that open a new tab point at it with aria-describedby, since the ↗ icon
+ * that shows it is hidden from assistive tech.
+ */
+export const NEW_TAB_NOTE_ID = "opens-in-new-tab";
+
 /** Link to another website, opened in a new tab. */
 export function ExternalLink({
 	newTab = true,
@@ -47,7 +54,13 @@ export function ExternalLink({
 }: StyledAnchorProps & { href: string; newTab?: boolean }) {
 	return (
 		<StyledAnchor
-			{...(newTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+			{...(newTab
+				? {
+						target: "_blank",
+						rel: "noopener noreferrer",
+						"aria-describedby": NEW_TAB_NOTE_ID,
+					}
+				: {})}
 			{...props}
 		/>
 	);

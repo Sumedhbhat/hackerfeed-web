@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { NEW_TAB_NOTE_ID } from "../atoms/Link";
 
 /** Full-height page frame: header on top, footer at the bottom, content filling the rest. */
 export function AppShell({
@@ -19,6 +20,9 @@ export function AppShell({
 			>
 				Skip to content
 			</a>
+			<span id={NEW_TAB_NOTE_ID} hidden>
+				Opens in a new tab
+			</span>
 			{header}
 			<div id="content" tabIndex={-1} className="app-content outline-none">
 				{children}

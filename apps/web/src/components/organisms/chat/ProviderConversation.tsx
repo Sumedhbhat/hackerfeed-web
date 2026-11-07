@@ -153,7 +153,9 @@ export function ProviderConversation({
 							</Text>
 						)}
 						<SelectField
-							label="Model"
+							// Named after the visible provider, so voice control can say
+							// "ChatGPT model" (WCAG 2.5.3).
+							label={`${provider.name} model`}
 							hideLabel
 							value={model}
 							onChange={setSelectedModel}

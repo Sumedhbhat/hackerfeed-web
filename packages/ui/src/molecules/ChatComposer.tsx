@@ -56,11 +56,15 @@ export function ChatComposer({
 			<label htmlFor={id} className="sr-only">
 				Message
 			</label>
+			<span id={`${id}-keys`} className="sr-only">
+				Enter sends. Shift+Enter adds a new line.
+			</span>
 			<TextArea
 				id={id}
 				variant="bare"
 				value={value}
 				onChange={(event) => onChange(event.target.value)}
+				aria-describedby={`${id}-keys`}
 				onKeyDown={(event) => {
 					// Enter while an IME is composing (Japanese, Chinese, Korean) picks a
 					// candidate; it must not send a half-typed message.

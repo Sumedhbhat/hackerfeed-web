@@ -308,7 +308,7 @@ describe("StoryChatPage", () => {
 	it("uses the selected model", async () => {
 		renderPage();
 
-		await choose("Model", "GPT B");
+		await choose("ChatGPT model", "GPT B");
 		fireEvent.change(screen.getByLabelText("Message"), {
 			target: { value: "Hi" },
 		});
@@ -545,7 +545,7 @@ describe("StoryChatPage", () => {
 
 		await waitFor(() =>
 			expect(
-				screen.getByRole("combobox", { name: "Model" }).textContent,
+				screen.getByRole("combobox", { name: "Claude model" }).textContent,
 			).toContain("claude"),
 		);
 		expect(screen.queryByText("It is about X.")).toBeNull();

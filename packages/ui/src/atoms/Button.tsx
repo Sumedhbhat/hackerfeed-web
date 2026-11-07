@@ -1,6 +1,7 @@
 import { Button as BaseButton } from "@base-ui/react/button";
 import { createLink } from "@tanstack/react-router";
 import type { AnchorHTMLAttributes } from "react";
+import { NEW_TAB_NOTE_ID } from "./Link";
 
 const BASE_CLASSES =
 	"inline-flex shrink-0 items-center justify-center gap-1.5 text-sm font-medium no-underline transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--lagoon) data-disabled:cursor-not-allowed data-disabled:opacity-55";
@@ -71,5 +72,12 @@ export const ButtonLink = createLink(ButtonAnchor);
 export function ExternalButtonLink(
 	props: ButtonAnchorProps & { href: string },
 ) {
-	return <ButtonAnchor target="_blank" rel="noopener noreferrer" {...props} />;
+	return (
+		<ButtonAnchor
+			target="_blank"
+			rel="noopener noreferrer"
+			aria-describedby={NEW_TAB_NOTE_ID}
+			{...props}
+		/>
+	);
 }
