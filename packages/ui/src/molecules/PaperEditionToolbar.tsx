@@ -49,7 +49,8 @@ export function PaperEditionToolbar({
 					aria-label="Search papers"
 				/>
 			</FieldFrame>
-			<div className="flex items-center gap-1">
+			{/* Wraps under very large text rather than squeezing the date. */}
+			<div className="flex flex-wrap items-center gap-1">
 				<Button
 					variant="icon"
 					aria-label="Previous day"
@@ -58,7 +59,7 @@ export function PaperEditionToolbar({
 				>
 					<Icon icon={ChevronLeft} />
 				</Button>
-				<FieldFrame grow>
+				<FieldFrame grow fitsDate>
 					<TextInput
 						variant="bare"
 						type="date"

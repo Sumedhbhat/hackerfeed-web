@@ -14,13 +14,16 @@ const INPUT_VARIANT = {
 export function FieldFrame({
 	children,
 	grow = false,
+	fitsDate = false,
 }: {
 	children: React.ReactNode;
 	grow?: boolean;
+	/** Never narrower than a full date, at any text size (WCAG 1.4.4). */
+	fitsDate?: boolean;
 }) {
 	return (
 		<div
-			className={`flex min-h-10 items-center gap-2 rounded-md border border-(--field-line) bg-(--surface-strong) px-3 text-(--sea-ink-soft) focus-within:border-(--lagoon) focus-within:outline-2 focus-within:outline-(--lagoon) ${grow ? "min-w-0 flex-1" : "shrink-0"}`}
+			className={`flex min-h-10 items-center gap-2 rounded-md border border-(--field-line) bg-(--surface-strong) px-3 text-(--sea-ink-soft) focus-within:border-(--lagoon) focus-within:outline-2 focus-within:outline-(--lagoon) ${grow ? "min-w-0 flex-1" : "shrink-0"} ${fitsDate ? "min-w-[9.5em]" : ""}`}
 		>
 			{children}
 		</div>

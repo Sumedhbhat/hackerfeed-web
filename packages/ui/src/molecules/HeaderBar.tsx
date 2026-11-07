@@ -34,7 +34,7 @@ export function HeaderBar({
 			{/* Below 360px (e.g. 320px, WCAG 1.4.10) the nav takes its own row. Above that, if
 			    larger text or spacing (1.4.12) still doesn't fit, its links wrap rather than
 			    sliding under the actions: the nav never shrinks below its widest link. */}
-			<div className="page-wrap flex min-h-14 items-center gap-1.5 px-3 max-[359px]:flex-wrap max-[359px]:py-1.5 sm:gap-6 sm:px-6">
+			<div className="page-wrap flex min-h-14 items-center gap-1.5 px-3 flex-wrap max-[359px]:py-1.5 sm:gap-6 sm:px-6">
 				{brand}
 				<nav
 					aria-label="Main"

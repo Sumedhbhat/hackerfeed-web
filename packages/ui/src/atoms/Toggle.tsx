@@ -11,15 +11,25 @@ type ToggleButtonProps = Omit<
 	onPressedChange?: (pressed: boolean) => void;
 };
 
+/**
+ * A two-state button. `disabled` keeps it focusable (aria-disabled, presses
+ * ignored): a Save button that is briefly busy must not drop keyboard focus
+ * to the page (WCAG 2.4.3).
+ */
 export function ToggleButton({
 	variant = "ghost",
 	onPressedChange,
+	disabled,
 	...props
 }: ToggleButtonProps) {
 	return (
 		<BaseToggle
 			className={buttonClassName(variant)}
-			onPressedChange={(pressed) => onPressedChange?.(pressed)}
+			aria-disabled={disabled || undefined}
+			data-disabled={disabled ? "" : undefined}
+			onPressedChange={(pressed) => {
+				if (!disabled) onPressedChange?.(pressed);
+			}}
 			{...props}
 		/>
 	);
