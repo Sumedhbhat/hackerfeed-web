@@ -32,10 +32,12 @@ const LAYOUT = {
 		"inline-flex max-w-full items-center gap-1 overflow-x-auto rounded-lg border border-(--line) bg-(--chip-bg) p-1",
 	/**
 	 * One scrolling line on phones, with a fade showing there is more; a spacer
-	 * after the last chip lets it scroll clear of the fade. Wraps from `sm` up.
+	 * after the last chip lets it scroll clear of the fade. The fade lifts while
+	 * a chip has keyboard focus, so the focused one is never dimmed (WCAG 1.4.3).
+	 * Wraps from `sm` up.
 	 */
 	scroll:
-		"-mx-1 flex gap-2 overflow-x-auto px-1 py-1 [mask-image:linear-gradient(to_right,black_calc(100%-3.5rem),transparent)] [scrollbar-width:none] after:w-14 after:shrink-0 after:content-[''] sm:flex-wrap sm:overflow-visible sm:[mask-image:none] sm:after:hidden [&::-webkit-scrollbar]:hidden",
+		"-mx-1 flex gap-2 overflow-x-auto px-1 py-1 [mask-image:linear-gradient(to_right,black_calc(100%-3.5rem),transparent)] has-focus-visible:[mask-image:none] [scrollbar-width:none] after:w-14 after:shrink-0 after:content-[''] sm:flex-wrap sm:overflow-visible sm:[mask-image:none] sm:after:hidden [&::-webkit-scrollbar]:hidden",
 } as const;
 
 export function ToggleGroup<T extends string>({

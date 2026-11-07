@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
 
 /** Sticky top bar: brand on the left, navigation links next to it, actions on the far right. */
 export function HeaderBar({
@@ -10,8 +10,27 @@ export function HeaderBar({
 	links: ReactNode;
 	actions: ReactNode;
 }) {
+	// Publish the header's height for `scroll-padding-top`, so focused and
+	// linked-to content always lands below it, however tall it gets (WCAG 2.4.11).
+	const headerRef = useRef<HTMLElement>(null);
+	useEffect(() => {
+		const header = headerRef.current;
+		if (!header || typeof ResizeObserver === "undefined") return;
+		const root = document.documentElement;
+		const observer = new ResizeObserver(() =>
+			root.style.setProperty("--header-height", `${header.offsetHeight}px`),
+		);
+		observer.observe(header);
+		return () => {
+			observer.disconnect();
+			root.style.removeProperty("--header-height");
+		};
+	}, []);
 	return (
-		<header className="sticky top-0 z-50 border-b border-(--line) bg-(--header-bg) backdrop-blur-md">
+		<header
+			ref={headerRef}
+			className="sticky top-0 z-50 border-b border-(--line) bg-(--header-bg) backdrop-blur-md"
+		>
 			{/* Below 360px (e.g. 320px, WCAG 1.4.10) the nav takes its own row. Above that, if
 			    larger text or spacing (1.4.12) still doesn't fit, its links wrap rather than
 			    sliding under the actions: the nav never shrinks below its widest link. */}

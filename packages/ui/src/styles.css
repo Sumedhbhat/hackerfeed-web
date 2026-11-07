@@ -91,15 +91,11 @@ body,
 
 /* Keep focused or scrolled-to elements clear of the sticky header (WCAG 2.4.11). */
 html {
-  scroll-padding-top: 5rem;
+  /* HeaderBar keeps --header-height at its real height, which grows when it
+     wraps under large text or zoom. */
+  scroll-padding-top: calc(var(--header-height, 4rem) + 1rem);
 }
 
-/* The header wraps to two rows below 360px (HeaderBar). */
-@media (max-width: 359px) {
-  html {
-    scroll-padding-top: 7.5rem;
-  }
-}
 
 body {
   margin: 0;
