@@ -1,13 +1,27 @@
 import type { ReactNode } from "react";
 
+const FROM = {
+	/** Hidden below 380px (the narrowest phones). */
+	xs: "max-xs:hidden",
+	/** Hidden on phones. */
+	sm: "max-sm:hidden",
+} as const;
+
 /**
- * Words inside a link or button that phones leave out to save room
- * ("4 comments" becomes "4"). Give the control an aria-label that still says
- * the full thing; this text is hidden from screen readers to avoid repeating it.
+ * Words inside a link or button that small screens leave out to save room
+ * ("4 comments" becomes "4", "Read article" becomes "Read"). Give the control
+ * an aria-label that says the full thing; this text is hidden from screen
+ * readers to avoid repeating it.
  */
-export function WideText({ children }: { children: ReactNode }) {
+export function WideText({
+	children,
+	from = "sm",
+}: {
+	children: ReactNode;
+	from?: keyof typeof FROM;
+}) {
 	return (
-		<span aria-hidden="true" className="max-sm:hidden">
+		<span aria-hidden="true" className={FROM[from]}>
 			{children}
 		</span>
 	);

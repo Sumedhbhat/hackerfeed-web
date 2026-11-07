@@ -1,25 +1,19 @@
 /**
  * The visible words of an on/off button ("Save" / "Saved"). Both words occupy
- * the same space so pressing the button never moves its neighbours. With
- * `iconOnlyOnPhones` the words hide on the narrowest phones (under 380px);
- * the button's aria-label names it.
+ * the same space so pressing the button never moves its neighbours. The
+ * button's aria-label names it; these words are for sighted readers.
  */
 export function ToggleLabel({
 	on,
 	offLabel,
 	onLabel,
-	iconOnlyOnPhones = false,
 }: {
 	on: boolean;
 	offLabel: string;
 	onLabel: string;
-	iconOnlyOnPhones?: boolean;
 }) {
 	return (
-		<span
-			aria-hidden="true"
-			className={`grid ${iconOnlyOnPhones ? "max-xs:hidden" : ""}`}
-		>
+		<span aria-hidden="true" className="grid">
 			<span className={`col-start-1 row-start-1 ${on ? "invisible" : ""}`}>
 				{offLabel}
 			</span>

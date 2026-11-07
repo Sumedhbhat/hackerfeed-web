@@ -82,12 +82,7 @@ export function PaperRow({
 							}}
 						>
 							<Icon icon={Bookmark} filled={saved} />
-							<ToggleLabel
-								on={saved}
-								offLabel="Save"
-								onLabel="Saved"
-								iconOnlyOnPhones
-							/>
+							<ToggleLabel on={saved} offLabel="Save" onLabel="Saved" />
 						</ToggleButton>
 					) : null
 				}

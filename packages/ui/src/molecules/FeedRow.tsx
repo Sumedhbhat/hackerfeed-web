@@ -40,16 +40,13 @@ export function FeedRow({
 				<div>
 					{/* Keeps the ribbon's spot free beside the first line on every row,
 					    so saving never re-wraps the title. */}
-					<span
-						aria-hidden="true"
-						className="float-right h-5 w-8 xs:w-12 sm:w-10"
-					/>
+					<span aria-hidden="true" className="float-right h-5 w-12 sm:w-10" />
 					{title}
 				</div>
 				<div className="flex flex-col gap-1 lg:flex-row lg:items-center lg:justify-between lg:gap-4">
 					{meta}
 					<div className="-mt-1.5 -ml-1.5 flex items-center gap-1 sm:-mr-2 sm:-ml-2 lg:mt-0 lg:ml-0 lg:shrink-0">
-						<div className="grid min-w-0 grid-cols-[minmax(7rem,auto)_minmax(3.25rem,auto)_auto] items-center justify-items-start sm:grid-cols-[minmax(7.25rem,auto)_minmax(7.5rem,auto)_auto] lg:grid-cols-[minmax(7.25rem,auto)_minmax(7.5rem,auto)_minmax(5.25rem,auto)]">
+						<div className="grid min-w-0 grid-cols-[minmax(4.25rem,auto)_minmax(3.25rem,auto)_auto] xs:grid-cols-[minmax(7rem,auto)_minmax(3.25rem,auto)_auto] items-center justify-items-start sm:grid-cols-[minmax(7.25rem,auto)_minmax(7.5rem,auto)_auto] lg:grid-cols-[minmax(7.25rem,auto)_minmax(7.5rem,auto)_minmax(5.25rem,auto)]">
 							{actions}
 						</div>
 						<div className="ml-auto lg:ml-0">{save}</div>

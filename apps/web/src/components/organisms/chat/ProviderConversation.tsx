@@ -50,6 +50,7 @@ export function ProviderConversation({
 	// only while the reader is at the bottom: scrolling up to reread stops it.
 	const followRef = useRef(true);
 	const lastCountRef = useRef(messageCount);
+	// Sending a question always scrolls to it; a reply finishing does not.
 	useEffect(() => {
 		const onScroll = () => {
 			followRef.current =
@@ -62,9 +63,11 @@ export function ProviderConversation({
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: scroll as content grows
 	useEffect(() => {
-		const newMessage = messageCount !== lastCountRef.current;
+		const asked =
+			messageCount !== lastCountRef.current &&
+			chat.messages.at(-1)?.role === "user";
 		lastCountRef.current = messageCount;
-		if (newMessage || followRef.current) {
+		if (asked || followRef.current) {
 			endRef.current?.scrollIntoView?.({ block: "end" });
 		}
 	}, [messageCount, streamingLength]);
@@ -209,9 +212,10 @@ export function ProviderConversation({
 					maxLength={MAX_CHAT_MESSAGE_LENGTH}
 					placeholder="Ask about this story…"
 				/>
-				{/* Below the composer, so following the reply keeps the input in view. */}
-				<div ref={endRef} />
 			</Stack>
+			{/* After the composer, so following the reply keeps the input in view;
+			    outside the Stack so it adds no gap. */}
+			<div ref={endRef} />
 		</Card>
 	);
 }

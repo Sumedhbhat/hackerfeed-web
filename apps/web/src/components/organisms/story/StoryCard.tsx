@@ -88,7 +88,8 @@ export function StoryCard({ story, rank, markSaved = true }: StoryCardProps) {
 						onClick={recordRead}
 						onAuxClick={recordMiddleClickRead}
 					>
-						{readLabel}
+						{story.url ? "Read" : "Open"}
+						<WideText from="xs">{story.url ? " article" : " post"}</WideText>
 						<Icon icon={ArrowUpRight} size={14} />
 					</ExternalButtonLink>
 
@@ -128,12 +129,7 @@ export function StoryCard({ story, rank, markSaved = true }: StoryCardProps) {
 					}}
 				>
 					<Icon icon={Bookmark} filled={isFav} />
-					<ToggleLabel
-						on={isFav}
-						offLabel="Save"
-						onLabel="Saved"
-						iconOnlyOnPhones
-					/>
+					<ToggleLabel on={isFav} offLabel="Save" onLabel="Saved" />
 				</ToggleButton>
 			}
 		/>

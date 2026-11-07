@@ -67,7 +67,8 @@ export function TabPanel({
 	children: ReactNode;
 }) {
 	return (
-		<BaseTabs.Panel value={value} keepMounted={keepMounted}>
+		// Panels always hold links or buttons, so the panel itself is not a tab stop.
+		<BaseTabs.Panel value={value} keepMounted={keepMounted} tabIndex={-1}>
 			{children}
 		</BaseTabs.Panel>
 	);
