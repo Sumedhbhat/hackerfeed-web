@@ -87,7 +87,7 @@ export function PapersFeed({
 			<PaperEditionToolbar
 				query={filters.query ?? ""}
 				date={selectedDate}
-				latestDate={latestDate}
+				latestDate={latestDate ?? undefined}
 				canGoNext={Boolean(
 					latestDate && selectedDate && selectedDate < latestDate,
 				)}
