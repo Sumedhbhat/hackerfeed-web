@@ -56,7 +56,9 @@ export function PaperSummary({
 			{canExpand || links ? (
 				<ActionLine>
 					{canExpand ? (
-						<CollapsibleTrigger>
+						<CollapsibleTrigger
+							aria-label={`${open ? "Show less" : "Show more"} of ${paper.title}`}
+						>
 							{open ? "Show less" : "Show more"}
 							<Icon icon={open ? ChevronUp : ChevronDown} />
 						</CollapsibleTrigger>

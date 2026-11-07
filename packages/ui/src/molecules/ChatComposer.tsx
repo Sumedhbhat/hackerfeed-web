@@ -1,5 +1,5 @@
 import { ArrowUp, Square } from "lucide-react";
-import type { FormEvent } from "react";
+import { type FormEvent, useEffect, useRef } from "react";
 import { Button } from "../atoms/Button";
 import { Icon } from "../atoms/Icon";
 import { TextArea } from "../atoms/TextField";
@@ -24,6 +24,25 @@ export function ChatComposer({
 	maxLength?: number;
 	placeholder?: string;
 }) {
+	// Send and Stop are the same button. When a reply ends it becomes a
+	// disabled Send (the box is empty), which drops keyboard focus to the
+	// page without a blur event; put it back in the message box (WCAG 2.4.3).
+	const actionFocusedRef = useRef(false);
+	useEffect(() => {
+		if (!isStreaming && actionFocusedRef.current) {
+			actionFocusedRef.current = false;
+			document.getElementById(id)?.focus();
+		}
+	}, [isStreaming, id]);
+	const trackFocus = {
+		onFocus: () => {
+			actionFocusedRef.current = true;
+		},
+		onBlur: () => {
+			actionFocusedRef.current = false;
+		},
+	};
+
 	const submit = (event: FormEvent) => {
 		event.preventDefault();
 		onSubmit();
@@ -57,11 +76,11 @@ export function ChatComposer({
 				placeholder={placeholder}
 			/>
 			{isStreaming ? (
-				<Button variant="secondary" onClick={onStop}>
+				<Button variant="secondary" onClick={onStop} {...trackFocus}>
 					<Icon icon={Square} size={14} filled /> Stop
 				</Button>
 			) : (
-				<Button type="submit" disabled={!value.trim()}>
+				<Button type="submit" disabled={!value.trim()} {...trackFocus}>
 					<Icon icon={ArrowUp} /> Send
 				</Button>
 			)}

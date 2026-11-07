@@ -245,12 +245,24 @@ export function FavoritesPage({
 
 /**
  * Unsaving removes the row, and the focused Save button with it. Say what
- * happened (WCAG 4.1.3) and put focus on the next saved item, or on the
- * empty state's link when nothing is left (WCAG 2.4.3).
+ * happened (WCAG 4.1.3) and put focus on the row that took its place (the
+ * next one, or the previous one if it was last), or on the empty state's
+ * link when nothing is left (WCAG 2.4.3).
  */
 function useRemovalFeedback(type: FavoritesType, count: number) {
 	const [message, setMessage] = useState("");
 	const lastRef = useRef({ type, count });
+	// The position of the row that last had focus in the saved list.
+	const focusedRowRef = useRef(0);
+	useEffect(() => {
+		const onFocusIn = (event: FocusEvent) => {
+			const list = document.getElementById("saved-list");
+			const row = (event.target as Element | null)?.closest("#saved-list > li");
+			if (list && row) focusedRowRef.current = [...list.children].indexOf(row);
+		};
+		document.addEventListener("focusin", onFocusIn);
+		return () => document.removeEventListener("focusin", onFocusIn);
+	}, []);
 	useEffect(() => {
 		const last = lastRef.current;
 		lastRef.current = { type, count };
@@ -262,10 +274,12 @@ function useRemovalFeedback(type: FavoritesType, count: number) {
 		);
 		requestAnimationFrame(() => {
 			if (!focusIsLost()) return;
-			const list = document.getElementById("saved-list");
-			if (list) focusFirstIn(list);
-			else
+			const rows = document.getElementById("saved-list")?.children;
+			if (rows?.length) {
+				focusFirstIn(rows[Math.min(focusedRowRef.current, rows.length - 1)]);
+			} else {
 				focusFirstIn(document.querySelector('[role="tabpanel"]:not([hidden])'));
+			}
 		});
 	}, [type, count]);
 	return message;

@@ -167,6 +167,30 @@ describe("FavoritesPage backend source of truth", () => {
 		).toEqual(["Database newest saved", "Database oldest saved"]);
 	});
 
+	it("moves focus to the row that takes an unsaved story's place", async () => {
+		authMock.user = { id: "workos-favorites-page-focus" };
+		trpcMock.list.mockResolvedValue([
+			makeStory({ id: 1, title: "First" }),
+			makeStory({ id: 2, title: "Second" }),
+			makeStory({ id: 3, title: "Third" }),
+		]);
+		render(<FavoritesPage />);
+
+		const second = await screen.findByRole("button", {
+			name: "Saved Second",
+			pressed: true,
+		});
+		second.focus();
+		fireEvent.click(second);
+
+		// Not back to the top of the list: the next row, where "Second" was.
+		await waitFor(() =>
+			expect(document.activeElement?.getAttribute("aria-label")).toMatch(
+				/Third$/,
+			),
+		);
+	});
+
 	it("does not render local favorites after backend favorites load", async () => {
 		toggleFavorite(makeStory({ id: 10, title: "Local saved story" }));
 		authMock.user = { id: "workos-favorites-page-source" };

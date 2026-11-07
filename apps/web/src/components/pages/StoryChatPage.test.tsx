@@ -418,9 +418,15 @@ describe("StoryChatPage", () => {
 		fireEvent.click(screen.getByRole("button", { name: "Send" }));
 
 		await screen.findByText("Slow");
-		fireEvent.click(screen.getByRole("button", { name: "Stop" }));
+		const stop = screen.getByRole("button", { name: "Stop" });
+		stop.focus();
+		fireEvent.click(stop);
 
 		await screen.findByRole("button", { name: "Send" });
+		// Stop turned back into a disabled Send; focus moved to the message box.
+		await waitFor(() =>
+			expect(document.activeElement).toBe(screen.getByLabelText("Message")),
+		);
 		// The partial reply is kept and no error is shown for a user cancel.
 		expect(screen.getByText("Slow")).toBeDefined();
 		expect(screen.queryByRole("alert")).toBeNull();
