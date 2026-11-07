@@ -25,13 +25,11 @@ import { rememberReturnFocus } from "#/lib/a11y/return-focus";
 
 type StoryCardProps = {
 	story: HackerNewsStoryRecord;
-	/** Position in a ranked feed; omit for unranked lists such as favorites. */
-	rank?: number;
 	/** Tint the row once saved; off in the Saved list, where everything is saved. */
 	markSaved?: boolean;
 };
 
-export function StoryCard({ story, rank, markSaved = true }: StoryCardProps) {
+export function StoryCard({ story, markSaved = true }: StoryCardProps) {
 	const { isFavorited, toggleFavorite } = useFavorites();
 	const { recordStoryView } = useViewActivity();
 	const aiChat = useFeatureFlag("aiChat");
@@ -55,7 +53,6 @@ export function StoryCard({ story, rank, markSaved = true }: StoryCardProps) {
 
 	return (
 		<FeedRow
-			rank={rank}
 			saved={markSaved && isFav}
 			title={
 				<Heading level={2} size="row">

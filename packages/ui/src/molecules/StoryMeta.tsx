@@ -20,9 +20,7 @@ export function StoryMeta({
 }) {
 	return (
 		<FactLine>
-			{domain ? (
-				<span className="font-medium text-(--sea-ink-soft)">{domain}</span>
-			) : null}
+			{domain ? <span className="text-(--sea-ink-soft)">{domain}</span> : null}
 			{score != null ? (
 				<span className="tabular-nums">
 					{score} {score === 1 ? "point" : "points"}

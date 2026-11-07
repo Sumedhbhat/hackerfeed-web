@@ -74,9 +74,7 @@ export function FeedPane({ feed, prefetchNextBatch }: FeedPaneProps) {
 				{displayedIds.map((storyId, i) => {
 					const story = storyQueries[i]?.data;
 					if (!story) return null;
-					return (
-						<StoryCard key={`${feed}-${storyId}`} story={story} rank={i + 1} />
-					);
+					return <StoryCard key={`${feed}-${storyId}`} story={story} />;
 				})}
 			</ReadingList>
 
