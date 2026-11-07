@@ -1,41 +1,27 @@
 import type { HackerNewsCommentRecord } from "@hackerfeed/hacker-news/records";
 import { formatStoryAge } from "@hackerfeed/hacker-news/utils";
-import { useSuspenseQueries } from "@tanstack/react-query";
 import { useState } from "react";
-import { commentQueryOptions } from "#/lib/hacker-news/queries";
 
 export type UseCommentReturn = {
 	collapsed: boolean;
 	setCollapsed: (value: boolean | ((prev: boolean) => boolean)) => void;
 	repliesOpen: boolean;
 	setRepliesOpen: (value: boolean | ((prev: boolean) => boolean)) => void;
-	childQueries: ReturnType<
-		typeof useSuspenseQueries<ReturnType<typeof commentQueryOptions>[]>
-	>;
 	age: string;
 	replyCount: number;
 };
 
+/** A comment's local state. Its replies load in `Replies`, inside their own Suspense boundary. */
 export function useComment(comment: HackerNewsCommentRecord): UseCommentReturn {
 	const [collapsed, setCollapsed] = useState(false);
 	const [repliesOpen, setRepliesOpen] = useState(false);
-
-	const childQueries = useSuspenseQueries({
-		queries: repliesOpen
-			? comment.kids.map((id) => commentQueryOptions(id))
-			: [],
-	});
-
-	const age = formatStoryAge(comment.time);
-	const replyCount = comment.kids.length;
 
 	return {
 		collapsed,
 		setCollapsed,
 		repliesOpen,
 		setRepliesOpen,
-		childQueries,
-		age,
-		replyCount,
+		age: formatStoryAge(comment.time),
+		replyCount: comment.kids.length,
 	};
 }

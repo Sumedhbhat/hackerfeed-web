@@ -455,8 +455,9 @@ describe("StoryChatPage", () => {
 		await screen.findByText("It is about X.");
 
 		fireEvent.click(screen.getByRole("button", { name: "New chat" }));
-		expect(screen.getByText("Started a new chat.")).toBeTruthy();
-		fireEvent.click(screen.getByRole("button", { name: "Undo" }));
+		// Shown next to Undo and announced through the chat status.
+		expect(screen.getAllByText("Started a new chat.")).toHaveLength(2);
+		fireEvent.click(screen.getByRole("button", { name: "Undo new chat" }));
 
 		expect(screen.getByText("It is about X.")).toBeTruthy();
 		expect(screen.queryByText("Started a new chat.")).toBeNull();

@@ -55,11 +55,6 @@ export function PapersFeed({
 	);
 	const visiblePapers = filteredPapers.slice(0, visibleCount);
 	const withFocus = useLoadMoreFocus("papers-list", visiblePapers.length);
-	const resultCount = useResultCountAnnouncement(
-		filteredPapers.length,
-		["paper", "papers"],
-		`${query}|${filters.topic ?? ""}|${edition.editionDate ?? ""}`,
-	);
 	const selectedDate = filters.date ?? edition.editionDate ?? "";
 	const hasPapers = edition.papers.length > 0;
 	const hasActiveFilters = Boolean(query || filters.topic);
@@ -70,6 +65,12 @@ export function PapersFeed({
 			: selectedDate
 				? "No papers are available for this edition."
 				: "No paper editions have been ingested yet.";
+	const resultCount = useResultCountAnnouncement(
+		filteredPapers.length,
+		["paper", "papers"],
+		`${query}|${filters.topic ?? ""}|${selectedDate}`,
+		emptyMessage,
+	);
 
 	return (
 		<PaperPageShell>

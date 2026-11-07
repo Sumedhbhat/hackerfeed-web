@@ -3,6 +3,7 @@ import {
 	ProfilePage,
 	type ProfileSearch,
 } from "#/components/pages/ProfilePage";
+import { titleHead } from "#/lib/page-title";
 
 const SEARCH_TOKEN = /^[a-z0-9_.-]{1,100}$/i;
 
@@ -28,6 +29,7 @@ export function parseProfileSearch(
 }
 
 export const Route = createFileRoute("/profile")({
+	head: () => titleHead("Profile"),
 	validateSearch: parseProfileSearch,
 	component: ProfileRoute,
 });

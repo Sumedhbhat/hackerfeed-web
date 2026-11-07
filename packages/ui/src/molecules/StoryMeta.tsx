@@ -3,7 +3,7 @@ import { FactLine } from "../atoms/FactLine";
 
 /**
  * The facts under a story title: where it is from, how many points it has,
- * when, and who posted it (last, so it is the fact that shortens if space runs out). `trailing` adds a last item such as a link.
+ * when, and who posted it. `trailing` adds a last item such as a link.
  */
 export function StoryMeta({
 	domain,
@@ -19,7 +19,7 @@ export function StoryMeta({
 	trailing?: ReactNode;
 }) {
 	return (
-		<FactLine singleLine>
+		<FactLine>
 			{domain ? (
 				<span className="font-medium text-(--sea-ink-soft)">{domain}</span>
 			) : null}
@@ -29,7 +29,7 @@ export function StoryMeta({
 				</span>
 			) : null}
 			{age ? <span>{age}</span> : null}
-			{by ? <span data-shrink>by {by}</span> : null}
+			{by ? <span>by {by}</span> : null}
 			{trailing}
 		</FactLine>
 	);

@@ -169,6 +169,7 @@ export function ProviderConversation({
 							variant="secondary"
 							onClick={() => {
 								chat.reset();
+								setAnnouncement("Started a new chat.");
 								// The button disappears; the Undo that replaces it gets focus.
 								requestAnimationFrame(() =>
 									document.getElementById("story-chat-undo")?.focus(),
@@ -215,8 +216,10 @@ export function ProviderConversation({
 									<Button
 										id="story-chat-undo"
 										variant="ghost"
+										aria-label="Undo new chat"
 										onClick={() => {
 											chat.undoReset();
+											setAnnouncement("Chat restored.");
 											focusComposer();
 										}}
 									>

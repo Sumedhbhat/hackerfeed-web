@@ -7,8 +7,10 @@ import {
 	PAGE_SIZE,
 	storyQueryOptions,
 } from "#/lib/hacker-news/queries";
+import { titleHead } from "#/lib/page-title";
 
 export const Route = createFileRoute("/")({
+	head: () => titleHead("Stories"),
 	component: FeedPage,
 	loader: async ({ context }) => {
 		try {

@@ -11,9 +11,11 @@ import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { Text } from "@hackerfeed/ui/atoms/Text";
 import { ThreadItem, ThreadList } from "@hackerfeed/ui/atoms/ThreadItem";
 import { CommentSkeleton } from "@hackerfeed/ui/molecules/CommentSkeleton";
+import { useSuspenseQueries } from "@tanstack/react-query";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { Suspense } from "react";
 import { useComment } from "#/hooks/useComment";
+import { commentQueryOptions } from "#/lib/hacker-news/queries";
 
 type CommentProps = {
 	comment: HackerNewsCommentRecord;
@@ -26,7 +28,6 @@ export function Comment({ comment, depth = 0 }: CommentProps) {
 		setCollapsed,
 		repliesOpen,
 		setRepliesOpen,
-		childQueries,
 		age,
 		replyCount,
 	} = useComment(comment);
@@ -91,7 +92,8 @@ export function Comment({ comment, depth = 0 }: CommentProps) {
 											</CollapsibleTrigger>
 										</Row>
 
-										{/* Nested replies — wrapped in Suspense so parent comment isn't affected while loading */}
+										{/* Replies load inside this boundary, so the comment and its
+										    "Hide replies" trigger stay mounted (and focused) meanwhile. */}
 										<CollapsiblePanel>
 											<Suspense
 												fallback={
@@ -102,18 +104,9 @@ export function Comment({ comment, depth = 0 }: CommentProps) {
 													</Stack>
 												}
 											>
-												<ThreadList>
-													{childQueries.map((q) => {
-														if (!q.data) return null;
-														return (
-															<Comment
-																key={q.data.id}
-																comment={q.data}
-																depth={depth + 1}
-															/>
-														);
-													})}
-												</ThreadList>
+												{repliesOpen ? (
+													<Replies ids={comment.kids} depth={depth + 1} />
+												) : null}
 											</Suspense>
 										</CollapsiblePanel>
 									</Stack>
@@ -124,5 +117,21 @@ export function Comment({ comment, depth = 0 }: CommentProps) {
 				</Stack>
 			</Collapsible>
 		</ThreadItem>
+	);
+}
+
+/** A comment's replies; suspends while they load. */
+function Replies({ ids, depth }: { ids: number[]; depth: number }) {
+	const queries = useSuspenseQueries({
+		queries: ids.map((id) => commentQueryOptions(id)),
+	});
+	return (
+		<ThreadList>
+			{queries.map((q) =>
+				q.data ? (
+					<Comment key={q.data.id} comment={q.data} depth={depth} />
+				) : null,
+			)}
+		</ThreadList>
 	);
 }

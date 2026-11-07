@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { FavoritesPage } from "#/components/pages/FavoritesPage";
+import { titleHead } from "#/lib/page-title";
 
 export type FavoritesType = "stories" | "papers";
 
@@ -13,6 +14,7 @@ export function parseFavoritesSearch(search: Record<string, unknown>): {
 }
 
 export const Route = createFileRoute("/favorites")({
+	head: () => titleHead("Saved"),
 	validateSearch: parseFavoritesSearch,
 	component: FavoritesRoute,
 });
