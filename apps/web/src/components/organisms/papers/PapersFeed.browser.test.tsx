@@ -111,7 +111,10 @@ describe("PapersFeed", () => {
 		);
 
 		const next = await screen.findByRole("button", { name: "Next day" });
-		await waitFor(() => expect(next.hasAttribute("disabled")).toBe(false));
+		await waitFor(() =>
+			expect(next.getAttribute("aria-disabled")).not.toBe("true"),
+		);
+		next.focus();
 		fireEvent.click(next);
 		expect(onFiltersChange).toHaveBeenCalledWith(
 			expect.objectContaining({ date: "2026-06-22" }),
@@ -125,9 +128,14 @@ describe("PapersFeed", () => {
 				onFiltersChange={onFiltersChange}
 			/>,
 		);
-		expect(
-			screen.getByRole("button", { name: "Next day" }).hasAttribute("disabled"),
-		).toBe(true);
+		// Unavailable, but still focusable, so pressing it to reach the latest
+		// edition doesn't drop focus to the page (WCAG 2.4.3).
+		const latestNext = screen.getByRole("button", { name: "Next day" });
+		expect(latestNext.getAttribute("aria-disabled")).toBe("true");
+		expect(document.activeElement).toBe(latestNext);
+		onFiltersChange.mockClear();
+		fireEvent.click(latestNext);
+		expect(onFiltersChange).not.toHaveBeenCalled();
 	});
 
 	it("shows the short summary and expands to the original abstract", () => {

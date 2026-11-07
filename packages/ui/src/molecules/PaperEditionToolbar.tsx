@@ -74,7 +74,10 @@ export function PaperEditionToolbar({
 				<Button
 					variant="icon"
 					aria-label="Next day"
+					// Stays focusable on the latest edition: pressing it to reach that
+					// day must not drop keyboard focus to the page (WCAG 2.4.3).
 					disabled={!date || !canGoNext}
+					focusableWhenDisabled
 					onClick={() => onDateChange(shiftDay(date, 1))}
 				>
 					<Icon icon={ChevronRight} />

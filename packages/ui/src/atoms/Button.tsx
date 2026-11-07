@@ -3,12 +3,12 @@ import { createLink } from "@tanstack/react-router";
 import type { AnchorHTMLAttributes } from "react";
 
 const BASE_CLASSES =
-	"inline-flex shrink-0 items-center justify-center gap-1.5 text-sm font-medium no-underline transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--lagoon) disabled:cursor-not-allowed disabled:opacity-55";
+	"inline-flex shrink-0 items-center justify-center gap-1.5 text-sm font-medium no-underline transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--lagoon) data-disabled:cursor-not-allowed data-disabled:opacity-55";
 
 const VARIANT_CLASSES = {
 	/** The one main action in a view. */
 	primary:
-		"rounded-md min-h-11 bg-(--lagoon) px-3.5 py-1.5 text-(--on-lagoon) disabled:bg-(--chip-bg) disabled:text-(--sea-ink-faint) disabled:opacity-100 sm:min-h-9 hover:bg-(--lagoon-deep) hover:text-(--on-lagoon)",
+		"rounded-md min-h-11 bg-(--lagoon) px-3.5 py-1.5 text-(--on-lagoon) data-disabled:bg-(--chip-bg) data-disabled:text-(--sea-ink-faint) data-disabled:opacity-100 sm:min-h-9 hover:bg-(--lagoon-deep) hover:text-(--on-lagoon)",
 	/** A main action that repeats down a list, where a solid button would shout. */
 	soft: "rounded-md whitespace-nowrap min-h-11 bg-(--lagoon-tint) px-2.5 py-1.5 text-(--lagoon-deep) hover:bg-(--lagoon) hover:text-(--on-lagoon) sm:min-h-9 sm:px-3",
 	/** The main action of a list row: green text, no fill, so a column of rows stays calm. */

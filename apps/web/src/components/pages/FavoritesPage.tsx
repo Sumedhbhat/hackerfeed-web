@@ -319,8 +319,8 @@ function useRemovalFeedback(type: FavoritesType, count: number) {
 		if (last.type !== type || count >= last.count) return;
 		setMessage(
 			count === 0
-				? "Removed from Saved. Nothing saved here now."
-				: `Removed from Saved. ${count} left.`,
+				? "Removed from Saved. Nothing saved here now. Undo is above the list."
+				: `Removed from Saved. ${count} left. Undo is above the list.`,
 		);
 		requestAnimationFrame(() => {
 			if (!focusIsLost()) return;

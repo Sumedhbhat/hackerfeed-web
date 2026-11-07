@@ -62,6 +62,10 @@ export function ToggleGroup<T extends string>({
 				if (next[0] !== undefined) onValueChange(next[0] as T);
 			}}
 			className={LAYOUT[layout]}
+			// Tab reaches the selected option and arrow keys move between them, the
+			// toolbar pattern; say so to assistive tech instead of a plain group.
+			role="toolbar"
+			aria-orientation="horizontal"
 			{...aria}
 		>
 			{children}

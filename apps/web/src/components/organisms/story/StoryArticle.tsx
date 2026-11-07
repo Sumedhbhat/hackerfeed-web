@@ -19,6 +19,7 @@ import { ArrowUpRight, Bookmark, Sparkles } from "lucide-react";
 import { useFavorites } from "#/hooks/useFavorites";
 import { useFeatureFlag } from "#/hooks/useFeatureFlags";
 import { useViewActivity } from "#/hooks/useViewActivity";
+import { rememberReturnFocus } from "#/lib/a11y/return-focus";
 
 /** Top of the story page: title, body text, facts and what you can do with it. */
 export function StoryArticle({ story }: { story: HackerNewsStoryRecord }) {
@@ -60,7 +61,10 @@ export function StoryArticle({ story }: { story: HackerNewsStoryRecord }) {
 						to="/chat/$storyId"
 						params={{ storyId: story.id }}
 						aria-label={`Ask AI about ${title}`}
-						onClick={() => recordStoryView(story, "chat_opened")}
+						onClick={(event) => {
+							rememberReturnFocus(event.currentTarget);
+							recordStoryView(story, "chat_opened");
+						}}
 					>
 						<Icon icon={Sparkles} accent />
 						Ask AI

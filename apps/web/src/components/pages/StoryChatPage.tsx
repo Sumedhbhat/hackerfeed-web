@@ -6,6 +6,7 @@ import { NoticeCard } from "@hackerfeed/ui/molecules/NoticeCard";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
 import { StoryChat } from "#/components/organisms/chat/StoryChat";
+import { goBackIfReturningTo } from "#/lib/a11y/return-focus";
 import { storyQueryOptions } from "#/lib/hacker-news/queries";
 
 type StoryChatPageProps = { storyId: number };
@@ -21,6 +22,9 @@ export function StoryChatPage({ storyId }: StoryChatPageProps) {
 		<PageContainer>
 			<BackLink
 				to={`/story/${storyId}`}
+				onClick={(event) => {
+					if (goBackIfReturningTo(`/story/${storyId}`)) event.preventDefault();
+				}}
 				label={
 					<>
 						<Icon icon={ArrowLeft} /> Story

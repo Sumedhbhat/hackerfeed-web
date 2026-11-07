@@ -13,7 +13,9 @@ import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { Suspense } from "react";
 import { Comment } from "#/components/organisms/story/Comment";
 import { StoryArticle } from "#/components/organisms/story/StoryArticle";
+import { useRestoreReturnFocus } from "#/hooks/useRestoreReturnFocus";
 import { useStoryPage } from "#/hooks/useStoryPage";
+import { goBackIfReturningTo } from "#/lib/a11y/return-focus";
 
 type StoryPageProps = {
 	storyId: number;
@@ -31,12 +33,16 @@ export function StoryPage({ storyId }: StoryPageProps) {
 // Separate component so useStoryPage's suspense queries sit under the Suspense above.
 function StoryContent({ storyId }: StoryPageProps) {
 	const { story, commentQueries } = useStoryPage(storyId);
+	useRestoreReturnFocus(Boolean(story));
 
 	if (!story) return null;
 
 	return (
 		<PageContainer>
 			<BackLink
+				onClick={(event) => {
+					if (goBackIfReturningTo("/")) event.preventDefault();
+				}}
 				label={
 					<>
 						<Icon icon={ArrowLeft} /> Stories
