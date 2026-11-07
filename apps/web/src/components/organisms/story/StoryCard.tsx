@@ -4,6 +4,7 @@ import {
 	getDiscussionUrl,
 	getStoryDomain,
 	getStoryTitle,
+	splitPostKind,
 } from "@hackerfeed/hacker-news/utils";
 import { ButtonLink, ExternalButtonLink } from "@hackerfeed/ui/atoms/Button";
 import { Heading } from "@hackerfeed/ui/atoms/Heading";
@@ -37,9 +38,7 @@ export function StoryCard({ story, rank, markSaved = true }: StoryCardProps) {
 	const [justSaved, setJustSaved] = useState(false);
 
 	const title = getStoryTitle(story);
-	// "Show HN: A tool" reads as a tag and a title: [Show HN] A tool.
-	const [, postKind, titleText = title] =
-		/^(Show HN|Ask HN|Tell HN|Launch HN):\s*(.+)$/.exec(title) ?? [];
+	const { kind: postKind, text: titleText } = splitPostKind(title);
 	const storyUrl = story.url ?? getDiscussionUrl(story.id);
 	const comments = story.descendants ?? 0;
 	const readLabel = story.url ? "Read article" : "Open post";

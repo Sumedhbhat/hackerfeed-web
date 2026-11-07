@@ -2,6 +2,7 @@ import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
 import {
 	buildChatGptStoryDiscussionUrl,
 	getStoryTitle,
+	splitPostKind,
 } from "@hackerfeed/hacker-news/utils";
 import {
 	Button,
@@ -9,6 +10,7 @@ import {
 	ExternalButtonLink,
 } from "@hackerfeed/ui/atoms/Button";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
+import { TitleTag } from "@hackerfeed/ui/atoms/TitleTag";
 import { ToggleButton } from "@hackerfeed/ui/atoms/Toggle";
 import { ToggleLabel } from "@hackerfeed/ui/atoms/ToggleLabel";
 import { CardSkeleton } from "@hackerfeed/ui/molecules/CardSkeleton";
@@ -29,7 +31,7 @@ export function StoryChat({ story }: { story: HackerNewsStoryRecord }) {
 	return (
 		<>
 			<StoryChatHeader
-				title={getStoryTitle(story)}
+				title={<StoryTitle title={getStoryTitle(story)} />}
 				url={story.url}
 				actions={<StoryChatActions story={story} />}
 			/>
@@ -99,6 +101,17 @@ function StoryChatActions({ story }: { story: HackerNewsStoryRecord }) {
 				<Icon icon={Bookmark} filled={saved} />
 				<ToggleLabel on={saved} offLabel="Save" onLabel="Saved" />
 			</ToggleButton>
+		</>
+	);
+}
+
+/** A story title with its Show HN / Ask HN prefix as a tag, as in the feed. */
+function StoryTitle({ title }: { title: string }) {
+	const { kind, text } = splitPostKind(title);
+	return (
+		<>
+			{kind ? <TitleTag>{kind}</TitleTag> : null}
+			{text}
 		</>
 	);
 }

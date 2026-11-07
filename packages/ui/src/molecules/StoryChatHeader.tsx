@@ -12,7 +12,7 @@ export function StoryChatHeader({
 	url,
 	actions,
 }: {
-	title: string;
+	title: ReactNode;
 	url?: string | null;
 	actions?: ReactNode;
 }) {

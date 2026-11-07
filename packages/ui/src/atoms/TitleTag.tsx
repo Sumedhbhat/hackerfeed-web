@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 export function TitleTag({ children }: { children: ReactNode }) {
 	return (
 		<>
-			<span className="align-[0.1em] font-sans text-meta font-semibold text-(--lagoon-deep)">
+			<span className="align-[0.1em] font-sans text-meta font-semibold whitespace-nowrap text-(--lagoon-deep)">
 				{children}
 				<span className="sr-only">:</span>
 			</span>{" "}

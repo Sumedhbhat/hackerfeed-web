@@ -4,6 +4,7 @@ import {
 	getDiscussionUrl,
 	getStoryDomain,
 	getStoryTitle,
+	splitPostKind,
 } from "@hackerfeed/hacker-news/utils";
 import { ButtonLink, ExternalButtonLink } from "@hackerfeed/ui/atoms/Button";
 import { Heading } from "@hackerfeed/ui/atoms/Heading";
@@ -12,6 +13,7 @@ import { ExternalLink } from "@hackerfeed/ui/atoms/Link";
 import { Prose } from "@hackerfeed/ui/atoms/Prose";
 import { Row } from "@hackerfeed/ui/atoms/Row";
 import { Stack } from "@hackerfeed/ui/atoms/Stack";
+import { TitleTag } from "@hackerfeed/ui/atoms/TitleTag";
 import { ToggleButton } from "@hackerfeed/ui/atoms/Toggle";
 import { ToggleLabel } from "@hackerfeed/ui/atoms/ToggleLabel";
 import { StoryMeta } from "@hackerfeed/ui/molecules/StoryMeta";
@@ -23,6 +25,7 @@ import { useViewActivity } from "#/hooks/useViewActivity";
 /** Top of the story page: title, body text, facts and what you can do with it. */
 export function StoryArticle({ story }: { story: HackerNewsStoryRecord }) {
 	const title = getStoryTitle(story);
+	const { kind: postKind, text: titleText } = splitPostKind(title);
 	const aiChat = useFeatureFlag("aiChat");
 	const { recordStoryView } = useViewActivity();
 	const { isFavorited, toggleFavorite } = useFavorites();
@@ -42,7 +45,8 @@ export function StoryArticle({ story }: { story: HackerNewsStoryRecord }) {
 				}
 			/>
 			<Heading level={1} size="title">
-				{title}
+				{postKind ? <TitleTag>{postKind}</TitleTag> : null}
+				{titleText}
 			</Heading>
 
 			{/* Story body text (Ask HN / Show HN posts) */}

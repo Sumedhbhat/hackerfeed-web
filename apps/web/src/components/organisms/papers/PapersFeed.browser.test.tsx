@@ -1,5 +1,5 @@
 import type { PaperEdition } from "@hackerfeed/contracts/papers";
-import { cleanup, fireEvent, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithQueryClient as render } from "#/test/renderWithQueryClient";
 import { PapersFeed } from "./PapersFeed";
@@ -7,6 +7,7 @@ import { PapersFeed } from "./PapersFeed";
 const authMock = vi.hoisted(() => ({ userId: "papers-page-user" }));
 const trpcMock = vi.hoisted(() => ({
 	add: vi.fn(),
+	latestEdition: vi.fn(),
 	list: vi.fn(),
 	remove: vi.fn(),
 	viewPaper: vi.fn(),
@@ -21,6 +22,9 @@ vi.mock("#/hooks/useAuthSession", () => ({
 
 vi.mock("#/lib/trpc/client", () => ({
 	createTrpcClient: () => ({
+		papers: {
+			edition: { query: trpcMock.latestEdition },
+		},
 		paperFavorites: {
 			add: { mutate: trpcMock.add },
 			list: { query: trpcMock.list },
@@ -92,6 +96,40 @@ afterEach(() => {
 });
 
 describe("PapersFeed", () => {
+	it("offers the next day only before the latest edition", async () => {
+		trpcMock.latestEdition.mockResolvedValue({
+			...emptyEdition,
+			editionDate: "2026-06-22",
+		});
+		const onFiltersChange = vi.fn();
+		const { rerender } = render(
+			<PapersFeed
+				edition={edition}
+				filters={{ date: "2026-06-21" }}
+				onFiltersChange={onFiltersChange}
+			/>,
+		);
+
+		const next = await screen.findByRole("button", { name: "Next day" });
+		await waitFor(() => expect(next.hasAttribute("disabled")).toBe(false));
+		fireEvent.click(next);
+		expect(onFiltersChange).toHaveBeenCalledWith(
+			expect.objectContaining({ date: "2026-06-22" }),
+		);
+
+		// Back on the latest edition, even when it is named in the URL.
+		rerender(
+			<PapersFeed
+				edition={{ ...edition, editionDate: "2026-06-22" }}
+				filters={{ date: "2026-06-22" }}
+				onFiltersChange={onFiltersChange}
+			/>,
+		);
+		expect(
+			screen.getByRole("button", { name: "Next day" }).hasAttribute("disabled"),
+		).toBe(true);
+	});
+
 	it("shows the short summary and expands to the original abstract", () => {
 		render(
 			<PapersFeed edition={edition} filters={{}} onFiltersChange={vi.fn()} />,

@@ -5,6 +5,7 @@ import {
 	getDiscussionUrl,
 	getStoryDomain,
 	getStoryTitle,
+	splitPostKind,
 	stripHtml,
 } from "./utils";
 
@@ -105,5 +106,25 @@ describe("formatStoryAge", () => {
 		const twoHoursAgo = Math.floor(Date.now() / 1000) - 7200;
 		const result = formatStoryAge(twoHoursAgo);
 		expect(result).toContain("hour");
+	});
+});
+
+describe("splitPostKind", () => {
+	it("splits a Show HN / Ask HN prefix from the title", () => {
+		expect(splitPostKind("Show HN: A tiny spreadsheet")).toEqual({
+			kind: "Show HN",
+			text: "A tiny spreadsheet",
+		});
+		expect(splitPostKind("Ask HN: Why?")).toEqual({
+			kind: "Ask HN",
+			text: "Why?",
+		});
+	});
+
+	it("leaves other titles whole", () => {
+		expect(splitPostKind("Showing HN data")).toEqual({
+			text: "Showing HN data",
+		});
+		expect(splitPostKind("Show HN:")).toEqual({ text: "Show HN:" });
 	});
 });

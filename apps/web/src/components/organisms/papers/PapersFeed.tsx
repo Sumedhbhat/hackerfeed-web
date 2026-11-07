@@ -11,6 +11,7 @@ import { PaperPageShell } from "@hackerfeed/ui/molecules/PaperPageShell";
 import { PaperTopicNav } from "@hackerfeed/ui/molecules/PaperTopicNav";
 import { RefreshCw } from "lucide-react";
 import { useMemo, useState } from "react";
+import { usePaperEdition } from "#/hooks/usePaperEdition";
 import { usePaperFavorites } from "#/hooks/usePaperFavorites";
 import { useViewActivity } from "#/hooks/useViewActivity";
 import { formatEditionDate } from "#/lib/dates/edition";
@@ -37,6 +38,8 @@ export function PapersFeed({
 	onFiltersChange,
 }: PapersFeedProps) {
 	const favorites = usePaperFavorites();
+	// The undated edition is the latest one (cached once /papers has loaded).
+	const latestDate = usePaperEdition().data?.editionDate;
 	const { recordPaperView } = useViewActivity();
 	const [visibleCount, setVisibleCount] = useState(INITIAL_PAPER_COUNT);
 	const query = filters.query?.trim() ?? "";
@@ -69,7 +72,9 @@ export function PapersFeed({
 			<PaperEditionToolbar
 				query={filters.query ?? ""}
 				date={selectedDate}
-				canGoNext={Boolean(filters.date)}
+				canGoNext={Boolean(
+					latestDate && selectedDate && selectedDate < latestDate,
+				)}
 				onQueryChange={(value) =>
 					onFiltersChange({ ...filters, query: value || undefined })
 				}
