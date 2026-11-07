@@ -11,6 +11,7 @@ import {
 } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { expectNoAxeViolations } from "#/test/axe";
 import { StoryChatPage } from "./StoryChatPage";
 
 const authMock = vi.hoisted(() => ({
@@ -432,6 +433,16 @@ describe("StoryChatPage", () => {
 		// The partial reply is kept and no error is shown for a user cancel.
 		expect(screen.getByText("Slow")).toBeDefined();
 		expect(screen.queryByRole("alert")).toBeNull();
+	});
+
+	it("has no axe violations with a conversation", async () => {
+		const { container } = renderPage();
+		fireEvent.change(await screen.findByLabelText("Ask about this story"), {
+			target: { value: "Hi" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: "Send" }));
+		await screen.findByText("It is about X.");
+		await expectNoAxeViolations(container);
 	});
 
 	it("clears the conversation with New chat", async () => {

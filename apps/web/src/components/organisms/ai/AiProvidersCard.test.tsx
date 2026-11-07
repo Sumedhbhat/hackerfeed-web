@@ -7,6 +7,7 @@ import {
 	within,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { expectNoAxeViolations } from "#/test/axe";
 import { renderWithQueryClient as render } from "#/test/renderWithQueryClient";
 import { AiProvidersCard, getAiResultMessage } from "./AiProvidersCard";
 
@@ -202,6 +203,16 @@ describe("AiProvidersCard", () => {
 		expect(
 			screen.getByText("ChatGPT disconnected.", { selector: "output" }),
 		).toBeDefined();
+	});
+
+	it("has no axe violations with connected and disconnected rows", async () => {
+		providers = [
+			provider({ connected: true, account: { email: "a@b.c", name: null } }),
+			provider({ id: "claude", name: "Claude" }),
+		];
+		const { container } = render(<AiProvidersCard />);
+		await screen.findByRole("button", { name: "Disconnect ChatGPT" });
+		await expectNoAxeViolations(container);
 	});
 
 	it("shows a disconnect failure", async () => {

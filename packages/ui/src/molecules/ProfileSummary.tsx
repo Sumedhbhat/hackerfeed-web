@@ -26,12 +26,12 @@ export function ProfileSummary({
 			/>
 			<div className="min-w-0">
 				<div>
-					<Heading level={1} size="page" truncate>
+					<Heading level={1} size="page" breakAnywhere>
 						{name}
 					</Heading>
 				</div>
 				<div className="mt-2">
-					<IconText icon={Mail} tone="soft" truncate>
+					<IconText icon={Mail} tone="soft" breakAnywhere>
 						{email}
 					</IconText>
 				</div>

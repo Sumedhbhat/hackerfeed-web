@@ -1,6 +1,7 @@
 import type { PaperEdition } from "@hackerfeed/contracts/papers";
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { expectNoAxeViolations } from "#/test/axe";
 import { renderWithQueryClient as render } from "#/test/renderWithQueryClient";
 import { PapersFeed } from "./PapersFeed";
 
@@ -136,6 +137,14 @@ describe("PapersFeed", () => {
 		onFiltersChange.mockClear();
 		fireEvent.click(latestNext);
 		expect(onFiltersChange).not.toHaveBeenCalled();
+	});
+
+	it("has no axe violations", async () => {
+		const { container } = render(
+			<PapersFeed edition={edition} filters={{}} onFiltersChange={vi.fn()} />,
+		);
+		await screen.findByRole("button", { name: "Next day" });
+		await expectNoAxeViolations(container);
 	});
 
 	it("shows the short summary and expands to the original abstract", () => {

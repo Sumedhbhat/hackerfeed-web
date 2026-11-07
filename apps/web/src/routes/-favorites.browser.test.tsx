@@ -12,6 +12,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { FavoritesPage } from "#/components/pages/FavoritesPage";
 import { clearAllFavorites, toggleFavorite } from "#/lib/favorites-store";
 import { type FavoritesType, parseFavoritesSearch } from "#/routes/favorites";
+import { expectNoAxeViolations } from "#/test/axe";
 import { renderWithQueryClient as render } from "#/test/renderWithQueryClient";
 
 const authMock = vi.hoisted(() => ({
@@ -246,6 +247,17 @@ describe("FavoritesPage backend source of truth", () => {
 				"Saved Older Paper",
 			),
 		);
+	});
+
+	it("has no axe violations with saved stories", async () => {
+		authMock.user = { id: "workos-favorites-page-axe" };
+		trpcMock.list.mockResolvedValue([
+			makeStory({ id: 1, title: "First" }),
+			makeStory({ id: 2, title: "Second" }),
+		]);
+		const { container } = render(<FavoritesPage />);
+		await screen.findByRole("button", { name: "Saved First", pressed: true });
+		await expectNoAxeViolations(container);
 	});
 
 	it("does not render local favorites after backend favorites load", async () => {

@@ -31,8 +31,8 @@ type TextProps = {
 	/** Relaxed line height for paragraphs of copy. */
 	relaxed?: boolean;
 	italic?: boolean;
-	/** Cut off with an ellipsis instead of wrapping. */
-	truncate?: boolean;
+	/** Long unbroken text (an email) wraps anywhere instead of overflowing; never cut off (WCAG 1.4.10). */
+	breakAnywhere?: boolean;
 	/** Cap the line length for readable copy. */
 	measure?: "sm" | "md" | "lg";
 	id?: string;
@@ -50,7 +50,7 @@ export function Text({
 	weight = "normal",
 	relaxed = false,
 	italic = false,
-	truncate = false,
+	breakAnywhere = false,
 	measure,
 	...props
 }: TextProps) {
@@ -61,7 +61,7 @@ export function Text({
 		WEIGHT[weight],
 		relaxed && "leading-relaxed",
 		italic && "italic",
-		truncate && "truncate",
+		breakAnywhere && "min-w-0 [overflow-wrap:anywhere]",
 		measure && MEASURE[measure],
 	]
 		.filter(Boolean)

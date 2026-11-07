@@ -25,8 +25,8 @@ type HeadingProps = {
 	level?: 1 | 2 | 3 | 4;
 	size?: keyof typeof SIZE;
 	id?: string;
-	/** Cut off with an ellipsis instead of wrapping. */
-	truncate?: boolean;
+	/** Long unbroken text (an email) wraps anywhere instead of overflowing; never cut off (WCAG 1.4.10). */
+	breakAnywhere?: boolean;
 	/** Only for screen readers; names a region that is obvious visually. */
 	visuallyHidden?: boolean;
 };
@@ -34,13 +34,13 @@ type HeadingProps = {
 export function Heading({
 	level = 2,
 	size = "section",
-	truncate = false,
+	breakAnywhere = false,
 	visuallyHidden = false,
 	...props
 }: HeadingProps) {
 	const Element = `h${level}` as const;
 	const className = visuallyHidden
 		? "sr-only"
-		: `m-0 text-(--sea-ink) text-pretty ${SIZE[size]}${truncate ? " truncate" : ""}`;
+		: `m-0 text-(--sea-ink) text-pretty ${SIZE[size]}${breakAnywhere ? " min-w-0 [overflow-wrap:anywhere]" : ""}`;
 	return <Element className={className} {...props} />;
 }
