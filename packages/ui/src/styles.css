@@ -91,7 +91,7 @@ body,
 
 /* Keep focused or scrolled-to elements clear of the sticky header (WCAG 2.4.11). */
 html {
-  scroll-padding-top: 4.5rem;
+  scroll-padding-top: 5rem;
 }
 
 /* The header wraps to two rows below 360px (HeaderBar). */

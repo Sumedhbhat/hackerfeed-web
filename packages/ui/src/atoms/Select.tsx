@@ -69,7 +69,7 @@ export function SelectOptions({ options }: { options: SelectOption[] }) {
 							<BaseSelect.Item
 								key={option.value}
 								value={option.value}
-								className="flex min-h-9 cursor-pointer items-center gap-2 rounded-md py-1.5 pr-4 pl-2 text-sm text-(--sea-ink) outline-none select-none data-highlighted:bg-(--chip-bg)"
+								className="flex min-h-9 cursor-pointer items-center gap-2 rounded-md py-1.5 pr-4 pl-2 text-sm text-(--sea-ink) outline-none select-none data-highlighted:bg-(--chip-bg) data-highlighted:outline-2 data-highlighted:-outline-offset-2 data-highlighted:outline-(--lagoon) data-highlighted:outline-solid"
 							>
 								<span className="flex w-3.5">
 									<BaseSelect.ItemIndicator>

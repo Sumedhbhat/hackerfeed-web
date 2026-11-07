@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { buttonClassName } from "./Button";
 
 const ITEM_CLASSES =
-	"flex min-h-9 cursor-pointer items-center gap-2 rounded-md px-2.5 py-1.5 text-sm text-(--sea-ink) no-underline outline-none select-none data-highlighted:bg-(--chip-bg)";
+	"flex min-h-9 cursor-pointer items-center gap-2 rounded-md px-2.5 py-1.5 text-sm text-(--sea-ink) no-underline outline-none select-none data-highlighted:bg-(--chip-bg) data-highlighted:outline-2 data-highlighted:-outline-offset-2 data-highlighted:outline-(--lagoon) data-highlighted:outline-solid";
 
 export function Menu({ children }: { children: ReactNode }) {
 	return <BaseMenu.Root>{children}</BaseMenu.Root>;
