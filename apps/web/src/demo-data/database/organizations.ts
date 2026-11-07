@@ -1,28 +1,27 @@
 import type { hfOrganizations } from "@hackerfeed/backend/database/schema";
 import { ingestedTimestamps } from "../defaults";
+import { snapshotPapers } from "../snapshot";
 
 type Organization = typeof hfOrganizations.$inferSelect;
 
-export const organization = (
-	name: string,
-	fields: Partial<Organization> = {},
-): Organization => ({
-	id: `demo-org-${name}`,
-	hfOrganizationId: `demo-org-${name}`,
-	name,
-	fullname: null,
-	...ingestedTimestamps,
-	...fields,
-});
+export const organizationId = (hfOrganizationId: string) =>
+	`demo-org-${hfOrganizationId}`;
 
-export const placeholderAi = organization("placeholder-ai", {
-	fullname: "Placeholder AI Lab",
-});
-export const exampleUniversity = organization("example-university", {
-	fullname: "Example University",
-});
-
+/** Every organization behind a snapshot paper, once each. */
 export const organizationRows: Organization[] = [
-	placeholderAi,
-	exampleUniversity,
+	...new Map(
+		snapshotPapers
+			.map(({ paper }) => paper.organization)
+			.filter((org) => org !== null)
+			.map((org): [string, Organization] => [
+				org.hfOrganizationId,
+				{
+					id: organizationId(org.hfOrganizationId),
+					hfOrganizationId: org.hfOrganizationId,
+					name: org.name,
+					fullname: org.fullname,
+					...ingestedTimestamps,
+				},
+			]),
+	).values(),
 ];

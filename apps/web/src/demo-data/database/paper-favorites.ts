@@ -4,7 +4,7 @@ import type {
 } from "@hackerfeed/backend/database/schema";
 import { sqliteAt } from "../defaults";
 import { demoUser } from "./app-users";
-import { reasoningBenchmark, sparseAttention } from "./papers";
+import { paperRows } from "./papers";
 
 type PaperFavorite = typeof paperFavorites.$inferSelect;
 
@@ -18,7 +18,9 @@ export const paperFavorite = (
 	...fields,
 });
 
-export const paperFavoriteRows: PaperFavorite[] = [
-	paperFavorite(sparseAttention, { createdAt: sqliteAt("10:45:00") }),
-	paperFavorite(reasoningBenchmark, { createdAt: sqliteAt("11:45:00") }),
-];
+/** The demo reader has saved the first two papers. */
+export const paperFavoriteRows: PaperFavorite[] = paperRows
+	.slice(0, 2)
+	.map((paper, index) =>
+		paperFavorite(paper, { createdAt: sqliteAt(`1${index}:45:00`) }),
+	);

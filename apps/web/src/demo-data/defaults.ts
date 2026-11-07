@@ -1,4 +1,7 @@
-export const DEMO_DATE = "2026-01-15";
+import papersSnapshot from "./snapshot/papers.json";
+
+/** The day of the Hugging Face edition in the snapshot (see snapshot/). */
+export const DEMO_DATE: string = papersSnapshot.editionDate;
 
 /** `time` ("HH:MM:SS") on the demo day, as the ISO string ingestion writes. */
 export const isoAt = (time: string) => `${DEMO_DATE}T${time}.000Z`;

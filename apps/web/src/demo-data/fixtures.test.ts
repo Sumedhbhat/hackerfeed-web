@@ -121,7 +121,7 @@ describe("demo Hacker News items", () => {
 		}
 	});
 
-	it("links comments to existing parents and counts them on each story", () => {
+	it("links comments to existing parents and never counts fewer than it has", () => {
 		for (const item of items) {
 			for (const kid of item.kids ?? []) {
 				const child = byId.get(kid);
@@ -130,8 +130,10 @@ describe("demo Hacker News items", () => {
 					`comment ${kid}`,
 				).toBe(item.id);
 			}
+			// The snapshot keeps a sample of each thread, while `descendants` is
+			// Hacker News's real count, so it may be larger, never smaller.
 			if (item.type === "story") {
-				expect(item.descendants, `story ${item.id}`).toBe(
+				expect(item.descendants, `story ${item.id}`).toBeGreaterThanOrEqual(
 					countDescendants(item),
 				);
 			}

@@ -21,18 +21,7 @@ export const storedStory = (
 	...fields,
 });
 
-export const tinySpreadsheet = storedStory(hackerNews.tinySpreadsheet);
-export const buildCache = storedStory(hackerNews.buildCache);
-export const sideProjects = storedStory(hackerNews.sideProjects);
-export const queryPlans = storedStory(hackerNews.queryPlans);
-export const serverHtml = storedStory(hackerNews.serverHtml);
-export const placeholderLabs = storedStory(hackerNews.placeholderLabs);
-
-export const storyRows: Story[] = [
-	tinySpreadsheet,
-	buildCache,
-	sideProjects,
-	queryPlans,
-	serverHtml,
-	placeholderLabs,
-];
+/** The first top stories, stored as if the demo reader had saved them. */
+export const storyRows: Story[] = hackerNews.threads
+	.slice(0, 6)
+	.map((thread) => storedStory(thread));

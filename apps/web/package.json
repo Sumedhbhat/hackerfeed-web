@@ -14,7 +14,8 @@
     "preview:private": "scripts/private-preview.sh",
     "demo-data:compare": "bun scripts/compare-demo-data.ts",
     "cf:typegen": "wrangler types",
-    "db:migrate:local": "wrangler d1 migrations apply DB --local"
+    "db:migrate:local": "wrangler d1 migrations apply DB --local",
+    "demo-data:refresh": "bun scripts/refresh-demo-data.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

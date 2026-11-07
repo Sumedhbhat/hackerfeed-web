@@ -3,6 +3,7 @@ import { paperFavoritesListOutputSchema } from "@hackerfeed/contracts/paper-favo
 import { paperEditionOutputSchema } from "@hackerfeed/contracts/papers";
 import { render, renderHook, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { snapshotPapers } from "#/demo-data/snapshot";
 import { matchesFilters } from "#/lib/papers/presentation";
 import { createDemoApi } from "./demo";
 
@@ -45,14 +46,24 @@ describe("fixture demo", () => {
 	it("serves dated paper editions, authors, keywords and saved-paper pagination", () => {
 		const api = createDemoApi();
 		const edition = paperEditionOutputSchema.parse(api("papers.edition", {}));
-		expect(edition.papers).toHaveLength(6);
-		expect(edition.papers[0].authors).toContain("Ada Placeholder");
-		expect(edition.papers[0].keywords).toContain("Sparse Attention");
+		// The edition is the snapshot's papers, with their authors and keywords.
+		expect(edition.papers).toHaveLength(snapshotPapers.length);
+		const withKeywords = snapshotPapers.find(
+			({ paper }) => paper.keywords.length > 0 && paper.authors.length > 0,
+		);
+		if (!withKeywords) throw new Error("snapshot has no paper with keywords");
+		const served = edition.papers.find(
+			(paper) => paper.arxivId === withKeywords.paper.arxivId,
+		);
+		const firstAuthor = withKeywords.paper.authors[0].name;
+		const firstKeyword = withKeywords.paper.keywords[0].keywordOriginal;
+		expect(served?.authors).toContain(firstAuthor);
+		expect(served?.keywords).toContain(firstKeyword);
 		expect(
-			edition.papers.filter((paper) =>
-				matchesFilters(paper, "Ada", "Sparse Attention"),
+			edition.papers.some((paper) =>
+				matchesFilters(paper, firstAuthor, firstKeyword),
 			),
-		).toHaveLength(1);
+		).toBe(true);
 		expect(
 			paperEditionOutputSchema.parse(
 				api("papers.edition", { editionDate: "2000-01-01" }),
