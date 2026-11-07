@@ -21,7 +21,9 @@ export function ProviderRow({
 					<Text weight="semibold">{name}</Text>
 					<Text tone="soft">{detail}</Text>
 				</div>
-				<div className="flex flex-wrap items-center gap-3">{actions}</div>
+				<div className="flex max-w-full min-w-0 flex-wrap items-center gap-3">
+					{actions}
+				</div>
 			</div>
 			{error ? (
 				<div className="mt-2">

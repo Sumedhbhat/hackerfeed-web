@@ -15,8 +15,10 @@ export function ProfileSummary({
 	imageUrl?: string | null;
 	initials: string;
 }) {
+	// Name and email move under the avatar when they don't fit beside it,
+	// rather than squeezing (WCAG 1.4.4).
 	return (
-		<div className="flex items-center gap-4 sm:gap-5">
+		<div className="flex flex-wrap items-center gap-4 sm:gap-5">
 			<Avatar
 				name={name}
 				imageUrl={imageUrl}
@@ -26,7 +28,7 @@ export function ProfileSummary({
 			/>
 			<div className="min-w-0">
 				<div>
-					<Heading level={1} size="page" breakAnywhere>
+					<Heading level={1} size="page">
 						{name}
 					</Heading>
 				</div>

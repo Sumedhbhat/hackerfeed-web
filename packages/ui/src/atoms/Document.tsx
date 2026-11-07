@@ -11,7 +11,7 @@ export function Document({
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<head>{head}</head>
-			<body className="font-sans antialiased wrap-anywhere">{children}</body>
+			<body className="font-sans antialiased wrap-break-word">{children}</body>
 		</html>
 	);
 }

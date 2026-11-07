@@ -39,7 +39,7 @@ const LAYOUT = {
 	wrap: "flex flex-wrap gap-1",
 	/** A track holding a few options, matching Tabs. */
 	segmented:
-		"inline-flex max-w-full items-center gap-1 overflow-x-auto rounded-lg border border-(--line) bg-(--chip-bg) p-1",
+		"inline-flex max-w-full flex-wrap items-center gap-1 rounded-lg border border-(--line) bg-(--chip-bg) p-1",
 	/**
 	 * One scrolling line on phones, with a fade showing there is more; a spacer
 	 * after the last chip lets it scroll clear of the fade. The fade lifts while

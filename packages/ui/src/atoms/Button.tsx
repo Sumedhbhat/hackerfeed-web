@@ -7,11 +7,11 @@ const BASE_CLASSES =
 	"inline-flex shrink-0 items-center justify-center gap-1.5 text-sm font-medium no-underline transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--lagoon) data-disabled:cursor-not-allowed data-disabled:opacity-55";
 
 const VARIANT_CLASSES = {
-	/** The one main action in a view. */
+	/** The one main action in a view. The transparent border is invisible in normal themes but drawn in forced colours, where the fill is removed. */
 	primary:
-		"rounded-md min-h-11 bg-(--lagoon) px-3.5 py-1.5 text-(--on-lagoon) data-disabled:bg-(--chip-bg) data-disabled:text-(--sea-ink-faint) data-disabled:opacity-100 sm:min-h-9 hover:bg-(--lagoon-deep) hover:text-(--on-lagoon)",
+		"rounded-md min-h-11 max-w-full border border-transparent bg-(--lagoon) px-3.5 py-1.5 text-(--on-lagoon) data-disabled:bg-(--chip-bg) data-disabled:text-(--sea-ink-faint) data-disabled:opacity-100 sm:min-h-9 hover:bg-(--lagoon-deep) hover:text-(--on-lagoon)",
 	/** A main action that repeats down a list, where a solid button would shout. */
-	soft: "rounded-md whitespace-nowrap min-h-11 bg-(--lagoon-tint) px-2.5 py-1.5 text-(--lagoon-deep) hover:bg-(--lagoon) hover:text-(--on-lagoon) sm:min-h-9 sm:px-3",
+	soft: "rounded-md whitespace-nowrap min-h-11 border border-transparent bg-(--lagoon-tint) px-2.5 py-1.5 text-(--lagoon-deep) hover:bg-(--lagoon) hover:text-(--on-lagoon) sm:min-h-9 sm:px-3",
 	/** The main action of a list row: green text, no fill, so a column of rows stays calm. */
 	accent:
 		"rounded-md whitespace-nowrap min-h-11 min-w-11 px-1.5 py-1.5 font-semibold text-(--lagoon-deep) hover:bg-(--lagoon-tint) hover:text-(--lagoon-deep) sm:min-h-8 sm:min-w-8 sm:px-2",

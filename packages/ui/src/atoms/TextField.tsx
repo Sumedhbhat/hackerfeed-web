@@ -10,7 +10,11 @@ const INPUT_VARIANT = {
 	bare: "w-full min-w-0 border-0 bg-transparent text-base text-(--sea-ink) outline-none placeholder:text-(--sea-ink-faint) sm:text-sm",
 } as const;
 
-/** Draws the field's border and focus ring around a `bare` input and a leading icon. Give the input its own label. */
+/**
+ * Draws the field's border and focus ring around a `bare` input and a leading
+ * icon. It is a <label>, so a click anywhere in the drawn box (padding, icon)
+ * focuses the input (WCAG 2.5.8). Give the input its own name (aria-label).
+ */
 export function FieldFrame({
 	children,
 	grow = false,
@@ -22,11 +26,12 @@ export function FieldFrame({
 	fitsDate?: boolean;
 }) {
 	return (
-		<div
-			className={`flex min-h-10 items-center gap-2 rounded-md border border-(--field-line) bg-(--surface-strong) px-3 text-(--sea-ink-soft) focus-within:border-(--lagoon) focus-within:outline-2 focus-within:outline-(--lagoon) ${grow ? "min-w-0 flex-1" : "shrink-0"} ${fitsDate ? "min-w-[9.5em]" : ""}`}
+		// biome-ignore lint/a11y/noLabelWithoutControl: the input inside is the control and is named by its aria-label
+		<label
+			className={`flex min-h-10 cursor-text items-center gap-2 rounded-md border border-(--field-line) bg-(--surface-strong) px-3 text-(--sea-ink-soft) focus-within:border-(--lagoon) focus-within:outline-2 focus-within:outline-(--lagoon) ${grow ? "min-w-0 flex-1" : "shrink-0"} ${fitsDate ? "min-w-[9.5em]" : ""}`}
 		>
 			{children}
-		</div>
+		</label>
 	);
 }
 

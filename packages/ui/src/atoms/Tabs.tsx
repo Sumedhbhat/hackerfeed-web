@@ -36,7 +36,7 @@ export function TabList({
 		<BaseTabs.List
 			activateOnFocus={activateOnFocus}
 			aria-label={ariaLabel}
-			className="inline-flex max-w-full items-center gap-1 self-start overflow-x-auto rounded-lg border border-(--line) bg-(--chip-bg) p-1"
+			className="inline-flex max-w-full flex-wrap items-center gap-1 self-start rounded-lg border border-(--line) bg-(--chip-bg) p-1"
 		>
 			{children}
 		</BaseTabs.List>

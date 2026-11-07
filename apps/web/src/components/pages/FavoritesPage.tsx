@@ -166,6 +166,7 @@ export function FavoritesPage({
 					{undoable ? (
 						<InlineNotice
 							boxed
+							quiet
 							message={`Removed “${undoable.item.title}” from Saved.`}
 							action={
 								<Button
