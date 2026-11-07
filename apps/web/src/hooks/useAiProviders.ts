@@ -170,6 +170,7 @@ export function useStoryChat(
 		(content: string) => {
 			const trimmed = content.trim();
 			if (!trimmed || abortRef.current) return;
+			setCleared(null);
 			void run([...messages, { role: "user", content: trimmed }]);
 		},
 		[messages, run],
@@ -183,20 +184,32 @@ export function useStoryChat(
 
 	const stop = useCallback(() => abortRef.current?.abort(), []);
 
+	// The conversation "New chat" just cleared, so it can be brought back.
+	const [cleared, setCleared] = useState<ChatMessage[] | null>(null);
+
 	const reset = useCallback(() => {
 		generationRef.current += 1;
 		abortRef.current?.abort();
 		abortRef.current = null;
+		setCleared(messages.length > 0 ? messages : null);
 		setMessages([]);
 		setStreamingText(null);
 		setError(null);
-	}, []);
+	}, [messages]);
+
+	const undoReset = useCallback(() => {
+		if (!cleared) return;
+		setMessages(cleared);
+		setCleared(null);
+	}, [cleared]);
 
 	return {
 		error,
 		isStreaming: streamingText !== null,
 		messages,
+		canUndoReset: cleared !== null,
 		reset,
+		undoReset,
 		retry,
 		send,
 		stop,

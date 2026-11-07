@@ -49,7 +49,7 @@ export function FeedRow({
 				<div className="flex flex-col gap-1 lg:flex-row lg:items-center lg:justify-between lg:gap-8">
 					{meta}
 					<div className="-mt-1.5 -ml-1.5 flex items-center gap-1 sm:-mr-2 sm:-ml-2 lg:mt-0 lg:ml-0 lg:shrink-0">
-						<div className="grid min-w-0 grid-cols-[minmax(4.25rem,auto)_minmax(3.25rem,auto)_auto] xs:grid-cols-[minmax(7rem,auto)_minmax(3.25rem,auto)_auto] items-center justify-items-start sm:grid-cols-[minmax(7.25rem,auto)_minmax(7.5rem,auto)_auto] lg:grid-cols-[minmax(7.25rem,auto)_minmax(7.5rem,auto)_minmax(5.25rem,auto)]">
+						<div className="grid min-w-0 grid-cols-[minmax(4.75rem,auto)_minmax(3.25rem,auto)_auto] xs:grid-cols-[minmax(7rem,auto)_minmax(3.25rem,auto)_auto] items-center justify-items-start sm:grid-cols-[minmax(7.25rem,auto)_minmax(7.5rem,auto)_auto] lg:grid-cols-[minmax(7.25rem,auto)_minmax(7.5rem,auto)_minmax(5.25rem,auto)]">
 							{actions}
 						</div>
 						<div className="ml-auto lg:ml-0">{save}</div>

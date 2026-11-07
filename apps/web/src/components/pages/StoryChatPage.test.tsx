@@ -445,6 +445,23 @@ describe("StoryChatPage", () => {
 		).toBeDefined();
 	});
 
+	it("brings a cleared conversation back with Undo", async () => {
+		renderPage();
+
+		fireEvent.change(await screen.findByLabelText("Message"), {
+			target: { value: "Hi" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: "Send" }));
+		await screen.findByText("It is about X.");
+
+		fireEvent.click(screen.getByRole("button", { name: "New chat" }));
+		expect(screen.getByText("Started a new chat.")).toBeTruthy();
+		fireEvent.click(screen.getByRole("button", { name: "Undo" }));
+
+		expect(screen.getByText("It is about X.")).toBeTruthy();
+		expect(screen.queryByText("Started a new chat.")).toBeNull();
+	});
+
 	it("shows model loading errors with a retry", async () => {
 		models = () =>
 			Response.json(

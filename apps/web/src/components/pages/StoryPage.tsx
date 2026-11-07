@@ -46,7 +46,7 @@ function StoryContent({ storyId }: StoryPageProps) {
 			<Stack gap="xl">
 				<StoryArticle story={story} />
 
-				<Stack as="section" gap="lg">
+				<Stack as="section" gap="lg" measure>
 					<Row justify="between" align="center" wrap>
 						<Heading level={2} size="section">
 							{story.descendants != null
@@ -61,7 +61,7 @@ function StoryContent({ storyId }: StoryPageProps) {
 					{story.kids.length === 0 ? (
 						<Text tone="soft">No comments yet.</Text>
 					) : (
-						<Stack gap="xs" divided measure>
+						<Stack gap="xs" divided>
 							{commentQueries.map((q) => {
 								if (!q.data) return null;
 								return <Comment key={q.data.id} comment={q.data} depth={0} />;

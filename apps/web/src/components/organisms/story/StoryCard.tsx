@@ -106,7 +106,7 @@ export function StoryCard({ story, rank, markSaved = true }: StoryCardProps) {
 					</ExternalButtonLink>
 
 					<ButtonLink
-						variant="ghost"
+						variant={comments > 0 ? "ghost" : "quiet"}
 						to="/story/$storyId"
 						params={{ storyId: story.id }}
 						aria-label={`${commentLabel}: ${title}`}

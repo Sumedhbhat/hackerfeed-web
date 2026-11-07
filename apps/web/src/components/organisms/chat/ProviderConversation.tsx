@@ -141,6 +141,7 @@ export function ProviderConversation({
 							variant="secondary"
 							onClick={chat.reset}
 							aria-label="New chat"
+							title="New chat"
 						>
 							<Icon icon={Plus} />
 							<WideText from="xs">New chat</WideText>
@@ -170,6 +171,18 @@ export function ProviderConversation({
 									/>
 								) : null}
 							</Stack>
+						) : null}
+
+						{chat.canUndoReset && messageCount === 0 ? (
+							<InlineNotice
+								boxed
+								message="Started a new chat."
+								action={
+									<Button variant="ghost" onClick={chat.undoReset}>
+										Undo
+									</Button>
+								}
+							/>
 						) : null}
 
 						{messageCount === 0 && !chat.isStreaming ? (
