@@ -104,7 +104,7 @@ Interactive atoms are built on [Base UI](https://base-ui.com) (`@base-ui/react`)
 | Picture or initials | `Avatar` (`Avatar`) |
 | Text input | `TextInput` (`Input`). `TextArea` is native: Base UI has none |
 
-These atoms manage their own ARIA state: pass `value`, `pressed` or `open`, never `aria-selected`/`aria-pressed`/`aria-expanded` by hand. A toggle keeps one label while pressed (`aria-label="Save to favorites"` + `pressed`). Never use `window.confirm`; use `ConfirmButton`. For a new interactive pattern, check whether Base UI has the component and wrap it in a new atom.
+These atoms manage their own ARIA state: pass `value`, `pressed` or `open`, never `aria-selected`/`aria-pressed`/`aria-expanded` by hand. A toggle's accessible name starts with the word it shows (WCAG 2.5.3 Label in Name): `aria-label={`${saved ? "Saved" : "Save"} ${title}`}` + `pressed`. Never use `window.confirm`; use `ConfirmButton`. For a new interactive pattern, check whether Base UI has the component and wrap it in a new atom.
 
 Before building UI, list `packages/ui/src/atoms/` and `packages/ui/src/molecules/` and reuse what is there. Import them as `@hackerfeed/ui/atoms/<Name>`; a new one also needs an entry in `packages/ui/package.json` `exports`. Add a variant to an existing atom before adding a new atom.
 

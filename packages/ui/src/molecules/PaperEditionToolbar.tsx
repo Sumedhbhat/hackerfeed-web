@@ -1,4 +1,5 @@
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Button } from "../atoms/Button";
 import { Icon } from "../atoms/Icon";
 import { FieldFrame, TextInput } from "../atoms/TextField";
@@ -25,6 +26,13 @@ export function PaperEditionToolbar({
 	/** False on the latest edition, where there is no next day yet. */
 	canGoNext?: boolean;
 }) {
+	// Typing a date fires a change per segment; only load the edition once the
+	// reader leaves the field or presses Enter (WCAG 3.2.2).
+	const [draft, setDraft] = useState(date);
+	useEffect(() => setDraft(date), [date]);
+	const commit = () => {
+		if (draft !== date) onDateChange(draft);
+	};
 	return (
 		<section
 			className="flex flex-col gap-2 sm:flex-row"
@@ -54,8 +62,12 @@ export function PaperEditionToolbar({
 					<TextInput
 						variant="bare"
 						type="date"
-						value={date}
-						onChange={(event) => onDateChange(event.target.value)}
+						value={draft}
+						onChange={(event) => setDraft(event.target.value)}
+						onBlur={commit}
+						onKeyDown={(event) => {
+							if (event.key === "Enter") commit();
+						}}
 						aria-label="Choose edition date"
 					/>
 				</FieldFrame>

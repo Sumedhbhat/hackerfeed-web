@@ -4,10 +4,16 @@ import { ReadingList } from "./ReadingList";
 /** The sheet of PaperCards. */
 export function PaperList({
 	children,
+	id,
 	"aria-label": ariaLabel,
 }: {
 	children: ReactNode;
+	id?: string;
 	"aria-label": string;
 }) {
-	return <ReadingList aria-label={ariaLabel}>{children}</ReadingList>;
+	return (
+		<ReadingList id={id} aria-label={ariaLabel}>
+			{children}
+		</ReadingList>
+	);
 }

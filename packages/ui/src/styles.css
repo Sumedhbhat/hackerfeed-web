@@ -89,6 +89,11 @@ body,
   min-height: 100%;
 }
 
+/* Keep focused or scrolled-to elements clear of the sticky header (WCAG 2.4.11). */
+html {
+  scroll-padding-top: 4.5rem;
+}
+
 body {
   margin: 0;
   color: var(--sea-ink);

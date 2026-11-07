@@ -1,6 +1,7 @@
 import { Button } from "@hackerfeed/ui/atoms/Button";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
 import { TextLink } from "@hackerfeed/ui/atoms/Link";
+import { LiveStatus } from "@hackerfeed/ui/atoms/LiveStatus";
 import { PageContainer } from "@hackerfeed/ui/atoms/PageContainer";
 import { PaperList } from "@hackerfeed/ui/atoms/PaperList";
 import { ReadingList } from "@hackerfeed/ui/atoms/ReadingList";
@@ -14,13 +15,14 @@ import { PageHeader } from "@hackerfeed/ui/molecules/PageHeader";
 import { SearchField } from "@hackerfeed/ui/molecules/SearchField";
 import { SortToolbar } from "@hackerfeed/ui/molecules/SortToolbar";
 import { ArrowRight, RefreshCw } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { FavoritesTabs } from "#/components/organisms/favorites/FavoritesTabs";
 import { PaperRow } from "#/components/organisms/papers/PaperRow";
 import { StoryCard } from "#/components/organisms/story/StoryCard";
 import { useFavorites } from "#/hooks/useFavorites";
 import { usePaperFavorites } from "#/hooks/usePaperFavorites";
 import { useViewActivity } from "#/hooks/useViewActivity";
+import { focusFirstIn, focusIsLost } from "#/lib/a11y/focus";
 import { matchesFilters } from "#/lib/papers/presentation";
 import type { FavoritesType } from "#/routes/favorites";
 
@@ -44,12 +46,22 @@ export function FavoritesPage({
 	// Without a tab in the URL, open the one that has something in it. With
 	// no saved stories, show Papers while they load or fail, so the reader sees
 	// "loading" or the error rather than a premature "nothing saved".
-	const activeType: FavoritesType =
-		requestedType ??
-		(stories.count === 0 &&
+	const autoType: FavoritesType =
+		stories.count === 0 &&
 		(papers.count > 0 || papers.isLoading || Boolean(papers.error))
 			? "papers"
-			: "stories");
+			: "stories";
+	// Once the automatic choice has found something, keep it: unsaving the last
+	// story must not flip the page to Papers under the reader's focus.
+	const settledTypeRef = useRef<FavoritesType | null>(null);
+	if (
+		!settledTypeRef.current &&
+		(autoType === "stories" ? stories.count : papers.count) > 0
+	) {
+		settledTypeRef.current = autoType;
+	}
+	const activeType: FavoritesType =
+		requestedType ?? settledTypeRef.current ?? autoType;
 	const { recordPaperView } = useViewActivity();
 	const isStories = activeType === "stories";
 	const activeCount = isStories ? stories.count : papers.count;
@@ -81,6 +93,7 @@ export function FavoritesPage({
 		? sortedPapers.filter((paper) => matchesFilters(paper, needle))
 		: sortedPapers;
 	const visibleCount = isStories ? visibleStories.length : visiblePapers.length;
+	const removal = useRemovalFeedback(activeType, activeCount);
 
 	function clearAll() {
 		if (isStories) stories.clearAllFavorites();
@@ -91,6 +104,7 @@ export function FavoritesPage({
 
 	return (
 		<PageContainer>
+			<LiveStatus message={removal} />
 			<Tabs value={activeType} onValueChange={onTypeChange}>
 				<Stack gap="lg">
 					<PageHeader title="Saved">
@@ -180,7 +194,7 @@ export function FavoritesPage({
 											{query.trim()}”.
 										</Text>
 									) : isStories ? (
-										<ReadingList aria-label="Saved stories">
+										<ReadingList id="saved-list" aria-label="Saved stories">
 											{visibleStories.map((story) => (
 												<StoryCard
 													key={story.id}
@@ -190,7 +204,7 @@ export function FavoritesPage({
 											))}
 										</ReadingList>
 									) : (
-										<PaperList aria-label="Saved papers">
+										<PaperList id="saved-list" aria-label="Saved papers">
 											{visiblePapers.map((paper) => (
 												<PaperRow
 													key={paper.arxivId}
@@ -218,4 +232,32 @@ export function FavoritesPage({
 			</Tabs>
 		</PageContainer>
 	);
+}
+
+/**
+ * Unsaving removes the row, and the focused Save button with it. Say what
+ * happened (WCAG 4.1.3) and put focus on the next saved item, or on the
+ * empty state's link when nothing is left (WCAG 2.4.3).
+ */
+function useRemovalFeedback(type: FavoritesType, count: number) {
+	const [message, setMessage] = useState("");
+	const lastRef = useRef({ type, count });
+	useEffect(() => {
+		const last = lastRef.current;
+		lastRef.current = { type, count };
+		if (last.type !== type || count >= last.count) return;
+		setMessage(
+			count === 0
+				? "Removed from Saved. Nothing saved here now."
+				: `Removed from Saved. ${count} left.`,
+		);
+		requestAnimationFrame(() => {
+			if (!focusIsLost()) return;
+			const list = document.getElementById("saved-list");
+			if (list) focusFirstIn(list);
+			else
+				focusFirstIn(document.querySelector('[role="tabpanel"]:not([hidden])'));
+		});
+	}, [type, count]);
+	return message;
 }

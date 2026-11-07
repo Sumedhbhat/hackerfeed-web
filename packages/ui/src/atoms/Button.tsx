@@ -22,7 +22,7 @@ const VARIANT_CLASSES = {
 		"rounded-md whitespace-nowrap min-h-11 min-w-11 px-1.5 py-1.5 font-normal text-(--sea-ink-soft) sm:min-h-8 sm:min-w-8 sm:px-2 hover:bg-(--chip-bg) hover:text-(--sea-ink) focus-visible:text-(--sea-ink) aria-pressed:text-(--bookmark) aria-pressed:hover:bg-(--bookmark-tint-strong) aria-pressed:hover:text-(--bookmark)",
 	/** One option in a segmented control (pick one of a few views). */
 	segment:
-		"rounded-md whitespace-nowrap min-h-8 px-3 py-1 text-(--sea-ink-soft) hover:text-(--sea-ink) aria-pressed:bg-(--surface-strong) aria-pressed:text-(--sea-ink) aria-pressed:shadow-(--shadow-raised)",
+		"rounded-md whitespace-nowrap min-h-8 border border-transparent px-3 py-1 text-(--sea-ink-soft) hover:text-(--sea-ink) aria-pressed:border-(--lagoon) aria-pressed:bg-(--surface-strong) aria-pressed:text-(--sea-ink) aria-pressed:shadow-(--shadow-raised) forced-colors:aria-pressed:outline-2 forced-colors:aria-pressed:outline-[Highlight]",
 	/** A filter chip in a wrapping set. */
 	chip: "whitespace-nowrap min-h-9 rounded-full border border-(--chip-line) bg-(--surface-strong) px-3 py-1 font-normal text-(--sea-ink-soft) hover:border-(--field-line) hover:text-(--sea-ink) aria-pressed:border-(--lagoon) aria-pressed:bg-(--lagoon-tint) aria-pressed:font-medium aria-pressed:text-(--lagoon-deep)",
 	/** A ghost action with nothing behind it yet (e.g. "0 comments"): same shape, fainter. */

@@ -9,7 +9,7 @@ import { Prose } from "@hackerfeed/ui/atoms/Prose";
 import { Row } from "@hackerfeed/ui/atoms/Row";
 import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { Text } from "@hackerfeed/ui/atoms/Text";
-import { ThreadItem } from "@hackerfeed/ui/atoms/ThreadItem";
+import { ThreadItem, ThreadList } from "@hackerfeed/ui/atoms/ThreadItem";
 import { CommentSkeleton } from "@hackerfeed/ui/molecules/CommentSkeleton";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { Suspense } from "react";
@@ -102,7 +102,7 @@ export function Comment({ comment, depth = 0 }: CommentProps) {
 													</Stack>
 												}
 											>
-												<Stack gap="none">
+												<ThreadList>
 													{childQueries.map((q) => {
 														if (!q.data) return null;
 														return (
@@ -113,7 +113,7 @@ export function Comment({ comment, depth = 0 }: CommentProps) {
 															/>
 														);
 													})}
-												</Stack>
+												</ThreadList>
 											</Suspense>
 										</CollapsiblePanel>
 									</Stack>

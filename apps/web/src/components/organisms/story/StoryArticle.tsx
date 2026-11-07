@@ -67,7 +67,7 @@ export function StoryArticle({ story }: { story: HackerNewsStoryRecord }) {
 					</ButtonLink>
 				) : null}
 				<ToggleButton
-					aria-label={`Save ${title}`}
+					aria-label={`${isFav ? "Saved" : "Save"} ${title}`}
 					pressed={isFav}
 					onPressedChange={() => toggleFavorite(story)}
 				>

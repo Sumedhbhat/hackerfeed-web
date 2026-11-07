@@ -1,6 +1,7 @@
 import type { PaperEdition } from "@hackerfeed/contracts/papers";
 import { Button } from "@hackerfeed/ui/atoms/Button";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
+import { LiveStatus } from "@hackerfeed/ui/atoms/LiveStatus";
 import { PaperList } from "@hackerfeed/ui/atoms/PaperList";
 import { InlineNotice } from "@hackerfeed/ui/molecules/InlineNotice";
 import { LoadMoreButton } from "@hackerfeed/ui/molecules/LoadMoreButton";
@@ -10,7 +11,8 @@ import { PaperFeedMessage } from "@hackerfeed/ui/molecules/PaperFeedMessage";
 import { PaperPageShell } from "@hackerfeed/ui/molecules/PaperPageShell";
 import { PaperTopicNav } from "@hackerfeed/ui/molecules/PaperTopicNav";
 import { RefreshCw } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useLoadMoreFocus } from "#/hooks/useLoadMoreFocus";
 import { usePaperEdition } from "#/hooks/usePaperEdition";
 import { usePaperFavorites } from "#/hooks/usePaperFavorites";
 import { useViewActivity } from "#/hooks/useViewActivity";
@@ -51,6 +53,11 @@ export function PapersFeed({
 		[edition.papers, filters.topic, query],
 	);
 	const visiblePapers = filteredPapers.slice(0, visibleCount);
+	const withFocus = useLoadMoreFocus("papers-list", visiblePapers.length);
+	const resultCount = useResultCountAnnouncement(
+		filteredPapers.length,
+		`${query}|${filters.topic ?? ""}|${edition.editionDate ?? ""}`,
+	);
 	const selectedDate = filters.date ?? edition.editionDate ?? "";
 	const hasPapers = edition.papers.length > 0;
 	const hasActiveFilters = Boolean(query || filters.topic);
@@ -64,6 +71,7 @@ export function PapersFeed({
 
 	return (
 		<PaperPageShell>
+			<LiveStatus message={resultCount} />
 			<PageHeader
 				title="Papers"
 				dateline={formatEditionDate(selectedDate)}
@@ -111,7 +119,7 @@ export function PapersFeed({
 
 			{visiblePapers.length > 0 ? (
 				<>
-					<PaperList aria-label="Papers">
+					<PaperList id="papers-list" aria-label="Papers">
 						{visiblePapers.map((paper) => (
 							<PaperRow
 								canFavorite={favorites.canFavorite}
@@ -127,9 +135,9 @@ export function PapersFeed({
 					{visibleCount < filteredPapers.length ? (
 						<LoadMoreButton
 							label="Load more papers"
-							onClick={() =>
-								setVisibleCount((count) => count + INITIAL_PAPER_COUNT)
-							}
+							onClick={withFocus(() =>
+								setVisibleCount((count) => count + INITIAL_PAPER_COUNT),
+							)}
 						/>
 					) : null}
 				</>
@@ -155,4 +163,28 @@ export function PapersFeed({
 			)}
 		</PaperPageShell>
 	);
+}
+
+/**
+ * Tells screen readers how many papers match once typing or a topic change
+ * settles (WCAG 4.1.3). Nothing is announced on first load.
+ */
+function useResultCountAnnouncement(count: number, filterKey: string) {
+	const [message, setMessage] = useState("");
+	const firstKeyRef = useRef<string | null>(filterKey);
+	useEffect(() => {
+		if (filterKey === firstKeyRef.current) return;
+		firstKeyRef.current = null; // filters have changed at least once
+		const timer = setTimeout(
+			() =>
+				setMessage(
+					count === 0
+						? "No papers match these filters."
+						: `${count} ${count === 1 ? "paper" : "papers"}`,
+				),
+			700,
+		);
+		return () => clearTimeout(timer);
+	}, [count, filterKey]);
+	return message;
 }

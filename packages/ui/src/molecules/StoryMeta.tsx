@@ -11,15 +11,12 @@ export function StoryMeta({
 	age,
 	score,
 	trailing,
-	compact = false,
 }: {
 	domain?: string | null;
 	by?: string | null;
 	age?: string | null;
 	score?: number | null;
 	trailing?: ReactNode;
-	/** List rows: leave the poster out on phones to keep the line short. */
-	compact?: boolean;
 }) {
 	return (
 		<FactLine singleLine>
@@ -32,11 +29,7 @@ export function StoryMeta({
 				</span>
 			) : null}
 			{age ? <span>{age}</span> : null}
-			{by ? (
-				<span data-shrink className={compact ? "hidden sm:inline" : undefined}>
-					by {by}
-				</span>
-			) : null}
+			{by ? <span data-shrink>by {by}</span> : null}
 			{trailing}
 		</FactLine>
 	);

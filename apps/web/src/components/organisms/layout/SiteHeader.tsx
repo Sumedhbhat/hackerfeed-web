@@ -38,7 +38,7 @@ export default function SiteHeader() {
 						{totalCount > 0 ? (
 							<>
 								{" "}
-								<CountBadge count={totalCount} />
+								<CountBadge count={totalCount} compact />
 							</>
 						) : null}
 					</TextLink>

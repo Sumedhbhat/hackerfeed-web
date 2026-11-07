@@ -252,7 +252,7 @@ describe("FavoritesPage paper collection", () => {
 
 		fireEvent.click(
 			screen.getByRole("button", {
-				name: "Save Saved Reasoning Paper",
+				name: "Saved Saved Reasoning Paper",
 				pressed: true,
 			}),
 		);
@@ -262,6 +262,10 @@ describe("FavoritesPage paper collection", () => {
 			}),
 		);
 		expect(screen.queryByText("Saved Reasoning Paper")).toBeNull();
+		// The removal is announced, since the row and its button are gone.
+		expect(
+			await screen.findByText(/^Removed from Saved\./, { selector: "output" }),
+		).toBeTruthy();
 	});
 
 	it("clears only papers after confirmation", async () => {

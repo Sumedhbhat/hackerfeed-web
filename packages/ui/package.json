@@ -20,6 +20,7 @@
 		"./atoms/IconBadge": "./src/atoms/IconBadge.tsx",
 		"./atoms/Kicker": "./src/atoms/Kicker.tsx",
 		"./atoms/Link": "./src/atoms/Link.tsx",
+		"./atoms/LiveStatus": "./src/atoms/LiveStatus.tsx",
 		"./atoms/Menu": "./src/atoms/Menu.tsx",
 		"./atoms/NarrowText": "./src/atoms/NarrowText.tsx",
 		"./atoms/PageContainer": "./src/atoms/PageContainer.tsx",

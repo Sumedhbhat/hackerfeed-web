@@ -6,6 +6,7 @@ import { PageContainer } from "@hackerfeed/ui/atoms/PageContainer";
 import { Row } from "@hackerfeed/ui/atoms/Row";
 import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { Text } from "@hackerfeed/ui/atoms/Text";
+import { ThreadList } from "@hackerfeed/ui/atoms/ThreadItem";
 import { BackLink } from "@hackerfeed/ui/molecules/BackLink";
 import { StoryPageSkeleton } from "@hackerfeed/ui/molecules/StoryPageSkeleton";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
@@ -61,12 +62,12 @@ function StoryContent({ storyId }: StoryPageProps) {
 					{story.kids.length === 0 ? (
 						<Text tone="soft">No comments yet.</Text>
 					) : (
-						<Stack gap="xs" divided>
+						<ThreadList divided aria-label="Comments">
 							{commentQueries.map((q) => {
 								if (!q.data) return null;
 								return <Comment key={q.data.id} comment={q.data} depth={0} />;
 							})}
-						</Stack>
+						</ThreadList>
 					)}
 				</Stack>
 			</Stack>

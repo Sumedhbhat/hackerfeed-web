@@ -6,6 +6,7 @@ import { Button } from "@hackerfeed/ui/atoms/Button";
 import { Card } from "@hackerfeed/ui/atoms/Card";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
 import { TextLink } from "@hackerfeed/ui/atoms/Link";
+import { LiveStatus } from "@hackerfeed/ui/atoms/LiveStatus";
 import { Row } from "@hackerfeed/ui/atoms/Row";
 import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { Text } from "@hackerfeed/ui/atoms/Text";
@@ -27,6 +28,13 @@ export const STARTER_PROMPTS = [
 	"What are the main points of debate in the HN comments?",
 ];
 
+/** After an action removes the focused control, continue in the message box. */
+function focusComposer() {
+	requestAnimationFrame(() =>
+		document.getElementById("story-chat-input")?.focus(),
+	);
+}
+
 /** A chat with one provider: model picker, transcript, and message box. */
 export function ProviderConversation({
 	storyId,
@@ -47,6 +55,25 @@ export function ProviderConversation({
 	const endRef = useRef<HTMLDivElement>(null);
 	const messageCount = chat.messages.length;
 	const streamingLength = chat.streamingText?.length ?? 0;
+
+	// Screen readers hear that a reply is coming and when it has arrived
+	// (WCAG 4.1.3), not every streamed word.
+	const [announcement, setAnnouncement] = useState("");
+	const wasStreamingRef = useRef(false);
+	useEffect(() => {
+		if (chat.isStreaming && !wasStreamingRef.current) {
+			setAnnouncement(`${provider.name} is replying…`);
+		} else if (!chat.isStreaming && wasStreamingRef.current) {
+			setAnnouncement(
+				chat.messages.at(-1)?.role === "assistant"
+					? `${provider.name} replied.`
+					: "",
+			);
+			// Stop becomes Send when a reply ends; keep focus in the conversation.
+			if (document.activeElement === document.body) focusComposer();
+		}
+		wasStreamingRef.current = chat.isStreaming;
+	}, [chat.isStreaming, chat.messages, provider.name]);
 
 	// Keep the newest text and the composer in view while a reply streams, but
 	// only while the reader is at the bottom: scrolling up to reread stops it.
@@ -105,6 +132,7 @@ export function ProviderConversation({
 
 	return (
 		<Card as="section" aria-label="Chat" padding="sm">
+			<LiveStatus message={announcement} />
 			<Stack gap="lg">
 				<Row justify="between" wrap>
 					<Row wrap>
@@ -139,7 +167,13 @@ export function ProviderConversation({
 					{messageCount > 0 ? (
 						<Button
 							variant="secondary"
-							onClick={chat.reset}
+							onClick={() => {
+								chat.reset();
+								// The button disappears; the Undo that replaces it gets focus.
+								requestAnimationFrame(() =>
+									document.getElementById("story-chat-undo")?.focus(),
+								);
+							}}
 							aria-label="New chat"
 							title="New chat"
 						>
@@ -178,7 +212,14 @@ export function ProviderConversation({
 								boxed
 								message="Started a new chat."
 								action={
-									<Button variant="ghost" onClick={chat.undoReset}>
+									<Button
+										id="story-chat-undo"
+										variant="ghost"
+										onClick={() => {
+											chat.undoReset();
+											focusComposer();
+										}}
+									>
 										Undo
 									</Button>
 								}
@@ -195,7 +236,10 @@ export function ProviderConversation({
 										<Button
 											key={prompt}
 											variant="secondary"
-											onClick={() => chat.send(prompt)}
+											onClick={() => {
+												chat.send(prompt);
+												focusComposer();
+											}}
 										>
 											{prompt}
 										</Button>

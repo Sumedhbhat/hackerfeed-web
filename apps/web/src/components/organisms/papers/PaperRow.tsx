@@ -73,7 +73,7 @@ export function PaperRow({
 				save={
 					canFavorite ? (
 						<ToggleButton
-							aria-label={`Save ${paper.title}`}
+							aria-label={`${saved ? "Saved" : "Save"} ${paper.title}`}
 							pressed={saved}
 							disabled={pending}
 							onPressedChange={(pressed) => {

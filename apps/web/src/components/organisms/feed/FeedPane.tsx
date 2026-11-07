@@ -10,6 +10,7 @@ import { Activity, Suspense } from "react";
 import { feedTabs } from "#/components/organisms/feed/feedTabs";
 import { StoryCard } from "#/components/organisms/story/StoryCard";
 import { FeedStatus, useFeed } from "#/hooks/useFeed";
+import { useLoadMoreFocus } from "#/hooks/useLoadMoreFocus";
 import {
 	type HackerNewsFeedKey,
 	storyQueryOptions,
@@ -39,6 +40,12 @@ export function FeedPane({ feed, prefetchNextBatch }: FeedPaneProps) {
 		refetch,
 	} = useFeed(feed);
 
+	const listId = `feed-${feed}-stories`;
+	const renderedCount = storyQueries
+		.slice(0, displayedIds.length)
+		.filter((query) => query?.data).length;
+	const withFocus = useLoadMoreFocus(listId, renderedCount);
+
 	const feedLabel =
 		(feedTabs.find((f) => f.key === feed) ?? feedTabs[0])?.label ?? feed;
 
@@ -61,7 +68,7 @@ export function FeedPane({ feed, prefetchNextBatch }: FeedPaneProps) {
 
 	return (
 		<Stack gap="md">
-			<ReadingList ordered aria-label={`${feedLabel} stories`}>
+			<ReadingList ordered id={listId} aria-label={`${feedLabel} stories`}>
 				{displayedIds.map((storyId, i) => {
 					const story = storyQueries[i]?.data;
 					if (!story) return null;
@@ -74,7 +81,7 @@ export function FeedPane({ feed, prefetchNextBatch }: FeedPaneProps) {
 			{hasMore && (
 				<LoadMoreButton
 					label={isPending ? "Loading..." : `Load ${nextBatchSize} more`}
-					onClick={loadMore}
+					onClick={withFocus(loadMore)}
 					disabled={isPending}
 				/>
 			)}

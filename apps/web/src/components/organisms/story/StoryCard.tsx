@@ -80,7 +80,6 @@ export function StoryCard({ story, rank, markSaved = true }: StoryCardProps) {
 					score={story.score}
 					by={story.by}
 					age={formatStoryAge(story.time)}
-					compact
 				/>
 			}
 			actions={
@@ -135,7 +134,7 @@ export function StoryCard({ story, rank, markSaved = true }: StoryCardProps) {
 			}
 			save={
 				<ToggleButton
-					aria-label={`Save ${title}`}
+					aria-label={`${isFav ? "Saved" : "Save"} ${title}`}
 					pressed={isFav}
 					onPressedChange={(pressed) => {
 						setJustSaved(pressed);

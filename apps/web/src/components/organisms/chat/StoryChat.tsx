@@ -94,7 +94,7 @@ function StoryChatActions({ story }: { story: HackerNewsStoryRecord }) {
 				{comments} {comments === 1 ? "comment" : "comments"}
 			</ButtonLink>
 			<ToggleButton
-				aria-label={`Save ${getStoryTitle(story)}`}
+				aria-label={`${saved ? "Saved" : "Save"} ${getStoryTitle(story)}`}
 				pressed={saved}
 				onPressedChange={() => toggleFavorite(story)}
 			>

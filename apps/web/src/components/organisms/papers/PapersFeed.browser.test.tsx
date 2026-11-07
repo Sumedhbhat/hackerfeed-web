@@ -250,7 +250,7 @@ describe("PapersFeed", () => {
 		fireEvent.click(save);
 
 		const remove = await screen.findByRole("button", {
-			name: "Save Reasoning Paper",
+			name: "Saved Reasoning Paper",
 			pressed: true,
 		});
 		expect(remove.getAttribute("aria-pressed")).toBe("true");
@@ -343,6 +343,9 @@ describe("PapersFeed", () => {
 		fireEvent.change(screen.getByLabelText("Choose edition date"), {
 			target: { value: "2026-06-18" },
 		});
+		// The edition loads once the reader leaves the field (WCAG 3.2.2).
+		expect(onFiltersChange).not.toHaveBeenCalled();
+		fireEvent.blur(screen.getByLabelText("Choose edition date"));
 
 		expect(onFiltersChange).toHaveBeenCalledWith({
 			date: "2026-06-18",
@@ -367,6 +370,9 @@ describe("PapersFeed", () => {
 		fireEvent.change(screen.getByLabelText("Choose edition date"), {
 			target: { value: "2026-06-18" },
 		});
+		// The edition loads once the reader leaves the field (WCAG 3.2.2).
+		expect(onFiltersChange).not.toHaveBeenCalled();
+		fireEvent.blur(screen.getByLabelText("Choose edition date"));
 
 		expect(onFiltersChange).toHaveBeenCalledWith({
 			date: "2026-06-18",
