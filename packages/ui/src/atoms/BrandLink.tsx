@@ -8,39 +8,25 @@ type BrandAnchorProps = Omit<
 	ref?: React.Ref<HTMLAnchorElement>;
 };
 
-/** Text lines on the page: [y, width] in the favicon's 512-unit grid. */
-const LINES: [number, number][] = [
-	[207, 283],
-	[237, 232],
-	[267, 283],
-	[297, 198],
-	[327, 283],
-	[357, 249],
-	[387, 155],
-];
-
-/**
- * The HackerFeed favicon (public/favicon.ico) redrawn as SVG: a dog-eared page
- * with an orange headline and lines of text. Its own fixed colours, like the
- * favicon, in both themes.
- */
+/** A page of text with a bookmark tucked in: the app's whole idea in one mark. (Brass is kept for saved items.) */
 function BrandMark() {
 	return (
 		<svg
-			viewBox="0 0 512 512"
+			viewBox="0 0 28 28"
 			width="28"
 			height="28"
 			aria-hidden="true"
-			className="block shrink-0 rounded-md"
+			className="block shrink-0"
 		>
-			<rect width="512" height="512" fill="#1c1a18" />
-			<path d="M64 64H356L446 154V446H64Z" fill="#f5f2ee" />
-			<path d="M356 64V154H446Z" fill="#d3cfca" />
-			<rect x="114" y="120" width="236" height="42" fill="#c25a28" />
-			<rect x="114" y="185" width="283" height="3" fill="#5c5955" />
-			{LINES.map(([y, width]) => (
-				<rect key={y} x="114" y={y} width={width} height="15" fill="#5c5955" />
-			))}
+			<rect width="28" height="28" rx="7" fill="var(--lagoon)" />
+			<path
+				d="M6.5 11h7M6.5 15h7M6.5 19h10"
+				stroke="var(--on-lagoon)"
+				strokeWidth="2"
+				strokeLinecap="round"
+				opacity="0.75"
+			/>
+			<path d="M16 0h6.5v13.5l-3.25-2.75L16 13.5z" fill="var(--on-lagoon)" />
 		</svg>
 	);
 }
