@@ -1,6 +1,7 @@
 import type { PaperViewAction } from "@hackerfeed/contracts/view-activity";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
 import { PaperCard } from "@hackerfeed/ui/atoms/PaperCard";
+import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { ToggleButton } from "@hackerfeed/ui/atoms/Toggle";
 import { ToggleLabel } from "@hackerfeed/ui/atoms/ToggleLabel";
 import { PaperCardFooter } from "@hackerfeed/ui/molecules/PaperCardFooter";
@@ -39,15 +40,17 @@ export function PaperRow({
 }: PaperRowProps) {
 	return (
 		<PaperCard saved={markSaved && saved}>
-			<PaperTitle href={paper.paperUrl} onClick={() => onView("read")}>
-				{paper.title}
-			</PaperTitle>
-			<PaperSignals
-				authors={formatAuthors(paper.authors)}
-				upvotes={paper.upvotes}
-				publishedLabel={formatPaperDate(paper.paperPublishedAt)}
-				topics={paper.keywords}
-			/>
+			<Stack gap="sm">
+				<PaperTitle href={paper.paperUrl} onClick={() => onView("read")}>
+					{paper.title}
+				</PaperTitle>
+				<PaperSignals
+					authors={formatAuthors(paper.authors)}
+					upvotes={paper.upvotes}
+					publishedLabel={formatPaperDate(paper.paperPublishedAt)}
+					topics={paper.keywords}
+				/>
+			</Stack>
 			<PaperSummary
 				paper={paper}
 				links={

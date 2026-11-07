@@ -6,6 +6,8 @@ const GAP = {
 	sm: "gap-2",
 	md: "gap-3",
 	lg: "gap-5",
+	/** Between the sections of a card: 16px, 20px from sm (matches card padding). */
+	section: "gap-4 sm:gap-5",
 	xl: "gap-8",
 } as const;
 

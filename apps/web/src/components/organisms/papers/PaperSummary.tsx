@@ -5,6 +5,7 @@ import {
 } from "@hackerfeed/ui/atoms/Collapsible";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
 import { PaperSummaryText } from "@hackerfeed/ui/atoms/PaperSummaryText";
+import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { ActionLine } from "@hackerfeed/ui/molecules/ActionLine";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { type ReactNode, useEffect, useRef, useState } from "react";
@@ -45,27 +46,29 @@ export function PaperSummary({
 
 	return (
 		<Collapsible open={open} onOpenChange={setOpen}>
-			{open ? null : (
-				<PaperSummaryText clamped ref={clampedRef}>
-					{paper.summary}
-				</PaperSummaryText>
-			)}
-			<CollapsiblePanel>
-				<PaperSummaryText>{paper.abstract ?? paper.summary}</PaperSummaryText>
-			</CollapsiblePanel>
-			{canExpand || links ? (
-				<ActionLine>
-					{canExpand ? (
-						<CollapsibleTrigger
-							aria-label={`${open ? "Show less" : "Show more"} of ${paper.title}`}
-						>
-							{open ? "Show less" : "Show more"}
-							<Icon icon={open ? ChevronUp : ChevronDown} />
-						</CollapsibleTrigger>
-					) : null}
-					{links}
-				</ActionLine>
-			) : null}
+			<Stack gap="section">
+				{open ? null : (
+					<PaperSummaryText clamped ref={clampedRef}>
+						{paper.summary}
+					</PaperSummaryText>
+				)}
+				<CollapsiblePanel>
+					<PaperSummaryText>{paper.abstract ?? paper.summary}</PaperSummaryText>
+				</CollapsiblePanel>
+				{canExpand || links ? (
+					<ActionLine flush>
+						{canExpand ? (
+							<CollapsibleTrigger
+								aria-label={`${open ? "Show less" : "Show more"} of ${paper.title}`}
+							>
+								{open ? "Show less" : "Show more"}
+								<Icon icon={open ? ChevronUp : ChevronDown} />
+							</CollapsibleTrigger>
+						) : null}
+						{links}
+					</ActionLine>
+				) : null}
+			</Stack>
 		</Collapsible>
 	);
 }

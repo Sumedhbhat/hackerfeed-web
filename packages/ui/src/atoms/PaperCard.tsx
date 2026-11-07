@@ -3,7 +3,9 @@ import { readingCardClassName } from "./ReadingList";
 
 /**
  * One paper in a PaperList, as its own card, tinted once saved. Its title is
- * a `card` link, so a click anywhere on the card opens the paper.
+ * a `card` link, so a click anywhere on the card opens the paper. Sections are
+ * spaced like the card's padding (16px, 20px from sm), so every visible gap
+ * matches.
  */
 export function PaperCard({
 	children,
@@ -14,7 +16,9 @@ export function PaperCard({
 }) {
 	return (
 		<li className={readingCardClassName(saved)}>
-			<article className="flex flex-col gap-2 p-4 sm:p-6">{children}</article>
+			<article className="flex flex-col gap-4 p-4 sm:gap-5 sm:p-5">
+				{children}
+			</article>
 		</li>
 	);
 }

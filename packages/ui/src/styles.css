@@ -89,6 +89,27 @@ body,
   min-height: 100%;
 }
 
+/*
+ * A row of text-style buttons inside a card. Their touch targets are taller
+ * than their text (36px on phones, 32px from sm, for 20px text), so the row
+ * gives the extra back with negative margins: the visible gaps around it then
+ * match the card's spacing. On phones the targets here are 36px rather than
+ * 44px so two rows 16px apart don't overlap (still above WCAG 2.5.8's 24px).
+ */
+.action-row {
+  margin-block: -8px;
+}
+@media (max-width: 39.999rem) {
+  .action-row :is(a, button) {
+    min-height: 2.25rem;
+  }
+}
+@media (min-width: 40rem) {
+  .action-row {
+    margin-block: -6px;
+  }
+}
+
 /* Keep focused or scrolled-to elements clear of the sticky header (WCAG 2.4.11). */
 html {
   /* HeaderBar keeps --header-height at its real height, which grows when it
