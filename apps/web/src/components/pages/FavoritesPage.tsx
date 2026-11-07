@@ -114,14 +114,23 @@ export function FavoritesPage({
 		const title = lastRemoved.item.title;
 		setUndone(lastRemoved.key);
 		setUndoMessage(`Put “${title}” back in Saved.`);
-		requestAnimationFrame(() =>
-			[...document.querySelectorAll<HTMLElement>("button[aria-label]")]
-				.find(
-					(button) => button.getAttribute("aria-label") === `Saved ${title}`,
-				)
-				?.focus(),
-		);
+		// The row comes back when the save completes, which can take a moment
+		// (papers go through the server); focus its Saved button once it's there.
+		restoredTitleRef.current = title;
 	}
+	const restoredTitleRef = useRef<string | null>(null);
+	useEffect(() => {
+		const title = restoredTitleRef.current;
+		if (!title) return;
+		const button = [
+			...document.querySelectorAll<HTMLElement>("button[aria-label]"),
+		].find(
+			(element) => element.getAttribute("aria-label") === `Saved ${title}`,
+		);
+		if (!button) return;
+		restoredTitleRef.current = null;
+		button.focus();
+	});
 	const undoable =
 		lastRemoved &&
 		lastRemoved.kind === (isStories ? "story" : "paper") &&

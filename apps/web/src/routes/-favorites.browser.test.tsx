@@ -24,6 +24,7 @@ const trpcMock = vi.hoisted(() => ({
 	clear: vi.fn(),
 	list: vi.fn(),
 	remove: vi.fn(),
+	paperAdd: vi.fn(),
 	paperClear: vi.fn(),
 	paperList: vi.fn(),
 	paperRemove: vi.fn(),
@@ -47,7 +48,7 @@ vi.mock("#/lib/trpc/client", () => ({
 			remove: { mutate: trpcMock.remove },
 		},
 		paperFavorites: {
-			add: { mutate: vi.fn() },
+			add: { mutate: trpcMock.paperAdd },
 			clear: { mutate: trpcMock.paperClear },
 			list: { query: trpcMock.paperList },
 			remove: { mutate: trpcMock.paperRemove },
@@ -212,6 +213,38 @@ describe("FavoritesPage backend source of truth", () => {
 		);
 		await waitFor(() =>
 			expect(screen.queryByRole("button", { name: /^Undo/ })).toBeNull(),
+		);
+	});
+
+	it("puts focus on a paper's Saved button once Undo brings it back", async () => {
+		authMock.user = { id: "paper-undo-user" };
+		trpcMock.paperList.mockResolvedValue({
+			items: [
+				savedPaper(),
+				savedPaper({ arxivId: "2607.00002", title: "Older Paper" }),
+			],
+			nextCursor: null,
+		});
+		// The server takes a moment, so the row returns after Undo is gone.
+		trpcMock.paperAdd.mockImplementation(
+			() => new Promise((resolve) => setTimeout(resolve, 150)),
+		);
+		render(<FavoritesPage activeType="papers" />);
+
+		fireEvent.click(
+			await screen.findByRole("button", {
+				name: "Saved Older Paper",
+				pressed: true,
+			}),
+		);
+		const undo = await screen.findByRole("button", { name: /^Undo/ });
+		undo.focus();
+		fireEvent.click(undo);
+
+		await waitFor(() =>
+			expect(document.activeElement?.getAttribute("aria-label")).toBe(
+				"Saved Older Paper",
+			),
 		);
 	});
 
