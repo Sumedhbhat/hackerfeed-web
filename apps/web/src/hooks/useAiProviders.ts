@@ -15,6 +15,9 @@ import {
 } from "#/lib/ai/client";
 import { useAuthSession } from "./useAuthSession";
 
+/** A chat message, plus whether an assistant reply was cut off by an error. */
+export type StoryChatMessage = ChatMessage & { incomplete?: boolean };
+
 const PROVIDERS_QUERY_KEY = ["ai", "providers"] as const;
 const modelsQueryKey = (providerId: string) =>
 	["ai", "providers", providerId, "models"] as const;
@@ -90,7 +93,7 @@ export function useStoryChat(
 	model: string | undefined,
 ) {
 	const queryClient = useQueryClient();
-	const [messages, setMessages] = useState<ChatMessage[]>([]);
+	const [messages, setMessages] = useState<StoryChatMessage[]>([]);
 	const [streamingText, setStreamingText] = useState<string | null>(null);
 	const [error, setError] = useState<StoryChatError | null>(null);
 	const abortRef = useRef<AbortController | null>(null);
@@ -118,7 +121,7 @@ export function useStoryChat(
 	}, [messages, storageKey, loadedKey]);
 
 	const run = useCallback(
-		async (history: ChatMessage[]) => {
+		async (history: StoryChatMessage[]) => {
 			if (!providerId || !model) return;
 			const controller = new AbortController();
 			const generation = generationRef.current;
@@ -128,9 +131,15 @@ export function useStoryChat(
 			setStreamingText("");
 
 			let reply = "";
+			let failed = false;
 			try {
 				await streamStoryChat(
-					{ providerId, storyId, model, messages: history },
+					{
+						providerId,
+						storyId,
+						model,
+						messages: history.map(({ role, content }) => ({ role, content })),
+					},
 					{
 						signal: controller.signal,
 						onDelta: (text) => {
@@ -144,6 +153,7 @@ export function useStoryChat(
 					!controller.signal.aborted &&
 					generation === generationRef.current
 				) {
+					failed = true;
 					const chatError = toStoryChatError(caught);
 					setError(chatError);
 					if (chatError.code === "provider_not_connected") {
@@ -157,7 +167,14 @@ export function useStoryChat(
 				if (generation === generationRef.current) {
 					// Keep partial text so an interrupted answer isn't lost.
 					if (reply.trim()) {
-						setMessages([...history, { role: "assistant", content: reply }]);
+						setMessages([
+							...history,
+							{
+								role: "assistant",
+								content: reply,
+								...(failed ? { incomplete: true } : {}),
+							},
+						]);
 					}
 					setStreamingText(null);
 				}
@@ -176,16 +193,18 @@ export function useStoryChat(
 		[messages, run],
 	);
 
-	/** Re-sends the conversation when the last reply failed before any text arrived. */
+	/** Asks again after a failed reply, dropping a reply that was cut off. */
 	const retry = useCallback(() => {
-		if (abortRef.current || messages.at(-1)?.role !== "user") return;
-		void run(messages);
+		if (abortRef.current) return;
+		const last = messages.at(-1);
+		if (last?.role === "user") void run(messages);
+		else if (last?.incomplete) void run(messages.slice(0, -1));
 	}, [messages, run]);
 
 	const stop = useCallback(() => abortRef.current?.abort(), []);
 
 	// The conversation "New chat" just cleared, so it can be brought back.
-	const [cleared, setCleared] = useState<ChatMessage[] | null>(null);
+	const [cleared, setCleared] = useState<StoryChatMessage[] | null>(null);
 
 	const reset = useCallback(() => {
 		generationRef.current += 1;

@@ -1,8 +1,9 @@
-import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "../atoms/Button";
 import { Icon } from "../atoms/Icon";
 import { FieldFrame, TextInput } from "../atoms/TextField";
+import { SearchField } from "./SearchField";
 
 /** "2026-01-15" moved by whole days, in UTC so a time zone can't skip a day. */
 function shiftDay(date: string, days: number): string {
@@ -38,17 +39,12 @@ export function PaperEditionToolbar({
 			className="flex flex-col gap-2 sm:flex-row"
 			aria-label="Find a paper edition"
 		>
-			<FieldFrame grow>
-				<Icon icon={Search} />
-				<TextInput
-					variant="bare"
-					type="search"
-					value={query}
-					onChange={(event) => onQueryChange(event.target.value)}
-					placeholder="Search papers"
-					aria-label="Search papers"
-				/>
-			</FieldFrame>
+			<SearchField
+				value={query}
+				onChange={onQueryChange}
+				label="Search papers"
+				placeholder="Search papers"
+			/>
 			{/* Wraps under very large text rather than squeezing the date. */}
 			<div className="flex flex-wrap items-center gap-1">
 				<Button

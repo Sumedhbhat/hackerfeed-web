@@ -6,6 +6,7 @@ export function ChatMessage({
 	authorName,
 	content,
 	isStreaming = false,
+	incomplete = false,
 }: {
 	author: "user" | "assistant";
 	/** Name read out to screen readers for assistant messages. */
@@ -13,6 +14,8 @@ export function ChatMessage({
 	content: string;
 	/** The assistant is still writing this message. */
 	isStreaming?: boolean;
+	/** The reply stopped partway because of an error. */
+	incomplete?: boolean;
 }) {
 	const isUser = author === "user";
 	return (
@@ -29,6 +32,11 @@ export function ChatMessage({
 			>
 				<span className="sr-only">{isUser ? "You: " : `${authorName}: `}</span>
 				{isUser ? content : <ChatMarkdown text={content} />}
+				{incomplete ? (
+					<p className="mt-2 mb-0 text-meta text-(--sea-ink-faint) italic">
+						Reply cut off.
+					</p>
+				) : null}
 			</div>
 		</li>
 	);

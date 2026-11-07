@@ -64,10 +64,13 @@ export function ProviderConversation({
 		if (chat.isStreaming && !wasStreamingRef.current) {
 			setAnnouncement(`${provider.name} is replying…`);
 		} else if (!chat.isStreaming && wasStreamingRef.current) {
+			const last = chat.messages.at(-1);
 			setAnnouncement(
-				chat.messages.at(-1)?.role === "assistant"
-					? `${provider.name} replied.`
-					: "",
+				last?.role !== "assistant"
+					? ""
+					: last.incomplete
+						? `${provider.name}'s reply was cut off.`
+						: `${provider.name} replied.`,
 			);
 			// Stop becomes Send when a reply ends; keep focus in the conversation.
 			if (document.activeElement === document.body) focusComposer();
@@ -197,6 +200,7 @@ export function ProviderConversation({
 										author={message.role}
 										authorName={provider.name}
 										content={message.content}
+										incomplete={message.incomplete}
 									/>
 								))}
 								{chat.streamingText !== null ? (
@@ -263,7 +267,9 @@ export function ProviderConversation({
 										<TextLink to="/profile" variant="accent">
 											Reconnect in profile
 										</TextLink>
-									) : chat.messages.at(-1)?.role === "user" ? (
+									) : chat.messages.at(-1)?.role === "user" ||
+										(chat.messages.at(-1)?.incomplete &&
+											chat.error.retryable) ? (
 										<Button variant="ghost" onClick={chat.retry}>
 											Try again
 										</Button>

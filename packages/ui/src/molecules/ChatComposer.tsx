@@ -2,6 +2,7 @@ import { ArrowUp, Square } from "lucide-react";
 import { type FormEvent, useEffect, useRef } from "react";
 import { Button } from "../atoms/Button";
 import { Icon } from "../atoms/Icon";
+import { LiveStatus } from "../atoms/LiveStatus";
 import { TextArea } from "../atoms/TextField";
 
 /** Message box with a Send button, or a Stop button while a reply streams in. */
@@ -46,51 +47,81 @@ export function ChatComposer({
 		},
 	};
 
+	// No hard maxLength: a long paste would be cut off without a word. Count
+	// down near the limit, say how far over it is, and don't send until it fits
+	// (WCAG 3.3.1).
+	const overBy = maxLength === undefined ? 0 : value.length - maxLength;
+	const showCount = maxLength !== undefined && value.length > maxLength * 0.9;
+	const tooLong = overBy > 0;
+
 	const submit = (event: FormEvent) => {
 		event.preventDefault();
-		onSubmit();
+		if (!tooLong) onSubmit();
 	};
 
 	return (
-		<form
-			onSubmit={submit}
-			className="flex items-end gap-2 rounded-xl border border-(--field-line) bg-(--surface-strong) p-2 focus-within:border-(--lagoon) focus-within:outline-1 focus-within:outline-(--lagoon)"
-		>
-			<label htmlFor={id} className="sr-only">
-				{label}
-			</label>
-			<span id={`${id}-keys`} className="sr-only">
-				Enter sends. Shift+Enter adds a new line.
-			</span>
-			<TextArea
-				id={id}
-				variant="bare"
-				value={value}
-				onChange={(event) => onChange(event.target.value)}
-				aria-describedby={`${id}-keys`}
-				onKeyDown={(event) => {
-					// Enter while an IME is composing (Japanese, Chinese, Korean) picks a
-					// candidate; it must not send a half-typed message.
-					if (
-						event.key === "Enter" &&
-						!event.shiftKey &&
-						!event.nativeEvent.isComposing
-					)
-						submit(event);
-				}}
-				maxLength={maxLength}
-				rows={2}
-				placeholder={placeholder}
+		<div className="flex flex-col gap-1.5">
+			<form
+				onSubmit={submit}
+				className="flex items-end gap-2 rounded-xl border border-(--field-line) bg-(--surface-strong) p-2 focus-within:border-(--lagoon) focus-within:outline-1 focus-within:outline-(--lagoon)"
+			>
+				<label htmlFor={id} className="sr-only">
+					{label}
+				</label>
+				<span id={`${id}-keys`} className="sr-only">
+					Enter sends. Shift+Enter adds a new line.
+				</span>
+				<TextArea
+					id={id}
+					variant="bare"
+					value={value}
+					onChange={(event) => onChange(event.target.value)}
+					aria-describedby={showCount ? `${id}-keys ${id}-count` : `${id}-keys`}
+					aria-invalid={tooLong || undefined}
+					onKeyDown={(event) => {
+						// Enter while an IME is composing (Japanese, Chinese, Korean) picks a
+						// candidate; it must not send a half-typed message.
+						if (
+							event.key === "Enter" &&
+							!event.shiftKey &&
+							!event.nativeEvent.isComposing
+						)
+							submit(event);
+					}}
+					rows={2}
+					placeholder={placeholder}
+				/>
+				{isStreaming ? (
+					<Button variant="secondary" onClick={onStop} {...trackFocus}>
+						<Icon icon={Square} size={14} filled /> Stop
+					</Button>
+				) : (
+					<Button
+						type="submit"
+						disabled={!value.trim() || tooLong}
+						{...trackFocus}
+					>
+						<Icon icon={ArrowUp} /> Send
+					</Button>
+				)}
+			</form>
+			{showCount ? (
+				<p
+					id={`${id}-count`}
+					className={`m-0 text-meta ${tooLong ? "font-medium text-(--danger)" : "text-(--sea-ink-faint)"}`}
+				>
+					{tooLong
+						? `${overBy.toLocaleString()} characters over the ${maxLength?.toLocaleString()} limit. Shorten it to send.`
+						: `${(-overBy).toLocaleString()} characters left`}
+				</p>
+			) : null}
+			<LiveStatus
+				message={
+					tooLong
+						? `Too long to send. Keep it to ${maxLength?.toLocaleString()} characters.`
+						: ""
+				}
 			/>
-			{isStreaming ? (
-				<Button variant="secondary" onClick={onStop} {...trackFocus}>
-					<Icon icon={Square} size={14} filled /> Stop
-				</Button>
-			) : (
-				<Button type="submit" disabled={!value.trim()} {...trackFocus}>
-					<Icon icon={ArrowUp} /> Send
-				</Button>
-			)}
-		</form>
+		</div>
 	);
 }
