@@ -127,7 +127,9 @@ export function StoryCard({ story, rank, markSaved = true }: StoryCardProps) {
 							onClick={() => recordStoryView(story, "chat_opened")}
 						>
 							<Icon icon={Sparkles} accent />
-							Ask AI
+							<span>
+								<WideText from="min">Ask </WideText>AI
+							</span>
 						</ButtonLink>
 					) : null}
 				</>

@@ -94,6 +94,13 @@ html {
   scroll-padding-top: 4.5rem;
 }
 
+/* The header wraps to two rows below 360px (HeaderBar). */
+@media (max-width: 359px) {
+  html {
+    scroll-padding-top: 7.5rem;
+  }
+}
+
 body {
   margin: 0;
   color: var(--sea-ink);
