@@ -6,7 +6,7 @@ export default function SiteFooter() {
 	return (
 		<FooterBar
 			title="HackerFeed"
-			tagline="Today's stories and papers, and the ones you kept."
+			tagline="Today’s stories and papers, and the ones you kept."
 			copyright={<>&copy; {year} HackerFeed</>}
 		/>
 	);

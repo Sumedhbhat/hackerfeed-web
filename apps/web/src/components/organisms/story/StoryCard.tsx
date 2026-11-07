@@ -88,8 +88,10 @@ export function StoryCard({ story, rank, markSaved = true }: StoryCardProps) {
 						onClick={recordRead}
 						onAuxClick={recordMiddleClickRead}
 					>
-						{story.url ? "Read" : "Open"}
-						<WideText from="xs">{story.url ? "article" : "post"}</WideText>
+						<span>
+							{story.url ? "Read" : "Open"}
+							<WideText from="xs">{story.url ? " article" : " post"}</WideText>
+						</span>
 						<Icon icon={ArrowUpRight} size={14} />
 					</ExternalButtonLink>
 
@@ -101,8 +103,10 @@ export function StoryCard({ story, rank, markSaved = true }: StoryCardProps) {
 						onClick={() => recordStoryView(story, "discussion_opened")}
 					>
 						<Icon icon={MessageSquare} />
-						{comments}
-						<WideText>{comments === 1 ? "comment" : "comments"}</WideText>
+						<span>
+							{comments}
+							<WideText>{comments === 1 ? " comment" : " comments"}</WideText>
+						</span>
 					</ButtonLink>
 
 					{aiChat ? (

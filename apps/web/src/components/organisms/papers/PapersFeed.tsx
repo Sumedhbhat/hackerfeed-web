@@ -67,7 +67,7 @@ export function PapersFeed({
 			<PageHeader
 				title="Papers"
 				dateline={formatEditionDate(selectedDate)}
-				description="The day's most discussed research papers."
+				description="The day’s most discussed research papers."
 			/>
 			<PaperEditionToolbar
 				query={filters.query ?? ""}

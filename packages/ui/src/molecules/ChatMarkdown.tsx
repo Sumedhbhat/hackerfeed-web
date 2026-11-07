@@ -12,7 +12,7 @@ import { Text } from "../atoms/Text";
  * React text, never as HTML, so a reply cannot inject markup.
  */
 
-type ListItem = { text: string; children?: ListBlock };
+type ListItem = { text: string; children?: ListBlock[] };
 type ListBlock = { kind: "ul" | "ol"; start: number; items: ListItem[] };
 
 type Block =
@@ -55,8 +55,15 @@ function addItem(
 	for (let depth = 0; depth < level; depth++) {
 		const parent = target.items.at(-1);
 		if (!parent) break;
-		parent.children ??= { kind, start, items: [] };
-		target = parent.children;
+		parent.children ??= [];
+		const deepest = depth === level - 1;
+		let child = parent.children.at(-1);
+		// At the item's own level a different marker starts a separate list.
+		if (!child || (deepest && child.kind !== kind)) {
+			child = { kind, start, items: [] };
+			parent.children.push(child);
+		}
+		target = child;
 	}
 	target.items.push({ text });
 }
@@ -64,7 +71,8 @@ function addItem(
 /** The most deeply nested last item, where a continuation line belongs. */
 function lastItem(list: ListBlock): ListItem | undefined {
 	const item = list.items.at(-1);
-	return item?.children ? (lastItem(item.children) ?? item) : item;
+	const lastChild = item?.children?.at(-1);
+	return lastChild ? (lastItem(lastChild) ?? item) : item;
 }
 
 function toBlocks(text: string): Block[] {
@@ -188,7 +196,10 @@ function MarkdownList({ list }: { list: ListBlock }) {
 				// biome-ignore lint/suspicious/noArrayIndexKey: list items are positional and never reorder
 				<ProseListItem key={itemIndex}>
 					{inline(item.text)}
-					{item.children ? <MarkdownList list={item.children} /> : null}
+					{item.children?.map((child, childIndex) => (
+						// biome-ignore lint/suspicious/noArrayIndexKey: child lists are positional and never reorder
+						<MarkdownList key={childIndex} list={child} />
+					))}
 				</ProseListItem>
 			))}
 		</ProseList>

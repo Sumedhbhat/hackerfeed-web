@@ -15,7 +15,7 @@ export function FactLine({
 }) {
 	return (
 		<div
-			className={`flex min-w-0 flex-wrap items-center gap-x-3 gap-y-0.5 text-meta text-(--sea-ink-faint) ${singleLine ? "sm:flex-nowrap sm:whitespace-nowrap sm:[&>*]:shrink-0 sm:[&>[data-shrink]]:min-w-[13ch] sm:[&>[data-shrink]]:shrink sm:[&>[data-shrink]]:truncate" : ""}`}
+			className={`flex min-w-0 flex-wrap items-center gap-x-3 gap-y-0.5 text-meta text-(--sea-ink-faint) ${singleLine ? "sm:flex-nowrap sm:whitespace-nowrap sm:[&>*]:shrink-0 sm:[&>[data-shrink]]:min-w-0 sm:[&>[data-shrink]]:shrink sm:[&>[data-shrink]]:truncate" : ""}`}
 		>
 			{children}
 		</div>

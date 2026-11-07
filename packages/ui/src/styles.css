@@ -158,7 +158,7 @@ pre code {
 }
 
 .page-wrap {
-  width: min(56rem, 100%);
+  width: min(60rem, 100%);
   margin-inline: auto;
 }
 

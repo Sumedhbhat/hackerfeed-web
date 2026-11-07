@@ -121,6 +121,19 @@ describe("ChatMarkdown", () => {
 		expect(nested?.querySelector("ul")).toBeNull();
 	});
 
+	it("starts a new nested list when the marker kind changes", () => {
+		const { container } = render(
+			<ChatMarkdown text={"- Parent\n  1. First\n  2. Second\n  - Caveat"} />,
+		);
+
+		const parent = container.querySelector("ul > li");
+		const ordered = parent?.querySelector(":scope > ol");
+		const bullets = parent?.querySelector(":scope > ul");
+		expect(ordered?.querySelectorAll("li")).toHaveLength(2);
+		expect(bullets?.querySelectorAll("li")).toHaveLength(1);
+		expect(bullets?.textContent).toBe("Caveat");
+	});
+
 	it("keeps balanced parentheses inside a link destination", () => {
 		render(
 			<ChatMarkdown text="See [cache](https://en.wikipedia.org/wiki/Cache_(computing))." />,

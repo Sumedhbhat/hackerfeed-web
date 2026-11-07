@@ -24,7 +24,7 @@ describe("SignedOutPage", () => {
 		render(<SignedOutPage />);
 
 		expect(
-			screen.getByRole("heading", { name: "You're signed out" }),
+			screen.getByRole("heading", { name: "You’re signed out" }),
 		).toBeDefined();
 		fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
 

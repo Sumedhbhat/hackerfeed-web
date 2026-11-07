@@ -27,7 +27,9 @@ export function FeedRow({
 	save: ReactNode;
 }) {
 	return (
-		<li className="relative flex gap-4 px-4 pt-3 pb-1 sm:px-6 sm:pt-3.5 sm:pb-2.5">
+		<li
+			className={`relative flex gap-4 px-4 pt-3 pb-1 sm:px-6 sm:pt-3.5 sm:pb-2.5 ${saved ? "bg-(--bookmark-tint)" : ""}`}
+		>
 			{saved ? <Ribbon drop={justSaved} /> : null}
 			{rank != null ? (
 				<span
@@ -44,7 +46,7 @@ export function FeedRow({
 					<span aria-hidden="true" className="float-right h-5 w-12 sm:w-10" />
 					{title}
 				</div>
-				<div className="flex flex-col gap-1 lg:flex-row lg:items-center lg:justify-between lg:gap-4">
+				<div className="flex flex-col gap-1 lg:flex-row lg:items-center lg:justify-between lg:gap-8">
 					{meta}
 					<div className="-mt-1.5 -ml-1.5 flex items-center gap-1 sm:-mr-2 sm:-ml-2 lg:mt-0 lg:ml-0 lg:shrink-0">
 						<div className="grid min-w-0 grid-cols-[minmax(4.25rem,auto)_minmax(3.25rem,auto)_auto] xs:grid-cols-[minmax(7rem,auto)_minmax(3.25rem,auto)_auto] items-center justify-items-start sm:grid-cols-[minmax(7.25rem,auto)_minmax(7.5rem,auto)_auto] lg:grid-cols-[minmax(7.25rem,auto)_minmax(7.5rem,auto)_minmax(5.25rem,auto)]">

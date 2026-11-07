@@ -1,6 +1,7 @@
 import { ArrowUpRight } from "lucide-react";
 import { ExternalButtonLink } from "../atoms/Button";
 import { Icon } from "../atoms/Icon";
+import { WideText } from "../atoms/WideText";
 
 /**
  * A paper's two main actions: read it (the green main action, like Read
@@ -28,7 +29,10 @@ export function PaperLinks({
 				aria-label={`Read paper: ${title}`}
 				onClick={onRead}
 			>
-				Read paper <Icon icon={ArrowUpRight} size={14} />
+				<span>
+					Read<WideText from="xs"> paper</WideText>
+				</span>
+				<Icon icon={ArrowUpRight} size={14} />
 			</ExternalButtonLink>
 			<ExternalButtonLink
 				variant="ghost"

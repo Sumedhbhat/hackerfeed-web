@@ -81,8 +81,10 @@ export function StoryArticle({ story }: { story: HackerNewsStoryRecord }) {
 					href={getDiscussionUrl(story.id)}
 					aria-label="View on HN"
 				>
-					<WideText>View on</WideText>
-					HN <Icon icon={ArrowUpRight} size={14} />
+					<span>
+						<WideText>View on </WideText>HN
+					</span>{" "}
+					<Icon icon={ArrowUpRight} size={14} />
 				</ExternalButtonLink>
 			</Row>
 		</Stack>

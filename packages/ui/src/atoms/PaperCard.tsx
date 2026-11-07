@@ -13,7 +13,7 @@ export function PaperCard({
 	justSaved?: boolean;
 }) {
 	return (
-		<li className="relative">
+		<li className={`relative ${saved ? "bg-(--bookmark-tint)" : ""}`}>
 			{saved ? <Ribbon drop={justSaved} /> : null}
 			<article className="flex flex-col gap-2 px-4 pt-4 pb-2 sm:px-6 sm:pb-3">
 				{children}
