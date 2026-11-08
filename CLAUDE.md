@@ -18,6 +18,7 @@ gh workflow run deploy.yaml  # Deploy with Terraform outputs in CI
 
 # Testing
 bun run test         # Every project's tests, through Nx
+bun run e2e          # End-to-end tests (apps/web-e2e): flows and accessibility
 bunx nx test backend # One project's tests
 cd packages/hacker-news && bunx vitest run src/utils.test.ts   # A single test file
 
@@ -125,5 +126,7 @@ Shared and server packages run Vitest with its defaults (`node`, no config file)
 - **`browser`** — component and browser-API tests using `happy-dom` (`src/components/**/*.test.*` and `src/**/*.browser.test.*`)
 
 In `apps/web`, use the `.browser.test.ts` suffix for anything that touches `window`, `localStorage`, or DOM APIs. Inject collaborators into package code (as `createAiClient(auth)` does) rather than mocking another package's internals.
+
+End-to-end tests live in `apps/web-e2e` (Playwright). They build the static demo (`VITE_DEMO_DATA=true`, `VITE_DEMO_AI_CHAT=true`), serve it with `wrangler.preview.jsonc` like PR previews, block every request that leaves that server, and fake `/api/ai/*` (`src/support/fixtures.ts`). Each test runs at desktop (1440px) and phone (390px) widths. `accessibility.spec.ts` checks every page for axe (WCAG 2.2 AA, light and dark), no sideways scroll or overlapping tap targets, reflow at 320px, WCAG text spacing, 200% text, a focus ring on each tab stop, and evenly spaced card sections; add new pages to its `SCREENS` list. Flow specs are grouped by area (`feed`, `story`, `saved`, `papers`, `chat`) and read their stories from the demo snapshot (`src/support/data.ts`), so they keep working after `demo-data:refresh`. CI runs them in the build job. Locally, `PLAYWRIGHT_CHROMIUM_PATH=/usr/bin/google-chrome bun run e2e` uses an installed Chrome instead of downloading one; the run leaves `apps/web/dist` behind, which `bun run check` lints, so delete it afterwards.
 
 Base UI in tests: keyboard focus moves a tick after the key press, so wrap focus assertions in `waitFor`. A select option only takes a mouse click that started on it: `fireEvent.pointerDown(option, { pointerType: "mouse" })`, then `fireEvent.click(option)` (see `choose()` in `StoryChatPage.test.tsx`). Popups render in a portal, so query them from `screen`.

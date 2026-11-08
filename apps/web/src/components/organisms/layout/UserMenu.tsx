@@ -25,7 +25,7 @@ export default function UserMenu() {
 
 	return (
 		<DropdownMenu
-			triggerLabel="User menu"
+			triggerLabel={`${initials}, user menu`}
 			trigger={
 				<Avatar
 					name={displayName}

@@ -66,5 +66,23 @@ jobs:
             exit 1
           fi
 
+      # Builds the demo app (after the production build is verified above) and
+      # runs the user-flow and accessibility tests in apps/web-e2e.
+      - name: Install Playwright's Chromium
+        working-directory: apps/web-e2e
+        run: bunx playwright install --with-deps chromium
+
+      - name: End-to-end tests
+        run: bun run e2e
+
+      - name: Upload end-to-end results
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: e2e-results
+          path: apps/web-e2e/test-results
+          retention-days: 7
+          if-no-files-found: ignore
+
       - name: Check Terraform
         run: bunx nx run-many -t fmt,validate

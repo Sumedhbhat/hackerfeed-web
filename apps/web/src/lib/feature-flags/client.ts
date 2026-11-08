@@ -10,6 +10,9 @@ export type {
 } from "@hackerfeed/api-client/feature-flags";
 
 export async function fetchFeatureFlags(): Promise<Partial<FeatureFlags>> {
-	if (import.meta.env.VITE_DEMO_DATA === "true") return { aiChat: false };
+	// Demo builds have no AI backend; the e2e build turns chat on and fakes it.
+	if (import.meta.env.VITE_DEMO_DATA === "true") {
+		return { aiChat: import.meta.env.VITE_DEMO_AI_CHAT === "true" };
+	}
 	return fetchSessionFeatureFlags({ getHeaders: getApiHeaders });
 }

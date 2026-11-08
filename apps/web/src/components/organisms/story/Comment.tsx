@@ -43,8 +43,7 @@ export function Comment({ comment, depth = 0 }: CommentProps) {
 				onOpenChange={(open) => setCollapsed(!open)}
 			>
 				<Stack gap="sm">
-					{/* Header row: author + age + collapse toggle */}
-					<Row gap="sm">
+					<Row gap="sm" wrap>
 						{comment.deleted ? (
 							<Text as="span" size="xs" tone="faint" italic>
 								[deleted]

@@ -9,6 +9,8 @@ dist-ssr
 .tanstack
 .wrangler
 .playwright-mcp
+test-results
+playwright-report
 .output
 .vinxi
 __unconfig*
