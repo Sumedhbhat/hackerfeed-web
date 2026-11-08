@@ -1,5 +1,5 @@
 import { type ReactNode, useId } from "react";
-import { ToggleButton, ToggleGroup } from "../atoms/Toggle";
+import { ToggleGroup, ToggleGroupItem } from "../atoms/Toggle";
 
 type SortOption<T extends string> = { value: T; label: string };
 
@@ -32,13 +32,13 @@ export function SortToolbar<T extends string>({
 					aria-labelledby={labelId}
 				>
 					{options.map((option) => (
-						<ToggleButton
+						<ToggleGroupItem
 							key={option.value}
 							variant="segment"
 							value={option.value}
 						>
 							{option.label}
-						</ToggleButton>
+						</ToggleGroupItem>
 					))}
 				</ToggleGroup>
 			</div>

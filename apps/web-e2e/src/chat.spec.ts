@@ -38,9 +38,9 @@ test("New chat can be undone", async ({ page }) => {
 	await box.press("Enter");
 	await expect(page.getByText("It comes down to two choices.")).toBeVisible();
 	await page.getByRole("button", { name: "New chat" }).click();
-	await expect(
-		page.getByRole("button", { name: "Undo new chat" }),
-	).toBeFocused();
-	await page.keyboard.press("Enter");
+	await expect(box).toBeFocused();
+	const toast = page.getByRole("region", { name: "Notifications" });
+	await expect(toast).toContainText("Started a new chat");
+	await toast.getByRole("button", { name: "Undo" }).click();
 	await expect(page.getByText("It comes down to two choices.")).toBeVisible();
 });

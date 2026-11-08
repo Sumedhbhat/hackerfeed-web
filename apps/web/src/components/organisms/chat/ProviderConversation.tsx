@@ -10,6 +10,7 @@ import { LiveStatus } from "@hackerfeed/ui/atoms/LiveStatus";
 import { Row } from "@hackerfeed/ui/atoms/Row";
 import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { Text } from "@hackerfeed/ui/atoms/Text";
+import { useShowToast } from "@hackerfeed/ui/atoms/Toast";
 import { WideText } from "@hackerfeed/ui/atoms/WideText";
 import { CardSkeleton } from "@hackerfeed/ui/molecules/CardSkeleton";
 import { ChatComposer } from "@hackerfeed/ui/molecules/ChatComposer";
@@ -59,6 +60,10 @@ export function ProviderConversation({
 	// Screen readers hear that a reply is coming and when it has arrived
 	// (WCAG 4.1.3), not every streamed word.
 	const [announcement, setAnnouncement] = useState("");
+	const showToast = useShowToast();
+	// The toast's Undo runs after the reset, so it needs the latest undoReset.
+	const undoResetRef = useRef(chat.undoReset);
+	undoResetRef.current = chat.undoReset;
 	const wasStreamingRef = useRef(false);
 	useEffect(() => {
 		if (chat.isStreaming && !wasStreamingRef.current) {
@@ -174,11 +179,18 @@ export function ProviderConversation({
 							variant="secondary"
 							onClick={() => {
 								chat.reset();
-								setAnnouncement("Started a new chat.");
-								// The button disappears; the Undo that replaces it gets focus.
-								requestAnimationFrame(() =>
-									document.getElementById("story-chat-undo")?.focus(),
-								);
+								showToast({
+									title: "Started a new chat",
+									timeout: 10_000,
+									action: {
+										label: "Undo",
+										onClick: () => {
+											undoResetRef.current();
+											focusComposer();
+										},
+									},
+								});
+								focusComposer();
 							}}
 							aria-label="New chat"
 							title="New chat"
@@ -212,28 +224,6 @@ export function ProviderConversation({
 									/>
 								) : null}
 							</Stack>
-						) : null}
-
-						{chat.canUndoReset && messageCount === 0 ? (
-							<InlineNotice
-								boxed
-								quiet
-								message="Started a new chat."
-								action={
-									<Button
-										id="story-chat-undo"
-										variant="ghost"
-										aria-label="Undo new chat"
-										onClick={() => {
-											chat.undoReset();
-											setAnnouncement("Chat restored.");
-											focusComposer();
-										}}
-									>
-										Undo
-									</Button>
-								}
-							/>
 						) : null}
 
 						{messageCount === 0 && !chat.isStreaming ? (

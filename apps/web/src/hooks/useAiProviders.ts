@@ -226,7 +226,6 @@ export function useStoryChat(
 		error,
 		isStreaming: streamingText !== null,
 		messages,
-		canUndoReset: cleared !== null,
 		reset,
 		undoReset,
 		retry,

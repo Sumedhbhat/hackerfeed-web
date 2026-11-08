@@ -13,6 +13,7 @@
 		"./atoms/Collapsible": "./src/atoms/Collapsible.tsx",
 		"./atoms/CountBadge": "./src/atoms/CountBadge.tsx",
 		"./atoms/Document": "./src/atoms/Document.tsx",
+		"./atoms/Field": "./src/atoms/Field.tsx",
 		"./atoms/FactLine": "./src/atoms/FactLine.tsx",
 		"./atoms/Heading": "./src/atoms/Heading.tsx",
 		"./atoms/Icon": "./src/atoms/Icon.tsx",

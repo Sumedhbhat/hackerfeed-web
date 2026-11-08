@@ -1,4 +1,4 @@
-import { ToggleButton, ToggleGroup } from "../atoms/Toggle";
+import { ToggleGroup, ToggleGroupItem } from "../atoms/Toggle";
 
 type Topic = { keyword: string; paperCount: number };
 
@@ -27,14 +27,18 @@ export function PaperTopicNav({
 			value={selected ?? ALL}
 			onValueChange={(topic) => onSelect(topic === ALL ? undefined : topic)}
 		>
-			<ToggleButton variant="chip" value={ALL}>
+			<ToggleGroupItem variant="chip" value={ALL}>
 				All papers <ChipCount count={totalCount} />
-			</ToggleButton>
+			</ToggleGroupItem>
 			{topics.map((topic) => (
-				<ToggleButton variant="chip" value={topic.keyword} key={topic.keyword}>
+				<ToggleGroupItem
+					variant="chip"
+					value={topic.keyword}
+					key={topic.keyword}
+				>
 					{topic.keyword}
 					{topic.paperCount > 1 ? <ChipCount count={topic.paperCount} /> : null}
-				</ToggleButton>
+				</ToggleGroupItem>
 			))}
 		</ToggleGroup>
 	);

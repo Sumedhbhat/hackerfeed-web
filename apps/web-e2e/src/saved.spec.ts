@@ -1,25 +1,26 @@
 import { open } from "./support/checks";
 import { expect, test } from "./support/fixtures";
 
-test("unsaving announces it, keeps focus in the list, and Undo puts it back", async ({
+test("unsaving shows a toast with Undo, keeps focus in the list, and Undo puts it back", async ({
 	page,
 }) => {
 	await open(page, "/favorites?type=stories");
 	const saved = page.getByRole("button", { name: /^Saved /, pressed: true });
 	const count = await saved.count();
-	const first = saved.first();
-	const name = (await first.getAttribute("aria-label")) ?? "";
-	await first.focus();
+	const name = (await saved.first().getAttribute("aria-label")) ?? "";
+	await saved.first().focus();
 	await page.keyboard.press("Enter");
 
-	await expect(
-		page.locator("output[aria-live]", {
-			hasText: `Removed from Saved. ${count - 1} left.`,
-		}),
-	).toHaveCount(1);
+	const toast = page.getByRole("region", { name: "Notifications" });
+	await expect(toast).toContainText(
+		`Removed “${name.replace(/^Saved /, "")}” from Saved`,
+	);
+	await expect(toast).toContainText(`${count - 1} left.`);
 	await expect(page.locator("#saved-list :focus")).toHaveCount(1);
 
-	await page.getByRole("button", { name: /^Undo: put/ }).click();
+	await page.keyboard.press("F6");
+	await expect(toast).toBeFocused();
+	await toast.getByRole("button", { name: "Undo" }).click();
 	await expect(page.getByRole("button", { name, pressed: true })).toBeFocused();
 	await expect(saved).toHaveCount(count);
 });

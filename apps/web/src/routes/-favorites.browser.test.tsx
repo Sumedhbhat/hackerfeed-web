@@ -204,7 +204,7 @@ describe("FavoritesPage backend source of truth", () => {
 			await screen.findByRole("button", { name: "Saved Oops", pressed: true }),
 		);
 		const undo = await screen.findByRole("button", {
-			name: "Undo: put “Oops” back in Saved",
+			name: "Undo",
 		});
 		fireEvent.click(undo);
 
@@ -354,9 +354,9 @@ describe("FavoritesPage paper collection", () => {
 			}),
 		);
 		expect(screen.queryByText("Saved Reasoning Paper")).toBeNull();
-		// The removal is announced, since the row and its button are gone.
+		// A toast says what happened, since the row and its button are gone.
 		expect(
-			await screen.findByText(/^Removed from Saved\./, { selector: "output" }),
+			await screen.findByText("Removed “Saved Reasoning Paper” from Saved"),
 		).toBeTruthy();
 	});
 
@@ -382,12 +382,9 @@ describe("FavoritesPage paper collection", () => {
 		await waitFor(() => expect(trpcMock.paperClear).toHaveBeenCalledTimes(1));
 		expect(trpcMock.clear).not.toHaveBeenCalled();
 		expect(await screen.findByText("No saved papers yet")).toBeTruthy();
-		// Clear has no Undo, so the status must not promise one.
-		const status = await screen.findByText(/^Removed from Saved\./, {
-			selector: "output",
-		});
-		expect(status.textContent).not.toContain("Undo");
-		expect(screen.queryByRole("button", { name: /^Undo/ })).toBeNull();
+		// Clear is confirmed in a dialog, so its toast has no Undo.
+		expect(await screen.findByText("Removed 2 from Saved")).toBeTruthy();
+		expect(screen.queryByRole("button", { name: "Undo" })).toBeNull();
 	});
 
 	it("shows an initial paper load failure and recovers on refresh", async () => {

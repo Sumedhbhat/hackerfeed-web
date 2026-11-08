@@ -1,8 +1,13 @@
 import { ArrowUp, Square } from "lucide-react";
 import { type FormEvent, useEffect, useRef } from "react";
 import { Button } from "../atoms/Button";
+import {
+	Field,
+	FieldDescription,
+	FieldError,
+	FieldLabel,
+} from "../atoms/Field";
 import { Icon } from "../atoms/Icon";
-import { LiveStatus } from "../atoms/LiveStatus";
 import { TextArea } from "../atoms/TextField";
 
 /** Message box with a Send button, or a Stop button while a reply streams in. */
@@ -60,24 +65,20 @@ export function ChatComposer({
 	};
 
 	return (
-		<div className="flex flex-col gap-1.5">
+		<Field invalid={tooLong}>
 			<form
 				onSubmit={submit}
 				className="flex items-end gap-2 rounded-xl border border-(--field-line) bg-(--surface-strong) p-2 focus-within:border-(--lagoon) focus-within:outline-1 focus-within:outline-(--lagoon)"
 			>
-				<label htmlFor={id} className="sr-only">
-					{label}
-				</label>
-				<span id={`${id}-keys`} className="sr-only">
+				<FieldLabel visuallyHidden>{label}</FieldLabel>
+				<FieldDescription visuallyHidden>
 					Enter sends. Shift+Enter adds a new line.
-				</span>
+				</FieldDescription>
 				<TextArea
 					id={id}
 					variant="bare"
 					value={value}
 					onChange={(event) => onChange(event.target.value)}
-					aria-describedby={showCount ? `${id}-keys ${id}-count` : `${id}-keys`}
-					aria-invalid={tooLong || undefined}
 					onKeyDown={(event) => {
 						// Enter while an IME is composing (Japanese, Chinese, Korean) picks a
 						// candidate; it must not send a half-typed message.
@@ -105,23 +106,15 @@ export function ChatComposer({
 					</Button>
 				)}
 			</form>
-			{showCount ? (
-				<p
-					id={`${id}-count`}
-					className={`m-0 text-meta ${tooLong ? "font-medium text-(--danger)" : "text-(--sea-ink-faint)"}`}
-				>
-					{tooLong
-						? `${overBy.toLocaleString()} characters over the ${maxLength?.toLocaleString()} limit. Shorten it to send.`
-						: `${(-overBy).toLocaleString()} characters left`}
-				</p>
+			{tooLong ? (
+				<FieldError>
+					{`${overBy.toLocaleString()} characters over the ${maxLength?.toLocaleString()} limit. Shorten it to send.`}
+				</FieldError>
+			) : showCount ? (
+				<FieldDescription>
+					{`${(-overBy).toLocaleString()} characters left`}
+				</FieldDescription>
 			) : null}
-			<LiveStatus
-				message={
-					tooLong
-						? `Too long to send. Keep it to ${maxLength?.toLocaleString()} characters.`
-						: ""
-				}
-			/>
-		</div>
+		</Field>
 	);
 }

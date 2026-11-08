@@ -1,5 +1,6 @@
 import type { AiProviderStatus } from "@hackerfeed/contracts/ai";
 import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
+import { ToastProvider } from "@hackerfeed/ui/atoms/Toast";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
 	cleanup,
@@ -123,7 +124,9 @@ function renderPage({ withStory = true } = {}) {
 	}
 	return render(
 		<QueryClientProvider client={queryClient}>
-			<StoryChatPage storyId={42} />
+			<ToastProvider>
+				<StoryChatPage storyId={42} />
+			</ToastProvider>
 		</QueryClientProvider>,
 	);
 }
@@ -524,12 +527,13 @@ describe("StoryChatPage", () => {
 		await screen.findByText("It is about X.");
 
 		fireEvent.click(screen.getByRole("button", { name: "New chat" }));
-		// Shown next to Undo and announced through the chat status.
-		expect(screen.getAllByText("Started a new chat.")).toHaveLength(2);
-		fireEvent.click(screen.getByRole("button", { name: "Undo new chat" }));
+		expect(await screen.findByText("Started a new chat")).toBeTruthy();
+		fireEvent.click(screen.getByRole("button", { name: "Undo" }));
 
-		expect(screen.getByText("It is about X.")).toBeTruthy();
-		expect(screen.queryByText("Started a new chat.")).toBeNull();
+		expect(await screen.findByText("It is about X.")).toBeTruthy();
+		await waitFor(() =>
+			expect(screen.queryByText("Started a new chat")).toBeNull(),
+		);
 	});
 
 	it("shows model loading errors with a retry", async () => {

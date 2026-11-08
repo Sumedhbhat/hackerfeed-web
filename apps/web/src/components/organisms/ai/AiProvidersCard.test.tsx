@@ -200,9 +200,7 @@ describe("AiProvidersCard", () => {
 			name: "Sign in with ChatGPT",
 		});
 		await waitFor(() => expect(document.activeElement).toBe(signIn));
-		expect(
-			screen.getByText("ChatGPT disconnected.", { selector: "output" }),
-		).toBeDefined();
+		expect(await screen.findByText("ChatGPT disconnected")).toBeDefined();
 	});
 
 	it("has no axe violations with connected and disconnected rows", async () => {
@@ -241,12 +239,8 @@ describe("AiProvidersCard", () => {
 		];
 		render(<AiProvidersCard result="connected" resultProviderId="chatgpt" />);
 
-		// Each provider row also has its own (empty) status for disconnects.
-		const statuses = await screen.findAllByRole("status");
-		await waitFor(() =>
-			expect(statuses.map((status) => status.textContent).join(" ")).toContain(
-				"ChatGPT is connected.",
-			),
+		expect((await screen.findByRole("status")).textContent).toContain(
+			"ChatGPT is connected.",
 		);
 	});
 

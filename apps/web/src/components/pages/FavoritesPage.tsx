@@ -10,6 +10,7 @@ import { ReadingList } from "@hackerfeed/ui/atoms/ReadingList";
 import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { TabPanel, Tabs } from "@hackerfeed/ui/atoms/Tabs";
 import { Text } from "@hackerfeed/ui/atoms/Text";
+import { useShowToast } from "@hackerfeed/ui/atoms/Toast";
 import { ConfirmButton } from "@hackerfeed/ui/molecules/ConfirmButton";
 import { EmptyState } from "@hackerfeed/ui/molecules/EmptyState";
 import { InlineNotice } from "@hackerfeed/ui/molecules/InlineNotice";
@@ -97,28 +98,14 @@ export function FavoritesPage({
 		? sortedPapers.filter((paper) => matchesFilters(paper, needle))
 		: sortedPapers;
 	const visibleCount = isStories ? visibleStories.length : visiblePapers.length;
-	const removal = useRemovalFeedback(activeType, activeCount);
-	const lastRemoved = useLastRemoved(
-		stories.getFavorites(),
-		papers.savedPapers,
-	);
-	const [undone, setUndone] = useState<string | null>(null);
-	const [undoMessage, setUndoMessage] = useState("");
-	useRestoreReturnFocus(activeCount > 0);
-
-	/** Put the last unsaved item back, then focus its Saved button. */
-	function undoRemove() {
-		if (!lastRemoved) return;
-		if (lastRemoved.kind === "story") stories.toggleFavorite(lastRemoved.item);
-		else papers.toggleFavorite(lastRemoved.item);
-		const title = lastRemoved.item.title;
-		setUndone(lastRemoved.key);
-		setUndoMessage(`Put “${title}” back in Saved.`);
-		// The row comes back when the save completes, which can take a moment
-		// (papers go through the server); focus its Saved button once it's there.
-		restoredTitleRef.current = title;
-	}
 	const restoredTitleRef = useRef<string | null>(null);
+	useRemovalToast(stories.getFavorites(), papers.savedPapers, (removed) => {
+		if (removed.kind === "story") stories.toggleFavorite(removed.item);
+		else papers.toggleFavorite(removed.item);
+		restoredTitleRef.current = removed.item.title;
+	});
+	// A restored row comes back once its save completes (papers go through the
+	// server), so focus its Saved button when it reappears.
 	useEffect(() => {
 		const title = restoredTitleRef.current;
 		if (!title) return;
@@ -131,12 +118,7 @@ export function FavoritesPage({
 		restoredTitleRef.current = null;
 		button.focus();
 	});
-	const undoable =
-		lastRemoved &&
-		lastRemoved.kind === (isStories ? "story" : "paper") &&
-		undone !== lastRemoved.key
-			? lastRemoved
-			: null;
+	useRestoreReturnFocus(activeCount > 0);
 	const searchResult = useResultCountAnnouncement(
 		visibleCount,
 		isStories
@@ -154,31 +136,12 @@ export function FavoritesPage({
 
 	return (
 		<PageContainer>
-			<LiveStatus message={removal} />
-			<LiveStatus message={undoMessage} />
 			<LiveStatus message={searchResult} />
 			<Tabs value={activeType} onValueChange={onTypeChange}>
 				<Stack gap="lg">
 					<PageHeader title="Saved">
 						<FavoritesTabs />
 					</PageHeader>
-
-					{undoable ? (
-						<InlineNotice
-							boxed
-							quiet
-							message={`Removed “${undoable.item.title}” from Saved.`}
-							action={
-								<Button
-									variant="secondary"
-									aria-label={`Undo: put “${undoable.item.title}” back in Saved`}
-									onClick={undoRemove}
-								>
-									Undo
-								</Button>
-							}
-						/>
-					) : null}
 
 					{TYPES.map((type) => (
 						<TabPanel key={type} value={type}>
@@ -303,17 +266,26 @@ export function FavoritesPage({
 	);
 }
 
+type Removed =
+	| { kind: "story"; item: HackerNewsStoryRecord }
+	| { kind: "paper"; item: SavedPaper };
+
 /**
- * Unsaving removes the row, and the focused Save button with it. Say what
- * happened (WCAG 4.1.3) and put focus on the row that took its place (the
- * next one, or the previous one if it was last), or on the empty state's
- * link when nothing is left (WCAG 2.4.3).
+ * Unsaving removes the row, and the focused Save button with it: show a toast
+ * (announced, with Undo for a single item) and put focus on the row that took
+ * its place, or on the empty state's link when nothing is left (WCAG 2.4.3).
  */
-function useRemovalFeedback(type: FavoritesType, count: number) {
-	const [message, setMessage] = useState("");
-	const lastRef = useRef({ type, count });
-	// The position of the row that last had focus in the saved list.
+function useRemovalToast(
+	stories: HackerNewsStoryRecord[],
+	papers: SavedPaper[],
+	onUndo: (removed: Removed) => void,
+) {
+	const showToast = useShowToast();
+	const previousRef = useRef({ stories, papers });
 	const focusedRowRef = useRef(0);
+	const onUndoRef = useRef(onUndo);
+	onUndoRef.current = onUndo;
+
 	useEffect(() => {
 		const onFocusIn = (event: FocusEvent) => {
 			const list = document.getElementById("saved-list");
@@ -323,17 +295,39 @@ function useRemovalFeedback(type: FavoritesType, count: number) {
 		document.addEventListener("focusin", onFocusIn);
 		return () => document.removeEventListener("focusin", onFocusIn);
 	}, []);
+
 	useEffect(() => {
-		const last = lastRef.current;
-		lastRef.current = { type, count };
-		if (last.type !== type || count >= last.count) return;
-		// Undo (see useLastRemoved) is only offered for a single unsave, not Clear.
-		const undo = last.count - count === 1 ? " Undo is above the list." : "";
-		setMessage(
-			count === 0
-				? `Removed from Saved. Nothing saved here now.${undo}`
-				: `Removed from Saved. ${count} left.${undo}`,
+		const previous = previousRef.current;
+		previousRef.current = { stories, papers };
+		const removedStories = previous.stories.filter(
+			(story) => !stories.some((kept) => kept.id === story.id),
 		);
+		const removedPapers = previous.papers.filter(
+			(paper) => !papers.some((kept) => kept.arxivId === paper.arxivId),
+		);
+		const removedCount = removedStories.length + removedPapers.length;
+		if (removedCount === 0) return;
+
+		const left = removedStories.length > 0 ? stories.length : papers.length;
+		const description =
+			left === 0 ? "Nothing saved here now." : `${left} left.`;
+		const single: Removed | null =
+			removedCount !== 1
+				? null
+				: removedStories[0]
+					? { kind: "story", item: removedStories[0] }
+					: { kind: "paper", item: removedPapers[0] };
+		showToast(
+			single
+				? {
+						title: `Removed “${single.item.title}” from Saved`,
+						description,
+						timeout: 10_000,
+						action: { label: "Undo", onClick: () => onUndoRef.current(single) },
+					}
+				: { title: `Removed ${removedCount} from Saved`, description },
+		);
+
 		requestAnimationFrame(() => {
 			if (!focusIsLost()) return;
 			const rows = document.getElementById("saved-list")?.children;
@@ -343,43 +337,5 @@ function useRemovalFeedback(type: FavoritesType, count: number) {
 				focusFirstIn(document.querySelector('[role="tabpanel"]:not([hidden])'));
 			}
 		});
-	}, [type, count]);
-	return message;
-}
-
-type Removed =
-	| { kind: "story"; key: string; item: HackerNewsStoryRecord }
-	| { kind: "paper"; key: string; item: SavedPaper };
-
-/** The item most recently unsaved one at a time (not by Clear), for Undo. */
-function useLastRemoved(
-	stories: HackerNewsStoryRecord[],
-	papers: SavedPaper[],
-): Removed | null {
-	const [removed, setRemoved] = useState<Removed | null>(null);
-	const previousRef = useRef({ stories, papers });
-	useEffect(() => {
-		const previous = previousRef.current;
-		previousRef.current = { stories, papers };
-		if (stories.length === previous.stories.length - 1) {
-			const ids = new Set(stories.map((story) => story.id));
-			const item = previous.stories.find((story) => !ids.has(story.id));
-			if (item)
-				setRemoved({
-					kind: "story",
-					key: `story:${item.id}:${Date.now()}`,
-					item,
-				});
-		} else if (papers.length === previous.papers.length - 1) {
-			const ids = new Set(papers.map((paper) => paper.arxivId));
-			const item = previous.papers.find((paper) => !ids.has(paper.arxivId));
-			if (item)
-				setRemoved({
-					kind: "paper",
-					key: `paper:${item.arxivId}:${Date.now()}`,
-					item,
-				});
-		}
-	}, [stories, papers]);
-	return removed;
+	}, [stories, papers, showToast]);
 }

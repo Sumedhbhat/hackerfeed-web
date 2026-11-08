@@ -2,6 +2,7 @@ import type { AiProviderStatus } from "@hackerfeed/contracts/ai";
 import { Button } from "@hackerfeed/ui/atoms/Button";
 import { ExternalLink } from "@hackerfeed/ui/atoms/Link";
 import { Text } from "@hackerfeed/ui/atoms/Text";
+import { useShowToast } from "@hackerfeed/ui/atoms/Toast";
 import { ProviderRow } from "@hackerfeed/ui/molecules/ProviderRow";
 import { useEffect, useRef } from "react";
 import { useDisconnectAiProvider } from "#/hooks/useAiProviders";
@@ -11,14 +12,12 @@ import { connectAiProvider } from "#/lib/ai/client";
 export function AiProviderRow({
 	provider,
 	returnTo,
-	onAnnounce,
 }: {
 	provider: AiProviderStatus;
 	returnTo: string;
-	/** Say something in the card's status region (e.g. "ChatGPT disconnected."). */
-	onAnnounce: (message: string) => void;
 }) {
 	const disconnect = useDisconnectAiProvider();
+	const showToast = useShowToast();
 	const account = provider.account?.email ?? provider.account?.name;
 	const connectId = `ai-connect-${provider.id}`;
 
@@ -55,7 +54,7 @@ export function AiProviderRow({
 								disconnect.mutate(provider.id, {
 									onSuccess: () => {
 										focusConnectRef.current = true;
-										onAnnounce(`${provider.name} disconnected.`);
+										showToast({ title: `${provider.name} disconnected` });
 									},
 								})
 							}

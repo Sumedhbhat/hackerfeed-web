@@ -96,14 +96,17 @@ Interactive atoms are built on [Base UI](https://base-ui.com) (`@base-ui/react`)
 | Need | Atom (Base UI part) |
 |---|---|
 | Button | `Button` (`Button`). Links that look like buttons stay `<a>`: `ButtonLink`, `ExternalButtonLink` |
-| On/off button, pick-one chips | `ToggleButton`, `ToggleGroup` (`Toggle`, `ToggleGroup`) |
+| On/off button | `ToggleButton` (`Toggle`) |
+| Pick one of a few (chips, segments) | `ToggleGroup` + `ToggleGroupItem` (`Toolbar` around `ToggleGroup`, items are `Toolbar.Button` rendering `Toggle`) |
 | Tabs | `Tabs`, `TabList`, `Tab`, `TabPanel` (`Tabs`) |
 | Drop-down menu | `Menu`, `MenuTrigger`, `MenuPopup`, `MenuGroup`, `MenuItem`, `MenuLinkItem` (`Menu`) |
 | Dropdown field | `Select`, `SelectLabel`, `SelectTrigger`, `SelectOptions` (`Select`) |
 | Show/hide | `Collapsible`, `CollapsibleTrigger`, `CollapsiblePanel` (`Collapsible`) |
 | "Are you sure?" | `AlertDialog*` atoms, composed by the `ConfirmButton` molecule (`AlertDialog`) |
 | Picture or initials | `Avatar` (`Avatar`) |
-| Text input | `TextInput` (`Input`). `TextArea` is native: Base UI has none |
+| Text input | `TextInput` (`Input`), `TextArea` (`Field.Control` rendering a `<textarea>`) |
+| Label, hint and error for a control | `Field`, `FieldLabel`, `FieldDescription`, `FieldError` (`Field`): ids, `aria-describedby` and `aria-invalid` are wired for you |
+| Something happened (removed, disconnected), optionally with Undo | `useShowToast` (`Toast`); pass `action` for Undo. For silent status (counts, "replying…") use `LiveStatus` |
 
 These atoms manage their own ARIA state: pass `value`, `pressed` or `open`, never `aria-selected`/`aria-pressed`/`aria-expanded` by hand. A toggle's accessible name starts with the word it shows (WCAG 2.5.3 Label in Name): `aria-label={`${saved ? "Saved" : "Save"} ${title}`}` + `pressed`. Never use `window.confirm`; use `ConfirmButton`. For a new interactive pattern, check whether Base UI has the component and wrap it in a new atom.
 

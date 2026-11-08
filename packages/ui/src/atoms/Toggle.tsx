@@ -1,5 +1,6 @@
 import { Toggle as BaseToggle } from "@base-ui/react/toggle";
 import { ToggleGroup as BaseToggleGroup } from "@base-ui/react/toggle-group";
+import { Toolbar } from "@base-ui/react/toolbar";
 import type { ReactNode } from "react";
 import { type ButtonVariant, buttonClassName } from "./Button";
 
@@ -66,19 +67,36 @@ export function ToggleGroup<T extends string>({
 	"aria-labelledby"?: string;
 }) {
 	return (
-		<BaseToggleGroup
-			value={[value]}
-			onValueChange={(next) => {
-				if (next[0] !== undefined) onValueChange(next[0] as T);
-			}}
-			className={LAYOUT[layout]}
-			// Tab reaches the selected option and arrow keys move between them, the
-			// toolbar pattern; say so to assistive tech instead of a plain group.
-			role="toolbar"
-			aria-orientation="horizontal"
-			{...aria}
+		<Toolbar.Root className={LAYOUT[layout]} {...aria}>
+			<BaseToggleGroup
+				value={[value]}
+				onValueChange={(next) => {
+					if (next[0] !== undefined) onValueChange(next[0] as T);
+				}}
+				className="contents"
+			>
+				{children}
+			</BaseToggleGroup>
+		</Toolbar.Root>
+	);
+}
+
+/** One option in a `ToggleGroup`; the toolbar moves between them with arrow keys. */
+export function ToggleGroupItem({
+	variant,
+	value,
+	children,
+}: {
+	variant: ButtonVariant;
+	value: string;
+	children: ReactNode;
+}) {
+	return (
+		<Toolbar.Button
+			render={<BaseToggle value={value} />}
+			className={buttonClassName(variant)}
 		>
 			{children}
-		</BaseToggleGroup>
+		</Toolbar.Button>
 	);
 }

@@ -1,4 +1,6 @@
+import { Field } from "@base-ui/react/field";
 import { Input } from "@base-ui/react/input";
+import { mergeProps } from "@base-ui/react/merge-props";
 import type { TextareaHTMLAttributes } from "react";
 
 const FIELD =
@@ -45,9 +47,10 @@ export function TextInput({
 	return <Input className={INPUT_VARIANT[variant] || undefined} {...props} />;
 }
 
-/** Multi-line text input that grows to fill its row. */
+/** Multi-line text input that grows to fill its row; inside a `Field` it takes the field's label, description and error. */
 export function TextArea({
 	variant = "field",
+	id,
 	...props
 }: Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "className" | "style"> & {
 	variant?: keyof typeof INPUT_VARIANT;
@@ -56,5 +59,18 @@ export function TextArea({
 		variant === "bare"
 			? `${INPUT_VARIANT.bare} resize-none px-2 py-1.5 leading-relaxed`
 			: `${FIELD} resize-y px-3 py-2`;
-	return <textarea className={`${look} min-h-11 flex-1`} {...props} />;
+	return (
+		<Field.Control
+			id={id}
+			render={(controlProps) => (
+				<textarea
+					{...mergeProps<"textarea">(
+						controlProps as TextareaHTMLAttributes<HTMLTextAreaElement>,
+						props,
+					)}
+					className={`${look} min-h-11 flex-1`}
+				/>
+			)}
+		/>
+	);
 }
