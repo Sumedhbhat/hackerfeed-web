@@ -7,13 +7,12 @@ import { paperId } from "./papers";
 type PaperAuthor = typeof hfPaperAuthors.$inferSelect;
 
 /** Each snapshot paper's authors, in their listed order. */
-export const paperAuthorRows: PaperAuthor[] = snapshotPapers.flatMap(
-	({ paper }) =>
-		paper.authors.map((author) => ({
-			id: `${paperId(paper.arxivId)}-${authorId(author.hfAuthorId)}`,
-			paperId: paperId(paper.arxivId),
-			authorId: authorId(author.hfAuthorId),
-			position: author.position,
-			...ingestedTimestamps,
-		})),
+export const paperAuthorRows: PaperAuthor[] = snapshotPapers.flatMap((paper) =>
+	paper.authors.map((name, index) => ({
+		id: `${paperId(paper.arxivId)}-${authorId(name)}`,
+		paperId: paperId(paper.arxivId),
+		authorId: authorId(name),
+		position: index + 1,
+		...ingestedTimestamps,
+	})),
 );

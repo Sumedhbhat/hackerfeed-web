@@ -21,7 +21,6 @@
 		"./atoms/Link": "./src/atoms/Link.tsx",
 		"./atoms/LiveStatus": "./src/atoms/LiveStatus.tsx",
 		"./atoms/Menu": "./src/atoms/Menu.tsx",
-		"./atoms/NarrowText": "./src/atoms/NarrowText.tsx",
 		"./atoms/PageContainer": "./src/atoms/PageContainer.tsx",
 		"./atoms/Panel": "./src/atoms/Panel.tsx",
 		"./atoms/PanelSection": "./src/atoms/PanelSection.tsx",

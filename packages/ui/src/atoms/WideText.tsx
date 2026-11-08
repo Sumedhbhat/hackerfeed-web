@@ -1,8 +1,6 @@
 import type { ReactNode } from "react";
 
 const FROM = {
-	/** Hidden below 360px (320px zoomed or tiny phones). */
-	min: "max-[359px]:hidden",
 	/** Hidden below 380px (the narrowest phones). */
 	xs: "max-xs:hidden",
 	/** Hidden on phones. */

@@ -8,13 +8,22 @@ type Paper = typeof hfPapers.$inferSelect;
 export const paperId = (arxivId: string) => `demo-paper-${arxivId}`;
 
 /** The snapshot's papers, in its rank order (most upvoted first). */
-export const paperRows: Paper[] = snapshotPapers.map(
-	({ paper: { organization, authors: _a, keywords: _k, ...paper } }) => ({
-		id: paperId(paper.arxivId),
-		organizationId: organization
-			? organizationId(organization.hfOrganizationId)
-			: null,
-		...paper,
-		...ingestedTimestamps,
-	}),
-);
+export const paperRows: Paper[] = snapshotPapers.map((paper) => ({
+	id: paperId(paper.arxivId),
+	arxivId: paper.arxivId,
+	organizationId: paper.organization
+		? organizationId(paper.organization.id)
+		: null,
+	title: paper.title,
+	summary: paper.summary,
+	aiSummary: paper.aiSummary,
+	aiSummaryModel: null,
+	paperPublishedAt: paper.paperPublishedAt,
+	upvotes: paper.upvotes,
+	discussionId: `demo-discussion-${paper.arxivId}`,
+	projectPage: paper.projectPage,
+	githubRepo: paper.githubRepo,
+	thumbnailUrl: null,
+	withdrawnAt: null,
+	...ingestedTimestamps,
+}));

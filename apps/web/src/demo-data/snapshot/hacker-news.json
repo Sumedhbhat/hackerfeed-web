@@ -22,7 +22,7 @@
 			"id": 50404599,
 			"by": "zenincognito",
 			"time": 1794060020,
-			"kids": [50405118, 50404908, 50405383, 50405367, 50404967, 50405659],
+			"kids": [50405118, 50404908, 50405383, 50405367],
 			"type": "story",
 			"score": 66,
 			"title": "The $8 Linux Computer (2022)",
@@ -93,7 +93,7 @@
 			"id": 50403066,
 			"by": "DeepLogin",
 			"time": 1794044346,
-			"kids": [50404266, 50404902, 50405010, 50404353, 50404694, 50404239],
+			"kids": [50404266, 50404902, 50405010, 50404353],
 			"type": "story",
 			"score": 102,
 			"title": "Running a law firm on Free software",
@@ -154,7 +154,7 @@
 			"id": 50399933,
 			"by": "mfiguiere",
 			"time": 1794007852,
-			"kids": [50401480, 50401618, 50400473, 50402685, 50401356, 50401342],
+			"kids": [50401480, 50401618, 50400473, 50402685],
 			"type": "story",
 			"score": 875,
 			"title": "Libghostty 1.0",
@@ -226,7 +226,7 @@
 			"id": 50401740,
 			"by": "benbreen",
 			"time": 1794027276,
-			"kids": [50404343, 50402059, 50402590, 50405370, 50402196, 50403151],
+			"kids": [50404343, 50402059, 50402590, 50405370],
 			"type": "story",
 			"score": 161,
 			"title": "A barbarian tribe's mythic origin story is true, ancient DNA reveals",
@@ -267,7 +267,7 @@
 			"id": 50402212,
 			"by": "geoffbp",
 			"time": 1794033544,
-			"kids": [50405503, 50405563, 50402919, 50404875, 50404801, 50404809],
+			"kids": [50405503, 50405563, 50402919, 50404875],
 			"type": "story",
 			"score": 101,
 			"title": "The Components of Agent Memory",
@@ -300,7 +300,7 @@
 			"id": 50360810,
 			"by": "derbOac",
 			"time": 1793758756,
-			"kids": [50401229, 50404893, 50405566, 50402856, 50404281, 50404898],
+			"kids": [50401229, 50404893, 50405566, 50402856],
 			"type": "story",
 			"score": 162,
 			"title": "Greece has its own Pompeii: Thera buried Akrotiri in ash 17th-16th century BCE",
@@ -351,7 +351,7 @@
 			"id": 50399991,
 			"by": "raybb",
 			"time": 1794008239,
-			"kids": [50400887, 50401093, 50403394, 50400910, 50402938, 50400998],
+			"kids": [50400887, 50401093, 50403394, 50400910],
 			"type": "story",
 			"score": 158,
 			"title": "RealPage rent-pricing case wraps with nearly $360M to renters",
@@ -373,7 +373,7 @@
 			"id": 50397429,
 			"by": "theanomaly",
 			"time": 1793994531,
-			"kids": [50397921, 50402239, 50399491, 50405488, 50398951, 50403943],
+			"kids": [50397921, 50402239, 50399491, 50405488],
 			"type": "story",
 			"score": 535,
 			"title": "A Jev that can ask Opus for help gives Opus accuracy at 4x lower cost",
@@ -405,7 +405,7 @@
 			"id": 50397219,
 			"by": "SerCe",
 			"time": 1793993618,
-			"kids": [50398529, 50397540, 50398007, 50397972, 50398287, 50398382],
+			"kids": [50398529, 50397540, 50398007, 50397972],
 			"type": "story",
 			"score": 265,
 			"title": "Firecracker VM Escape: PwnEscape Part 2",
@@ -416,7 +416,7 @@
 			"id": 50388001,
 			"by": "ChrisArchitect",
 			"time": 1793937628,
-			"kids": [50394856, 50404836, 50393856, 50402766, 50395528, 50389013],
+			"kids": [50394856, 50404836, 50393856, 50402766],
 			"type": "story",
 			"score": 372,
 			"title": "US FAA says it will phase out floppy disks from air traffic control by 2028",
@@ -438,7 +438,7 @@
 			"id": 50356037,
 			"by": "speckx",
 			"time": 1793730447,
-			"kids": [50404388, 50405245, 50404551, 50404319, 50403723, 50403886],
+			"kids": [50404388, 50405245, 50404551, 50404319],
 			"type": "story",
 			"score": 56,
 			"title": "ToothPaste",
@@ -479,7 +479,7 @@
 			"id": 50403097,
 			"by": "infwhispers",
 			"time": 1794044763,
-			"kids": [50403714, 50404620, 50403522, 50403752, 50403610, 50405708],
+			"kids": [50403714, 50404620, 50403522, 50403752],
 			"type": "story",
 			"score": 362,
 			"title": "Every Mac comes with an (undocumented) family member classifier",
@@ -490,7 +490,7 @@
 			"id": 50403052,
 			"by": "fluxusars",
 			"time": 1794044196,
-			"kids": [50405767, 50404449, 50404555, 50405761, 50404031, 50404519],
+			"kids": [50405767, 50404449, 50404555, 50405761],
 			"type": "story",
 			"score": 414,
 			"title": "Need for Speed Underground 2 online in the browser",
@@ -531,7 +531,7 @@
 			"id": 50391456,
 			"by": "PLenz",
 			"time": 1793967231,
-			"kids": [50394025, 50393307, 50394656, 50396106, 50394319, 50398454],
+			"kids": [50394025, 50393307, 50394656, 50396106],
 			"type": "story",
 			"score": 1095,
 			"title": "Tesla to wind down Cybertruck production",
@@ -572,7 +572,7 @@
 			"id": 50404908,
 			"by": "internet2000",
 			"time": 1794062196,
-			"kids": [50405434, 50405665, 50405357],
+			"kids": [50405434, 50405665],
 			"type": "comment",
 			"parent": 50404599,
 			"text": "The Raspberry Pi Zero sold for $5 before the foundation sold out."
@@ -603,37 +603,12 @@
 			"text": "One could buy an old router or Android device for media playback on a TV for less. So the main attraction here is not that it&#x27;s cheap, but that it&#x27;s small and has convenient GPIO."
 		},
 		{
-			"id": 50405659,
-			"by": "ajju",
-			"time": 1794067384,
-			"type": "comment",
-			"parent": 50404599,
-			"text": "Also liked your “Nature abhors unused RAM” piece.<p><a href=\"https:&#x2F;&#x2F;thelittleengineerthatcould.blogspot.com&#x2F;2019&#x2F;10&#x2F;horror-vacui.html?m=1\" rel=\"nofollow\">https:&#x2F;&#x2F;thelittleengineerthatcould.blogspot.com&#x2F;2019&#x2F;10&#x2F;horr...</a><p>Sam Altman is just catching on ;)"
-		},
-		{
-			"id": 50404967,
-			"by": "amelius",
-			"time": 1794062565,
-			"kids": [50405656],
-			"type": "comment",
-			"parent": 50404599,
-			"text": "I want this but in credit-card form factor, with a screen built in."
-		},
-		{
 			"id": 50405336,
 			"by": "doublepg23",
 			"time": 1794065081,
 			"type": "comment",
 			"parent": 50405118,
 			"text": "My friend has gotten full Linux on a number of weird RISC-V boards. <a href=\"https:&#x2F;&#x2F;github.com&#x2F;queenkjuul&#x2F;milkv-duo-ubuntu\" rel=\"nofollow\">https:&#x2F;&#x2F;github.com&#x2F;queenkjuul&#x2F;milkv-duo-ubuntu</a>"
-		},
-		{
-			"id": 50405357,
-			"by": "danparsonson",
-			"time": 1794065312,
-			"type": "comment",
-			"parent": 50404908,
-			"text": "To be fair to them that was over ten years ago, and prices of everything have risen significantly in that time."
 		},
 		{
 			"id": 50405434,
@@ -650,14 +625,6 @@
 			"type": "comment",
 			"parent": 50404908,
 			"text": "Zero at $5 was never profitable. I think it was reported that they consulted Eric Schmidt and followed his advice to sell the core hardware at loss and recoup from accessories and bundle sales, which didn&#x27;t suit their business, but did it anyway. This was why it was limited to 1 per customer and also because Pi Zero and Pico models have a more overpriced&#x2F;appropriately-priced &quot;WH&quot; variants with no purchase limits."
-		},
-		{
-			"id": 50405656,
-			"by": "kQq9oHeAz6wLLS",
-			"time": 1794067360,
-			"type": "comment",
-			"parent": 50404967,
-			"text": "Like a Linux phone?"
 		},
 		{
 			"id": 50404555,
@@ -680,7 +647,7 @@
 			"id": 50404449,
 			"by": "macNchz",
 			"time": 1794058745,
-			"kids": [50405153, 50404604, 50405210],
+			"kids": [50405153, 50404604],
 			"type": "comment",
 			"parent": 50403052,
 			"text": "I played this when it was new, taking turns at the keyboard of my friend’s gaming PC. Kind of wild to revisit on my phone today and have it work perfectly.<p>I wish the circumstances around abandonware games weren’t so tenuous, there’s so much great stuff out there and reverse engineering with AI unlocks all sorts of cool possibilities. The multiplayer features here have me thinking about other old games that could be brought online and how fun it could be. SimCity 2000 where all the neighboring cities are real and operated by other players…"
@@ -692,32 +659,6 @@
 			"type": "comment",
 			"parent": 50403052,
 			"text": "That was rather fun in online mode!"
-		},
-		{
-			"id": 50404519,
-			"by": "donatj",
-			"time": 1794059443,
-			"kids": [50404731, 50404950, 50404618],
-			"type": "comment",
-			"parent": 50403052,
-			"text": "Something about the like soft almost dream like lighting of this era of games just feels so much more comforting and inviting than todays hyper realistic graphics."
-		},
-		{
-			"id": 50404031,
-			"by": "rustyhancock",
-			"time": 1794055029,
-			"kids": [50404991, 50404099],
-			"type": "comment",
-			"parent": 50403052,
-			"text": "Huge fan of bringing back older games and updating.<p>But I think it&#x27;s highly dubious to accept let alone solicit donations for copyrighted content."
-		},
-		{
-			"id": 50405210,
-			"by": "iugtmkbdfil834",
-			"time": 1794064242,
-			"type": "comment",
-			"parent": 50404449,
-			"text": "I just saw a game on itch with psx LDS &#x27;reimagining&#x27;. Gonna be fun times."
 		},
 		{
 			"id": 50404604,
@@ -736,22 +677,6 @@
 			"text": "I recall playing the demo level on an Elonex laptop that my brother had for work and we played it repeatedly. When SE came out with the 3DFX support, we were absolutely amazed at the fog and water effects in game.<p>I remember the music being very good, and was sad to learn of the death of the guy who did it at EA a few years back. The menu music was amazing.<p>Edit: Seems I can&#x27;t read! I thought this was NFS2 not NFSUG2! I still have my CDs for both! I am old."
 		},
 		{
-			"id": 50404950,
-			"by": "Jtarii",
-			"time": 1794062457,
-			"type": "comment",
-			"parent": 50404519,
-			"text": "Art is born out of limitations, if you only have a PS2 to work with you have to get creative to make it look good. Now you can just dump whatever you want into the game."
-		},
-		{
-			"id": 50404731,
-			"by": "threetonesun",
-			"time": 1794060967,
-			"type": "comment",
-			"parent": 50404519,
-			"text": "I&#x27;ve often felt this most with the Grand Theft Auto games, there was a level of visual abstraction in the III series that IV and V lost and trying to take in the world moving around you is too much."
-		},
-		{
 			"id": 50405286,
 			"by": "AndriyKunitsyn",
 			"time": 1794064738,
@@ -760,36 +685,12 @@
 			"text": "&gt;But NFSU2 is abandonware that isn&#x27;t available anymore so I hope they just leave it alone.<p>There is a concept in US law: a trademark can be considered abandoned if the owner does not want to get into legal fights over its use. I am not a lawyer, but I guess something like this can be said about NFS trademark and the game&#x27;s copyright in general - even if EA doesn&#x27;t want to fight over this, they should, otherwise they risk losing&#x2F;diminishing the value of IP. For a company which has IP as its main asset, it&#x27;d be bad."
 		},
 		{
-			"id": 50404991,
-			"by": "rvz",
-			"time": 1794062764,
-			"type": "comment",
-			"parent": 50404031,
-			"text": "&gt; Huge fan of bringing back older games and updating.<p>Just because <i>this game</i> is old, does not mean they (nfsu2 [dot] xyz) own the rights to redistributing it which is what they are doing. Both the copyright for this game and the company is still live.<p>Even asking for donations is going to get them into trouble as well as inviting the rights holders to contact them directly.<p>So I don&#x27;t think this site will survive for long. EA&#x27;s lawyers have access to insurmountable funds which make this cat-and-mouse game disadvantageous to projects like this who are even showing the intention of asking for some form of financial contribution of support (money through donations)."
-		},
-		{
 			"id": 50405109,
 			"by": "herodoturtle",
 			"time": 1794063513,
 			"type": "comment",
 			"parent": 50404555,
 			"text": "When you go to enable &quot;Unsafe WebGPU Support&quot; it says the following:<p>&quot;Convenience flag for WebGPU development. Enables best-effort WebGPU support on unsupported configurations and more! Note that this flag could expose security issues to websites so only use it for your own development.&quot;<p>Can someone who knows about this stuff please guide us in terms of what sort of security risk we would would be exposing ourselves to?<p>Thanks."
-		},
-		{
-			"id": 50404099,
-			"by": "m00dy",
-			"time": 1794055682,
-			"type": "comment",
-			"parent": 50404031,
-			"text": "Multiplayer works, great job!"
-		},
-		{
-			"id": 50404618,
-			"by": "cite_please",
-			"time": 1794060154,
-			"type": "comment",
-			"parent": 50404519,
-			"text": "Having game designers rather than film school hacks might have something to do with it."
 		},
 		{
 			"id": 50402685,
@@ -803,7 +704,7 @@
 			"id": 50401480,
 			"by": "jdorfman",
 			"time": 1794023747,
-			"kids": [50402341, 50401883, 50403331],
+			"kids": [50402341, 50401883],
 			"type": "comment",
 			"parent": 50399933,
 			"text": "&gt; “And a whole wave of new terminals and &quot;agentic&quot; coding tools, such as herdr and cmux, have been built on it rather than writing yet another emulator.”<p>Mitchell could have easily snuck his competing product Rex in there but resisted. Respect."
@@ -827,24 +728,6 @@
 			"text": "I&#x27;m currently working on my own Zig project (an interpreter) and right now I&#x27;m working on designing a C interface for it. Seeing things mentioned like having objects as opaque handles, or enum-keyed getters and setters, made me think about how clunky my current API is, since I leak too many details to callers.<p>What really caught my attention was this: &quot;So from the start, I took inspiration from C libraries I enjoyed working with and designed the API to have a strong, stable ABI that allows for future additions.&quot; What are good examples of this? I feel like I just don&#x27;t have enough experience with well-designed C libraries to know what to look for."
 		},
 		{
-			"id": 50401356,
-			"by": "spudlyo",
-			"time": 1794022062,
-			"kids": [50402380],
-			"type": "comment",
-			"parent": 50399933,
-			"text": "One area where Ghostty really shines is with fancy TUI programs like the pi agent. Pi has a relatively recent tuiMode &quot;fullscreen&quot; feature, and it&#x27;s been exceptional. Showing inline images with the Kitty graphics protocol has been a huge improvement too -- I love it when a model calls `read` on an image file and I get to see the results in my terminal. The OSC-8 hyperlink support very handy too. Viewport scrolling is super fast, and pi can hide&#x2F;show the scrollbar as you need it."
-		},
-		{
-			"id": 50401342,
-			"by": "ximm",
-			"time": 1794021920,
-			"kids": [50403558],
-			"type": "comment",
-			"parent": 50399933,
-			"text": "&gt; Every bug any libghostty-vt embedder reports makes everyone else in the ecosystem better. Every feature we ship in libghostty-vt becomes available to everyone quickly and safely. Terminals can move faster with less fragmentation.<p>Can anyone give a comparison to libvte? There are many terminals that are just thin wrapper around that (gnome-terminal, xfce4-terminal, mate-terminal, lxterminal, sakura, …). It is tied to GTK, so it has a much narrower scope. But still it feels related in spirit."
-		},
-		{
 			"id": 50401883,
 			"by": "ksh09",
 			"time": 1794028960,
@@ -861,14 +744,6 @@
 			"text": "I like Rex and have started using it and its replacing Ghostty for me. This has made me a bit confused: is the intent for Rex to replace Ghostty? not sure when I would use one vs the other yet"
 		},
 		{
-			"id": 50403558,
-			"by": "pekim",
-			"time": 1794050474,
-			"type": "comment",
-			"parent": 50401342,
-			"text": "libghostty provides terminal emulation, without any UI. An application embedding it will need to provide the UI.<p>libvte provides terminal emulation complete with a gtk UI.<p>In terms of terminal emulation, libghostty implements several protocols that libvte does not. For example kitty keyboard, kitty graphics, and desktop notification."
-		},
-		{
 			"id": 50400541,
 			"by": "shoobiedoo",
 			"time": 1794012831,
@@ -877,28 +752,12 @@
 			"text": "Indeed it is. It feels like libghostty was only announced yesterday and already there are things like ghostel for emacs that are imo far above and beyond the other emacs terminal options."
 		},
 		{
-			"id": 50403331,
-			"by": "mijoharas",
-			"time": 1794047972,
-			"type": "comment",
-			"parent": 50401480,
-			"text": "I had a look to see how Rex was coming along the other day and it seems there&#x27;s still no Linux beta (though MacOs users have one).<p>I&#x27;m still interested to check it out though none of these things have ever interested me too much so far."
-		},
-		{
 			"id": 50402503,
 			"by": "spacechild1",
 			"time": 1794037236,
 			"type": "comment",
 			"parent": 50401618,
 			"text": "One example that comes to my mind is libopus: <a href=\"https:&#x2F;&#x2F;github.com&#x2F;xiph&#x2F;opus\" rel=\"nofollow\">https:&#x2F;&#x2F;github.com&#x2F;xiph&#x2F;opus</a><p>If you have structs that might need to be extended, you can use &quot;versioned structs&quot;. One popular technique is to include the struct size as the first field. The struct size is set to `offsetof(mystruct, lastmember) + sizeof(lastmember)` and the receiver of the struct can use this to check if a member exists. The ARA API is a good example: <a href=\"https:&#x2F;&#x2F;github.com&#x2F;Celemony&#x2F;ARA_API&#x2F;blob&#x2F;65ec5c43b943a48cb5446f448a0492db6af8534b&#x2F;ARAInterface.h#L510\" rel=\"nofollow\">https:&#x2F;&#x2F;github.com&#x2F;Celemony&#x2F;ARA_API&#x2F;blob&#x2F;65ec5c43b943a48cb54...</a>"
-		},
-		{
-			"id": 50402380,
-			"by": "larodi",
-			"time": 1794035784,
-			"type": "comment",
-			"parent": 50401356,
-			"text": "Though zooming images  is not there yet, is very need feature indeed."
 		},
 		{
 			"id": 50403268,
@@ -912,7 +771,7 @@
 			"id": 50404266,
 			"by": "theturtletalks",
 			"time": 1794056964,
-			"kids": [50404827, 50405710, 50405483],
+			"kids": [50404827, 50405710],
 			"type": "comment",
 			"parent": 50403066,
 			"text": "These law firms all using Harvey don’t know that they are giving Harvey everything they need to integrate vertically and become the Amazon for law. Then you are at their whim for every client. Also, AI doesn’t give you an edge if everyone is using the same cookie cutter solution."
@@ -930,28 +789,10 @@
 			"id": 50405010,
 			"by": "skeeter2020",
 			"time": 1794062881,
-			"kids": [50405519, 50405712, 50405507],
+			"kids": [50405519, 50405712],
 			"type": "comment",
 			"parent": 50403066,
 			"text": "Am I alone in my reaction that I want my lawyer to focus on law-ing, not pretty unique IT? What do I do if something happens to you and another lawyer or paralegal has to step in?"
-		},
-		{
-			"id": 50404694,
-			"by": "Tomte",
-			"time": 1794060710,
-			"kids": [50405035, 50405430, 50404795],
-			"type": "comment",
-			"parent": 50403066,
-			"text": "I‘ve heard it said earlier this year at a legal workshop that not using Microsoft Word in your law firm amounts to malpractice.<p>That was from a well known, respected, and long-time American Open Source lawyer."
-		},
-		{
-			"id": 50404239,
-			"by": "xtiansimon",
-			"time": 1794056801,
-			"kids": [50404652],
-			"type": "comment",
-			"parent": 50403066,
-			"text": "Curious what money software they were using:<p>Invoicing and tracking payments: InvoicePlane<p>Time tracking: Kimai<p>But no ERP? I presume their accountant is doing the books then?"
 		},
 		{
 			"id": 50404353,
@@ -961,14 +802,6 @@
 			"type": "comment",
 			"parent": 50403066,
 			"text": "&gt; Text expansion: espanso<p>Have always loved that text shortcuts work across iOs and MacOs (yay, for integrated walled gardens).<p>Wanted the same thing for Linux and it seems like espanso + rsync(or git) for syncing the shortcuts across devices is the way to go."
-		},
-		{
-			"id": 50405430,
-			"by": "richardfontana",
-			"time": 1794065821,
-			"type": "comment",
-			"parent": 50404694,
-			"text": "This must have been intended as hyperbole. It is true, in some legal practice areas, non-use of Word has been highly impractical or even impossible for a long time, mainly because in the mainstream legal profession generally Word quickly established a chokehold by the late 1990s.<p>Some courts expect Word format. I haven&#x27;t been close to litigation in ages so I don&#x27;t know how common a thing this is, but here&#x27;s an example of an apparent &quot;Word only&quot; federal court: <a href=\"https:&#x2F;&#x2F;www.caed.uscourts.gov&#x2F;caednew&#x2F;index.cfm&#x2F;attorney-info&#x2F;word-format&#x2F;\" rel=\"nofollow\">https:&#x2F;&#x2F;www.caed.uscourts.gov&#x2F;caednew&#x2F;index.cfm&#x2F;attorney-inf...</a> . So sure, in a hypothetical where a lawyer stubbornly refused to use Word in the context of a filing in that court, you can imagine consequences arising to the level of malpractice, but I don&#x27;t think that&#x27;s what they had in mind.<p>A more familiar issue to me (and I&#x27;m guessing what that speaker was thinking of) is that if you&#x27;re negotiating an agreement with some other party, and they are using Word (as they most likely will be), it is going to be highly inconvenient at best to insist on using some alternative tool.<p>Red Hat&#x27;s in house legal team is, er, was not a law firm of course, but ages ago Red Hat attempted to have as many &#x27;back-office&#x27; staff use RHEL as possible, with few exceptions related to what was necessary for regulatory purposes. This extended to Red Hat&#x27;s legal team, which attempted valiantly for a while to use OpenOffice (as was, and I suppose more specifically the RHEL packaging of the go-oo fork in those days) for all document-related purposes, including negotiating agreements with outside parties who were using Word. This proved to be impractical for at least the subset of the legal team that did that sort of work as their daily bread and butter, and eventually they got access to Word on Windows on VMware. Later on, it became possible for Red Hat lawyers to use OS X and Windows with Word, so the issue went away."
 		},
 		{
 			"id": 50404827,
@@ -985,14 +818,6 @@
 			"type": "comment",
 			"parent": 50404266,
 			"text": "<a href=\"https:&#x2F;&#x2F;www.harvey.ai&#x2F;legal&#x2F;harvey-privacy-center\" rel=\"nofollow\">https:&#x2F;&#x2F;www.harvey.ai&#x2F;legal&#x2F;harvey-privacy-center</a><p><i>Does Harvey train AI models on Customer Data and Content<p>We understand and appreciate that Customers trust Harvey with highly confidential information. Harvey does not use Customer Data or Content to train AI models, or to improve our products and services. We also do not access Customer Data or Content except (i) to provide or support the Harvey Service or (ii) to comply with the law or a binding order of a governmental body.</i>"
-		},
-		{
-			"id": 50405483,
-			"by": "alansaber",
-			"time": 1794066213,
-			"type": "comment",
-			"parent": 50404266,
-			"text": "This is funny, but the amlaw100 law firms signing up to enterprise saas have probably thought about their data protection terms, edit: equally, this is the game, and Harvey will undoubtedly be trying to maximise their metadata&#x2F;data capture."
 		},
 		{
 			"id": 50405175,
@@ -1019,30 +844,6 @@
 			"text": "No, but my impression from this website is that he&#x27;s a technology lawyer who enjoys maintaining his own stack, which strikes me as nothing but a plus."
 		},
 		{
-			"id": 50405507,
-			"by": "dghlsakjg",
-			"time": 1794066400,
-			"type": "comment",
-			"parent": 50405010,
-			"text": "I also want my lawyer to focus on lawyering, not dealing with Microsoft contracts, trying to keep confidential data out of copilot, dealing with proprietary formats, etc.<p>At the end of the day, every firm needs some form of IT. Above a certain scale you are hiring IT help to manage it anyway, might as well use free software where you can over MS. It’s not as if managing MS for a large org is particularly easy."
-		},
-		{
-			"id": 50404795,
-			"by": "jrm4",
-			"time": 1794061423,
-			"type": "comment",
-			"parent": 50404694,
-			"text": "Upvoting because it&#x27;s an interesting statement, and also probably wrong?<p>As a techy person with a law degree that doesn&#x27;t really practice any more, the &quot;silos&quot; of what each lawyer thinks is and isn&#x27;t a &quot;must have&quot; is interesting, as well as the huge differences in rates and types of tech adoption; a huge factor here is probably administrative assistants who do a lot of heavy lifting."
-		},
-		{
-			"id": 50405035,
-			"by": "droidjj",
-			"time": 1794063023,
-			"type": "comment",
-			"parent": 50404694,
-			"text": "[I am a US lawyer]<p>It&#x27;s definitely not categorically malpractice to not use Word. Depends entirely on the situation. If a court demands docx and you file an rtf, or you refuse to read a client&#x27;s redlines because they&#x27;re in Word, sure, that could be malpractice.<p>The only proprietary software that I think _might_ be malpractice not to use is a legal research service with a capable citator, like Westlaw or LexisNexis. If you rely on a case that was overruled, you can&#x27;t defend a malpractice suit by saying, &quot;I didn&#x27;t want to pay for the software.&quot;<p>I hear CourtListener (a free legal research tool) is working on a citator--hopefully it&#x27;s competitive with the paid services."
-		},
-		{
 			"id": 50405712,
 			"by": "harvey9",
 			"time": 1794067908,
@@ -1051,18 +852,10 @@
 			"text": "Reading the blog post, he isn&#x27;t doing anything that unusual just using some open source applications that other people can use just as easily."
 		},
 		{
-			"id": 50404652,
-			"by": "balderdash",
-			"time": 1794060426,
-			"type": "comment",
-			"parent": 50404239,
-			"text": "Gnu cash?"
-		},
-		{
 			"id": 50405333,
 			"by": "glum64",
 			"time": 1794065078,
-			"kids": [50405717, 50405703, 50405448],
+			"kids": [50405717, 50405703],
 			"type": "comment",
 			"parent": 50352791,
 			"text": "Well, that &quot;How we identify UK sites&quot; should be &quot;How we define a UK site&quot;.<p>I have a server hosted in UK by a US company, being a resident and a citizen of neither..."
@@ -1084,18 +877,10 @@
 			"text": "What&#x27;s the difference? If the UK wants to archive your website it can do so, it&#x27;s public."
 		},
 		{
-			"id": 50405448,
-			"by": "crtasm",
-			"time": 1794065913,
-			"type": "comment",
-			"parent": 50405333,
-			"text": "There&#x27;s three other signifiers listed besides being hosted in the UK - do any of those apply to your site?"
-		},
-		{
 			"id": 50404620,
 			"by": "elgertam",
 			"time": 1794060159,
-			"kids": [50405694, 50405157, 50404648],
+			"kids": [50405694, 50405157],
 			"type": "comment",
 			"parent": 50403097,
 			"text": "&gt; What if I told you that every Mac since 2022 ships a pair of daemons whose only purpose in life is to build a graph about you and the people around you: who you are, who you know, how those people are related to you and to each other, how you communicate with them, where you go, with whom, what you do and when.<p>I wouldn&#x27;t be surprised at all, given that Photos knows the names and faces of all the loved ones in my life. Not just people, in fact, but the &quot;furry friends.&quot; And Calendar and Reminders knows where I go. And so forth.<p>The feature is genuinely useful. Only thing is it should be opt-in and have guarantees about where&#x2F;how the data is stored, such as encrypted-at-rest. I trust Apple with that more than all other Big Tech combined, but still in a &quot;trust, but verify&quot; way."
@@ -1104,7 +889,7 @@
 			"id": 50403714,
 			"by": "thomascountz",
 			"time": 1794052027,
-			"kids": [50405107, 50405334, 50403768],
+			"kids": [50405107, 50405334],
 			"type": "comment",
 			"parent": 50403097,
 			"text": "At one point in my life, I would&#x27;ve found this data fascinating (if it were opt-in, perhaps)! Now, I find it exhausting.<p>A similar discussion came up recently with Siri Recap[1], where some expressed how useful they thought it was and that, as a party to the conversations it summarizes, there was very little moral or ethical concern. But I have a social concern.<p>If I&#x27;m having a chat with someone, there&#x27;s a milieu constructed around the fact that not everything will be remembered verbatim. There are all sorts of social and contextual cues that can easily get lost if listening gets replaced by flat relentless transcription.<p>With Recaps and this social graph (were it to be productized), the informal fluidity in the way we relate to one another starts to go away, and the expectations that follow from that become artificial and burdensome. In the same way that autocorrect has made typos unacceptable, how could you ever be forgiven for forgetting the name of your colleague&#x27;s new nephew or the Italian village that your neighbor took a spontaneous boat trip to while on vacation last year?<p>[1]: <a href=\"https:&#x2F;&#x2F;news.ycombinator.com&#x2F;item?id=49641401\">https:&#x2F;&#x2F;news.ycombinator.com&#x2F;item?id=49641401</a>"
@@ -1113,7 +898,7 @@
 			"id": 50403522,
 			"by": "infwhispers",
 			"time": 1794050010,
-			"kids": [50403597, 50403890, 50404426],
+			"kids": [50403597, 50403890],
 			"type": "comment",
 			"parent": 50403097,
 			"text": "I am the author of the research. Please, feel free to ask me anything. Also, check out the followup research: <a href=\"https:&#x2F;&#x2F;8rank.ai&#x2F;game&#x2F;apple-intelligence-knowledge-graph-in-the-wrong-hands\" rel=\"nofollow\">https:&#x2F;&#x2F;8rank.ai&#x2F;game&#x2F;apple-intelligence-knowledge-graph-in-...</a>"
@@ -1128,37 +913,12 @@
 			"text": "This is context for local LLMs like Siri so that when you say “Text James and tell him …” it knows which James you mean.<p>Likewise, you could say “Tell my boss I’m not coming in tomorrow” and it would have to know who your boss is.<p>We could get super angry about this, but seeing as it’s fully local and doesn’t leave the device, it really doesn’t seem like a big deal. Is it much different to your car remembering who you call and where you go at what times for navigation purposes?"
 		},
 		{
-			"id": 50403610,
-			"by": "Ungh",
-			"time": 1794051030,
-			"kids": [50403883, 50403726],
-			"type": "comment",
-			"parent": 50403097,
-			"text": "Just spent 30 minutes poking around this. It&#x27;s horrifying. Absolutely horrifying. All the intelligence and Siri stuff is turned off and blocked on my Mac yet it&#x27;s still doing this.<p>Think this might kick me over the fence finally to Debian."
-		},
-		{
-			"id": 50405708,
-			"by": "jwilcoxson",
-			"time": 1794067884,
-			"type": "comment",
-			"parent": 50403097,
-			"text": "Maybe the technical details weren’t available, but I thought that we already knew this was a thing? I was aware that my Mac and iPhone were indexing various sources like this on device for Siri."
-		},
-		{
 			"id": 50405334,
 			"by": "ryandrake",
 			"time": 1794065079,
 			"type": "comment",
 			"parent": 50403714,
 			"text": "I&#x27;ve also become totally exhausted by all these &quot;someone is making your computer do X behind your back&quot; revelations. Whether it&#x27;s the app developer or OS vendor, it doesn&#x27;t really matter. When did PCs stop being the user&#x27;s computer &#x2F; operating on behalf of the user, and instead start operating on behalf of the OS vendor and app developers? Every day there&#x27;s a new case of this."
-		},
-		{
-			"id": 50403726,
-			"by": "apples_oranges",
-			"time": 1794052181,
-			"type": "comment",
-			"parent": 50403610,
-			"text": "The good news is that with AI, nothing stops Linux desktops from looking and feeling like (Former) osx.."
 		},
 		{
 			"id": 50405107,
@@ -1177,36 +937,12 @@
 			"text": "I wonder how they get around GDPR. Normally I&#x27;d expect the EU to dish out a pretty hefty fine for this sort of thing, but something tells me Apple lawyers and penpushers has been busy making sure this passes, even though it&#x27;s technically illegal."
 		},
 		{
-			"id": 50403768,
-			"by": "ctippett",
-			"time": 1794052639,
-			"type": "comment",
-			"parent": 50403714,
-			"text": "I too would&#x27;ve found this fascinating at one point, but my jaded older self now just finds this incredibly creepy, unsettling and not at all surprising."
-		},
-		{
-			"id": 50404648,
-			"by": "ProllyInfamous",
-			"time": 1794060406,
-			"type": "comment",
-			"parent": 50404620,
-			"text": "Great &quot;just a user&quot; feedback!<p>&gt;it should be opt-in<p>And definitely not &quot;cannot even turn this shit off&quot; mode.<p>----<p>I just recently installed Microsoft Office 2011 on my 27&quot; iMac (2009 i5), and it absolutely shocked me that <i>the default &quot;Send User Data to Microsoft&quot;</i> option was `OPT-OUT`, requiring the user to manually click a radio-button to `OPT-IN` to usage data collection.<p>This was in recent living memory. From Microsoft."
-		},
-		{
 			"id": 50403890,
 			"by": "atombender",
 			"time": 1794053828,
 			"type": "comment",
 			"parent": 50403522,
 			"text": "There was a very obvious and unnerving shift in style that happened early in the article where it went from human to LLM. I find such shifts really glaring. Agents, in their current state, simply cannot produce quality prose and are not good enough to write blog posts targeting a human audience.<p>I found the topic fascinating, but eventually I started skimming and then gave up on it."
-		},
-		{
-			"id": 50403883,
-			"by": "ProllyInfamous",
-			"time": 1794053774,
-			"type": "comment",
-			"parent": 50403610,
-			"text": "&gt;All the intelligence and Siri stuff is turned off and blocked on my Mac yet it&#x27;s still doing this.<p>Wait until you discover that macOS <i>entirely ignores your manually-input DNS settings</i>, before every bootup, <i>to reach out to security.apple.com</i>.<p>Have a network-wide PiHole (allegedly) blocking the entire *.apple.com domain? No you don&#x27;t, (at least) not at bootup, because APPLE DOES NOT RESPECT YOUR PRIVACY and will use any network-discoverable DNS (instead of your configured Network Settings) to [attempt a] phone-home.<p>----<p>I finally made the full switch to Linux earlier this year. Been a (primarily) Apple user since 1992."
 		},
 		{
 			"id": 50405694,
@@ -1233,14 +969,6 @@
 			"text": "Please stop using AI to author your articles. It was really hard to read it despite how interesting the topic was. I dropped halfway because it was just too annoying."
 		},
 		{
-			"id": 50404426,
-			"by": "jdiff",
-			"time": 1794058497,
-			"type": "comment",
-			"parent": 50403522,
-			"text": "It says there&#x27;s 137 live&#x2F;certain facts in my graph. I can see where they&#x27;re sourced from&#x2F;a statistical breakdown of type&#x2F;the number of unique confidence values&#x2F;how many citations they&#x27;re using&#x2F;how many ingests contributed no facts. Am I missing where I can see what the actual facts are?<p>A lot of these statistics aren&#x27;t very useful for mining insights from the graph, from a technical standpoint of how the graph works or from a personal standpoint  of how the graph is interacting with my personal data."
-		},
-		{
 			"id": 50404189,
 			"by": "ProllyInfamous",
 			"time": 1794056367,
@@ -1252,7 +980,7 @@
 			"id": 50394025,
 			"by": "brightball",
 			"time": 1793980779,
-			"kids": [50395730, 50395046, 50394477],
+			"kids": [50395730, 50395046],
 			"type": "comment",
 			"parent": 50391456,
 			"text": "After Helene knocked out power in parts of my area for a little over 14 days, I found out that a friend of ours used his cybertruck to power his house through the entire mess. He&#x27;d run the house on it for a couple of days, then drive the cybertruck over to a super charger station, recharge, then come home and plug the house back in.<p>The battery capacity on those things is equivalent to 9 Tesla Powerwall units or something close to it.<p>They may be ugly, but the emergency prepper in me always wanted one after hearing that story. Before, I always wanted to install powerwalls...but I never considered in an extended event being able to drive my powerwalls somewhere to recharge them."
@@ -1261,7 +989,7 @@
 			"id": 50393307,
 			"by": "paxy",
 			"time": 1793978003,
-			"kids": [50393715, 50393670, 50393412],
+			"kids": [50393715, 50393670],
 			"type": "comment",
 			"parent": 50391456,
 			"text": "- Federal EV tax credits are over.<p>- The emissions credit market (where Tesla made most of its money) is dead due to lowered standards.<p>- Manufacturing costs haven&#x27;t come down.<p>- EV sales share in the US is down to 6% (and falling every quarter).<p>- Chinese EVs are dominating every market outside the US.<p>- All the overhyped moonshots (sub-$30K car, unsupervised autopilot, autonomous robots) are nowhere to be seen.<p>It&#x27;s hard to see where Tesla goes from here as a company. The stock is still surviving on Elon hype but has been stagnant for 5 years. The day he gets bored and decides to resign to focus on SpaceX full time the company is basically done."
@@ -1270,7 +998,7 @@
 			"id": 50394656,
 			"by": "conductr",
 			"time": 1793983012,
-			"kids": [50395071, 50394705, 50398124],
+			"kids": [50395071, 50394705],
 			"type": "comment",
 			"parent": 50391456,
 			"text": "From my perspective, owning a truck and SUV and using them differently for various use cases, the cybertruck is neither. So even if I ignore everything else I feel about it’s aesthetic, Musk, politics, etc. It simply does not serve many real world needs that I have. It put itself in a very narrow box of, only people that really like this quirky design and also like&#x2F;feel indifferent to the tangential stuff will want to buy this truck. Oh, also you have to be able to afford it too. This is such a small addressable market for a vehicle to target. Was never going to work.<p>However, it provided content and distraction and kept the stock high longer than it should have and I feel like that’s what Musk continues to excel at."
@@ -1279,28 +1007,10 @@
 			"id": 50396106,
 			"by": "crawshaw",
 			"time": 1793989001,
-			"kids": [50396338, 50396744, 50404469],
+			"kids": [50396338, 50396744],
 			"type": "comment",
 			"parent": 50391456,
 			"text": "There are a lot of lenses through which to view the failure of the cybertruck: aesthetics, not enough truck not enough SUV, size, association of aesthetics with politics, etc. But I think the main one that is ignored is price.<p>The cybertruck was built in an era of high truck prices driven by zero interest rates. It bet on the price of trucks going up, just as the Ford F150 electric did. That was the wrong bet.<p>If it was a $40,000 truck, it would have a much bigger market despite all the other explanations of its failure. The market moved under it."
-		},
-		{
-			"id": 50394319,
-			"by": "gnarcoregrizz",
-			"time": 1793981795,
-			"kids": [50402896, 50395094, 50397446],
-			"type": "comment",
-			"parent": 50391456,
-			"text": "The absurdity is the best part of it. Finally it was something new, in a landscape where every car and truck has looked the same for the past 20 years. I&#x27;m happy someone designed and built something so crazy and different.<p>It probably would have been better had they not been mass produced, and maybe did a very limited quantity run - make it more like a collector item... I suppose thats what it&#x27;ll be now. I see quite a few on the road, it takes away from the uniqueness."
-		},
-		{
-			"id": 50398454,
-			"by": "kraig911",
-			"time": 1793998804,
-			"kids": [50401003, 50399574, 50399138],
-			"type": "comment",
-			"parent": 50391456,
-			"text": "Full disclosure: I work for a competitor to Tesla so I&#x27;m a bit biased.<p>The Cybertruck I thought was initially kind of neat but when you try to use one as a truck you quickly can see some glaring problems that most people who buy a truck want. Towing with an EV is terrible. I&#x27;ve heard there&#x27;s power stations with pull throughs but havent&#x27; seen them personally. The truck bed isn&#x27;t practical for anything but a lawn mower. When I ride in one it rides like a car. It doesn&#x27;t look good dirty. I just think they were going for warthog from Halo and thought the rest would work out. It&#x27;s also super expensive for all these issues. It&#x27;s a hobby vehicle. A toy.<p>I think Tesla is struggling personally. The marketing tactics of showcasing cars we&#x27;ll never be able to buy just to cause a scene. Don&#x27;t get me wrong the new Roadster my jaw dropped and I agree with Elon now that SpaceX and Tesla are the &#x27;same&#x27; company I think it&#x27;s great but let&#x27;s be realistic. Most people want cars that are cheap, dependable and sort of cool. Not everyone can afford multiple cars, and a corvette that isn&#x27;t feasible. Like I said I work for a competitor (GM) and I fear China is going to eat our lunch. Unless we make infrastructure for charging better and make it a no brainer."
 		},
 		{
 			"id": 50395730,
@@ -1311,60 +1021,12 @@
 			"text": "This seems like an awfully niche case, no? How often does someone lose power at home for days, while also having a nearby and accessible charging station that stays functional the whole time? Most of the disasters I&#x27;m aware of people either get their power back in a short enough amount of time that they can use a normal generator for the gap, or things are bad and widespread enough that they aren&#x27;t driving down the street to recharge their vehicle."
 		},
 		{
-			"id": 50399138,
-			"by": "reverius42",
-			"time": 1794002841,
-			"type": "comment",
-			"parent": 50398454,
-			"text": "&gt; now that SpaceX and Tesla are the &#x27;same&#x27; company<p>Did I miss something big on the stock market or are these actually still two different public companies? How do the shareholders of both of these (ostensibly different, kind of unrelated) large publicly-held companies feel about them being conflated like this? Is there any historical precedent for this situation?"
-		},
-		{
-			"id": 50401003,
-			"by": "purpleidea",
-			"time": 1794017658,
-			"type": "comment",
-			"parent": 50398454,
-			"text": "I would buy an electric car tomorrow, I have access to cheap charging, and I don&#x27;t even do long commutes. But there is <i>zero</i> chance I want a spyware car that&#x27;s like another cell phone.<p>The U.S. is being protectionist because of Chinese cars that can spy on U.S. soil-- just do the right thing and stop <i>all</i> the car spying nonsense. Require manufacturers to open the code and let us even develop alternatives.<p>Tell GM."
-		},
-		{
-			"id": 50397446,
-			"by": "bagacrap",
-			"time": 1793994600,
-			"type": "comment",
-			"parent": 50394319,
-			"text": "The Oscar Meyer weiner truck is also unique"
-		},
-		{
-			"id": 50399574,
-			"by": "bashtoni",
-			"time": 1794005508,
-			"type": "comment",
-			"parent": 50398454,
-			"text": "Here in Australia, it&#x27;s interesting how well the Tesla cars are still selling.<p>The model Y is still the best selling EV despite the wide choice of other brands. BYD out sell them in aggregate, but Tesla are holding their own pretty well. Of course, all the Tesla cars here are made in the Shanghai Gigafactory, but still, I don&#x27;t think Chinese brand dominance is a forgone conclusion. I think the real danger is if American protectionism makes Tesla feel like they don&#x27;t need to innovate any more."
-		},
-		{
 			"id": 50395046,
 			"by": "spaceywilly",
 			"time": 1793984630,
 			"type": "comment",
 			"parent": 50394025,
 			"text": "Another way to view this is that driving a cybertruck every day is quite wasteful (no different than driving a full size gas pickup every day). One recharge cycle in a cybertruck uses enough energy to power a typical home for 8 days, 130kWh. If you aren’t doing truck things with it, it’s better to drive a more efficient EV or hybrid car. It uses almost twice as much Wh per mile compared to a model Y.<p>I think this is why these EV trucks don’t do well (ford also cancelled the F150 lightning). For truck things, they aren’t particularly capable (you’d get less than 100 miles towing). For daily driving duty, a car or small suv is much more efficient. You can power your home during a storm from most EVs these days, you’d just have to top it up more often"
-		},
-		{
-			"id": 50398124,
-			"by": "ponector",
-			"time": 1793997363,
-			"type": "comment",
-			"parent": 50394656,
-			"text": "Van like Fiat Ducato is superior to american pickups: more volume, more payload great fuel economy for half the price of f150."
-		},
-		{
-			"id": 50394477,
-			"by": "lrobinovitch",
-			"time": 1793982356,
-			"type": "comment",
-			"parent": 50394025,
-			"text": "This is now a feature of most new Tesla vehicles:<p><a href=\"https:&#x2F;&#x2F;www.tesla.com&#x2F;powershare&#x2F;#vehicles\" rel=\"nofollow\">https:&#x2F;&#x2F;www.tesla.com&#x2F;powershare&#x2F;#vehicles</a><p>&gt; Powershare allows you to draw power directly from your compatible Tesla vehicle to power your devices, your home or the grid.<p>&gt; Powershare is currently available for all Cybertruck vehicles, and all new Model 3 and Model Y2 vehicles ordered on October 1, 2026 or later.<p>&gt; To verify if your vehicle has Powershare, navigate to ‘Software’ &gt; ‘Additional Vehicle Info’ &gt; ‘Powershare Support: Enabled’ on your vehicle touchscreen."
 		},
 		{
 			"id": 50393715,
@@ -1381,14 +1043,6 @@
 			"type": "comment",
 			"parent": 50393307,
 			"text": "&gt; - Chinese EVs are dominating every market outside the US.<p>Not so in Europe, where the top 10 EVs sold in 2025 [1] has not a single Chinese car.<p>[1] <a href=\"https:&#x2F;&#x2F;autorai.nl&#x2F;tesla-van-de-troon-gestoten-als-populairste-ev-merk-in-europa-in-2025&#x2F;\" rel=\"nofollow\">https:&#x2F;&#x2F;autorai.nl&#x2F;tesla-van-de-troon-gestoten-als-populairs...</a>"
-		},
-		{
-			"id": 50393412,
-			"by": "pjc50",
-			"time": 1793978480,
-			"type": "comment",
-			"parent": 50393307,
-			"text": "I think they have a future as a &quot;normal&quot; car company, but in order to do that they&#x27;d have to manage to deliver a new &quot;normal car&quot; model at some point, and accept normal stock prices.<p>That EV market share direction in the US, though .. really bad compared to non-petrostates (except Norway)"
 		},
 		{
 			"id": 50395071,
@@ -1421,30 +1075,6 @@
 			"type": "comment",
 			"parent": 50396106,
 			"text": "I think another big one was the time from announcement to release.<p>When it was announced, for those who wanted an electric truck, it was going to be the only game in town. By the time Tesla delivered, there were several options already on the road from various companies. The people who really wanted an electric truck were already happy customers of another company by the time the cybertruck shipped. I see a fair number of Rivian, F-150 Lightning, and Hummer EVs around me.<p>When it comes to price, I expect to see a lot of Slate trucks once it starts shipping, with its low price."
-		},
-		{
-			"id": 50402896,
-			"by": "ZuLuuuuuu",
-			"time": 1794042267,
-			"type": "comment",
-			"parent": 50394319,
-			"text": "Tesla&#x27;s mission was never to built &quot;something crazy and different&quot;. In fact it was kind of the opposite: when Model S came out, Tesla showed the world that EVs don&#x27;t need to look or drive differently than traditional cars, because all EVs which came before Model S were either looked like a concept car or a small toy-like car. Tesla continued this success with Model 3 and Model Y. Then they started deviating from their mission and came up with Cybertruck. All they needed to do was to show the world that an EV truck can be just as practical and capable as a gasoline truck. They didn&#x27;t need to go crazy with the design, make it bullet-proof, choose stainless steel which made the manufacturing harder... They shot themselves in the foot."
-		},
-		{
-			"id": 50395094,
-			"by": "dvogel",
-			"time": 1793984830,
-			"type": "comment",
-			"parent": 50394319,
-			"text": "I find the auto market stale as well. However the CT could have been so much better if it sought to answer that demand with a positive vision rather being a reactionary revolt. Somehow a food critic has given the best critique that I&#x27;ve seen: <a href=\"https:&#x2F;&#x2F;www.youtube.com&#x2F;watch?v=NEcZSM6xS80\" rel=\"nofollow\">https:&#x2F;&#x2F;www.youtube.com&#x2F;watch?v=NEcZSM6xS80</a>"
-		},
-		{
-			"id": 50404469,
-			"by": "tim333",
-			"time": 1794059021,
-			"type": "comment",
-			"parent": 50396106,
-			"text": "Yeah, when they said $40k I thought I might get one. $100k, no, not me."
 		},
 		{
 			"id": 50404701,
@@ -1508,7 +1138,7 @@
 			"id": 50404615,
 			"by": "cube00",
 			"time": 1794060152,
-			"kids": [50405750, 50404919, 50405208],
+			"kids": [50405750, 50404919],
 			"type": "comment",
 			"parent": 50361417,
 			"text": "&gt; The workflow on election night, from my couch: edit some JSON, VPN into the NBC network, SSH into the server, git pull from master, pm2 restart all, text the producer that it&#x27;s updated — then watch my change go out on air a few minutes later through Hulu. Doing that live in an emergency and seeing it on television minutes later is a pretty cool feeling.<p>Less &quot;cool&quot; and more asking for trouble if you make one misplaced comma, quote, or curly brace. The entire apps crashes and shows nothing to the broadcast audience or worse an error screen they&#x27;ll screencap and meme."
@@ -1536,22 +1166,6 @@
 			"type": "comment",
 			"parent": 50404751,
 			"text": "This. I can&#x27;t watch people like Harry Ente, not least because of the pain in watching the delay when they draw or click on something."
-		},
-		{
-			"id": 50405208,
-			"by": "thakoppno",
-			"time": 1794064230,
-			"type": "comment",
-			"parent": 50404615,
-			"text": "That part stood out to me too. However this article was from 2018, not last week it seems to me.<p>We did live debugging like this at the time, wouldn’t today."
-		},
-		{
-			"id": 50403723,
-			"by": "amelius",
-			"time": 1794052147,
-			"type": "comment",
-			"parent": 50356037,
-			"text": "I could use this to control an android phone I have at home, which is allowed to run a banking app, and which my on-the-go phone that runs GrapheneOS cannot thanks to Google&#x27;s Play Integrity™."
 		},
 		{
 			"id": 50404388,
@@ -1587,29 +1201,12 @@
 			"text": "Here is a shameless plug for my project. It is a esp32 based programmable keyboard (HID) with a web interface and api. It can be directly flashed to the m5stack atom or m5stack cardputer.<p>One stand-out feature it has is an implementation of the Keepass KDBX database standard. The database can be stored on FRAM or SD card and can be unlocked via the web interface. The key is stored in volatile memory.\nThere is a DSL scripting language that can be used to run macros, programs, or functions. With the database unlocked you can send credentials via key-value DSL strings such as the following example:\n{credstore  myusername}\n{TAB}\n{credstore mypassword}\n{ENTER}<p><a href=\"https:&#x2F;&#x2F;github.com&#x2F;akoerner&#x2F;kprox\" rel=\"nofollow\">https:&#x2F;&#x2F;github.com&#x2F;akoerner&#x2F;kprox</a>"
 		},
 		{
-			"id": 50403886,
-			"by": "Hyperlisk",
-			"time": 1794053793,
-			"kids": [50404450],
-			"type": "comment",
-			"parent": 50356037,
-			"text": "Nice work! Hardware password managers are great! While yours does a little more, perhaps, these might also be interesting:<p>Mooltipass: <a href=\"https:&#x2F;&#x2F;www.themooltipass.com&#x2F;\" rel=\"nofollow\">https:&#x2F;&#x2F;www.themooltipass.com&#x2F;</a><p>OnlyKey: <a href=\"https:&#x2F;&#x2F;onlykey.io&#x2F;\" rel=\"nofollow\">https:&#x2F;&#x2F;onlykey.io&#x2F;</a>"
-		},
-		{
 			"id": 50405309,
 			"by": "Markoff",
 			"time": 1794064904,
 			"type": "comment",
 			"parent": 50404388,
 			"text": "Thanks for saving me the click, here I was thinking it will be recipe for DIY toothpaste."
-		},
-		{
-			"id": 50404450,
-			"by": "yuryk_art",
-			"time": 1794058754,
-			"type": "comment",
-			"parent": 50403886,
-			"text": "The closest is actually InputStick: <a href=\"https:&#x2F;&#x2F;www.inputstick.com&#x2F;\" rel=\"nofollow\">https:&#x2F;&#x2F;www.inputstick.com&#x2F;</a>"
 		},
 		{
 			"id": 50405488,
@@ -1621,19 +1218,10 @@
 			"text": "Memdoor author here which is a coding agent that run Jev inside. I believe this is becoming mainstream in any coding agent for routing calls and reduce input sizes. First candidates are edit tools for reading file or jgrep for greping large files folder etc.. The Token saving is mostly on the read side.<p>If we compare coding agents with Jev on vs off we get those numbers (metered with Memdoor):\n- read-heavy tasks (coding questions , logs tail etc..): -63% to -65% input tokens, 40-45% fewer model calls, on GLM 5.3 half the wall time. Reproduced a month apart on two models (DeepSeek V4.1 Flash, GLM 5.3).\n- a file edit: -23%<p>Two things match the post. Calibration is what makes it safe: I apply a decision at confidence &gt;= 0.75 and fail below this threshold or on timeout or on an unknown tool family. The dollar saving scales with the price of the model being saved: on a $0.04&#x2F;M model Jev costs what it saves so on a $0.38&#x2F;M model it&#x27;s negligible but on Claude model for example it can be outstanding.<p>Where it did not help: giving Jev more context about the repo. I found same thing  as the post.<p>If you are interested i have put figures here : <a href=\"https:&#x2F;&#x2F;github.com&#x2F;guregodevo&#x2F;memdoor&#x2F;blob&#x2F;main&#x2F;docs&#x2F;features&#x2F;DECIDE.md\" rel=\"nofollow\">https:&#x2F;&#x2F;github.com&#x2F;guregodevo&#x2F;memdoor&#x2F;blob&#x2F;main&#x2F;docs&#x2F;feature...</a>"
 		},
 		{
-			"id": 50398951,
-			"by": "nico",
-			"time": 1794001637,
-			"kids": [50401352, 50399123],
-			"type": "comment",
-			"parent": 50397429,
-			"text": "This is very cool. But also, it’s a benchmark&#x2F;result for a very specific experiment&#x2F;task:  identity resolution<p>Despite the title, the article is not making claims of, or demonstrating general usage improvements or general coding agent improvements"
-		},
-		{
 			"id": 50397921,
 			"by": "xlayn",
 			"time": 1793996530,
-			"kids": [50398050, 50397941, 50398893],
+			"kids": [50398050, 50397941],
 			"type": "comment",
 			"parent": 50397429,
 			"text": "If you use Qwen3.8 27B to manage, to orchestrate, do do shallow research, and then make it ask claude you will notice that Qwen can get out of Haiku, Sonnet and Opus almost as good answers... I was researching how good the model asnswers where, I can&#x27;t get to work with anything but Fable, but Qwen can get good work from any of them.\nMy theory is that if you make Qwen understand you, Qwen can elaborate as much as needed to get any of those models get good results, because it&#x27;s filling in details.\nSo using Qwen to direct claude also get&#x27;s you amazing results way way cheaper...<p>Update: let me elaborate more, I read the HN entry about the team of 5 Qwens being close to fable quality... so I embarked to add to my harness (<a href=\"https:&#x2F;&#x2F;github.com&#x2F;alainnothere&#x2F;privibe\" rel=\"nofollow\">https:&#x2F;&#x2F;github.com&#x2F;alainnothere&#x2F;privibe</a> because we all have one right?) and once I had added the orchestrate tool I had to now measure somehow it it&#x27;s able to improve quality, so I claude and then Qwen to run a experiment to call my harness passing the model to use and ask them to do something, 3 rounds I think and see what quality came out of it... and as per the grading... qwen and claude agreed that the quality of the response comming out the harness using the orchestrate was VERY CLOSE, with opus and fable providing more &quot;in my opinion you should&quot; which matches my experience on why they are better.<p>One more update: I can&#x27;t get copilot models to work decently, it may be my way of working... but I can get Qwen to follow what I try to do... if Qwen get&#x27;s me he can then fire copilot cli and get amazing results by using copilot... bonus points seems like copilot cli is cheaper with the AIC (cost of the requests) so you can make the copilot subscription longer"
@@ -1642,7 +1230,7 @@
 			"id": 50402239,
 			"by": "vouwfietsman",
 			"time": 1794033903,
-			"kids": [50403106, 50404182, 50402687],
+			"kids": [50403106, 50404182],
 			"type": "comment",
 			"parent": 50397429,
 			"text": "Everyone is discussing the tech, but you do realize that they made <i>mapping data to real people</i> easier using AI? This is essentially AI-assisted privacy violation, 4 times cheaper.<p>People, please <i>try to understand what you are building</i>. Don&#x27;t just build it as asked!"
@@ -1655,15 +1243,6 @@
 			"type": "comment",
 			"parent": 50397429,
 			"text": "Found similar results, but the economics of the models involved have changed so quickly that it becomes so task specific on what the right thing to do was.<p>With an assemblage of models like Jev + Opus or Jev + Qwen, Jev would often do the right thing when deciding to escalate to another model - I was impressed that it would usually make the right call, especially if you gave it good awareness of what the other model capabilities were.  &quot;ESCALATE to opus if you need good vision awareness&quot;.<p>When Haiku 5.5 came out though, for my tasks, the cost differences disappeared almost immediately. Haiku was good enough &#x2F; fast enough for so many things that introducing a decider layer didn&#x27;t offer huge wins. Jev&#x27;s &quot;millisecond&quot; level performance was nice but would get dwarfed by other latencies in my chain ( web browsing ), that it didn&#x27;t make a measurable difference in my tasks."
-		},
-		{
-			"id": 50403943,
-			"by": "andai",
-			"time": 1794054227,
-			"kids": [50405371],
-			"type": "comment",
-			"parent": 50397429,
-			"text": "Let me make sure I&#x27;m getting this: They asked the models for answers but also for confidence score.<p>Jev&#x27;s confidence score was more reliable. Which means that they were able to use Jev despite it having lower accuracy, because of the confidence was below a cut off, they would escalate to an expensive model (Opus)?<p>Whereas Luna, even though it was more accurate than Jev, its confidence was way off, so they couldn&#x27;t reliably know when to fall back?"
 		},
 		{
 			"id": 50402139,
@@ -1698,52 +1277,12 @@
 			"text": "Kind of offtopic, but I was kind of horrified by the rather blasé presentation of massive privacy invasion at scale, too. But there&#x27;s clearly no stopping it technically, it will have to be handled by legislation, and the only hope of that happening is some kind of huge scandal."
 		},
 		{
-			"id": 50398893,
-			"by": "rao-v",
-			"time": 1794001296,
-			"type": "comment",
-			"parent": 50397921,
-			"text": "Oh man I’m been playing with little -&gt; big vs big -&gt; little sub-tasking a bunch.<p>My sense so far is it’s very much about problem domain “taste” and there is no one correct answer (that is token cost efficient).<p>Does the smartest agent need the full flavor of the context of the problem to make real progress (i.e what’s been tried, how you’ve influenced the approach) or does the smartest agent really need a crisp problem definition and context room to really work."
-		},
-		{
-			"id": 50401352,
-			"by": "pkulak",
-			"time": 1794022022,
-			"type": "comment",
-			"parent": 50398951,
-			"text": "Not hard to test. I wired a “judge” into my existing Jev setup and… it works. I was able to trim my prompt down to the basics without “engineering” and have my entire test suite pass. Best I could get before was 1 failure, with an extremely brittle prompt. Like, adding a comma where grammatically appropriate broke 10 more tests."
-		},
-		{
-			"id": 50405371,
-			"by": "saretup",
-			"time": 1794065408,
-			"type": "comment",
-			"parent": 50403943,
-			"text": "It ain&#x27;t what you don&#x27;t know that gets you into trouble. It&#x27;s what you know for sure that just ain&#x27;t so.<p>- Mark Twain"
-		},
-		{
 			"id": 50404182,
 			"by": "bossyTeacher",
 			"time": 1794056339,
 			"type": "comment",
 			"parent": 50402239,
 			"text": "&gt; Everyone is discussing the tech, but you do realize that they made mapping data to real people easier using AI?<p>That&#x27;s Hacker News for you. They have chronic tunnel vision and are unable to look at implications that go beyond the technical. Particular blind spot for techno-social consequences."
-		},
-		{
-			"id": 50402687,
-			"by": "MisterMunchkin",
-			"time": 1794039522,
-			"type": "comment",
-			"parent": 50402239,
-			"text": "You also need that for things like merging paper hospital records when you digitise them."
-		},
-		{
-			"id": 50399123,
-			"by": "theanomaly",
-			"time": 1794002753,
-			"type": "comment",
-			"parent": 50398951,
-			"text": "Agreed, though many kinds of tasks are likely to benefit from this pattern, YMMV."
 		},
 		{
 			"id": 50405595,
@@ -1787,14 +1326,6 @@
 			"text": "There’s no better way to get a lot of testers than to have a Show HN.<p>I’ll confirm - there are cursor bugs on iOS. Both on newlines and autocorrect.<p>I’m personally more forgiving of an LLM “helped” site, if it looks like there was a human in the loop for the process. An LLM has more context about the design goals and architecture than the reader, so if it’s an informative page, I’m not personally bothered.<p>But I’m probably in the minority."
 		},
 		{
-			"id": 50404281,
-			"by": "Luc",
-			"time": 1794057116,
-			"type": "comment",
-			"parent": 50360810,
-			"text": "In case you&#x27;re thinking of going, note the excavated surface of Akrotiri is about 40 times smaller than what&#x27;s visible at Pompeii."
-		},
-		{
 			"id": 50404893,
 			"by": "ughitsaaron",
 			"time": 1794062119,
@@ -1828,29 +1359,12 @@
 			"text": "Everyone goes for the blue domes.<p>The real historic sites can be seen via<p><pre><code>  - taking a boat tour to the dead volcano &quot;Caldera&quot;\n  - visiting the Prehistoric ruins at Akrotiri (south side of the island)\n</code></pre>\nThe weirdest thing about this island is that everything is built on a caldera rim, much higher than sea level. Extremely unusual for an island.<p><a href=\"https:&#x2F;&#x2F;ashishb.net&#x2F;travel&#x2F;greece&#x2F;santorini&#x2F;\" rel=\"nofollow\">https:&#x2F;&#x2F;ashishb.net&#x2F;travel&#x2F;greece&#x2F;santorini&#x2F;</a>"
 		},
 		{
-			"id": 50404898,
-			"by": "Y_Y",
-			"time": 1794062146,
-			"type": "comment",
-			"parent": 50360810,
-			"text": "No relation of the British territory on the south of the island of Cyprus, for anyone else who wondered.<p>As Wikipedia says:<p>&gt; Akrotiri (Greek: Ακρωτήρι, pronounced Greek: [akroˈtiri]) means &quot;cape, promontory&quot;. As a result, many different seaside places bear this name."
-		},
-		{
 			"id": 50402930,
 			"by": "distances",
 			"time": 1794042723,
 			"type": "comment",
 			"parent": 50402856,
 			"text": "&gt; The weirdest thing about this island is that everything is built on a caldera rim, much higher than sea level. Extremely unusual for an island.<p>Most Greek islands have their Chora, the capital village, on a high point of the island. This was for defense reasons against pirates and other potential attackers."
-		},
-		{
-			"id": 50389013,
-			"by": "skissane",
-			"time": 1793947625,
-			"kids": [50394495],
-			"type": "comment",
-			"parent": 50388001,
-			"text": "FAA website on EIDS: <a href=\"https:&#x2F;&#x2F;www.faa.gov&#x2F;air_traffic&#x2F;technology&#x2F;eids\" rel=\"nofollow\">https:&#x2F;&#x2F;www.faa.gov&#x2F;air_traffic&#x2F;technology&#x2F;eids</a><p>Another article with some more details: <a href=\"https:&#x2F;&#x2F;www.pcmag.com&#x2F;news&#x2F;the-faa-is-still-using-floppy-disk-based-systems-but-thats-about-to-change\" rel=\"nofollow\">https:&#x2F;&#x2F;www.pcmag.com&#x2F;news&#x2F;the-faa-is-still-using-floppy-dis...</a><p>I know they are saying IDS-4 is a &quot;1980s&quot; system, but it appears IDS-4 was actually developed in the early 1990s; it uses MS-DOS and 3.5 inch floppies: <a href=\"https:&#x2F;&#x2F;sysatl.com&#x2F;systems-atlanta-inc-awarded-faa-ids4-sustainment-support-contract&#x2F;\" rel=\"nofollow\">https:&#x2F;&#x2F;sysatl.com&#x2F;systems-atlanta-inc-awarded-faa-ids4-sust...</a>"
 		},
 		{
 			"id": 50404836,
@@ -1871,19 +1385,10 @@
 			"text": "Anyone who&#x27;s worked around systems in that category knows that the fact that they&#x27;re replacing floppies is more scary than the fact that they&#x27;re still using floppies.<p>Yes, the system is old and warty, but we know it. It&#x27;s old Jim the warthog."
 		},
 		{
-			"id": 50395528,
-			"by": "driverdan",
-			"time": 1793986560,
-			"kids": [50398658],
-			"type": "comment",
-			"parent": 50388001,
-			"text": "The politically grandstanding is gross. From what I can tell E-IDS has been in development since at least 2020 with a planned rollout starting in 2025.<p>Unfortunately web search has gotten so bad that it&#x27;s hard to find past information about it."
-		},
-		{
 			"id": 50394856,
 			"by": "bargl",
 			"time": 1793983834,
-			"kids": [50396806, 50395501, 50395151],
+			"kids": [50396806, 50395501],
 			"type": "comment",
 			"parent": 50388001,
 			"text": "I worked on modernization in the FAA specifically around digitizing NOTAMs.<p>I would urge you not to consider this modernization from the perspective you may be familiar, as someone who may work on the bleeding edge and sometimes sees a lack of caution from engineers pushing for change.<p>The FAAs safety risk management is built around a rigorous process, but that is also a massive slowdown to reasonable progress.<p>One of the eng I worked with was 80+ years old and just didnt want to retire. He did not understand modern systems at all and the risks we were looking at were not (imo) realistically balanced.<p>I get the idea that the current administration is pushing safety to the side, but there is another risk where safety becomes a blocker to reasonable change.<p>When I left that work (more than 15 years ago) it was clearly a blocker."
@@ -1896,14 +1401,6 @@
 			"type": "comment",
 			"parent": 50388001,
 			"text": "More information needed. Was this a sneakernet? No one thought of replacing with a floppy emulator and SD cards? All of the data can fit into 1.44MB?<p>If the last one is true, devs take note. If FAA can rely on slow, small storage for safety critical applications, you probably can reduce the resource requirements for your app and improve your customers’ experience and extend the life of their hardware."
-		},
-		{
-			"id": 50395151,
-			"by": "inetknght",
-			"time": 1793985022,
-			"type": "comment",
-			"parent": 50394856,
-			"text": "&gt; <i>The FAAs safety risk management is built around a rigorous process, but that is also a massive slowdown to reasonable progress.</i><p>In one role, I worked on writing software for drones.<p>That very rigorous process was very reassurring to me. Reasonable progress was absolutely occurring.<p>&gt; <i>One of the eng I worked with was 80+ years old and just didnt want to retire. He did not understand modern systems at all and the risks we were looking at were not (imo) realistically balanced.</i><p>What kind of risks were you looking at with what kinds of balances, if you&#x27;re able to share?"
 		},
 		{
 			"id": 50405237,
@@ -1946,28 +1443,12 @@
 			"text": "I thought humanity had stopped manufacturing floppy disks.<p>But yes, the dread of the inevitable bug filled replacement for Jim the Warthog is very real."
 		},
 		{
-			"id": 50394495,
-			"by": "lp92",
-			"time": 1793982431,
-			"type": "comment",
-			"parent": 50389013,
-			"text": "Remember, this is the government we&#x27;re talking about. That system was likely being worked on from 1980s to 1990s before itactually went in to implementation phase in 1990s."
-		},
-		{
 			"id": 50396806,
 			"by": "kalcode",
 			"time": 1793991852,
 			"type": "comment",
 			"parent": 50394856,
 			"text": "This isn&#x27;t like COBOL. Floppy disc were never reliable. They should&#x27;ve been phased out a long time ago<p>Magnetic degradation, wear from read&#x2F;write heads, and environmental sensitivity mean disks have a natural expiration date and it&#x27;s not long. And they are also easy to corrupt from all kinds of magnetic sources around us.<p>I get other stuff, even DOS like system. Safety critical software&#x2F;hardware that was battle tested makes sense. Not floppy. Sometime it&#x27;s just bureaucracy."
-		},
-		{
-			"id": 50398658,
-			"by": "joe_the_user",
-			"time": 1793999827,
-			"type": "comment",
-			"parent": 50395528,
-			"text": "Yeah, AI has become the only source of information that once could be gotten with Google. For example, this FAA document: <a href=\"https:&#x2F;&#x2F;www.faa.gov&#x2F;media&#x2F;70881\" rel=\"nofollow\">https:&#x2F;&#x2F;www.faa.gov&#x2F;media&#x2F;70881</a> which I found through chat gpt. When this well is poisoned too, not sure where things are going."
 		},
 		{
 			"id": 50394728,
@@ -1981,7 +1462,7 @@
 			"id": 50400887,
 			"by": "rabidheuristics",
 			"time": 1794016532,
-			"kids": [50401600, 50401877, 50403575],
+			"kids": [50401600, 50401877],
 			"type": "comment",
 			"parent": 50399991,
 			"text": "“None of the companies admitted fault or liability. They did, however, agree to stop providing Realpage with their nonpublic data for use as an input in Realpage’s revenue management system’s price recommendations, and to stop using Realpage’s RMS in ways that use competitors’ non-public data to inform pricing recommendations”.<p>Okay but Realpage has a decade of real pricing data that it can use to continue informing these rental companies and outside of them having extremely hard boundaries in their service this is just going to happen again.<p>This doesn’t do a whole lot to address the actual issue, and these companies aren’t going to stop colluding over a wrist slap like this."
@@ -1990,18 +1471,10 @@
 			"id": 50403394,
 			"by": "Lucasoato",
 			"time": 1794048653,
-			"kids": [50403587, 50405322, 50404390],
+			"kids": [50403587, 50405322],
 			"type": "comment",
 			"parent": 50399991,
 			"text": "What about a law that bans house ownership and rentals unless you are a physical person and not a company? What would be the cons of such a thing?"
-		},
-		{
-			"id": 50402938,
-			"by": "skew-aberration",
-			"time": 1794042831,
-			"type": "comment",
-			"parent": 50399991,
-			"text": "&quot;People of the same trade seldom meet together, even for merriment and diversion, but the conversation ends in a conspiracy against the public, or in some contrivance to raise prices.&quot;<p>Adam Smith, The Wealth of Nations<p>Land ownership is the biggest business and the source of the biggest conspiracies."
 		},
 		{
 			"id": 50400910,
@@ -2016,19 +1489,10 @@
 			"id": 50401093,
 			"by": "epistasis",
 			"time": 1794019043,
-			"kids": [50405310, 50401866, 50401996],
+			"kids": [50405310, 50401866],
 			"type": "comment",
 			"parent": 50399991,
 			"text": "We need a public rental registry of rental prices that anybody can browse, analyze, etc. The information disparity is a problem.<p>However, that&#x27;s not a systematic method for lower prices. It just prevents individual cases of price gouging."
-		},
-		{
-			"id": 50400998,
-			"by": "throwitaway222",
-			"time": 1794017609,
-			"kids": [50404083, 50401620, 50401447],
-			"type": "comment",
-			"parent": 50399991,
-			"text": "I&#x27;ve been saying this for a while, but there is a cottage industry like RealPage in pretty much every industry. These companies need to be slammed out of existence for anti-competitive pricing and collusion. So much corruption. I&#x27;m so sick of fraud and corruption."
 		},
 		{
 			"id": 50401600,
@@ -2063,14 +1527,6 @@
 			"text": "The fact that the number of houses owned by large corporations is so low as to be insignificant shows that it’s basically 0% of the cause. (I’m assuming you’re not against a landlord who owns a small number of properties forming an LLC, but mean companies that rent lots of properties.)<p>It is a supply issue caused by local building codes and zoning. Full stop. Everything else is just pretending to do something about the problem, and corporations are just scapegoats."
 		},
 		{
-			"id": 50401996,
-			"by": "hermanubis",
-			"time": 1794030465,
-			"type": "comment",
-			"parent": 50401093,
-			"text": "A growing body of economic research shows that this allows producers to keep prices high even with lots of competition."
-		},
-		{
 			"id": 50401877,
 			"by": "xvedejas",
 			"time": 1794028901,
@@ -2079,52 +1535,12 @@
 			"text": "Is there an actual issue? I&#x27;ve seen compelling arguments that places that banned the practice of algorithmic rent setting did not see any appreciable drop in rents. I&#x27;m almost convinced the problem is entirely supply side."
 		},
 		{
-			"id": 50403575,
-			"by": "consensus1",
-			"time": 1794050725,
-			"type": "comment",
-			"parent": 50400887,
-			"text": "They got a wrist slap because the case was flimsy and probably wouldn&#x27;t stand up in court.  This looks nothing like price fixing and everything like price discovery in an undersupplied market, and the people bringing the case are the same government responsible for the actual problem."
-		},
-		{
-			"id": 50404390,
-			"by": "sokoloff",
-			"time": 1794058119,
-			"type": "comment",
-			"parent": 50403394,
-			"text": "It would dramatically reduce the availability of rental properties. So, if you really hate renters, it’s a good thing I guess.<p>Extremely low chance that I’m going to put my entire net worth on the line to own and rent out housing in my own name.<p>Exactly zero chance that I’ll do it in a multi-family or apartment building.<p>Holding these things in corporate title is sensible risk management and compartmentalization."
-		},
-		{
-			"id": 50404083,
-			"by": "Aboutplants",
-			"time": 1794055517,
-			"type": "comment",
-			"parent": 50400998,
-			"text": "I had a plumber over to quote a HVAC replacement, while he was working up the quote I saw his iPad where his was inputting the equipment for costs etc, then it flipped over to an area that showed my home estimated value, my estimated household income and a ton of other economic measures that gave them sweet spots for their quote. \nWhile I obviously know people do this, to see it so blatantly laid out (it wasn’t meant for my eyes) was very gross.<p>By the way, the home value and income estimates were higher than reality, and his quote was also fairly high - though not the highest"
-		},
-		{
 			"id": 50401066,
 			"by": "georgel",
 			"time": 1794018548,
 			"type": "comment",
 			"parent": 50400910,
 			"text": "I filed my claim, and based on their calculator this might be the most serious check from a class action (assuming I get the full amount). For me its ~1.5k between 3 named landlords."
-		},
-		{
-			"id": 50401620,
-			"by": "crazygringo",
-			"time": 1794025740,
-			"type": "comment",
-			"parent": 50400998,
-			"text": "I really can&#x27;t think of any others. Which is why RealPage has been so newsworthy.<p>If you have examples of such a company in other industries, please share."
-		},
-		{
-			"id": 50401447,
-			"by": "mmooss",
-			"time": 1794023393,
-			"type": "comment",
-			"parent": 50400998,
-			"text": "Could you give us other examples?"
 		},
 		{
 			"id": 50405322,
@@ -2155,18 +1571,10 @@
 			"id": 50402919,
 			"by": "yfontana",
 			"time": 1794042537,
-			"kids": [50404540, 50403335, 50404794],
+			"kids": [50404540, 50403335],
 			"type": "comment",
 			"parent": 50402212,
 			"text": "So far I&#x27;ve turned off automatic memory creation in every harness I&#x27;ve used. Claude Code sometimes creates some anyway, and I probably delete 95% of them. The memories it creates are almost always relevant only to the specific task that it is currently working on. If it&#x27;s a task I&#x27;ll need to do again, then yeah, maybe that&#x27;s useful. But that isn&#x27;t the case most of the time, so I delete them to avoid cluttering context.<p>So the main improvement to memories I&#x27;d like to see is better judgment on which ones to create.<p>The parts about &quot;dreaming&quot; make me think of how agent transcripts contain a ton of information, which I think is currently under-utilized. I&#x27;ll repeat advice I&#x27;ve seen here a few times: ingest your own transcripts into duckdb (claude code will build that pipeline in about 10 minutes) and do some data analysis on them. Some ideas if you don&#x27;t know where to start: look at tool call failures to see if you can prevent common ones, check out if you have large cache misses and what causes them, look at various efficiency metrics over time (tokens per $, lines of code per tokens, etc.) with main thread vs sub-agents, etc. I started with this sort of things, and ended up following some threads to interesting insights. For example, I found indications that I tended to make Opus 5.5 &#x2F; Sol 6.1 divide their work into units that were too small. They have the capacity to work on more stuff at once than older models, and I wasn&#x27;t really taking advantage of that."
-		},
-		{
-			"id": 50404809,
-			"by": "benfortuna",
-			"time": 1794061516,
-			"type": "comment",
-			"parent": 50402212,
-			"text": "Conflict resolution is important, but the thing I think most memory models are missing is provenance. Memories are modified&#x2F;overwritten instead of retained as the source of any resolution.<p>I am exploring an alternative dialectic-based approach: <a href=\"https:&#x2F;&#x2F;particulars.fyi&#x2F;\" rel=\"nofollow\">https:&#x2F;&#x2F;particulars.fyi&#x2F;</a>"
 		},
 		{
 			"id": 50404875,
@@ -2178,37 +1586,12 @@
 			"text": "Interesting article to read but by defining memory as a prediction about future needs they are side stepping the real problem that these models cannot learn continuously i.e. update their weights. Opus 5.5s real memory , experience and knowledge is set in stone no amount of markdown tricks will change that.<p>This is a better research direction I feel<p><a href=\"https:&#x2F;&#x2F;research.google&#x2F;blog&#x2F;the-sleep-framework-a-new-way-for-llms-to-retain-knowledge-in-continual-learning&#x2F;\" rel=\"nofollow\">https:&#x2F;&#x2F;research.google&#x2F;blog&#x2F;the-sleep-framework-a-new-way-f...</a>"
 		},
 		{
-			"id": 50404801,
-			"by": "MASNeo",
-			"time": 1794061447,
-			"kids": [50405691, 50404888],
-			"type": "comment",
-			"parent": 50402212,
-			"text": "Concepts made for humans should not be used for machines unless it’s really the same process. Clearly Claud doesn’t rest and doesn’t balance hormones and other chemicals when it’s not thinking. Just because one element of dreaming relates to information organization, organizing information isn’t dreaming.<p>That’s like saying walking is space flight because both happen to change the location of an individual."
-		},
-		{
 			"id": 50405654,
 			"by": "grey-area",
 			"time": 1794067332,
 			"type": "comment",
 			"parent": 50405503,
 			"text": "The way we store memories is to adjust the weights in our brain (as far as we know). The way models store memories seems to be to write them down on a scratchpad someplace (details vary, but roughly this is what they&#x27;re doing).<p>The article explicitly excludes this from consideration early on though:<p><i>By “agent memory,” we mean knowledge that Claude gains from experience...saved as context it can read later. It excludes other ways models can learn or manage context, such as changes to their weights</i><p>Those seem fundamentally different processes, and adjusting weights does seem a much better idea after all, but then in that world everyone has a different AI and how do you apply updates? For a company like Anthropic this is of course a big problem and that is probably why they don&#x27;t like that route. Could we store weight deltas or something similar and reapply them over a different model?"
-		},
-		{
-			"id": 50404794,
-			"by": "jv22222",
-			"time": 1794061414,
-			"type": "comment",
-			"parent": 50402919,
-			"text": "Yep I turned off memory and then I made this. It interactively suggests what to store when it sees you make headway or solve problems. I found it to be very good but ymmv.<p><a href=\"https:&#x2F;&#x2F;innerloop.works&#x2F;breadcrumb\" rel=\"nofollow\">https:&#x2F;&#x2F;innerloop.works&#x2F;breadcrumb</a>"
-		},
-		{
-			"id": 50405691,
-			"by": "yipinwong",
-			"time": 1794067708,
-			"type": "comment",
-			"parent": 50404801,
-			"text": "I find the term &quot;dreaming&quot; works here for the particular logic they used.<p>Remember, any analogies fail at some point.<p>Say, given your space flight example, astronauts do &quot;space walk&quot; spacecraft to perate.  They are not &quot;walking&quot; but still makes sense."
 		},
 		{
 			"id": 50404540,
@@ -2243,14 +1626,6 @@
 			"text": "Continuously updating weights will never be viable for a company like anthropic that&#x27;s providing cloud inference.<p>So if you&#x27;re hoping for that you should probably just look at the models that can be ran locally... And then you prolly realize that that&#x27;s still several years into the future."
 		},
 		{
-			"id": 50404888,
-			"by": "jazzypants",
-			"time": 1794062102,
-			"type": "comment",
-			"parent": 50404801,
-			"text": "Yes, I agree, and it&#x27;s so exhausting to read articles like this over and over. It&#x27;s clear that either they&#x27;re not actually learning any lessons over at Anthropic or they&#x27;re just so deluded that they&#x27;ll never get this."
-		},
-		{
 			"id": 50397972,
 			"by": "markasoftware",
 			"time": 1793996772,
@@ -2263,7 +1638,7 @@
 			"id": 50398529,
 			"by": "scoodah",
 			"time": 1793999140,
-			"kids": [50398655, 50399992, 50399255],
+			"kids": [50398655, 50399992],
 			"type": "comment",
 			"parent": 50397219,
 			"text": "I really wish they would have expanded on this paragraph in their article further:<p>&gt; The configuration used here had no jailer. Firecracker&#x27;s production containment includes dropping privileges and restricting the process through namespaces and seccomp. A deployment using those controls requires a separate assessment of the privileges and resources available after compromising its VMM.<p>If I&#x27;m understanding all of this correctly, a properly jailed and configured firecracker instance would greatly reduce the blast radius of this escape, and I feel as though it would have been good for them to explain what jailing and dropping privileges would do to help. I&#x27;d hope most production firecracker deployments would be doing this already.<p>Not saying that this is any less severe and the root issue is not specific to Firecracker, but to a flaw in the kernel&#x27;s network code -- they just used an insecure firecracker configuration to demonstrate it. However, I feel like some are taking this as a flaw with firecracker when its not. This is an issue in the kernel networking stack."
@@ -2272,19 +1647,10 @@
 			"id": 50397540,
 			"by": "lrvick",
 			"time": 1793995076,
-			"kids": [50397845, 50398040, 50397653],
+			"kids": [50397845, 50398040],
 			"type": "comment",
 			"parent": 50397219,
 			"text": "I am more convinced by the day that the Nova Microhypervisor approach is correct.<p>Do virtualization with a tiny formally verified microkernel and have complex kernels like Linux run underneath instead of letting a huge, complex, and brittle linux kernel and vm ecosystem control the hypervisor layer.<p><a href=\"https:&#x2F;&#x2F;hypervisor.org&#x2F;\" rel=\"nofollow\">https:&#x2F;&#x2F;hypervisor.org&#x2F;</a>"
-		},
-		{
-			"id": 50398287,
-			"by": "denysvitali",
-			"time": 1793998044,
-			"kids": [50398352],
-			"type": "comment",
-			"parent": 50397219,
-			"text": "Dupe: <a href=\"https:&#x2F;&#x2F;news.ycombinator.com&#x2F;item?id=50381397\">https:&#x2F;&#x2F;news.ycombinator.com&#x2F;item?id=50381397</a><p>(Doesn&#x27;t HN usually deduplicate links? I&#x27;m confused)"
 		},
 		{
 			"id": 50398007,
@@ -2294,15 +1660,6 @@
 			"type": "comment",
 			"parent": 50397219,
 			"text": "I have a demo service that entirely relies on Firecracker VMs: ClickBench playground, <a href=\"https:&#x2F;&#x2F;benchmark.clickhouse.com&#x2F;playground&#x2F;\" rel=\"nofollow\">https:&#x2F;&#x2F;benchmark.clickhouse.com&#x2F;playground&#x2F;</a><p>It hosts hundreds of database engines - many of them have vulnerabilities, and some of them, like Pandas, are basically open RCEs regardless.<p>We can PoC the Firecracker VM Escape on that service."
-		},
-		{
-			"id": 50398382,
-			"by": "clhodapp",
-			"time": 1793998447,
-			"kids": [50401306, 50401130, 50402036],
-			"type": "comment",
-			"parent": 50397219,
-			"text": "I posted a similar query on the Replit sandbox engine article, but..<p>How do people feel about the hardware isolation provided by microVMs versus the stronger end of software isolation techniques like gvisor?<p>Right now, we put a huge amount of stock in &quot;hardware isolation&quot;. If that starts falling to agents to any substantial degree, I wonder whether we might end up leaning more on patchable software isolation, similar to the rise of software RAID (though, in userspace this time)."
 		},
 		{
 			"id": 50398655,
@@ -2319,14 +1676,6 @@
 			"type": "comment",
 			"parent": 50397540,
 			"text": "How is this different from Xen? It&#x27;s the same approach as Xen or Hyper-V where the hypervisor is its own component, then you boot into a virtualized Dom0 or Root Partition (in Xen and Hyper-V terminology respectively) that can manage the hypervisor underneath it.<p>This is different from KVM where your hypervisor runs in your Dom0&#x2F;Root Partition."
-		},
-		{
-			"id": 50399255,
-			"by": "amluto",
-			"time": 1794003517,
-			"type": "comment",
-			"parent": 50398529,
-			"text": "Nope.  The exploit compromises the host kernel.  The researchers built an unconventional exploit chain in which they used the host kernel compromise to compromise the host firecracker userspace code, but I see no fundamental reason they couldn&#x27;t have compromised something else in the host kernel."
 		},
 		{
 			"id": 50399992,
@@ -2369,46 +1718,6 @@
 			"text": "<p><pre><code>  &gt; &quot;run SQL against 110+ databases&quot;\n</code></pre>\nThis is one of the most useful web tools I&#x27;ve ever seen.<p>I work on connectors for datasources (mostly DB&#x27;s. Being able to quickly test things like sorting behavior and how the same function can be emulated across DB&#x27;s would have made my life so much easier."
 		},
 		{
-			"id": 50397653,
-			"by": "traceroute66",
-			"time": 1793995512,
-			"type": "comment",
-			"parent": 50397540,
-			"text": "&gt; the Nova Microhypevisor approach is correct<p>To save people the time:<p><i>&quot;This code is experimental and not feature complete. If it breaks, you get to keep both pieces.&quot;</i>"
-		},
-		{
-			"id": 50401306,
-			"by": "wmf",
-			"time": 1794021564,
-			"type": "comment",
-			"parent": 50398382,
-			"text": "My intuition is that gVisor is never going to be stronger in a fair comparison. Almost all the vulns are in I&#x2F;O code and every type of container&#x2F;VM&#x2F;sandbox has I&#x2F;O."
-		},
-		{
-			"id": 50402036,
-			"by": "Melatonic",
-			"time": 1794030922,
-			"type": "comment",
-			"parent": 50398382,
-			"text": "You mean virtualised hardware ? That&#x27;s still technically software"
-		},
-		{
-			"id": 50401130,
-			"by": "oasisaimlessly",
-			"time": 1794019539,
-			"type": "comment",
-			"parent": 50398382,
-			"text": "FYI, gvisor also uses KVM under the hood; it&#x27;s not completely orthogonal to [micro]VMs."
-		},
-		{
-			"id": 50398352,
-			"by": "tptacek",
-			"time": 1793998335,
-			"type": "comment",
-			"parent": 50398287,
-			"text": "Duplicates are generally accepted when there was no significant discussion on the original submission."
-		},
-		{
 			"id": 50403806,
 			"by": "Plaoo",
 			"time": 1794053009,
@@ -2420,7 +1729,7 @@
 			"id": 50402963,
 			"by": "SurajMishra",
 			"time": 1794043108,
-			"kids": [50404574, 50403547, 50403275],
+			"kids": [50404574, 50403547],
 			"type": "comment",
 			"parent": 50361765,
 			"text": "It looks good but it&#x27;s from 2023 (postgres 14). Does anyone have anything from after 2025?"
@@ -2442,14 +1751,6 @@
 			"text": "They keep publishing Russian version of this book, with the latest covering PostgreSQL 18: <a href=\"https:&#x2F;&#x2F;edu.postgrespro.ru&#x2F;postgresql_internals-18.pdf\" rel=\"nofollow\">https:&#x2F;&#x2F;edu.postgrespro.ru&#x2F;postgresql_internals-18.pdf</a><p>AI should do a decent job translating it to English."
 		},
 		{
-			"id": 50403275,
-			"by": "__s",
-			"time": 1794047254,
-			"type": "comment",
-			"parent": 50402963,
-			"text": "To your point, PG15 has a pretty meaningful change to its base backup protocol<p><a href=\"https:&#x2F;&#x2F;github.com&#x2F;wal-g&#x2F;wal-g&#x2F;issues&#x2F;1385\" rel=\"nofollow\">https:&#x2F;&#x2F;github.com&#x2F;wal-g&#x2F;wal-g&#x2F;issues&#x2F;1385</a>"
-		},
-		{
 			"id": 50404343,
 			"by": "alexpotato",
 			"time": 1794057628,
@@ -2461,7 +1762,7 @@
 			"id": 50402059,
 			"by": "joegibbs",
 			"time": 1794031199,
-			"kids": [50405714, 50402127, 50402774],
+			"kids": [50405714, 50402127],
 			"type": "comment",
 			"parent": 50401740,
 			"text": "Why did people doubt this? It doesn’t sound so ridiculous that a Germanic-speaking people would come from Scandinavia, which has a island called Gothland, a province East Gothland and West Gothland, a city called Gothenburg and people called Geats (probably related to Goths)."
@@ -2482,24 +1783,6 @@
 			"type": "comment",
 			"parent": 50401740,
 			"text": "Swedish Gotlander&#x27;s have been referring to this mythic origin story for centuries. I believe Gustavus Adophus referenced this history to justify blatant Swedish militarism in the 17th century."
-		},
-		{
-			"id": 50402196,
-			"by": "pmontra",
-			"time": 1794033390,
-			"kids": [50405270, 50402412, 50402476],
-			"type": "comment",
-			"parent": 50401740,
-			"text": "&gt; the Spanish for “bandit,” “helmet,” and “truce.”<p>If they are bandido, casco, tregua they are identical to the Italian bandito, casco, tregua. The only difference is a d&#x2F;t. Actually in Italy a cyclist and a worker wear a casco, but a soldier wears an elmetto.<p>I googled the etymology of casco and it comes from Latin but it came to Italy from Spain a few centuries ago. So I wonder what other word for helmet they use in Spain, that originated in the Goth language."
-		},
-		{
-			"id": 50403151,
-			"by": "clauderoux",
-			"time": 1794045635,
-			"kids": [50403508],
-			"type": "comment",
-			"parent": 50401740,
-			"text": "Actually, the most ancient recorded instance of the Goth language is a Bible that was written in what is now Bulgaria around 350: The so-called Bible of Wulfila. So, there is nothing new under the sun about the presence of Goths in the area, bringing their language and culture around."
 		},
 		{
 			"id": 50402890,
@@ -2532,46 +1815,6 @@
 			"type": "comment",
 			"parent": 50402059,
 			"text": "The article says why.  The fall of the Roman empire being increasingly attributed to the migration of foreigners is both topical and problematic to certain ideologies"
-		},
-		{
-			"id": 50402774,
-			"by": "mjw1007",
-			"time": 1794040741,
-			"type": "comment",
-			"parent": 50402059,
-			"text": "When you&#x27;re reading a popular-science story about a new discovery, there are two things to be careful about:<p>- are the claims it&#x27;s making about the discovery right, or exaggerated?<p>- are the claims it&#x27;s making about what people previously believed right, or exaggerated?<p>When I&#x27;m reading about areas that I happen to know something about, I find that there&#x27;s a smallish tendency to exaggerate the first and a large one to exaggerate the second.<p>I think it&#x27;s likely that&#x27;s true in other areas. I get the impression it&#x27;s particularly common for archaeological discoveries for some reason."
-		},
-		{
-			"id": 50405270,
-			"by": "anon84873628",
-			"time": 1794064618,
-			"type": "comment",
-			"parent": 50402196,
-			"text": "I always found this fact about the common Spanish surname Rodríguez to be interesting:<p>&gt;The &quot;ez&quot; signifies &quot;son of&quot;. The name Rodrigo is the Spanish form of the German name Roderich, meaning &quot;rich in fame&quot;, from the Gothic elements &quot;hrod&quot; (fame or glory) and &quot;ric&quot; (rich). It was the name of Roderic, the last Visigothic King before the Muslim conquest, and the subject of many legends. The surname Rodríguez could have originated in the 9th century when patronymic names originated.<p><a href=\"https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Rodr%C3%ADguez_(surname)\" rel=\"nofollow\">https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Rodr%C3%ADguez_(surname)</a><p>The Visigoths directly ruled in Iberia so that&#x27;s an example of the &quot;elite influence&quot; spreading culture and language."
-		},
-		{
-			"id": 50402412,
-			"by": "card_zero",
-			"time": 1794036166,
-			"type": "comment",
-			"parent": 50402196,
-			"text": "&quot;On the peninsula&quot; ... I found <i>elmo,</i> does Galician count? <a href=\"https:&#x2F;&#x2F;en.wiktionary.org&#x2F;wiki&#x2F;elmo#Galician\" rel=\"nofollow\">https:&#x2F;&#x2F;en.wiktionary.org&#x2F;wiki&#x2F;elmo#Galician</a><p>There are plenty of other warlike terms in <a href=\"https:&#x2F;&#x2F;en.wiktionary.org&#x2F;wiki&#x2F;Category:Spanish_terms_derived_from_Gothic\" rel=\"nofollow\">https:&#x2F;&#x2F;en.wiktionary.org&#x2F;wiki&#x2F;Category:Spanish_terms_derive...</a> such as <i>gaita</i> (bagpipes)."
-		},
-		{
-			"id": 50403508,
-			"by": "TFNA",
-			"time": 1794049880,
-			"type": "comment",
-			"parent": 50403151,
-			"text": "Your &quot;Well acktually...&quot; is misplaced, because no one anywhere in the article ever cast doubt on that, but rather the debate was about the Gothic Urheimat and the degree of gene spread versus cultural diffusion."
-		},
-		{
-			"id": 50402476,
-			"by": "fcatalan",
-			"time": 1794036908,
-			"type": "comment",
-			"parent": 50402196,
-			"text": "We have yelmo and almete, but looking up both of them, they seem to be considered later medieval loans.\nEspuela (spur), dardo (dart) and a few other warlike items are often mentioned. And of course guerra (war) itself."
 		}
 	]
 }

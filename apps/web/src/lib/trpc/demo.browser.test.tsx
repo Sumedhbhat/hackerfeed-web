@@ -49,14 +49,14 @@ describe("fixture demo", () => {
 		// The edition is the snapshot's papers, with their authors and keywords.
 		expect(edition.papers).toHaveLength(snapshotPapers.length);
 		const withKeywords = snapshotPapers.find(
-			({ paper }) => paper.keywords.length > 0 && paper.authors.length > 0,
+			(paper) => paper.keywords.length > 0 && paper.authors.length > 0,
 		);
 		if (!withKeywords) throw new Error("snapshot has no paper with keywords");
 		const served = edition.papers.find(
-			(paper) => paper.arxivId === withKeywords.paper.arxivId,
+			(paper) => paper.arxivId === withKeywords.arxivId,
 		);
-		const firstAuthor = withKeywords.paper.authors[0].name;
-		const firstKeyword = withKeywords.paper.keywords[0].keywordOriginal;
+		const firstAuthor = withKeywords.authors[0];
+		const firstKeyword = withKeywords.keywords[0];
 		expect(served?.authors).toContain(firstAuthor);
 		expect(served?.keywords).toContain(firstKeyword);
 		expect(

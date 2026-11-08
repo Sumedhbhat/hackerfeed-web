@@ -11,13 +11,13 @@ export const organizationId = (hfOrganizationId: string) =>
 export const organizationRows: Organization[] = [
 	...new Map(
 		snapshotPapers
-			.map(({ paper }) => paper.organization)
+			.map((paper) => paper.organization)
 			.filter((org) => org !== null)
 			.map((org): [string, Organization] => [
-				org.hfOrganizationId,
+				org.id,
 				{
-					id: organizationId(org.hfOrganizationId),
-					hfOrganizationId: org.hfOrganizationId,
+					id: organizationId(org.id),
+					hfOrganizationId: org.id,
 					name: org.name,
 					fullname: org.fullname,
 					...ingestedTimestamps,

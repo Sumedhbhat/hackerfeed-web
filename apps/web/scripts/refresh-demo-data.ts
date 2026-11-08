@@ -1,8 +1,10 @@
 // Refreshes the demo snapshots in src/demo-data/snapshot/ from the live APIs:
 // the first 20 Hacker News top, new and best stories (with a sample of each
 // top story's comments) and the day's 20 most upvoted Hugging Face papers,
-// normalized exactly as production ingestion does.
+// validated as production ingestion does. Only fields the app shows are kept;
+// the files are then formatted with the repo's Biome settings.
 // Usage: bun run demo-data:refresh
+import { spawnSync } from "node:child_process";
 import { writeFile } from "node:fs/promises";
 import { validateHuggingFaceDailyPapersResponse } from "../../../packages/backend/src/huggingface-papers/schema";
 import type { DemoItem } from "../src/demo-data/hacker-news";
@@ -10,11 +12,14 @@ import type { DemoItem } from "../src/demo-data/hacker-news";
 const HN = "https://hacker-news.firebaseio.com/v0";
 const HF = "https://huggingface.co/api/daily_papers";
 const STORIES_PER_FEED = 20;
-const TOP_LEVEL_COMMENTS = 6;
-const REPLIES_PER_COMMENT = 3;
+const TOP_LEVEL_COMMENTS = 4;
+const REPLIES_PER_COMMENT = 2;
 const PAPERS = 20;
 const out = (name: string) =>
-	new URL(`../src/demo-data/snapshot/${name}`, import.meta.url);
+	new URL(
+		`${process.env.SNAPSHOT_DIR ?? "../src/demo-data/snapshot"}/${name}`,
+		import.meta.url,
+	);
 
 async function json<T>(url: string): Promise<T> {
 	const response = await fetch(url);
@@ -105,15 +110,44 @@ async function papers() {
 		const top = entries
 			.sort((a, b) => b.paper.upvotes - a.paper.upvotes)
 			.slice(0, PAPERS)
-			.map((entry, index) => ({ ...entry, rank: index + 1 }));
+			.map(({ entryPublishedAt, isAuthorParticipating, paper }, index) => ({
+				rank: index + 1,
+				entryPublishedAt,
+				isAuthorParticipating,
+				arxivId: paper.arxivId,
+				title: paper.title,
+				summary: paper.summary,
+				aiSummary: paper.aiSummary,
+				paperPublishedAt: paper.paperPublishedAt,
+				upvotes: paper.upvotes,
+				projectPage: paper.projectPage,
+				githubRepo: paper.githubRepo,
+				organization: paper.organization && {
+					id: paper.organization.hfOrganizationId,
+					name: paper.organization.name,
+					fullname: paper.organization.fullname,
+				},
+				authors: paper.authors
+					.filter((author) => !author.hidden)
+					.map((author) => author.name),
+				keywords: paper.keywords.map((keyword) => keyword.keywordOriginal),
+			}));
 		return { fetchedAt: new Date().toISOString(), editionDate, papers: top };
 	}
 	throw new Error("No Hugging Face edition in the last week");
 }
 
 const [hn, hf] = await Promise.all([hackerNews(), papers()]);
-await writeFile(out("hacker-news.json"), `${JSON.stringify(hn, null, "\t")}\n`);
-await writeFile(out("papers.json"), `${JSON.stringify(hf, null, "\t")}\n`);
+const files = [out("hacker-news.json"), out("papers.json")];
+await writeFile(files[0], JSON.stringify(hn));
+await writeFile(files[1], JSON.stringify(hf));
+// Format as `bun run check` expects.
+const format = spawnSync(
+	"bunx",
+	["biome", "format", "--write", ...files.map((file) => file.pathname)],
+	{ encoding: "utf8" },
+);
+if (format.status !== 0) throw new Error(format.stderr);
 console.log(
 	`${hn.items.length} Hacker News items (${hn.feeds.top.length} top stories), ${hf.papers.length} papers for ${hf.editionDate}`,
 );

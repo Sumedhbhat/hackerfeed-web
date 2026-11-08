@@ -5,13 +5,14 @@ what readers actually see. Nothing here comes from production (no user data);
 the content is public Hacker News and Hugging Face data.
 
 - `snapshot/hacker-news.json`: the first 20 top, new and best stories, with a
-  sample of each top story's comments (up to 6 top-level comments and 3
+  sample of each top story's comments (up to 4 top-level comments and 2
   replies each). `descendants` is Hacker News's real count, so a story can
   show more comments than the snapshot holds.
 - `snapshot/papers.json`: one day's 20 most upvoted Hugging Face daily papers,
-  normalized with production ingestion's own validator
-  (`packages/backend/src/huggingface-papers/schema.ts`), with their authors,
-  organizations, AI summaries and keywords.
+  validated with production ingestion's own validator
+  (`packages/backend/src/huggingface-papers/schema.ts`), keeping what the app
+  shows: titles, summaries, AI summaries, author names, organizations and
+  keywords.
 - `hacker-news.ts` serves the Hacker News snapshot in the API's response
   shape; preview builds (`VITE_DEMO_DATA=true`) answer Hacker News requests
   from it (`src/lib/hacker-news/demo-api.ts`).

@@ -8,9 +8,9 @@ type DailyPaperEntry = typeof hfDailyPaperEntries.$inferSelect;
 /** The snapshot's edition: every paper, in its rank order. */
 export const dailyPaperEntryRows: DailyPaperEntry[] = snapshotPapers.map(
 	(entry) => ({
-		id: `${paperId(entry.paper.arxivId)}-entry-${DEMO_DATE}`,
+		id: `${paperId(entry.arxivId)}-entry-${DEMO_DATE}`,
 		editionDate: DEMO_DATE,
-		paperId: paperId(entry.paper.arxivId),
+		paperId: paperId(entry.arxivId),
 		entryPublishedAt: entry.entryPublishedAt,
 		isAuthorParticipating: entry.isAuthorParticipating,
 		rank: entry.rank,

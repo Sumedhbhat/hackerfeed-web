@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 const SIZE = {
 	xs: "text-meta",
 	sm: "text-sm",
-	base: "text-base",
 	/** Keep the size the parent set (e.g. inside a chat reply). */
 	inherit: "",
 } as const;
@@ -12,13 +11,10 @@ const TONE = {
 	default: "text-(--sea-ink)",
 	soft: "text-(--sea-ink-soft)",
 	faint: "text-(--sea-ink-faint)",
-	accent: "text-(--lagoon-deep)",
-	danger: "text-(--danger)",
 } as const;
 
 const WEIGHT = {
 	normal: "",
-	medium: "font-medium",
 	semibold: "font-semibold",
 } as const;
 

@@ -7,11 +7,14 @@ type PaperKeyword = typeof hfPaperKeywords.$inferSelect;
 
 /** Each snapshot paper's Hugging Face keywords, in their listed order. */
 export const paperKeywordRows: PaperKeyword[] = snapshotPapers.flatMap(
-	({ paper }) =>
-		paper.keywords.map((keyword) => ({
-			id: `${paperId(paper.arxivId)}-keyword-${keyword.position}`,
+	(paper) =>
+		paper.keywords.map((keyword, index) => ({
+			id: `${paperId(paper.arxivId)}-keyword-${index + 1}`,
 			paperId: paperId(paper.arxivId),
-			...keyword,
+			keywordOriginal: keyword,
+			// The same normalization production ingestion applies.
+			keywordNormalized: keyword.trim().toLowerCase().replace(/\s+/g, " "),
+			position: index + 1,
 			...ingestedTimestamps,
 		})),
 );
