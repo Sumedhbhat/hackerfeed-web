@@ -6,7 +6,6 @@ export function InlineNotice({
 	action,
 	role,
 	boxed = false,
-	quiet = false,
 }: {
 	message: ReactNode;
 	action?: ReactNode;
@@ -14,10 +13,8 @@ export function InlineNotice({
 	role?: "alert";
 	/** Draw it as a bordered box, e.g. an error under a chat transcript. */
 	boxed?: boolean;
-	/** Not a live region: the page announces the change itself, and the notice holds a control (e.g. Undo). */
-	quiet?: boolean;
 }) {
-	const Element = role === "alert" || quiet ? "div" : "output";
+	const Element = role === "alert" ? "div" : "output";
 	return (
 		<Element
 			className={
