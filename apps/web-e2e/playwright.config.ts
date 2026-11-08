@@ -2,11 +2,7 @@ import { defineConfig, devices } from "@playwright/test";
 
 const PORT = 4173;
 
-/**
- * End-to-end tests for the web app: user flows and accessibility. They run
- * against the same static demo build as PR previews (real HN and Hugging Face
- * snapshot data), served the same way, with AI chat on and its API faked.
- */
+// Runs against the same static demo build as PR previews, served the same way.
 export default defineConfig({
 	testDir: "./src",
 	fullyParallel: true,
@@ -18,7 +14,6 @@ export default defineConfig({
 		baseURL: `http://127.0.0.1:${PORT}`,
 		reducedMotion: "reduce",
 		trace: "retain-on-failure",
-		// Use a locally installed Chrome instead of Playwright's download.
 		launchOptions: process.env.PLAYWRIGHT_CHROMIUM_PATH
 			? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH, args: ["--no-sandbox"] }
 			: {},

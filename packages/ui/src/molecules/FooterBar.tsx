@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 
-/** Quiet site footer: product name and tagline on one side, copyright on the other. */
 export function FooterBar({
 	title,
 	tagline,

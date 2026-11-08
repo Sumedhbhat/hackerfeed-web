@@ -1,8 +1,5 @@
-/**
- * Keyboard and screen-reader users who open a story and come back with Back
- * should land on the control they used, not at the top of the page (WCAG
- * 2.4.3). The router restores the scroll position; this restores focus.
- */
+// The router restores scroll on Back but not focus; this returns focus to the
+// control the reader left from.
 const STORAGE_KEY = "hackerfeed:return-focus";
 
 type ReturnFocus = {
@@ -12,7 +9,7 @@ type ReturnFocus = {
 	path: string;
 };
 
-/** What identifies a control again after the page re-renders: its aria-label, or its text (title links). */
+// Identifies the control again after the page re-renders.
 function controlLabel(control: Element): string {
 	return (
 		control.getAttribute("aria-label") ??
@@ -23,7 +20,6 @@ function controlLabel(control: Element): string {
 
 type RouterHistoryState = { __TSR_key?: string; __TSR_index?: number } | null;
 
-/** The router's key for the current history entry. */
 function historyEntryKey(): string | undefined {
 	return (window.history.state as RouterHistoryState)?.__TSR_key;
 }
@@ -40,7 +36,6 @@ function readSaved(): ReturnFocus | null {
 	}
 }
 
-/** Call when a control navigates away within the app. */
 export function rememberReturnFocus(control: Element) {
 	const entry = historyEntryKey();
 	const index = historyIndex();
@@ -57,10 +52,6 @@ export function rememberReturnFocus(control: Element) {
 	}
 }
 
-/**
- * When this page is the history entry a remembered control was on (the reader
- * came back), focus that control again. Returns whether it did.
- */
 export function restoreReturnFocus(): boolean {
 	const saved = readSaved();
 	if (!saved || saved.entry !== historyEntryKey()) return false;
@@ -75,11 +66,8 @@ export function restoreReturnFocus(): boolean {
 	return true;
 }
 
-/**
- * An in-page "← Back" link to `path` should act like the browser's Back
- * button when the reader just came from there, so focus and scroll return to
- * where they were. Returns true if it went back.
- */
+// An in-page "← Back" link acts like the browser's Back when the reader just
+// came from `path`, so focus and scroll return to where they were.
 export function goBackIfReturningTo(path: string): boolean {
 	const saved = readSaved();
 	const index = historyIndex();

@@ -27,12 +27,8 @@ export type DemoItem = DemoStory | DemoComment;
 
 export type Thread = { story: DemoStory; comments: DemoComment[] };
 
-/**
- * A snapshot of live Hacker News (snapshot/hacker-news.json, refreshed with
- * `bun run demo-data:refresh`): the first stories of each feed and a sample of
- * each top story's comments. `descendants` is HN's real count, so it can be
- * larger than the comments kept here.
- */
+// The snapshot keeps a sample of each thread; `descendants` is HN's real
+// count, so it can be larger than the comments kept here.
 const snapshot = hackerNewsSnapshot as {
 	feeds: Record<string, number[]>;
 	items: DemoItem[];
@@ -43,7 +39,6 @@ export const feeds: Record<string, number[]> = snapshot.feeds;
 
 const byId = new Map(items.map((item) => [item.id, item]));
 
-/** Each story with the comments under it, in feed order (top first). */
 export const threads: Thread[] = [...new Set(Object.values(feeds).flat())]
 	.map((id) => byId.get(id))
 	.filter((item): item is DemoStory => item?.type === "story")

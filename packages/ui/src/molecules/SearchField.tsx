@@ -2,7 +2,6 @@ import { Search } from "lucide-react";
 import { Icon } from "../atoms/Icon";
 import { FieldFrame, TextInput } from "../atoms/TextField";
 
-/** A search box with a leading magnifier that grows to fill its row. */
 export function SearchField({
 	value,
 	onChange,
@@ -11,7 +10,6 @@ export function SearchField({
 }: {
 	value: string;
 	onChange: (value: string) => void;
-	/** Accessible name, e.g. "Search saved stories". */
 	label: string;
 	placeholder?: string;
 }) {

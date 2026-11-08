@@ -1,11 +1,6 @@
 import { Card } from "../atoms/Card";
 import { Skeleton, SkeletonGroup } from "../atoms/Skeleton";
 
-/**
- * Card holding one pulsing bar, shown while a section loads. `label` (e.g.
- * "Loading chat") is what screen readers hear, since the bars are hidden from
- * them (WCAG 4.1.3).
- */
 export function CardSkeleton({
 	width,
 	height = "md",

@@ -1,8 +1,4 @@
-/**
- * Renders trusted HTML (story text, comments) with readable typography. Code
- * in comments wraps instead of scrolling sideways, so it never needs a
- * keyboard-scrollable region (WCAG 2.1.1).
- */
+/** Code wraps instead of scrolling sideways, so it never needs a keyboard-scrollable region. */
 export function Prose({ html }: { html: string }) {
 	return (
 		<div

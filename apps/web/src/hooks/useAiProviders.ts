@@ -15,7 +15,6 @@ import {
 } from "#/lib/ai/client";
 import { useAuthSession } from "./useAuthSession";
 
-/** A chat message, plus whether an assistant reply was cut off by an error. */
 export type StoryChatMessage = ChatMessage & { incomplete?: boolean };
 
 const PROVIDERS_QUERY_KEY = ["ai", "providers"] as const;
@@ -82,11 +81,6 @@ function toStoryChatError(error: unknown): StoryChatError {
 	};
 }
 
-/**
- * Holds one conversation about a story and streams replies into it. The
- * conversation is kept for the browser session (per story and assistant), so
- * opening the HN comments and coming back doesn't lose it.
- */
 export function useStoryChat(
 	storyId: number,
 	providerId: string | undefined,
@@ -102,9 +96,8 @@ export function useStoryChat(
 
 	useEffect(() => () => abortRef.current?.abort(), []);
 
-	// Load the saved conversation for this story and assistant, then keep it
-	// saved. `loadedKey` stops the previous assistant's messages being written
-	// under the new key in the render before the load lands.
+	// `loadedKey` stops the previous assistant's messages being written under
+	// the new key in the render before the load lands.
 	const storageKey = providerId
 		? storyChatStorageKey(storyId, providerId)
 		: null;
@@ -193,7 +186,6 @@ export function useStoryChat(
 		[messages, run],
 	);
 
-	/** Asks again after a failed reply, dropping a reply that was cut off. */
 	const retry = useCallback(() => {
 		if (abortRef.current) return;
 		const last = messages.at(-1);
@@ -203,7 +195,6 @@ export function useStoryChat(
 
 	const stop = useCallback(() => abortRef.current?.abort(), []);
 
-	// The conversation "New chat" just cleared, so it can be brought back.
 	const [cleared, setCleared] = useState<StoryChatMessage[] | null>(null);
 
 	const reset = useCallback(() => {

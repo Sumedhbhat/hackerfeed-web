@@ -1,8 +1,7 @@
 /**
- * Small number pill, e.g. a count next to a tab label. `compact` hides it
- * visually between 360px and 380px, where the header row is tightest, but
- * keeps it in the accessible name. Below 360px (e.g. 400% zoom) the nav has a
- * row of its own, so the count shows again (WCAG 1.4.10).
+ * `compact` hides the count visually (not from the accessible name) only
+ * between 360px and 380px, where the header row is tightest. Below 360px the
+ * nav has a row of its own, so the count shows again.
  */
 export function CountBadge({
 	count,

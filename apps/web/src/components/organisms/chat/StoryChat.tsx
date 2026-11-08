@@ -78,7 +78,6 @@ export function StoryChat({ story }: { story: HackerNewsStoryRecord }) {
 	);
 }
 
-/** Save the story and jump to its HN comments without leaving the chat first. */
 function StoryChatActions({ story }: { story: HackerNewsStoryRecord }) {
 	const { isFavorited, toggleFavorite } = useFavorites();
 	const saved = isFavorited(story.id);
@@ -105,7 +104,6 @@ function StoryChatActions({ story }: { story: HackerNewsStoryRecord }) {
 	);
 }
 
-/** A story title with its Show HN / Ask HN prefix as a tag, as in the feed. */
 function StoryTitle({ title }: { title: string }) {
 	const { kind, text } = splitPostKind(title);
 	return (

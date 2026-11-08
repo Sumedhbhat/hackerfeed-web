@@ -2,11 +2,8 @@ import { LiveStatus } from "@hackerfeed/ui/atoms/LiveStatus";
 import { useLocation } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 
-/**
- * Client-side navigation doesn't reload the page, so screen readers get no
- * cue that it changed. Announce the new page's title after each navigation
- * (not on first load, where the browser reads the title itself).
- */
+// Client-side navigation gives screen readers no cue, so announce the new
+// title (not on first load, where the browser reads it itself).
 export function RouteAnnouncer() {
 	const { pathname } = useLocation();
 	const [message, setMessage] = useState("");

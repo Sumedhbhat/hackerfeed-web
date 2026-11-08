@@ -1,13 +1,11 @@
 import type { ReactNode } from "react";
 
-/** A bulleted or numbered list in running text, e.g. inside a chat reply. */
 export function ProseList({
 	ordered = false,
 	start,
 	children,
 }: {
 	ordered?: boolean;
-	/** First number of an ordered list, when it isn't 1. */
 	start?: number;
 	children: ReactNode;
 }) {
@@ -22,7 +20,6 @@ export function ProseList({
 	);
 }
 
-/** One item of a ProseList; a nested ProseList goes after its text. */
 export function ProseListItem({ children }: { children: ReactNode }) {
 	return <li className="pl-1 [&>ol]:mt-1.5 [&>ul]:mt-1.5">{children}</li>;
 }

@@ -8,7 +8,6 @@ type BrandAnchorProps = Omit<
 	ref?: React.Ref<HTMLAnchorElement>;
 };
 
-/** A page of text with a bookmark tucked in: the app's whole idea in one mark. (Brass is kept for saved items.) */
 function BrandMark() {
 	return (
 		<svg
@@ -31,7 +30,6 @@ function BrandMark() {
 	);
 }
 
-/** HackerFeed logo: the mark on phones, mark and wordmark from `sm` up. */
 function BrandAnchor(props: BrandAnchorProps) {
 	return (
 		<a

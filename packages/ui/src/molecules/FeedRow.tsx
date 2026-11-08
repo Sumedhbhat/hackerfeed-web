@@ -1,17 +1,9 @@
 import type { ReactNode } from "react";
 import { readingCardClassName } from "../atoms/ReadingList";
 
-/** Minimum widths of the action cells, so the actions line up from row to row. */
+/** Fixed minimum widths so the actions line up from row to row. */
 const CELL = ["", "min-w-[3.25rem] sm:min-w-[7.5rem]"];
 
-/**
- * One story in a ReadingList, as its own card: the title, the facts, then the
- * actions, each on its own line. The whole card opens the story: `title`
- * holds a `card` link whose hit area stretches over it, and the actions sit
- * above that. The actions wrap instead of overflowing when larger text
- * doesn't fit (WCAG 1.4.4). `save` sits at the far right; a saved card is
- * tinted.
- */
 export function FeedRow({
 	saved = false,
 	title,
@@ -20,10 +12,9 @@ export function FeedRow({
 	save,
 }: {
 	saved?: boolean;
-	/** The heading, with a `card` link so a click anywhere on the row opens it. */
 	title: ReactNode;
 	meta: ReactNode;
-	/** AI and discussion actions, in that order (one cell each). */
+	/** AI action, then discussion: each takes the matching CELL width. */
 	actions: ReactNode[];
 	save: ReactNode;
 }) {
@@ -31,8 +22,6 @@ export function FeedRow({
 		<li
 			className={`${readingCardClassName(saved)} p-4 transition-colors sm:p-5 ${saved ? "" : "hover:border-(--field-line)"}`}
 		>
-			{/* The heading group (title, facts) and the actions, spaced like the
-			    card's padding so the actions sit evenly between them. */}
 			<div className="flex min-w-0 flex-col gap-4 sm:gap-5">
 				<div className="flex flex-col gap-2">
 					<div>{title}</div>

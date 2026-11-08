@@ -1,9 +1,3 @@
-/*
- * Parsing for ChatMarkdown, kept free of React so it can be tested on its own.
- * Blocks: paragraphs, headings, lists (nested by indent), fenced code.
- * Inline: **bold**, `code` and [links](https://…) (http and https only).
- */
-
 export type ListItem = { text: string; children?: ListBlock[] };
 export type ListBlock = { kind: "ul" | "ol"; start: number; items: ListItem[] };
 
@@ -21,10 +15,8 @@ const ORDERED = /^(\s*)(\d+)[.)]\s+/;
 const BULLET = /^(\s*)[-*•]\s+/;
 
 /**
- * Nesting follows the indents actually used: an item indented further than
- * the one before goes one level deeper, an item back at an earlier indent
- * returns to that level, and equal indents are siblings (so 2-space and
- * 4-space styles both work). `indents` holds the indent of each open level.
+ * Nesting follows the indents actually used rather than a fixed width, so
+ * 2-space and 4-space styles both work. `indents` holds each open level's indent.
  */
 function nestLevel(indents: number[], indent: string): number {
 	const width = indent.replace(/\t/g, "    ").length;
@@ -35,7 +27,6 @@ function nestLevel(indents: number[], indent: string): number {
 	return indents.length - 1;
 }
 
-/** Adds an item `level` lists deep below the last item of `list`. */
 function addItem(
 	list: ListBlock,
 	level: number,
@@ -60,7 +51,6 @@ function addItem(
 	target.items.push({ text });
 }
 
-/** The most deeply nested last item, where a continuation line belongs. */
 function lastItem(list: ListBlock): ListItem | undefined {
 	const item = list.items.at(-1);
 	const lastChild = item?.children?.at(-1);
@@ -170,7 +160,6 @@ export type InlinePart =
 	| { kind: "code"; text: string }
 	| { kind: "link"; text: string; href: string };
 
-/** Splits a line into plain text, bold, code and safe links. */
 export function parseInline(text: string): InlinePart[] {
 	return text
 		.split(INLINE)

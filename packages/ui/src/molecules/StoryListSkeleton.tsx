@@ -1,7 +1,6 @@
 import { ReadingList } from "../atoms/ReadingList";
 import { StoryCardSkeleton } from "./StoryCardSkeleton";
 
-/** A sheet of feed-row placeholders, shown while a feed loads. */
 export function StoryListSkeleton({ count }: { count: number }) {
 	return (
 		<output aria-label="Loading stories" className="block">

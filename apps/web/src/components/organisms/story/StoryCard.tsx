@@ -25,7 +25,6 @@ import { rememberReturnFocus } from "#/lib/a11y/return-focus";
 
 type StoryCardProps = {
 	story: HackerNewsStoryRecord;
-	/** Tint the row once saved; off in the Saved list, where everything is saved. */
 	markSaved?: boolean;
 };
 
@@ -38,8 +37,7 @@ export function StoryCard({ story, markSaved = true }: StoryCardProps) {
 	const title = getStoryTitle(story);
 	const { kind: postKind, text: titleText } = splitPostKind(title);
 	const comments = story.descendants ?? 0;
-	// Ask HN, Show HN and link-less posts are their HN thread: open the
-	// discussion view (question or description, then replies) instead.
+	// Ask HN, Show HN and link-less posts open the discussion view instead.
 	const opensDiscussion = isDiscussionPost(story);
 	const commentLabel = `${comments} ${comments === 1 ? "comment" : "comments"}`;
 

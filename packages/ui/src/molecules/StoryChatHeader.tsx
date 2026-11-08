@@ -6,7 +6,6 @@ import { Icon } from "../atoms/Icon";
 import { Kicker } from "../atoms/Kicker";
 import { ActionLine } from "./ActionLine";
 
-/** Title block of the story chat screen: the article link, then `actions` (save, comments). */
 export function StoryChatHeader({
 	title,
 	url,

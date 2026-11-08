@@ -119,7 +119,6 @@ export function Comment({ comment, depth = 0 }: CommentProps) {
 	);
 }
 
-/** A comment's replies; suspends while they load. */
 function Replies({ ids, depth }: { ids: number[]; depth: number }) {
 	const queries = useSuspenseQueries({
 		queries: ids.map((id) => commentQueryOptions(id)),

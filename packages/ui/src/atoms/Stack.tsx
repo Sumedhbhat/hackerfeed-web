@@ -6,7 +6,6 @@ const GAP = {
 	sm: "gap-2",
 	md: "gap-3",
 	lg: "gap-5",
-	/** Between the sections of a card: 16px, 20px from sm (matches card padding). */
 	section: "gap-4 sm:gap-5",
 	xl: "gap-8",
 } as const;
@@ -25,7 +24,6 @@ type StackProps = Omit<HTMLAttributes<HTMLElement>, "className" | "style"> & {
 	divided?: boolean;
 	/** Take the remaining width in a Row and allow children to shrink. */
 	grow?: boolean;
-	/** Cap the width at a comfortable reading measure (dividers included). */
 	measure?: boolean;
 };
 

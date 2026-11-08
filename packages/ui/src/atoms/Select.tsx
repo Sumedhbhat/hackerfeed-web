@@ -36,7 +36,6 @@ export function SelectLabel({
 	visuallyHidden = false,
 }: {
 	children: ReactNode;
-	/** Name the field for screen readers only, when the context already says it. */
 	visuallyHidden?: boolean;
 }) {
 	return (

@@ -12,14 +12,13 @@ export type UseCommentReturn = {
 	replyCount: number;
 };
 
-/** A comment's local state. Its replies load in `Replies`, inside their own Suspense boundary. */
 export function useComment(comment: HackerNewsCommentRecord): UseCommentReturn {
 	const expansion = useThreadExpansion();
 	const [collapsed, setCollapsed] = useState(false);
 	// Replies that load after "Expand all" open too.
 	const [repliesOpen, setRepliesOpen] = useState(expansion.mode === "expand");
 
-	// Apply each press of "Expand all" / "Collapse all".
+	// Compare `revision`, not `mode`, so pressing the same button twice applies.
 	const appliedRef = useRef(expansion.revision);
 	useEffect(() => {
 		if (expansion.revision === appliedRef.current) return;

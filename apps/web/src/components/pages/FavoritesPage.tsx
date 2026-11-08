@@ -48,9 +48,8 @@ export function FavoritesPage({
 	const [query, setQuery] = useState("");
 	const stories = useFavorites();
 	const papers = usePaperFavorites();
-	// Without a tab in the URL, open the one that has something in it. With
-	// no saved stories, show Papers while they load or fail, so the reader sees
-	// "loading" or the error rather than a premature "nothing saved".
+	// With no saved stories, show Papers while they load or fail, so the reader
+	// sees "loading" or the error rather than a premature "nothing saved".
 	const autoType: FavoritesType =
 		stories.count === 0 &&
 		(papers.count > 0 || papers.isLoading || Boolean(papers.error))
@@ -273,7 +272,7 @@ type Removed =
 /**
  * Unsaving removes the row, and the focused Save button with it: show a toast
  * (announced, with Undo for a single item) and put focus on the row that took
- * its place, or on the empty state's link when nothing is left (WCAG 2.4.3).
+ * its place, or on the empty state's link when nothing is left.
  */
 function useRemovalToast(
 	stories: HackerNewsStoryRecord[],

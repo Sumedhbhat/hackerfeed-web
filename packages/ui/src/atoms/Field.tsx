@@ -1,10 +1,6 @@
 import { Field as BaseField } from "@base-ui/react/field";
 import type { ReactNode } from "react";
 
-/**
- * Groups a control with its label, description and error. Base UI wires the
- * ids, `aria-describedby` and `aria-invalid` from `invalid`.
- */
 export function Field({
 	invalid,
 	children,
@@ -53,7 +49,6 @@ export function FieldDescription({
 	);
 }
 
-/** Shown and announced while the field is invalid. */
 export function FieldError({ children }: { children: ReactNode }) {
 	return (
 		<BaseField.Error

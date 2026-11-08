@@ -45,7 +45,6 @@ describe("Comment replies", () => {
 		trigger.focus();
 		await act(async () => trigger.click());
 
-		// The comment didn't suspend: its trigger is still there and focused.
 		expect(screen.queryByText("Loading page")).toBeNull();
 		expect(document.activeElement).toBe(trigger);
 		expect(await screen.findByText("Comment 2")).toBeTruthy();

@@ -30,7 +30,6 @@ export function horizontalOverflow(page: Page) {
 	);
 }
 
-/** Pairs of controls whose boxes overlap, so a tap could hit the wrong one. */
 export function overlappingTargets(page: Page) {
 	return page.evaluate(() => {
 		window.scrollTo(0, 0);
@@ -66,7 +65,6 @@ export function overlappingTargets(page: Page) {
 	});
 }
 
-/** Labels of the first tab stops that show no focus indicator. */
 export async function tabStopsWithoutFocusRing(page: Page, stops = 20) {
 	await page.mouse.click(1, 1);
 	const missing: string[] = [];
@@ -103,11 +101,7 @@ export async function tabStopsWithoutFocusRing(page: Page, stops = 20) {
 	return missing;
 }
 
-/**
- * Gaps (px) between the visible text sections of the nth card in the first
- * list on the page, plus the card's top and bottom padding. Lines closer than
- * 12px belong to the same section (a title and its facts, a paragraph).
- */
+// Lines closer than 12px belong to the same section (a title and its facts).
 export function cardSectionGaps(page: Page, nth = 1) {
 	return page.evaluate((index) => {
 		const card = document.querySelectorAll("main li")[index];

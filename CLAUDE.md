@@ -110,6 +110,17 @@ Interactive atoms are built on [Base UI](https://base-ui.com) (`@base-ui/react`)
 
 These atoms manage their own ARIA state: pass `value`, `pressed` or `open`, never `aria-selected`/`aria-pressed`/`aria-expanded` by hand. A toggle's accessible name starts with the word it shows (WCAG 2.5.3 Label in Name): `aria-label={`${saved ? "Saved" : "Save"} ${title}`}` + `pressed`. Never use `window.confirm`; use `ConfirmButton`. For a new interactive pattern, check whether Base UI has the component and wrap it in a new atom.
 
+Accessibility rules (WCAG 2.2 AA; `apps/web-e2e` checks most of them). Code follows these without comments repeating them:
+- **Names match what's on screen.** An accessible name contains the visible text, first (2.5.3). axe ignores text in brackets, so `"DR, user menu"`, not `"User menu (DR)"`.
+- **Focus never drops to the page.** When an action removes the focused control (unsave, Stop, Disconnect, Load more), move focus to its replacement: the next row, the composer, the new button, or the empty state's link (2.4.3).
+- **Busy or unavailable controls stay focusable.** Use `Button busy`, `focusableWhenDisabled`, or `ToggleButton disabled` (all `aria-disabled`), never the native `disabled` on a control that might have focus.
+- **Say what happened, once.** Events (removed, disconnected, started a new chat) get a toast; silent status (result counts, "replying…") a `LiveStatus` that stays mounted. Announce outcomes, not every change.
+- **Fields don't act while you type.** Date and filter fields commit on blur or Enter (3.2.2).
+- **Every route has its own title** through `titleHead` (2.4.2).
+- **Text wraps, never clips.** Long user text (emails, domains, usernames) wraps (`breakAnywhere`), rows wrap instead of squeezing at 200% text or 320px, and nothing is cut off with an ellipsis (1.4.4, 1.4.10).
+- **Cards open from anywhere.** A row card's title uses the `card` link variant, whose hit area covers the card; controls inside sit above it with `relative z-10`. Card sections are spaced like the card's padding (16px, 20px from `sm`), so every visible gap is equal.
+- **Colour has one meaning each.** Brass is only for saved things; the sparkle icon only for in-app AI.
+
 Before building UI, list `packages/ui/src/atoms/` and `packages/ui/src/molecules/` and reuse what is there. Import them as `@hackerfeed/ui/atoms/<Name>`; a new one also needs an entry in `packages/ui/package.json` `exports`. Add a variant to an existing atom before adding a new atom.
 
 Rules, enforced by Biome (`bun run check`) and guarded by `tools/workspace/src/lint-rules.test.ts`:

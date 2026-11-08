@@ -21,7 +21,6 @@ import { useFeatureFlag } from "#/hooks/useFeatureFlags";
 import { useViewActivity } from "#/hooks/useViewActivity";
 import { rememberReturnFocus } from "#/lib/a11y/return-focus";
 
-/** Top of the story page: title, body text, facts and what you can do with it. */
 export function StoryArticle({ story }: { story: HackerNewsStoryRecord }) {
 	const title = getStoryTitle(story);
 	const { kind: postKind, text: titleText } = splitPostKind(title);
@@ -43,7 +42,6 @@ export function StoryArticle({ story }: { story: HackerNewsStoryRecord }) {
 				{titleText}
 			</Heading>
 
-			{/* Story body text (Ask HN / Show HN posts) */}
 			{story.text && <Prose html={story.text} />}
 
 			<Row gap="sm" wrap>

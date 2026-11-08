@@ -1,8 +1,4 @@
-/**
- * The visible words of an on/off button ("Save" / "Saved"). Both words occupy
- * the same space so pressing the button never moves its neighbours. The
- * button's aria-label names it; these words are for sighted readers.
- */
+/** Both words share one grid cell so toggling never moves the neighbours; the button's aria-label names it. */
 export function ToggleLabel({
 	on,
 	offLabel,

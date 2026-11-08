@@ -46,7 +46,6 @@ describe("fixture demo", () => {
 	it("serves dated paper editions, authors, keywords and saved-paper pagination", () => {
 		const api = createDemoApi();
 		const edition = paperEditionOutputSchema.parse(api("papers.edition", {}));
-		// The edition is the snapshot's papers, with their authors and keywords.
 		expect(edition.papers).toHaveLength(snapshotPapers.length);
 		const withKeywords = snapshotPapers.find(
 			(paper) => paper.keywords.length > 0 && paper.authors.length > 0,

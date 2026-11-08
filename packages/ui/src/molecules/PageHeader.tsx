@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 import { Heading } from "../atoms/Heading";
 import { Text } from "../atoms/Text";
 
-/** Page title with optional controls (tabs, filters) beside it, dropping below only when they don't fit. */
 export function PageHeader({
 	title,
 	hideTitle = false,
@@ -10,7 +9,6 @@ export function PageHeader({
 	children,
 }: {
 	title: string;
-	/** Only for screen readers, when the nav already says where you are (Stories). */
 	hideTitle?: boolean;
 	description?: ReactNode;
 	children?: ReactNode;

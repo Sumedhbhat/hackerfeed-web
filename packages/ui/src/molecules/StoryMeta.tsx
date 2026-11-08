@@ -1,10 +1,6 @@
 import type { ReactNode } from "react";
 import { FactLine } from "../atoms/FactLine";
 
-/**
- * The facts under a story title: where it is from, how many points it has,
- * when, and who posted it. `trailing` adds a last item such as a link.
- */
 export function StoryMeta({
 	domain,
 	by,

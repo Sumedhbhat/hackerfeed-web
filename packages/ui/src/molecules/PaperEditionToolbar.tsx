@@ -5,14 +5,13 @@ import { Icon } from "../atoms/Icon";
 import { FieldFrame, TextInput } from "../atoms/TextField";
 import { SearchField } from "./SearchField";
 
-/** "2026-01-15" moved by whole days, in UTC so a time zone can't skip a day. */
+/** In UTC so a time zone or DST change can't skip a day. */
 function shiftDay(date: string, days: number): string {
 	const day = new Date(`${date}T00:00:00Z`);
 	day.setUTCDate(day.getUTCDate() + days);
 	return day.toISOString().slice(0, 10);
 }
 
-/** Search box, and the edition date with previous/next day buttons, at the top of the papers feed. */
 export function PaperEditionToolbar({
 	query,
 	date,
@@ -25,13 +24,11 @@ export function PaperEditionToolbar({
 	date: string;
 	onQueryChange: (query: string) => void;
 	onDateChange: (date: string) => void;
-	/** False on the latest edition, where there is no next day yet. */
 	canGoNext?: boolean;
-	/** The newest edition; later dates can't be picked (WCAG 3.3.3). */
 	latestDate?: string;
 }) {
 	// Typing a date fires a change per segment; only load the edition once the
-	// reader leaves the field or presses Enter (WCAG 3.2.2).
+	// reader leaves the field or presses Enter.
 	const [draft, setDraft] = useState(date);
 	useEffect(() => setDraft(date), [date]);
 	const commit = () => {
@@ -48,7 +45,6 @@ export function PaperEditionToolbar({
 				label="Search papers"
 				placeholder="Search papers"
 			/>
-			{/* Wraps under very large text rather than squeezing the date. */}
 			<div className="flex flex-wrap items-center gap-1">
 				<Button
 					variant="icon"
@@ -76,7 +72,7 @@ export function PaperEditionToolbar({
 					variant="icon"
 					aria-label="Next day"
 					// Stays focusable on the latest edition: pressing it to reach that
-					// day must not drop keyboard focus to the page (WCAG 2.4.3).
+					// day must not drop keyboard focus to <body>.
 					disabled={!date || !canGoNext}
 					focusableWhenDisabled
 					onClick={() => onDateChange(shiftDay(date, 1))}

@@ -83,7 +83,6 @@ export function getStoryTitle(story: HackerNewsStoryRecord): string {
 
 const POST_KIND = /^(Show HN|Ask HN|Tell HN|Launch HN):\s*(.+)$/;
 
-/** "Show HN: A tool" as { kind: "Show HN", text: "A tool" }; other titles have no kind. */
 export function splitPostKind(title: string): { kind?: string; text: string } {
 	const match = POST_KIND.exec(title);
 	return match?.[1] && match[2]
@@ -91,11 +90,7 @@ export function splitPostKind(title: string): { kind?: string; text: string } {
 		: { text: title };
 }
 
-/**
- * Whether a story is mainly its own HN thread: Ask HN and Show HN posts (the
- * question or the maker's description, then the replies) and posts with no
- * link. These open the discussion view rather than an external page.
- */
+/** Ask HN and Show HN open the discussion view even with a link: the post text and replies are the content. */
 export function isDiscussionPost(story: {
 	title?: string | null;
 	url?: string | null;

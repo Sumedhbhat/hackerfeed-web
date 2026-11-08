@@ -3,7 +3,6 @@ import { ToggleGroup, ToggleGroupItem } from "../atoms/Toggle";
 
 type SortOption<T extends string> = { value: T; label: string };
 
-/** "Sort by" segmented control on the left, an extra action (e.g. "Clear") on the right. */
 export function SortToolbar<T extends string>({
 	options,
 	value,

@@ -20,7 +20,6 @@ describe("useResultCountAnnouncement", () => {
 		act(() => vi.advanceTimersByTime(300));
 		rerender({ count: 0, filter: "reaz" });
 		act(() => vi.advanceTimersByTime(300));
-		// Still typing: nothing yet.
 		expect(result.current).toBe("");
 		act(() => vi.advanceTimersByTime(700));
 		expect(result.current).toBe("No papers match.");
@@ -41,7 +40,6 @@ describe("useResultCountAnnouncement", () => {
 		act(() => vi.advanceTimersByTime(700));
 		expect(result.current).toBe("3 papers");
 
-		// The list shrinks with no search change: nothing new is said.
 		rerender({ count: 2, filter: "" });
 		act(() => vi.advanceTimersByTime(1000));
 		rerender({ count: 0, filter: "" });

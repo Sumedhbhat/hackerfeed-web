@@ -30,12 +30,11 @@ export function ChatComposer({
 	isStreaming: boolean;
 	maxLength?: number;
 	placeholder?: string;
-	/** The field's name; match the visible prompt so voice control can use it (WCAG 2.5.3). */
 	label?: string;
 }) {
-	// Send and Stop are the same button. When a reply ends it becomes a
-	// disabled Send (the box is empty), which drops keyboard focus to the
-	// page without a blur event; put it back in the message box (WCAG 2.4.3).
+	// Send and Stop are one button. When a reply ends it becomes a disabled
+	// Send, which drops focus to <body> without a blur event; put it back in
+	// the message box.
 	const actionFocusedRef = useRef(false);
 	useEffect(() => {
 		if (!isStreaming && actionFocusedRef.current) {
@@ -52,9 +51,8 @@ export function ChatComposer({
 		},
 	};
 
-	// No hard maxLength: a long paste would be cut off without a word. Count
-	// down near the limit, say how far over it is, and don't send until it fits
-	// (WCAG 3.3.1).
+	// No hard maxLength: a long paste would be cut off silently. Count down
+	// near the limit and don't send until it fits.
 	const overBy = maxLength === undefined ? 0 : value.length - maxLength;
 	const showCount = maxLength !== undefined && value.length > maxLength * 0.9;
 	const tooLong = overBy > 0;

@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 import { Heading } from "../atoms/Heading";
 import { ExternalLink } from "../atoms/Link";
 
-/** Paper title linking out to the paper; its hit area covers the whole card. */
 export function PaperTitle({
 	children,
 	href,

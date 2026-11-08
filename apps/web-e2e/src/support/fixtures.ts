@@ -11,10 +11,6 @@ const REPLY = [
 	"```",
 ].join("\n");
 
-/**
- * Every test runs offline: requests that leave the demo server get an empty
- * page, and the AI API (absent from demo builds) is faked.
- */
 export const test = base.extend<{ stubbedNetwork: undefined }>({
 	stubbedNetwork: [
 		async ({ context, baseURL }, use) => {

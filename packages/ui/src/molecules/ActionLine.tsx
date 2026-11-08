@@ -1,10 +1,9 @@
 import type { ReactNode } from "react";
 
 /**
- * A wrapping line of text-style actions under some text. It pulls left by the
- * buttons' own padding, so the first label lines up with the text above.
- * `flush` (inside a card) also trims the targets' extra height, so the gaps
- * above and below the row are the card's own spacing.
+ * The negative margin cancels the buttons' padding so the first label lines
+ * up with the text above. `flush` also trims the targets' extra height (see
+ * `.action-row`).
  */
 export function ActionLine({
 	children,

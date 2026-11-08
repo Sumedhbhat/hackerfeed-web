@@ -4,7 +4,6 @@ import { ToggleLabel } from "./ToggleLabel";
 
 afterEach(cleanup);
 
-/** The word a sighted reader sees: both are mounted, one is `invisible`. */
 function visibleWord() {
 	const words = ["Save", "Saved"].map((word) =>
 		screen.getByText(word, { exact: true }),

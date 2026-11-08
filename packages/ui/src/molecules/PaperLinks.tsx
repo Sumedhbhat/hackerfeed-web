@@ -2,11 +2,7 @@ import { ArrowUpRight } from "lucide-react";
 import { ExternalButtonLink } from "../atoms/Button";
 import { Icon } from "../atoms/Icon";
 
-/**
- * A paper's action besides opening it (a click on the card does that): hand it
- * to ChatGPT in a new tab. There is no in-app paper chat yet, so this hand-off
- * has no sparkle, which means in-app AI.
- */
+/** No sparkle icon: that marks in-app AI, and this hands the paper off to ChatGPT. */
 export function PaperLinks({
 	title,
 	discussUrl,

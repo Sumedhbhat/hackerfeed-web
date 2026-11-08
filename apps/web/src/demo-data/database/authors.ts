@@ -8,7 +8,6 @@ type Author = typeof hfAuthors.$inferSelect;
 export const authorId = (name: string) =>
 	`demo-author-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
 
-/** Every author of a snapshot paper, once each. */
 export const authorRows: Author[] = [
 	...new Set(snapshotPapers.flatMap((paper) => paper.authors)),
 ].map((name) => ({

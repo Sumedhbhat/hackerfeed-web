@@ -19,7 +19,6 @@ export function IconText({
 	icon: LucideIcon;
 	iconSize?: number;
 	tone?: keyof typeof TONE;
-	/** Long unbroken text (an email) wraps anywhere instead of overflowing; never cut off (WCAG 1.4.10). */
 	breakAnywhere?: boolean;
 	role?: "status" | "alert";
 	children: ReactNode;

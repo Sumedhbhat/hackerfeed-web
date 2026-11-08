@@ -1,6 +1,5 @@
 import { ChatMarkdown } from "./ChatMarkdown";
 
-/** One message in a chat transcript; your own questions sit on the right in a tinted bubble. */
 export function ChatMessage({
 	author,
 	authorName,
@@ -14,7 +13,6 @@ export function ChatMessage({
 	content: string;
 	/** The assistant is still writing this message. */
 	isStreaming?: boolean;
-	/** The reply stopped partway because of an error. */
 	incomplete?: boolean;
 }) {
 	const isUser = author === "user";

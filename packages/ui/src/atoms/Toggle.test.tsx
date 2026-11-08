@@ -15,7 +15,6 @@ describe("ToggleButton", () => {
 		const button = screen.getByRole("button", { name: "Save" });
 		button.focus();
 
-		// Busy while saving: still focused, marked unavailable, presses ignored.
 		rerender(
 			<ToggleButton pressed={false} onPressedChange={onPressedChange} disabled>
 				Save

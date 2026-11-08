@@ -7,7 +7,6 @@ type Organization = typeof hfOrganizations.$inferSelect;
 export const organizationId = (hfOrganizationId: string) =>
 	`demo-org-${hfOrganizationId}`;
 
-/** Every organization behind a snapshot paper, once each. */
 export const organizationRows: Organization[] = [
 	...new Map(
 		snapshotPapers

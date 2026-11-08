@@ -1,18 +1,11 @@
 import type { ReactNode } from "react";
 
 const FROM = {
-	/** Hidden below 380px (the narrowest phones). */
 	xs: "max-xs:hidden",
-	/** Hidden on phones. */
 	sm: "max-sm:hidden",
 } as const;
 
-/**
- * Words inside a link or button that small screens leave out to save room
- * ("4 comments" becomes "4", "Read article" becomes "Read"). Give the control
- * an aria-label that says the full thing; this text is hidden from screen
- * readers to avoid repeating it.
- */
+/** Hidden from screen readers, so give the control an aria-label that says the full thing. */
 export function WideText({
 	children,
 	from = "sm",

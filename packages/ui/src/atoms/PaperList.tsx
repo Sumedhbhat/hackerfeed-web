@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { ReadingList } from "./ReadingList";
 
-/** The sheet of PaperCards. */
 export function PaperList({
 	children,
 	id,

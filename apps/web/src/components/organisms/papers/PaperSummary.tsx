@@ -13,14 +13,13 @@ import type { PaperPresentation } from "#/lib/papers/presentation";
 
 /**
  * A paper's short summary cut to 3 lines, with "Show more" for the full
- * abstract when there is more to read; `links` share that line.
+ * abstract when there is more to read.
  */
 export function PaperSummary({
 	paper,
 	links,
 }: {
 	paper: PaperPresentation;
-	/** Secondary links (project, code) shown on the same line as Show more. */
 	links?: ReactNode;
 }) {
 	const [open, setOpen] = useState(false);

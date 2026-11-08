@@ -7,12 +7,7 @@ import { Text } from "../atoms/Text";
 
 import { type ListBlock, parseInline, toBlocks } from "./chatMarkdownParse";
 
-/*
- * The small part of Markdown that chat replies actually use: paragraphs,
- * headings, numbered and bulleted lists, fenced code blocks, **bold**,
- * `code` and [links](https://…) (http and https only). Everything renders as
- * React text, never as HTML, so a reply cannot inject markup.
- */
+// Everything renders as React text, never as HTML, so a reply cannot inject markup.
 
 function inline(text: string): ReactNode[] {
 	return parseInline(text).map((part, index) => {
@@ -47,7 +42,6 @@ function MarkdownList({ list }: { list: ListBlock }) {
 	);
 }
 
-/** A chat reply's text with its light Markdown formatting applied. */
 export function ChatMarkdown({ text }: { text: string }) {
 	return (
 		<div className="flex flex-col gap-3">

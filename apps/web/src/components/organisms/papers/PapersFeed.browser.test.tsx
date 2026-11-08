@@ -121,7 +121,6 @@ describe("PapersFeed", () => {
 			expect.objectContaining({ date: "2026-06-22" }),
 		);
 
-		// Back on the latest edition, even when it is named in the URL.
 		rerender(
 			<PapersFeed
 				edition={{ ...edition, editionDate: "2026-06-22" }}
@@ -129,8 +128,7 @@ describe("PapersFeed", () => {
 				onFiltersChange={onFiltersChange}
 			/>,
 		);
-		// Unavailable, but still focusable, so pressing it to reach the latest
-		// edition doesn't drop focus to the page (WCAG 2.4.3).
+		// aria-disabled, not disabled, so focus isn't dropped to the page.
 		const latestNext = screen.getByRole("button", { name: "Next day" });
 		expect(latestNext.getAttribute("aria-disabled")).toBe("true");
 		expect(document.activeElement).toBe(latestNext);
@@ -360,7 +358,6 @@ describe("PapersFeed", () => {
 		fireEvent.change(screen.getByLabelText("Choose edition date"), {
 			target: { value: "2026-06-18" },
 		});
-		// The edition loads once the reader leaves the field (WCAG 3.2.2).
 		expect(onFiltersChange).not.toHaveBeenCalled();
 		fireEvent.blur(screen.getByLabelText("Choose edition date"));
 
@@ -387,7 +384,6 @@ describe("PapersFeed", () => {
 		fireEvent.change(screen.getByLabelText("Choose edition date"), {
 			target: { value: "2026-06-18" },
 		});
-		// The edition loads once the reader leaves the field (WCAG 3.2.2).
 		expect(onFiltersChange).not.toHaveBeenCalled();
 		fireEvent.blur(screen.getByLabelText("Choose edition date"));
 

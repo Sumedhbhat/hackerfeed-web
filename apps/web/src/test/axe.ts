@@ -1,12 +1,8 @@
 import axe from "axe-core";
 import { expect } from "vitest";
 
-/**
- * Fails the test if axe finds WCAG 2.2 AA or best-practice problems in
- * `root` (roles, names, list and landmark structure, ARIA). Colour contrast
- * and full-page rules are left to the browser QA run, since happy-dom does
- * no layout and tests render fragments.
- */
+// Contrast and full-page rules are off: happy-dom does no layout and tests
+// render fragments. The e2e run covers them.
 export async function expectNoAxeViolations(root: Element) {
 	const results = await axe.run(root, {
 		runOnly: ["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa", "best-practice"],

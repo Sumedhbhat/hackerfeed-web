@@ -29,9 +29,7 @@ export function CollapsibleTrigger({
 	"aria-label": ariaLabel,
 }: {
 	variant?: ButtonVariant;
-	/** Starts a line under text: shift left by the padding so the label lines up with the text. */
 	flush?: boolean;
-	/** Sits in a line of text: don't let the tap area push the line taller. */
 	inline?: boolean;
 	children: ReactNode;
 	"aria-label"?: string;

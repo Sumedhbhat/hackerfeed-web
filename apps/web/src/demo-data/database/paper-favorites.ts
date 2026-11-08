@@ -18,7 +18,6 @@ export const paperFavorite = (
 	...fields,
 });
 
-/** The demo reader has saved the first two papers. */
 export const paperFavoriteRows: PaperFavorite[] = paperRows
 	.slice(0, 2)
 	.map((paper, index) =>

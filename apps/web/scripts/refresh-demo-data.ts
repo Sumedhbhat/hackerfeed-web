@@ -1,9 +1,3 @@
-// Refreshes the demo snapshots in src/demo-data/snapshot/ from the live APIs:
-// the first 20 Hacker News top, new and best stories (with a sample of each
-// top story's comments) and the day's 20 most upvoted Hugging Face papers,
-// validated as production ingestion does. Only fields the app shows are kept;
-// the files are then formatted with the repo's Biome settings.
-// Usage: bun run demo-data:refresh
 import { spawnSync } from "node:child_process";
 import { writeFile } from "node:fs/promises";
 import { validateHuggingFaceDailyPapersResponse } from "../../../packages/backend/src/huggingface-papers/schema";
@@ -62,7 +56,6 @@ async function hackerNews() {
 			),
 		);
 	}
-	// Feeds list only stories that loaded; kids only items in the snapshot.
 	for (const feed of Object.keys(feeds)) {
 		feeds[feed] = feeds[feed].filter((id) => live.get(id)?.type === "story");
 	}
@@ -98,7 +91,6 @@ async function hackerNews() {
 }
 
 async function papers() {
-	// The most recent edition that has papers, looking back up to a week.
 	for (let daysAgo = 0; daysAgo < 7; daysAgo++) {
 		const editionDate = new Date(Date.now() - daysAgo * 86_400_000)
 			.toISOString()
@@ -141,7 +133,6 @@ const [hn, hf] = await Promise.all([hackerNews(), papers()]);
 const files = [out("hacker-news.json"), out("papers.json")];
 await writeFile(files[0], JSON.stringify(hn));
 await writeFile(files[1], JSON.stringify(hf));
-// Format as `bun run check` expects.
 const format = spawnSync(
 	"bunx",
 	["biome", "format", "--write", ...files.map((file) => file.pathname)],

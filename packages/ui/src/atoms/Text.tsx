@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 const SIZE = {
 	xs: "text-meta",
 	sm: "text-sm",
-	/** Keep the size the parent set (e.g. inside a chat reply). */
 	inherit: "",
 } as const;
 
@@ -27,7 +26,6 @@ type TextProps = {
 	/** Relaxed line height for paragraphs of copy. */
 	relaxed?: boolean;
 	italic?: boolean;
-	/** Long unbroken text (an email) wraps anywhere instead of overflowing; never cut off (WCAG 1.4.10). */
 	breakAnywhere?: boolean;
 	/** Cap the line length for readable copy. */
 	measure?: "sm" | "md" | "lg";

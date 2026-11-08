@@ -1,16 +1,13 @@
 import { FactLine } from "../atoms/FactLine";
 
-/** Real papers can carry a dozen keywords; the card shows the first few. */
 const SHOWN_TOPICS = 3;
 
-/** Authors, upvotes, publish date and topics under a paper title. */
 export function PaperSignals({
 	authors,
 	upvotes,
 	publishedLabel,
 	topics = [],
 }: {
-	/** Already formatted, e.g. "Ada Lovelace, Alan Turing". */
 	authors: string;
 	upvotes: number;
 	/** Already formatted, e.g. "21 Jun". */

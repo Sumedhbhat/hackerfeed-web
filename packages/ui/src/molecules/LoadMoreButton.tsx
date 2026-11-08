@@ -8,7 +8,6 @@ export function LoadMoreButton({
 }: {
 	label: string;
 	onClick: () => void;
-	/** Loading the next batch; stays focusable meanwhile. */
 	busy?: boolean;
 }) {
 	return (

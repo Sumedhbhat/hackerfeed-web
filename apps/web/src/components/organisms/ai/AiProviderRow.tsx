@@ -21,8 +21,8 @@ export function AiProviderRow({
 	const account = provider.account?.email ?? provider.account?.name;
 	const connectId = `ai-connect-${provider.id}`;
 
-	// Say that it worked, and put focus on the sign-in button that replaces
-	// Disconnect once the row has switched (WCAG 4.1.3, 2.4.3).
+	// Disconnect unmounts the focused button; focus its replacement once the
+	// row has switched.
 	const focusConnectRef = useRef(false);
 	useEffect(() => {
 		if (provider.connected || !focusConnectRef.current) return;

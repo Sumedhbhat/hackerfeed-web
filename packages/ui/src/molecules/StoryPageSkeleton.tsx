@@ -1,7 +1,6 @@
 import { PageContainer } from "../atoms/PageContainer";
 import { Skeleton, SkeletonGroup } from "../atoms/Skeleton";
 
-/** Placeholder for the story detail page: back link, title and actions. */
 export function StoryPageSkeleton() {
 	return (
 		<PageContainer>

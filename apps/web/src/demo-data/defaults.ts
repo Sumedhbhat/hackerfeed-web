@@ -1,6 +1,5 @@
 import papersSnapshot from "./snapshot/papers.json";
 
-/** The day of the Hugging Face edition in the snapshot (see snapshot/). */
 export const DEMO_DATE: string = papersSnapshot.editionDate;
 
 /** `time` ("HH:MM:SS") on the demo day, as the ISO string ingestion writes. */

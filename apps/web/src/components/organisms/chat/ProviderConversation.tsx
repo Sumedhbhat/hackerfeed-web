@@ -29,7 +29,7 @@ export const STARTER_PROMPTS = [
 	"What are the main points of debate in the HN comments?",
 ];
 
-/** After an action removes the focused control, continue in the message box. */
+// For when an action removes the focused control.
 function focusComposer() {
 	requestAnimationFrame(() =>
 		document.getElementById("story-chat-input")?.focus(),
@@ -57,8 +57,7 @@ export function ProviderConversation({
 	const messageCount = chat.messages.length;
 	const streamingLength = chat.streamingText?.length ?? 0;
 
-	// Screen readers hear that a reply is coming and when it has arrived
-	// (WCAG 4.1.3), not every streamed word.
+	// Announce when a reply starts and ends, not every streamed word.
 	const [announcement, setAnnouncement] = useState("");
 	const showToast = useShowToast();
 	// The toast's Undo runs after the reset, so it needs the latest undoReset.
@@ -83,8 +82,8 @@ export function ProviderConversation({
 		wasStreamingRef.current = chat.isStreaming;
 	}, [chat.isStreaming, chat.messages, provider.name]);
 
-	// Keep the newest text and the composer in view while a reply streams, but
-	// only while the reader is at the bottom: scrolling up to reread stops it.
+	// Follow a streaming reply only while the reader is at the bottom:
+	// scrolling up to reread stops it.
 	const followRef = useRef(true);
 	const lastCountRef = useRef(messageCount);
 	// Sending a question always scrolls to it; a reply finishing does not.
@@ -161,8 +160,7 @@ export function ProviderConversation({
 							</Text>
 						)}
 						<SelectField
-							// Named after the visible provider, so voice control can say
-							// "ChatGPT model" (WCAG 2.5.3).
+							// Includes the visible provider name so voice control can say "ChatGPT model".
 							label={`${provider.name} model`}
 							hideLabel
 							value={model}

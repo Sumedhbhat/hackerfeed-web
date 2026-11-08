@@ -21,7 +21,6 @@ export const storedStory = (
 	...fields,
 });
 
-/** The first top stories, stored as if the demo reader had saved them. */
 export const storyRows: Story[] = hackerNews.threads
 	.slice(0, 6)
 	.map((thread) => storedStory(thread));

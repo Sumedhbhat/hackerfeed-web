@@ -20,7 +20,6 @@ import { PaperSummary } from "./PaperSummary";
 
 type PaperRowProps = {
 	canFavorite: boolean;
-	/** Tint the row once saved; off in the Saved list, where everything is saved. */
 	markSaved?: boolean;
 	isFavorited: boolean;
 	isPending: boolean;

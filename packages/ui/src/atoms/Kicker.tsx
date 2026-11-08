@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 
-/** Short label shown above a heading. */
 export function Kicker({
 	children,
 	as: Element = "p",

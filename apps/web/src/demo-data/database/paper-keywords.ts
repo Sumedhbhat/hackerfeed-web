@@ -5,7 +5,6 @@ import { paperId } from "./papers";
 
 type PaperKeyword = typeof hfPaperKeywords.$inferSelect;
 
-/** Each snapshot paper's Hugging Face keywords, in their listed order. */
 export const paperKeywordRows: PaperKeyword[] = snapshotPapers.flatMap(
 	(paper) =>
 		paper.keywords.map((keyword, index) => ({

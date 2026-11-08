@@ -1,12 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 
-/**
- * Tells screen readers how many results match once typing or a filter change
- * settles (WCAG 4.1.3), for a `LiveStatus`. It speaks only when `filterKey`
- * (the search and filters) changes: not on first load, and not when the list
- * changes for another reason (an unsave, Undo, Clear), which say so themselves.
- * `emptyMessage` replaces the default "No … match." (e.g. no edition that day).
- */
+// Speaks only when `filterKey` (the search and filters) changes: not on first
+// load, and not when the list changes for another reason (an unsave, Undo,
+// Clear), which announce themselves.
 export function useResultCountAnnouncement(
 	count: number,
 	[one, many]: [singular: string, plural: string],

@@ -185,8 +185,7 @@ describe("FavoritesPage backend source of truth", () => {
 		second.focus();
 		fireEvent.click(second);
 
-		// Not back to the top of the list: the next row, where "Second" was.
-		// The row's first control is its title link.
+		// Focus moves to the next row's first control, its title link.
 		await waitFor(() =>
 			expect(document.activeElement?.textContent).toBe("Third"),
 		);
@@ -354,7 +353,6 @@ describe("FavoritesPage paper collection", () => {
 			}),
 		);
 		expect(screen.queryByText("Saved Reasoning Paper")).toBeNull();
-		// A toast says what happened, since the row and its button are gone.
 		expect(
 			await screen.findByText("Removed “Saved Reasoning Paper” from Saved"),
 		).toBeTruthy();

@@ -194,8 +194,6 @@ describe("AiProvidersCard", () => {
 		disconnect.focus();
 		fireEvent.click(disconnect);
 
-		// Focus moves to the button that replaces Disconnect (WCAG 2.4.3), and
-		// the change is announced (4.1.3).
 		const signIn = await screen.findByRole("button", {
 			name: "Sign in with ChatGPT",
 		});

@@ -7,7 +7,6 @@ type Paper = typeof hfPapers.$inferSelect;
 
 export const paperId = (arxivId: string) => `demo-paper-${arxivId}`;
 
-/** The snapshot's papers, in its rank order (most upvoted first). */
 export const paperRows: Paper[] = snapshotPapers.map((paper) => ({
 	id: paperId(paper.arxivId),
 	arxivId: paper.arxivId,

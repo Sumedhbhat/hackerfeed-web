@@ -39,7 +39,6 @@ describe("parseInline", () => {
 			{ kind: "text", text: " " },
 			{ kind: "link", text: "d", href: "https://e.example/f_(g)" },
 			{ kind: "text", text: " " },
-			// Not a web link, so it stays as the text it was.
 			{ kind: "text", text: "[x](javascript:y)" },
 		]);
 	});

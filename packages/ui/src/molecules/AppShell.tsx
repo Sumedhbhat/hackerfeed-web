@@ -13,7 +13,6 @@ export function AppShell({
 }) {
 	return (
 		<div className="app-shell">
-			{/* First stop on every page: jump past the header (WCAG 2.4.1). */}
 			<a
 				href="#content"
 				className="sr-only rounded-md bg-(--surface-strong) px-3 py-2 text-sm font-semibold text-(--lagoon-deep) shadow-(--shadow-raised) focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[60]"

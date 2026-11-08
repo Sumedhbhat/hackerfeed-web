@@ -11,7 +11,6 @@ type PanelProps = Omit<HTMLAttributes<HTMLElement>, "className" | "style"> & {
 	width?: keyof typeof WIDTH;
 };
 
-/** Bordered box aligned to the page column, capped when given a width. Used for forms and status screens. */
 export function Panel({
 	as: Element = "section",
 	width = "full",

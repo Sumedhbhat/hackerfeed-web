@@ -2,7 +2,6 @@ import { Code2, Globe } from "lucide-react";
 import { ExternalButtonLink } from "../atoms/Button";
 import { Icon } from "../atoms/Icon";
 
-/** A paper's optional project page and code links. */
 export function PaperResourceLinks({
 	title,
 	projectPage,

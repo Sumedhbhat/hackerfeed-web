@@ -15,7 +15,6 @@ export const favorite = (
 	...fields,
 });
 
-/** The demo reader has saved the first three stored stories. */
 export const favoriteRows: Favorite[] = storyRows
 	.slice(0, 3)
 	.map((story, index) =>

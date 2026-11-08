@@ -4,7 +4,6 @@ import { titleHead } from "#/lib/page-title";
 
 export type FavoritesType = "stories" | "papers";
 
-/** The tab the URL asks for; none means "open whichever tab has items". */
 export function parseFavoritesSearch(search: Record<string, unknown>): {
 	type?: FavoritesType;
 } {

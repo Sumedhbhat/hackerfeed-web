@@ -8,17 +8,13 @@ const DEPTH_BORDERS = [
 	"ml-1 border-l-2 border-(--chip-line) pl-3 sm:pl-4",
 ] as const;
 
-/**
- * A list of comments (a thread, or the replies to one comment). Nesting
- * lists is what tells assistive tech how deep a reply is.
- */
+/** Replies are nested lists: that is what tells assistive tech how deep a reply is. */
 export function ThreadList({
 	children,
 	divided = false,
 	"aria-label": ariaLabel,
 }: {
 	children: ReactNode;
-	/** Hairlines between top-level comments. */
 	divided?: boolean;
 	"aria-label"?: string;
 }) {
@@ -32,7 +28,6 @@ export function ThreadList({
 	);
 }
 
-/** One comment in a ThreadList; replies hang off a thread line, indenting less as they nest. */
 export function ThreadItem({
 	depth = 0,
 	children,

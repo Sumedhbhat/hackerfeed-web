@@ -401,7 +401,6 @@ describe("StoryChatPage", () => {
 		});
 		fireEvent.click(screen.getByRole("button", { name: "Send" }));
 
-		// Shown and announced as cut off, not "replied" (WCAG 4.1.3).
 		expect(await screen.findByText("Reply cut off.")).toBeTruthy();
 		expect(
 			await screen.findByText("ChatGPT's reply was cut off.", {
@@ -419,7 +418,6 @@ describe("StoryChatPage", () => {
 		const box = await screen.findByLabelText("Ask about this story");
 		fireEvent.change(box, { target: { value: "x".repeat(8_005) } });
 
-		// Not cut off silently: the whole paste stays, with the overage described.
 		expect((box as HTMLTextAreaElement).value).toHaveLength(8_005);
 		expect(box.getAttribute("aria-invalid")).toBe("true");
 		expect(screen.getByText(/^5 characters over the 8,000 limit/)).toBeTruthy();
@@ -477,7 +475,6 @@ describe("StoryChatPage", () => {
 		fireEvent.click(stop);
 
 		await screen.findByRole("button", { name: "Send" });
-		// Stop turned back into a disabled Send; focus moved to the message box.
 		await waitFor(() =>
 			expect(document.activeElement).toBe(
 				screen.getByLabelText("Ask about this story"),

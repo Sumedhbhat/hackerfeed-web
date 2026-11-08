@@ -3,11 +3,9 @@ import type { LucideIcon } from "lucide-react";
 type IconProps = {
 	icon: LucideIcon;
 	size?: number;
-	/** Fill the shape with the text color (e.g. a saved bookmark). */
 	filled?: boolean;
 	/** Dim the icon next to text. */
 	muted?: boolean;
-	/** Colour the icon green to mark an in-app AI action. */
 	accent?: boolean;
 };
 

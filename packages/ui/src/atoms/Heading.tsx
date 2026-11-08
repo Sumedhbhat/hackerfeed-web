@@ -1,7 +1,5 @@
 import type { ReactNode } from "react";
 
-/* Things you read (story and paper titles) are set in the serif; interface
-   headings stay in the sans. */
 const SIZE = {
 	/** Large page title. */
 	page: "font-serif text-page-sm font-semibold tracking-[-0.01em] sm:text-page",
@@ -10,11 +8,8 @@ const SIZE = {
 		"font-serif text-headline-sm font-semibold tracking-[-0.01em] sm:text-headline",
 	/** Section heading inside a page or card. */
 	section: "text-lg font-semibold tracking-tight",
-	/** Card title, e.g. a paper. */
 	card: "font-serif text-row font-semibold leading-snug sm:text-xl",
-	/** Title of one row in a reading list. */
 	row: "text-lg font-semibold leading-snug sm:text-xl",
-	/** A heading inside running text, e.g. a chat reply: the text's own size, bold. */
 	inline: "text-read font-semibold",
 	/** Small heading for panels and groups. */
 	small: "text-base font-semibold tracking-tight",
@@ -25,9 +20,7 @@ type HeadingProps = {
 	level?: 1 | 2 | 3 | 4;
 	size?: keyof typeof SIZE;
 	id?: string;
-	/** Long unbroken text (an email) wraps anywhere instead of overflowing; never cut off (WCAG 1.4.10). */
 	breakAnywhere?: boolean;
-	/** Only for screen readers; names a region that is obvious visually. */
 	visuallyHidden?: boolean;
 };
 

@@ -6,7 +6,6 @@ import { paperId } from "./papers";
 
 type PaperAuthor = typeof hfPaperAuthors.$inferSelect;
 
-/** Each snapshot paper's authors, in their listed order. */
 export const paperAuthorRows: PaperAuthor[] = snapshotPapers.flatMap((paper) =>
 	paper.authors.map((name, index) => ({
 		id: `${paperId(paper.arxivId)}-${authorId(name)}`,

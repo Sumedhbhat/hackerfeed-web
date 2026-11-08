@@ -8,15 +8,10 @@ const FIELD =
 
 const INPUT_VARIANT = {
 	field: `${FIELD} px-3 py-2`,
-	/** No chrome: the parent draws the field (search boxes, composers). */
 	bare: "w-full min-w-0 border-0 bg-transparent text-base text-(--sea-ink) outline-none placeholder:text-(--sea-ink-faint) sm:text-sm",
 } as const;
 
-/**
- * Draws the field's border and focus ring around a `bare` input and a leading
- * icon. It is a <label>, so a click anywhere in the drawn box (padding, icon)
- * focuses the input (WCAG 2.5.8). Give the input its own name (aria-label).
- */
+/** A <label>, so a click anywhere in the drawn box (padding, icon) focuses the input. */
 export function FieldFrame({
 	children,
 	grow = false,
@@ -24,7 +19,6 @@ export function FieldFrame({
 }: {
 	children: React.ReactNode;
 	grow?: boolean;
-	/** Never narrower than a full date, at any text size (WCAG 1.4.4). */
 	fitsDate?: boolean;
 }) {
 	return (
@@ -47,7 +41,6 @@ export function TextInput({
 	return <Input className={INPUT_VARIANT[variant] || undefined} {...props} />;
 }
 
-/** Multi-line text input that grows to fill its row; inside a `Field` it takes the field's label, description and error. */
 export function TextArea({
 	variant = "field",
 	id,

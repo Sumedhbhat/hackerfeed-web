@@ -5,18 +5,12 @@ const VARIANT_CLASSES = {
 	/** Quiet grey link that darkens on hover (secondary actions, "Back"). */
 	subtle:
 		"rounded-sm text-sm text-(--sea-ink-soft) no-underline hover:text-(--sea-ink) hover:underline",
-	/** Green call-to-action link standing on its own (not inside a sentence); underlined on hover. */
 	accent:
 		"rounded-sm text-sm font-medium text-(--lagoon-deep) no-underline underline-offset-[3px] hover:text-(--lagoon-deep) hover:underline",
-	/** Top navigation item; tinted when the router marks it active. */
 	nav: "min-h-9 gap-1.5 rounded-md px-2 py-1.5 xs:px-2.5 text-sm font-medium whitespace-nowrap text-(--sea-ink-soft) no-underline hover:bg-(--chip-bg) hover:text-(--sea-ink) data-[status=active]:bg-(--lagoon-tint) data-[status=active]:text-(--lagoon-deep) sm:px-3",
-	/** A link inside text or a line of facts: green and always underlined, so it reads as a link, not more text. */
 	inline:
 		"text-(--lagoon-deep) underline decoration-(--lagoon)/40 underline-offset-[3px] hover:text-(--lagoon-deep) hover:decoration-(--lagoon)",
-	/**
-	 * A row's title link whose hit area covers the whole row (the row needs
-	 * `position: relative`), so a click anywhere on the card opens it.
-	 */
+	/** The hit area covers the nearest `position: relative` ancestor (the card). */
 	card: "rounded-sm text-inherit no-underline decoration-(--lagoon)/50 underline-offset-[3px] after:absolute after:inset-0 after:content-[''] hover:text-inherit hover:underline visited:text-(--sea-ink-soft)",
 } as const;
 
@@ -42,11 +36,7 @@ function StyledAnchor({ variant = "subtle", ...props }: StyledAnchorProps) {
 /** In-app link (`to="/favorites"`) styled as text. */
 export const TextLink = createLink(StyledAnchor);
 
-/**
- * Id of the hidden "Opens in a new tab" note that AppShell renders once; links
- * that open a new tab point at it with aria-describedby, since the ↗ icon
- * that shows it is hidden from assistive tech.
- */
+/** AppShell renders this hidden "Opens in a new tab" note once; new-tab links point at it with aria-describedby because the ↗ icon is aria-hidden. */
 export const NEW_TAB_NOTE_ID = "opens-in-new-tab";
 
 /** Link to another website, opened in a new tab. */

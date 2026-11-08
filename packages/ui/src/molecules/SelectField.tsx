@@ -16,7 +16,6 @@ export function SelectField({
 	hideLabel = false,
 }: {
 	label: string;
-	/** Keep the label for screen readers only. */
 	hideLabel?: boolean;
 	value: string;
 	options: SelectOption[];

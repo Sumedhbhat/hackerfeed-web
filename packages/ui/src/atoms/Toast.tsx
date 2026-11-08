@@ -14,7 +14,6 @@ export type ToastOptions = {
 	timeout?: number;
 	/** "high" interrupts a screen reader, for failures. */
 	priority?: "low" | "high";
-	/** A button in the toast, e.g. Undo; the toast closes after it runs. */
 	action?: { label: string; onClick: () => void };
 };
 

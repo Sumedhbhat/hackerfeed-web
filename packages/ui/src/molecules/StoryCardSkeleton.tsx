@@ -1,7 +1,6 @@
 import { readingCardClassName } from "../atoms/ReadingList";
 import { Skeleton, SkeletonGroup } from "../atoms/Skeleton";
 
-/** Placeholder with the shape of one feed row, shown while stories load. */
 export function StoryCardSkeleton() {
 	return (
 		<li className={`${readingCardClassName()} p-4 sm:p-6`}>

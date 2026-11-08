@@ -10,16 +10,14 @@ export function HeaderBar({
 	links: ReactNode;
 	actions: ReactNode;
 }) {
-	// On short screens (landscape phones, 400% zoom) the header scrolls away
-	// instead of taking a third of the view.
-	// Publish the header's height for `scroll-padding-top`, so focused and
-	// linked-to content always lands below it, however tall it gets (WCAG 2.4.11).
+	// Publish the header's real height for `scroll-padding-top` (styles.css),
+	// so focused content lands below it however tall it wraps.
 	const headerRef = useRef<HTMLElement>(null);
 	useEffect(() => {
 		const header = headerRef.current;
 		if (!header || typeof ResizeObserver === "undefined") return;
 		const root = document.documentElement;
-		// Not sticky on short screens (see below), so nothing to clear then.
+		// Not sticky on short screens (it would take a third of the view), so nothing to clear then.
 		const update = () =>
 			root.style.setProperty(
 				"--header-height",
@@ -41,9 +39,8 @@ export function HeaderBar({
 			ref={headerRef}
 			className="sticky top-0 z-50 [@media(max-height:500px)]:static border-b border-(--line) bg-(--header-bg) backdrop-blur-md"
 		>
-			{/* Below 360px (e.g. 320px, WCAG 1.4.10) the nav takes its own row. Above that, if
-			    larger text or spacing (1.4.12) still doesn't fit, its links wrap rather than
-			    sliding under the actions: the nav never shrinks below its widest link. */}
+			{/* Below 360px the nav takes its own row. Above that its links wrap rather
+			    than slide under the actions. */}
 			<div className="page-wrap flex min-h-14 items-center gap-1.5 px-3 flex-wrap max-[359px]:py-1.5 sm:gap-6 sm:px-6">
 				{brand}
 				<nav
