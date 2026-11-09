@@ -16,7 +16,9 @@ test("unsaving shows a toast with Undo, keeps focus in the list, and Undo puts i
 		`Removed “${name.replace(/^Saved /, "")}” from Saved`,
 	);
 	await expect(toast).toContainText(`${count - 1} left.`);
-	await expect(page.locator("#saved-list :focus")).toHaveCount(1);
+	await expect(
+		page.getByRole("list", { name: "Saved stories" }).locator(":focus"),
+	).toHaveCount(1);
 
 	await page.keyboard.press("F6");
 	await expect(toast).toBeFocused();

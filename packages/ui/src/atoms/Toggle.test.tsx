@@ -14,12 +14,16 @@ describe("ToggleButton", () => {
 		);
 		const button = screen.getByRole("button", { name: "Save" });
 		button.focus();
+		fireEvent.click(button);
+		expect(onPressedChange).toHaveBeenCalledWith(true);
+		onPressedChange.mockClear();
 
 		rerender(
 			<ToggleButton pressed={false} onPressedChange={onPressedChange} disabled>
 				Save
 			</ToggleButton>,
 		);
+		// Natively disabled buttons drop out of the tab order.
 		expect(button.hasAttribute("disabled")).toBe(false);
 		expect(button.getAttribute("aria-disabled")).toBe("true");
 		expect(document.activeElement).toBe(button);

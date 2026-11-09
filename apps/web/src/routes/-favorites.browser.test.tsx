@@ -207,9 +207,13 @@ describe("FavoritesPage backend source of truth", () => {
 		});
 		fireEvent.click(undo);
 
+		expect(trpcMock.add).toHaveBeenCalledTimes(1);
 		expect(trpcMock.add).toHaveBeenCalledWith(
 			expect.objectContaining({ id: 2, title: "Oops" }),
 		);
+		expect(
+			await screen.findByRole("button", { name: "Saved Oops", pressed: true }),
+		).toBeTruthy();
 		await waitFor(() =>
 			expect(screen.queryByRole("button", { name: /^Undo/ })).toBeNull(),
 		);
@@ -241,8 +245,8 @@ describe("FavoritesPage backend source of truth", () => {
 		fireEvent.click(undo);
 
 		await waitFor(() =>
-			expect(document.activeElement?.getAttribute("aria-label")).toBe(
-				"Saved Older Paper",
+			expect(document.activeElement).toBe(
+				screen.getByRole("button", { name: "Saved Older Paper" }),
 			),
 		);
 	});
@@ -285,6 +289,8 @@ describe("FavoritesPage paper collection", () => {
 				savedPaper({
 					arxivId: "2607.00002",
 					title: "Older Paper",
+					authors: ["Grace Hopper"],
+					keywords: ["robotics"],
 					savedAt: "2026-07-10T00:00:00.000Z",
 				}),
 			],
@@ -293,18 +299,27 @@ describe("FavoritesPage paper collection", () => {
 		render(<FavoritesPage activeType="papers" />);
 		await screen.findByText("Older Paper");
 
-		fireEvent.change(
-			screen.getByRole("searchbox", { name: "Search saved papers" }),
-			{ target: { value: "older" } },
-		);
-		expect(screen.getByText("Older Paper")).toBeTruthy();
-		expect(screen.queryByText("Saved Reasoning Paper")).toBeNull();
+		for (const search of ["older", "hopper", "robotics"]) {
+			fireEvent.change(
+				screen.getByRole("searchbox", { name: "Search saved papers" }),
+				{ target: { value: search } },
+			);
+			expect(screen.getByText("Older Paper")).toBeTruthy();
+			expect(screen.queryByText("Saved Reasoning Paper")).toBeNull();
+		}
 
 		fireEvent.change(
 			screen.getByRole("searchbox", { name: "Search saved papers" }),
 			{ target: { value: "nothing like this" } },
 		);
 		expect(screen.getByText(/No saved papers match/)).toBeTruthy();
+		expect(
+			await screen.findByText(
+				"No saved papers match.",
+				{ selector: "output" },
+				{ timeout: 2000 },
+			),
+		).toBeTruthy();
 	});
 
 	it("renders canonical paper links in newest-saved order and removes with the star", async () => {

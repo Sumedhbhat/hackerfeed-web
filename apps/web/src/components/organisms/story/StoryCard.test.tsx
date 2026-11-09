@@ -1,11 +1,12 @@
 import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
-import { StoryCardSkeleton } from "@hackerfeed/ui/molecules/StoryCardSkeleton";
+import { StoryListSkeleton } from "@hackerfeed/ui/molecules/StoryListSkeleton";
 import {
 	cleanup,
 	fireEvent,
 	render,
 	screen,
 	waitFor,
+	within,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { StoryCard } from "#/components/organisms/story/StoryCard";
@@ -121,14 +122,12 @@ afterEach(() => {
 	clearAllFavorites();
 });
 
-describe("StoryCardSkeleton", () => {
-	it("renders without throwing", () => {
-		render(
-			<ul>
-				<StoryCardSkeleton />
-			</ul>,
-		);
-		expect(document.querySelector("li")).not.toBeNull();
+describe("StoryListSkeleton", () => {
+	it("tells assistive tech that stories are loading", () => {
+		render(<StoryListSkeleton count={3} />);
+		expect(
+			screen.getByRole("status", { name: "Loading stories" }),
+		).toBeDefined();
 	});
 });
 
@@ -198,10 +197,11 @@ describe("StoryCard link actions", () => {
 		["A post with no link", null],
 	])("opens the in-app discussion for %s", (title, url) => {
 		render(<StoryCard story={makeStory({ id: 777, title, url })} />);
-		const heading = screen.getByRole("heading", { level: 2 });
-		const link = heading.querySelector("a");
-		expect(link?.getAttribute("href")).toBe("/story/777");
-		expect(link?.getAttribute("target")).toBeNull();
+		const link = within(screen.getByRole("heading", { level: 2 })).getByRole(
+			"link",
+		);
+		expect(link.getAttribute("href")).toBe("/story/777");
+		expect(link.getAttribute("target")).toBeNull();
 	});
 
 	it("the comment count links to the internal discussion page", () => {
@@ -233,7 +233,9 @@ describe("StoryCard link actions", () => {
 
 		fireEvent.click(screen.getByRole("link", { name: story.title ?? "" }));
 
-		expect(trpcMock.viewStory).toHaveBeenCalledWith({ action: "read", story });
+		expect(trpcMock.viewStory.mock.calls).toEqual([
+			[{ action: "read", story }],
+		]);
 	});
 
 	it("records middle-click reads but not other auxiliary clicks", () => {
@@ -336,19 +338,6 @@ describe("StoryCard favorite toggle", () => {
 			}),
 		);
 		expect(isFavorited(888)).toBe(false);
-	});
-
-	it("starts its name with the word it shows, Saved, once favorited (WCAG 2.5.3)", () => {
-		render(<StoryCard story={makeStory()} />);
-		fireEvent.click(
-			screen.getByRole("button", { name: /^save a test story title$/i }),
-		);
-		expect(
-			screen.getByRole("button", {
-				name: /^saved a test story title$/i,
-				pressed: true,
-			}).textContent,
-		).toContain("Saved");
 	});
 
 	it("shows 'Save' text when not favorited", () => {

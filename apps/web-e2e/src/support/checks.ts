@@ -1,10 +1,10 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, type Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 
 export async function open(page: Page, path: string) {
 	await page.goto(path);
 	await page.waitForLoadState("networkidle");
-	await expect(page.locator("main")).toBeVisible();
+	await expect(page.getByRole("main")).toBeVisible();
 }
 
 export async function axeViolations(page: Page) {
@@ -67,19 +67,38 @@ export function overlappingTargets(page: Page) {
 
 export async function tabStopsWithoutFocusRing(page: Page, stops = 20) {
 	await page.mouse.click(1, 1);
+	// A ring is an outline or shadow the control did not already have unfocused,
+	// so a card's resting shadow does not count as one.
+	await page.evaluate(() => {
+		const resting = new WeakMap<Element, string>();
+		for (const el of document.querySelectorAll("body *")) {
+			const style = getComputedStyle(el);
+			resting.set(
+				el,
+				`${style.outlineStyle} ${style.outlineWidth} ${style.outlineColor} ${style.boxShadow}`,
+			);
+		}
+		(window as unknown as { restingRing: typeof resting }).restingRing =
+			resting;
+	});
 	const missing: string[] = [];
 	for (let i = 0; i < stops; i++) {
 		await page.keyboard.press("Tab");
 		const stop = await page.evaluate(() => {
 			const el = document.activeElement;
 			if (!el || el === document.body) return null;
+			const resting = (
+				window as unknown as { restingRing: WeakMap<Element, string> }
+			).restingRing;
 			const ringed = (node: Element) => {
 				const style = getComputedStyle(node);
-				return (
-					(style.outlineStyle !== "none" &&
-						Number.parseFloat(style.outlineWidth) > 0) ||
-					style.boxShadow !== "none"
-				);
+				const now = `${style.outlineStyle} ${style.outlineWidth} ${style.outlineColor} ${style.boxShadow}`;
+				if (resting.get(node) === now) return false;
+				const outline =
+					style.outlineStyle !== "none" &&
+					Number.parseFloat(style.outlineWidth) > 0 &&
+					!/rgba\(.*,\s*0\)$|transparent/.test(style.outlineColor);
+				return outline || style.boxShadow !== "none";
 			};
 			let visible = ringed(el);
 			for (
@@ -101,10 +120,59 @@ export async function tabStopsWithoutFocusRing(page: Page, stops = 20) {
 	return missing;
 }
 
+/** Waits out CSS transitions, so a style change has reached the layout. */
+export function settled(page: Page) {
+	return page.evaluate(async () => {
+		await Promise.all(
+			document
+				.getAnimations()
+				.filter((animation) => animation instanceof CSSTransition)
+				.map((animation) => animation.finished.catch(() => undefined)),
+		);
+		await new Promise(requestAnimationFrame);
+	});
+}
+
+/** Sets the root text size and returns how much the smallest visible text grew. */
+export async function scaleText(page: Page, percent: number) {
+	const before = await page.evaluate((size) => {
+		const texts = [...document.querySelectorAll("body *")].filter(
+			(el) =>
+				el.checkVisibility() &&
+				[...el.childNodes].some(
+					(node) =>
+						node.nodeType === Node.TEXT_NODE && node.textContent?.trim(),
+				),
+		);
+		const before = texts.map((el) =>
+			Number.parseFloat(getComputedStyle(el).fontSize),
+		);
+		document.documentElement.style.fontSize = `${size}%`;
+		(window as unknown as { textBefore: unknown }).textBefore = {
+			texts,
+			before,
+		};
+		return before.length;
+	}, percent);
+	expect(before).toBeGreaterThan(0);
+	await settled(page);
+	return page.evaluate(() => {
+		const { texts, before } = (
+			window as unknown as {
+				textBefore: { texts: Element[]; before: number[] };
+			}
+		).textBefore;
+		return Math.min(
+			...texts.map(
+				(el, i) => Number.parseFloat(getComputedStyle(el).fontSize) / before[i],
+			),
+		);
+	});
+}
+
 // Lines closer than 12px belong to the same section (a title and its facts).
-export function cardSectionGaps(page: Page, nth = 1) {
-	return page.evaluate((index) => {
-		const card = document.querySelectorAll("main li")[index];
+export function cardSectionGaps(card: Locator) {
+	return card.evaluate((card) => {
 		const cardBox = card.getBoundingClientRect();
 		const lines: { top: number; bottom: number }[] = [];
 		const range = document.createRange();
@@ -156,5 +224,5 @@ export function cardSectionGaps(page: Page, nth = 1) {
 			Math.round(cardBox.bottom - (rows.at(-1)?.bottom ?? cardBox.bottom)),
 		);
 		return gaps;
-	}, nth);
+	});
 }

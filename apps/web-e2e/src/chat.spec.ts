@@ -11,7 +11,7 @@ test("a sent question gets a reply, announced, with focus left in the box", asyn
 	await box.press("Enter");
 	await expect(page.getByText("It comes down to two choices.")).toBeVisible();
 	await expect(
-		page.locator("output[aria-live]", { hasText: "ChatGPT replied." }),
+		page.getByRole("status").filter({ hasText: "ChatGPT replied." }),
 	).toHaveCount(1);
 	await expect(box).toBeFocused();
 });
@@ -36,11 +36,13 @@ test("New chat can be undone", async ({ page }) => {
 	const box = page.getByRole("textbox", { name: "Ask about this story" });
 	await box.fill("Hello");
 	await box.press("Enter");
-	await expect(page.getByText("It comes down to two choices.")).toBeVisible();
+	const reply = page.getByText("It comes down to two choices.");
+	await expect(reply).toBeVisible();
 	await page.getByRole("button", { name: "New chat" }).click();
+	await expect(reply).toHaveCount(0);
 	await expect(box).toBeFocused();
 	const toast = page.getByRole("region", { name: "Notifications" });
 	await expect(toast).toContainText("Started a new chat");
 	await toast.getByRole("button", { name: "Undo" }).click();
-	await expect(page.getByText("It comes down to two choices.")).toBeVisible();
+	await expect(reply).toBeVisible();
 });

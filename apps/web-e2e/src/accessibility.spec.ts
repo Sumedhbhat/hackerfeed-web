@@ -4,6 +4,8 @@ import {
 	horizontalOverflow,
 	open,
 	overlappingTargets,
+	scaleText,
+	settled,
 	tabStopsWithoutFocusRing,
 } from "./support/checks";
 import { threadStory } from "./support/data";
@@ -53,14 +55,13 @@ for (const [name, path] of SCREENS) {
 		}) => {
 			await open(page, path);
 			await page.addStyleTag({ content: TEXT_SPACING });
+			await settled(page);
 			expect(await horizontalOverflow(page)).toBeLessThanOrEqual(1);
 		});
 
 		test("keeps everything at 200% text size (1.4.4)", async ({ page }) => {
 			await open(page, path);
-			await page.evaluate(() => {
-				document.documentElement.style.fontSize = "200%";
-			});
+			expect(await scaleText(page, 200)).toBeGreaterThanOrEqual(1.99);
 			expect(await horizontalOverflow(page)).toBeLessThanOrEqual(1);
 		});
 
@@ -71,13 +72,15 @@ for (const [name, path] of SCREENS) {
 	});
 }
 
-for (const [name, path] of [
-	["story cards", "/"],
-	["paper cards", "/papers"],
+for (const [name, path, list] of [
+	["story cards", "/", "Top stories"],
+	["paper cards", "/papers", "Papers"],
 ] as const) {
 	test(`${name} space their sections evenly`, async ({ page }) => {
 		await open(page, path);
-		const gaps = await cardSectionGaps(page);
+		const gaps = await cardSectionGaps(
+			page.getByRole("list", { name: list }).getByRole("listitem").nth(1),
+		);
 		expect(
 			Math.max(...gaps) - Math.min(...gaps),
 			`gaps ${gaps.join(", ")}`,

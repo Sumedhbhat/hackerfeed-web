@@ -60,12 +60,21 @@ describe("ChatMarkdown", () => {
 	});
 
 	it("makes code blocks a named, focusable region so the keyboard can scroll them", () => {
-		const { container } = render(
-			<ChatMarkdown text={`\`\`\`\n${"x".repeat(200)}\n\`\`\``} />,
-		);
-		const region = container.querySelector("pre")?.closest("section");
-		expect(region?.getAttribute("tabindex")).toBe("0");
-		expect(region?.getAttribute("aria-label")).toBe("Code");
+		render(<ChatMarkdown text={`\`\`\`\n${"x".repeat(200)}\n\`\`\``} />);
+		const region = screen.getByRole("region", { name: "Code" });
+		expect(region.textContent).toBe("x".repeat(200));
+		expect(region.tabIndex).toBe(0);
+		region.focus();
+		expect(document.activeElement).toBe(region);
+	});
+
+	it("keeps a single line break inside a paragraph", () => {
+		const { container } = render(<ChatMarkdown text={"One\ntwo\n\nThree"} />);
+
+		const paragraphs = container.querySelectorAll("p");
+		expect(paragraphs).toHaveLength(2);
+		expect(paragraphs[0]?.textContent).toBe("Onetwo");
+		expect(paragraphs[0]?.querySelectorAll("br")).toHaveLength(1);
 	});
 
 	it("closes a longer fence only with a fence at least as long", () => {

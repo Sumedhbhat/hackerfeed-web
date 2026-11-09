@@ -1,5 +1,11 @@
 import type { PaperEdition } from "@hackerfeed/contracts/papers";
-import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import {
+	act,
+	cleanup,
+	fireEvent,
+	screen,
+	waitFor,
+} from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { expectNoAxeViolations } from "#/test/axe";
 import { renderWithQueryClient as render } from "#/test/renderWithQueryClient";
@@ -391,5 +397,57 @@ describe("PapersFeed", () => {
 			date: "2026-06-18",
 			topic: undefined,
 		});
+	});
+});
+
+describe("PapersFeed result count announcement", () => {
+	beforeEach(() => vi.useFakeTimers());
+	afterEach(() => vi.useRealTimers());
+
+	const announced = () =>
+		screen
+			.getAllByRole("status")
+			.map((status) => status.textContent)
+			.filter(Boolean);
+
+	const feed = (query: string, papers = edition.papers) => (
+		<PapersFeed
+			edition={{ ...edition, papers }}
+			filters={{ date: "2026-06-21", query }}
+			onFiltersChange={vi.fn()}
+		/>
+	);
+
+	it("stays quiet on load and announces the count once a search settles", () => {
+		const { rerender } = render(feed(""));
+		act(() => vi.advanceTimersByTime(1000));
+		expect(announced()).toEqual([]);
+
+		rerender(feed("rea"));
+		act(() => vi.advanceTimersByTime(300));
+		rerender(feed("reaz"));
+		act(() => vi.advanceTimersByTime(300));
+		expect(announced()).toEqual([]);
+		act(() => vi.advanceTimersByTime(700));
+		expect(announced()).toEqual(["No papers match these filters."]);
+
+		rerender(feed("rea"));
+		act(() => vi.advanceTimersByTime(700));
+		expect(announced()).toEqual(["1 paper"]);
+
+		rerender(feed(""));
+		act(() => vi.advanceTimersByTime(700));
+		expect(announced()).toEqual(["2 papers"]);
+	});
+
+	it("stays quiet when the list changes without a new search", () => {
+		const { rerender } = render(feed("paper"));
+		rerender(feed(""));
+		act(() => vi.advanceTimersByTime(700));
+		expect(announced()).toEqual(["2 papers"]);
+
+		rerender(feed("", edition.papers.slice(0, 1)));
+		act(() => vi.advanceTimersByTime(1000));
+		expect(announced()).toEqual(["2 papers"]);
 	});
 });

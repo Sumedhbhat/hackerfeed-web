@@ -411,6 +411,10 @@ describe("StoryChatPage", () => {
 		fireEvent.click(screen.getByRole("button", { name: "Try again" }));
 		expect(await screen.findByText("Full answer")).toBeTruthy();
 		expect(screen.queryByText("Partial answer")).toBeNull();
+		expect(chatBodies.map((body) => body.messages)).toEqual([
+			[{ role: "user", content: "Go" }],
+			[{ role: "user", content: "Go" }],
+		]);
 	});
 
 	it("says how far over the limit a long message is and won't send it", async () => {
