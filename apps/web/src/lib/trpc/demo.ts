@@ -1,5 +1,15 @@
 import type { AppRouter } from "@hackerfeed/api-client/trpc";
 import {
+	BUILT_IN_PALETTES,
+	DEFAULT_PALETTE,
+	type Palette,
+	paletteIdInputSchema,
+	paletteInputSchema,
+	paletteUpdateInputSchema,
+	preferencesUpdateInputSchema,
+	type ThemeMode,
+} from "@hackerfeed/contracts/appearance";
+import {
 	type FavoriteStoryInput,
 	favoriteStoryIdInputSchema,
 	hackerNewsStorySchema,
@@ -17,6 +27,10 @@ import {
 } from "@hackerfeed/contracts/view-activity";
 import { TRPCClientError, type TRPCLink } from "@trpc/client";
 import { observable } from "@trpc/server/observable";
+import {
+	paletteRows,
+	userPreferencesRows,
+} from "#/demo-data/database/appearance";
 import { authorRows } from "#/demo-data/database/authors";
 import { dailyPaperEntryRows } from "#/demo-data/database/daily-paper-entries";
 import { favoriteRows } from "#/demo-data/database/favorites";
@@ -79,6 +93,25 @@ export function createDemoApi() {
 			savedAt: `${row.createdAt.replace(" ", "T")}Z`,
 		});
 	}
+	const palettes = new Map<string, Palette>(
+		paletteRows.map(({ id, name, baseRole, baseColor, accentColor }) => [
+			id,
+			{ id, name, baseRole, baseColor, accentColor, builtIn: false },
+		]),
+	);
+	let preferences: { mode: ThemeMode; paletteId: string | null } | null =
+		userPreferencesRows[0] ?? null;
+	const findPalette = (id: string) =>
+		BUILT_IN_PALETTES.find((palette) => palette.id === id) ?? palettes.get(id);
+	const account = () => ({
+		preferences: {
+			mode: preferences?.mode ?? "auto",
+			palette:
+				(preferences?.paletteId && findPalette(preferences.paletteId)) ||
+				DEFAULT_PALETTE,
+			saved: preferences !== null,
+		},
+	});
 	const storyViews = new Set<number>();
 	const paperViews = new Set<string>();
 	const findPaper = (arxivId: string) => {
@@ -193,6 +226,45 @@ export function createDemoApi() {
 			case "paperFavorites.clear":
 				paperFavorites.clear();
 				return;
+			case "account.me":
+				return account();
+			case "preferences.update": {
+				const changes = preferencesUpdateInputSchema.parse(input);
+				if (changes.paletteId && !findPalette(changes.paletteId))
+					throw new Error("That palette was not found");
+				preferences = {
+					mode: changes.mode ?? preferences?.mode ?? "auto",
+					paletteId: changes.paletteId ?? preferences?.paletteId ?? null,
+				};
+				return account();
+			}
+			case "palettes.list":
+				return [...BUILT_IN_PALETTES, ...palettes.values()];
+			case "palettes.create": {
+				const palette = {
+					...paletteInputSchema.parse(input),
+					id: crypto.randomUUID(),
+					builtIn: false,
+				};
+				palettes.set(palette.id, palette);
+				return palette;
+			}
+			case "palettes.update": {
+				const palette = {
+					...paletteUpdateInputSchema.parse(input),
+					builtIn: false,
+				};
+				if (!palettes.has(palette.id))
+					throw new Error("That palette was not found");
+				palettes.set(palette.id, palette);
+				return palette;
+			}
+			case "palettes.delete": {
+				const { id } = paletteIdInputSchema.parse(input);
+				palettes.delete(id);
+				if (preferences?.paletteId === id) preferences.paletteId = null;
+				return;
+			}
 			case "views.story":
 				storyViews.add(storyViewInputSchema.parse(input).story.id);
 				return;

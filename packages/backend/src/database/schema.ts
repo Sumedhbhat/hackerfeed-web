@@ -104,6 +104,72 @@ export const paperFavorites = sqliteTable(
 	],
 );
 
+const HEX_COLOR_GLOB = `'#[0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F]'`;
+
+/**
+ * A reader's own colour palette. Only the three picked inputs are stored; the
+ * colours the UI uses are derived from them in the browser, so improving the
+ * derivation improves every palette. Built-in palettes live in
+ * `@hackerfeed/contracts/appearance`, not here.
+ */
+export const palettes = sqliteTable(
+	"palettes",
+	{
+		id: uuidPrimaryKey(),
+		appUserId: text()
+			.notNull()
+			.references(() => appUsers.id, { onDelete: "cascade" }),
+		name: text().notNull(),
+		baseRole: text({ enum: ["background", "text"] }).notNull(),
+		baseColor: text().notNull(),
+		accentColor: text().notNull(),
+		createdAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
+		updatedAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
+	},
+	(table) => [
+		index("palettes_app_user_id_created_at_id_idx").on(
+			table.appUserId,
+			table.createdAt,
+			table.id,
+		),
+		check(
+			"palettes_base_role_check",
+			sql`${table.baseRole} in ('background', 'text')`,
+		),
+		check(
+			"palettes_base_color_check",
+			sql`${table.baseColor} glob ${sql.raw(HEX_COLOR_GLOB)}`,
+		),
+		check(
+			"palettes_accent_color_check",
+			sql`${table.accentColor} glob ${sql.raw(HEX_COLOR_GLOB)}`,
+		),
+	],
+);
+
+/**
+ * One row per reader, created on their first choice. No row means the
+ * defaults, so a changed default reaches everyone who never chose.
+ */
+export const userPreferences = sqliteTable(
+	"user_preferences",
+	{
+		appUserId: text()
+			.primaryKey()
+			.references(() => appUsers.id, { onDelete: "cascade" }),
+		mode: text({ enum: ["light", "dark", "auto"] }).notNull(),
+		/** A built-in palette's id or a `palettes.id`; null or unknown means the default. */
+		paletteId: text(),
+		updatedAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
+	},
+	(table) => [
+		check(
+			"user_preferences_mode_check",
+			sql`${table.mode} in ('light', 'dark', 'auto')`,
+		),
+	],
+);
+
 export const activityActions = [
 	"story.read",
 	"story.discussion_opened",
