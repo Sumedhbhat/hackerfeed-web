@@ -19,16 +19,16 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
-    "@cloudflare/vite-plugin": "^1.64.0",
+    "@cloudflare/vite-plugin": "^1.65.0",
     "@hackerfeed/api-client": "workspace:*",
     "@hackerfeed/backend": "workspace:*",
     "@hackerfeed/contracts": "workspace:*",
     "@hackerfeed/hacker-news": "workspace:*",
     "@hackerfeed/runtime": "workspace:*",
     "@hackerfeed/ui": "workspace:*",
-    "@sentry/cloudflare": "^11.7.0",
+    "@sentry/cloudflare": "^11.9.0",
     "@sentry/core": "^11.7.0",
-    "@sentry/react": "^11.7.0",
+    "@sentry/react": "^11.9.0",
     "@t3-oss/env-core": "^0.13.10",
     "@tailwindcss/vite": "^4.3.3",
     "@tanstack/react-devtools": "latest",
@@ -48,14 +48,14 @@
     "culori": "^4.0.2",
     "drizzle-orm": "^0.45.3",
     "ky": "^2.1.0",
-    "lucide-react": "^1.49.0",
+    "lucide-react": "^1.62.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "tailwindcss": "^4.3.3",
     "zod": "^4.6.5"
   },
   "devDependencies": {
-    "@sentry/vite-plugin": "11.8.0",
+    "@sentry/vite-plugin": "11.9.0",
     "@tailwindcss/typography": "^0.5.20",
     "@tanstack/devtools-event-client": "latest",
     "@tanstack/devtools-vite": "^0.8.5",
@@ -70,8 +70,8 @@
     "babel-plugin-react-compiler": "^1.0.0",
     "happy-dom": "^21.0.4",
     "tsx": "^4.23.15",
-    "vite": "^8.3.1",
-    "vitest": "^5.0.4",
-    "wrangler": "^4.151.0"
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5",
+    "wrangler": "^4.153.0"
   }
 }
