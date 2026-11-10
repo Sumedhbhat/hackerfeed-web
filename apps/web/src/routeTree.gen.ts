@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as PapersRouteImport } from './routes/papers'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ApiFeatureFlagsRouteImport } from './routes/api.feature-flags'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as AuthSignedOutRouteImport } from './routes/auth.signed-out'
@@ -44,6 +45,11 @@ const PapersRoute = PapersRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiFeatureFlagsRoute = ApiFeatureFlagsRouteImport.update({
@@ -114,6 +120,7 @@ export interface FileRoutesByFullPath {
   '/favorites': typeof FavoritesRoute
   '/papers': typeof PapersRoute
   '/profile': typeof ProfileRoute
+  '/settings': typeof SettingsRoute
   '/api/feature-flags': typeof ApiFeatureFlagsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/signed-out': typeof AuthSignedOutRoute
@@ -132,6 +139,7 @@ export interface FileRoutesByTo {
   '/favorites': typeof FavoritesRoute
   '/papers': typeof PapersRoute
   '/profile': typeof ProfileRoute
+  '/settings': typeof SettingsRoute
   '/api/feature-flags': typeof ApiFeatureFlagsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/signed-out': typeof AuthSignedOutRoute
@@ -151,6 +159,7 @@ export interface FileRoutesById {
   '/favorites': typeof FavoritesRoute
   '/papers': typeof PapersRoute
   '/profile': typeof ProfileRoute
+  '/settings': typeof SettingsRoute
   '/api/feature-flags': typeof ApiFeatureFlagsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/signed-out': typeof AuthSignedOutRoute
@@ -171,6 +180,7 @@ export interface FileRouteTypes {
     | '/favorites'
     | '/papers'
     | '/profile'
+    | '/settings'
     | '/api/feature-flags'
     | '/auth/callback'
     | '/auth/signed-out'
@@ -189,6 +199,7 @@ export interface FileRouteTypes {
     | '/favorites'
     | '/papers'
     | '/profile'
+    | '/settings'
     | '/api/feature-flags'
     | '/auth/callback'
     | '/auth/signed-out'
@@ -207,6 +218,7 @@ export interface FileRouteTypes {
     | '/favorites'
     | '/papers'
     | '/profile'
+    | '/settings'
     | '/api/feature-flags'
     | '/auth/callback'
     | '/auth/signed-out'
@@ -226,6 +238,7 @@ export interface RootRouteChildren {
   FavoritesRoute: typeof FavoritesRoute
   PapersRoute: typeof PapersRoute
   ProfileRoute: typeof ProfileRoute
+  SettingsRoute: typeof SettingsRoute
   ApiFeatureFlagsRoute: typeof ApiFeatureFlagsRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   AuthSignedOutRoute: typeof AuthSignedOutRoute
@@ -268,6 +281,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/feature-flags': {
@@ -362,6 +382,7 @@ const rootRouteChildren: RootRouteChildren = {
   FavoritesRoute: FavoritesRoute,
   PapersRoute: PapersRoute,
   ProfileRoute: ProfileRoute,
+  SettingsRoute: SettingsRoute,
   ApiFeatureFlagsRoute: ApiFeatureFlagsRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   AuthSignedOutRoute: AuthSignedOutRoute,

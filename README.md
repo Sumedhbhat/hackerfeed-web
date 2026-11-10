@@ -459,3 +459,18 @@ the tree on the next dev server restart or build.
 Styling uses Tailwind CSS in `packages/ui/src/styles.css`, which the app loads
 as `@hackerfeed/ui/styles.css`. Tailwind scans `packages/ui/src` through
 `@source`; only atoms and molecules carry classes.
+
+Colours are roles (`--paper`, `--ink`, `--accent`…), each one `light-dark()`
+pair, registered as Tailwind colours (`bg-paper`, `text-ink`). Tailwind's own
+palette is switched off, so only the roles compile.
+
+### Modes and palettes
+
+Readers choose light, dark or automatic mode and a colour palette on
+`/settings`. Both are saved to their account and follow them to every device.
+A palette is two picked colours (a background or a text colour, plus an
+accent); `derivePalette` in `apps/web/src/lib/appearance/` works out the other
+fifteen for light and dark mode and keeps text readable (4.5:1) whatever was
+picked. Only the picked colours are stored, as `#RRGGBB`. The default palette
+is the stylesheet itself, and readers who never chose have no row, so changing
+the default reaches them.

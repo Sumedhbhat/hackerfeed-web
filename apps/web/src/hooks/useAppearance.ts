@@ -1,7 +1,9 @@
-import type {
-	Palette,
-	PreferencesUpdateInput,
-	ThemeMode,
+import {
+	BUILT_IN_PALETTES,
+	type Palette,
+	type PaletteInput,
+	type PreferencesUpdateInput,
+	type ThemeMode,
 } from "@hackerfeed/contracts/appearance";
 import {
 	useIsMutating,
@@ -110,4 +112,40 @@ export function useAppearanceSync() {
 				{ onSuccess: forgetLegacyMode },
 			);
 	}, [account, mutate]);
+}
+
+/** The built-in palettes plus the reader's own, with the calls that change the reader's own. */
+export function usePalettes() {
+	const { user } = useAuthSession();
+	const queryClient = useQueryClient();
+	const queryKey = ["palettes", user?.id ?? null] as const;
+	const refresh = () => queryClient.invalidateQueries({ queryKey });
+
+	const { data } = useQuery({
+		queryKey,
+		queryFn: () => createTrpcClient().palettes.list.query(),
+		enabled: Boolean(user),
+	});
+	const save = useMutation({
+		mutationFn: ({ id, ...palette }: PaletteInput & { id?: string }) =>
+			id
+				? createTrpcClient().palettes.update.mutate({ id, ...palette })
+				: createTrpcClient().palettes.create.mutate(palette),
+		onSuccess: refresh,
+	});
+	const remove = useMutation({
+		mutationFn: (id: string) =>
+			createTrpcClient().palettes.delete.mutate({ id }),
+		meta: { errorAction: "remove" },
+		// Deleting the palette in use puts the account back on the default.
+		onSuccess: () =>
+			Promise.all([
+				refresh(),
+				queryClient.invalidateQueries({
+					queryKey: accountQueryKey(user?.id),
+				}),
+			]),
+	});
+
+	return { palettes: data ?? BUILT_IN_PALETTES, save, remove };
 }

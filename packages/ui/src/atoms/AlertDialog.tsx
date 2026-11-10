@@ -10,15 +10,18 @@ export function AlertDialogTrigger({
 	variant = "secondary",
 	disabled,
 	children,
+	"aria-label": ariaLabel,
 }: {
 	variant?: ButtonVariant;
 	disabled?: boolean;
 	children: ReactNode;
+	"aria-label"?: string;
 }) {
 	return (
 		<BaseAlertDialog.Trigger
 			className={buttonClassName(variant)}
 			disabled={disabled}
+			aria-label={ariaLabel}
 		>
 			{children}
 		</BaseAlertDialog.Trigger>
