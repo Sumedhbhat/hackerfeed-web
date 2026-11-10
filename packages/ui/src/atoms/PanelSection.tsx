@@ -12,5 +12,5 @@ export function PanelSection({
 	as: Element = "section",
 	...props
 }: PanelSectionProps) {
-	return <Element className="border-t border-(--line) pt-5" {...props} />;
+	return <Element className="border-t border-line pt-5" {...props} />;
 }

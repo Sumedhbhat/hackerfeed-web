@@ -15,7 +15,7 @@ export function ProviderRow({
 	error?: ReactNode;
 }) {
 	return (
-		<li aria-label={name} className="rounded-lg border border-(--line) p-4">
+		<li aria-label={name} className="rounded-lg border border-line p-4">
 			<div className="flex flex-wrap items-start justify-between gap-3">
 				<div className="flex min-w-0 flex-col gap-1">
 					<Text weight="semibold">{name}</Text>

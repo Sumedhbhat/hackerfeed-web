@@ -17,7 +17,7 @@ export function IconHeading({
 }) {
 	return (
 		<div className="flex items-center gap-2">
-			<span className="flex text-(--sea-ink-soft)">
+			<span className="flex text-ink-soft">
 				<Icon icon={icon} size={16} />
 			</span>
 			<Heading level={level} size="small" id={id}>

@@ -16,9 +16,7 @@ export function PaperSignals({
 }) {
 	return (
 		<FactLine>
-			{authors ? (
-				<span className="text-(--sea-ink-soft)">{authors}</span>
-			) : null}
+			{authors ? <span className="text-ink-soft">{authors}</span> : null}
 			<span className="tabular-nums">
 				{upvotes} {upvotes === 1 ? "upvote" : "upvotes"}
 			</span>

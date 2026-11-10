@@ -7,6 +7,7 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from "../atoms/AlertDialog";
+import type { ButtonVariant } from "../atoms/Button";
 
 export function ConfirmButton({
 	children,
@@ -15,6 +16,8 @@ export function ConfirmButton({
 	confirmLabel,
 	onConfirm,
 	disabled,
+	triggerLabel,
+	variant,
 }: {
 	children: ReactNode;
 	title: string;
@@ -22,10 +25,19 @@ export function ConfirmButton({
 	confirmLabel: string;
 	onConfirm: () => void;
 	disabled?: boolean;
+	/** The trigger's accessible name when its text alone is ambiguous, e.g. "Delete Sunset". */
+	triggerLabel?: string;
+	variant?: ButtonVariant;
 }) {
 	return (
 		<AlertDialog>
-			<AlertDialogTrigger disabled={disabled}>{children}</AlertDialogTrigger>
+			<AlertDialogTrigger
+				disabled={disabled}
+				variant={variant}
+				aria-label={triggerLabel}
+			>
+				{children}
+			</AlertDialogTrigger>
 			<AlertDialogPopup>
 				<AlertDialogTitle>{title}</AlertDialogTitle>
 				<AlertDialogDescription>{description}</AlertDialogDescription>

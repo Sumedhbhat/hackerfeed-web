@@ -4,11 +4,11 @@ import { mergeProps } from "@base-ui/react/merge-props";
 import type { TextareaHTMLAttributes } from "react";
 
 const FIELD =
-	"rounded-md border border-(--field-line) bg-(--surface-strong) text-base text-(--sea-ink) placeholder:text-(--sea-ink-faint) focus-visible:border-(--lagoon) focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-(--lagoon) sm:text-sm";
+	"rounded-md border border-field-line bg-surface text-base text-ink placeholder:text-ink-faint focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-accent sm:text-sm";
 
 const INPUT_VARIANT = {
 	field: `${FIELD} px-3 py-2`,
-	bare: "w-full min-w-0 border-0 bg-transparent text-base text-(--sea-ink) outline-none placeholder:text-(--sea-ink-faint) sm:text-sm",
+	bare: "w-full min-w-0 border-0 bg-transparent text-base text-ink outline-none placeholder:text-ink-faint sm:text-sm",
 } as const;
 
 /** A <label>, so a click anywhere in the drawn box (padding, icon) focuses the input. */
@@ -24,7 +24,7 @@ export function FieldFrame({
 	return (
 		// biome-ignore lint/a11y/noLabelWithoutControl: the input inside is the control and is named by its aria-label
 		<label
-			className={`flex min-h-10 cursor-text items-center gap-2 rounded-md border border-(--field-line) bg-(--surface-strong) px-3 text-(--sea-ink-soft) focus-within:border-(--lagoon) focus-within:outline-2 focus-within:outline-(--lagoon) ${grow ? "min-w-0 flex-1" : "shrink-0"} ${fitsDate ? "min-w-[9.5em]" : ""}`}
+			className={`flex min-h-10 cursor-text items-center gap-2 rounded-md border border-field-line bg-surface px-3 text-ink-soft focus-within:border-accent focus-within:outline-2 focus-within:outline-accent ${grow ? "min-w-0 flex-1" : "shrink-0"} ${fitsDate ? "min-w-[9.5em]" : ""}`}
 		>
 			{children}
 		</label>

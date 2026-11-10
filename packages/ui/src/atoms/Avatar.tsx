@@ -30,13 +30,13 @@ export function Avatar({
 			{...(labelled
 				? { role: "img", "aria-label": name }
 				: { "aria-hidden": true })}
-			className={`${SIZE[size]} flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-(--lagoon) font-semibold text-(--on-lagoon)`}
+			className={`${SIZE[size]} flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-accent font-semibold text-on-accent`}
 		>
 			{imageUrl ? (
 				<BaseAvatar.Image
 					src={imageUrl}
 					alt=""
-					className="h-full w-full bg-(--chip-bg) object-cover"
+					className="h-full w-full bg-muted object-cover"
 				/>
 			) : null}
 			<BaseAvatar.Fallback>

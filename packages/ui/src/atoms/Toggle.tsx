@@ -35,7 +35,7 @@ export function ToggleButton({
 const LAYOUT = {
 	wrap: "flex flex-wrap gap-1",
 	segmented:
-		"inline-flex max-w-full flex-wrap items-center gap-1 rounded-lg border border-(--line) bg-(--chip-bg) p-1",
+		"inline-flex max-w-full flex-wrap items-center gap-1 rounded-lg border border-line bg-muted p-1",
 	/**
 	 * The ::after spacer lets the last chip scroll clear of the fade, and the
 	 * fade lifts while a chip has focus so it is never dimmed. Below 360px it

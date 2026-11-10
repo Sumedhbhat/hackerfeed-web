@@ -13,7 +13,7 @@ export function ProseList({
 	return (
 		<List
 			start={ordered && start !== 1 ? start : undefined}
-			className={`m-0 flex flex-col gap-1.5 pl-5 marker:text-(--sea-ink-faint) ${ordered ? "list-decimal" : "list-disc"}`}
+			className={`m-0 flex flex-col gap-1.5 pl-5 marker:text-ink-faint ${ordered ? "list-decimal" : "list-disc"}`}
 		>
 			{children}
 		</List>

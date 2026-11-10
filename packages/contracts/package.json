@@ -4,6 +4,7 @@
 	"type": "module",
 	"exports": {
 		"./ai": "./src/ai.ts",
+		"./appearance": "./src/appearance.ts",
 		"./favorites": "./src/favorites.ts",
 		"./paper-favorites": "./src/paper-favorites.ts",
 		"./papers": "./src/papers.ts",

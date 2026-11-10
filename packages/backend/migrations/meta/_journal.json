@@ -43,6 +43,13 @@
       "when": 1792830949589,
       "tag": "20261024083549_fold_views_into_activity_events",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1794282293142,
+      "tag": "20261110034453_appearance",
+      "breakpoints": true
     }
   ]
 }

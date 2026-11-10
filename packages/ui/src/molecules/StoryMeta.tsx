@@ -17,7 +17,7 @@ export function StoryMeta({
 	return (
 		<FactLine>
 			{domain ? (
-				<span className="min-w-0 text-(--sea-ink-soft) [overflow-wrap:anywhere]">
+				<span className="min-w-0 text-ink-soft [overflow-wrap:anywhere]">
 					{domain}
 				</span>
 			) : null}

@@ -14,8 +14,8 @@ export function PaperFeedMessage({
 	standalone?: boolean;
 }) {
 	const content = (
-		<section className="flex min-h-64 flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-(--chip-line) px-6 py-12 text-center">
-			<p className="m-0 max-w-md text-read text-(--sea-ink-soft)">{message}</p>
+		<section className="flex min-h-64 flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-muted-line px-6 py-12 text-center">
+			<p className="m-0 max-w-md text-read text-ink-soft">{message}</p>
 			{children}
 		</section>
 	);

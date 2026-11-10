@@ -39,12 +39,12 @@ function ToastList() {
 		<BaseToast.Root
 			key={toast.id}
 			toast={toast}
-			className="rounded-lg border border-(--line) bg-(--surface-strong) p-3 shadow-lg transition-[opacity,translate] duration-200 data-ending-style:translate-y-2 data-ending-style:opacity-0 data-starting-style:translate-y-2 data-starting-style:opacity-0"
+			className="rounded-lg border border-line bg-surface p-3 shadow-lg transition-[opacity,translate] duration-200 data-ending-style:translate-y-2 data-ending-style:opacity-0 data-starting-style:translate-y-2 data-starting-style:opacity-0"
 		>
 			<BaseToast.Content className="flex items-start gap-3">
 				<div className="flex min-w-0 flex-1 flex-col gap-1">
-					<BaseToast.Title className="m-0 text-sm font-semibold text-(--sea-ink)" />
-					<BaseToast.Description className="m-0 text-sm text-(--sea-ink-soft)" />
+					<BaseToast.Title className="m-0 text-sm font-semibold text-ink" />
+					<BaseToast.Description className="m-0 text-sm text-ink-soft" />
 					{(toast.data as ToastData | undefined)?.details}
 				</div>
 				{toast.actionProps ? (

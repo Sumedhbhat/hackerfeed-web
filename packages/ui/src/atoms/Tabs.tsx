@@ -2,7 +2,7 @@ import { Tabs as BaseTabs } from "@base-ui/react/tabs";
 import type { ReactNode } from "react";
 
 const TAB_CLASSES =
-	"inline-flex min-h-8 cursor-pointer items-center gap-1.5 rounded-md border border-transparent px-3.5 py-1 text-sm font-medium text-(--sea-ink-soft) transition-colors hover:text-(--sea-ink) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--lagoon) data-active:border-(--lagoon) data-active:bg-(--surface-strong) data-active:text-(--sea-ink) data-active:shadow-(--shadow-raised) forced-colors:data-active:outline-2 forced-colors:data-active:outline-[Highlight]";
+	"inline-flex min-h-8 cursor-pointer items-center gap-1.5 rounded-md border border-transparent px-3.5 py-1 text-sm font-medium text-ink-soft transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent data-active:border-accent data-active:bg-surface data-active:text-ink data-active:shadow-(--shadow-raised) forced-colors:data-active:outline-2 forced-colors:data-active:outline-[Highlight]";
 
 export function Tabs<T extends string>({
 	value,
@@ -36,7 +36,7 @@ export function TabList({
 		<BaseTabs.List
 			activateOnFocus={activateOnFocus}
 			aria-label={ariaLabel}
-			className="inline-flex max-w-full flex-wrap items-center gap-1 self-start rounded-lg border border-(--line) bg-(--chip-bg) p-1"
+			className="inline-flex max-w-full flex-wrap items-center gap-1 self-start rounded-lg border border-line bg-muted p-1"
 		>
 			{children}
 		</BaseTabs.List>

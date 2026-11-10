@@ -5,7 +5,7 @@ type Topic = { keyword: string; paperCount: number };
 const ALL = "\u0000all";
 
 function ChipCount({ count }: { count: number }) {
-	return <span className="text-(--sea-ink-faint) tabular-nums">{count}</span>;
+	return <span className="text-ink-faint tabular-nums">{count}</span>;
 }
 
 /** Scrollable row of topic filter chips, starting with "All papers". */

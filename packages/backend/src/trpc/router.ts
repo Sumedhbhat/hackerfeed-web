@@ -1,6 +1,15 @@
 import "@tanstack/react-start/server-only";
 
 import {
+	accountOutputSchema,
+	paletteIdInputSchema,
+	paletteInputSchema,
+	paletteListOutputSchema,
+	paletteSchema,
+	paletteUpdateInputSchema,
+	preferencesUpdateInputSchema,
+} from "@hackerfeed/contracts/appearance";
+import {
 	favoriteStoriesOutputSchema,
 	favoriteStoryIdInputSchema,
 	hackerNewsStorySchema,
@@ -28,6 +37,12 @@ import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
 import * as Sentry from "@sentry/cloudflare";
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
+import {
+	type AppearanceService,
+	createAppearanceServiceFromDatabase,
+	PaletteLimitError,
+	PaletteNotFoundError,
+} from "../appearance/service";
 import { createFavoriteServiceFromDatabase } from "../favorites/service";
 import { createHuggingFacePaperFeedServiceFromDatabase } from "../huggingface-papers/feed";
 import {
@@ -168,6 +183,27 @@ function getViewActivityApiService(
 	return createViewActivityServiceFromDatabase(database);
 }
 
+function getAppearanceApiService(
+	database: TrpcContext["database"],
+	appearance?: AppearanceService,
+) {
+	if (appearance) return appearance;
+
+	return createAppearanceServiceFromDatabase(database);
+}
+
+function mapAppearanceError(error: unknown): never {
+	if (error instanceof PaletteNotFoundError) {
+		throw new TRPCError({ code: "NOT_FOUND", message: error.message });
+	}
+
+	if (error instanceof PaletteLimitError) {
+		throw new TRPCError({ code: "BAD_REQUEST", message: error.message });
+	}
+
+	throw error;
+}
+
 function mapPaperFavoriteError(error: unknown): never {
 	if (error instanceof PaperNotFoundError) {
 		throw new TRPCError({ code: "NOT_FOUND", message: error.message });
@@ -193,8 +229,64 @@ export function createAppRouter(
 	papers?: PapersApiService,
 	paperFavorites?: PaperFavoritesApiService,
 	viewActivity?: ViewActivityApiService,
+	appearance?: AppearanceService,
 ) {
 	return t.router({
+		account: t.router({
+			me: protectedProcedure
+				.output(accountOutputSchema)
+				.query(({ ctx }) =>
+					getAppearanceApiService(ctx.database, appearance).getAccount(
+						ctx.user,
+					),
+				),
+		}),
+		preferences: t.router({
+			update: protectedProcedure
+				.input(preferencesUpdateInputSchema)
+				.output(accountOutputSchema)
+				.mutation(({ ctx, input }) =>
+					getAppearanceApiService(ctx.database, appearance)
+						.updatePreferences(ctx.user, input)
+						.catch(mapAppearanceError),
+				),
+		}),
+		palettes: t.router({
+			list: protectedProcedure
+				.output(paletteListOutputSchema)
+				.query(({ ctx }) =>
+					getAppearanceApiService(ctx.database, appearance).listPalettes(
+						ctx.user,
+					),
+				),
+
+			create: protectedProcedure
+				.input(paletteInputSchema)
+				.output(paletteSchema)
+				.mutation(({ ctx, input }) =>
+					getAppearanceApiService(ctx.database, appearance)
+						.createPalette(ctx.user, input)
+						.catch(mapAppearanceError),
+				),
+
+			update: protectedProcedure
+				.input(paletteUpdateInputSchema)
+				.output(paletteSchema)
+				.mutation(({ ctx, input: { id, ...palette } }) =>
+					getAppearanceApiService(ctx.database, appearance)
+						.updatePalette(ctx.user, id, palette)
+						.catch(mapAppearanceError),
+				),
+
+			delete: protectedProcedure
+				.input(paletteIdInputSchema)
+				.mutation(({ ctx, input }) =>
+					getAppearanceApiService(ctx.database, appearance).deletePalette(
+						ctx.user,
+						input.id,
+					),
+				),
+		}),
 		favorites: t.router({
 			list: protectedProcedure
 				.output(favoriteStoriesOutputSchema)

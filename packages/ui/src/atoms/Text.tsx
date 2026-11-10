@@ -7,9 +7,9 @@ const SIZE = {
 } as const;
 
 const TONE = {
-	default: "text-(--sea-ink)",
-	soft: "text-(--sea-ink-soft)",
-	faint: "text-(--sea-ink-faint)",
+	default: "text-ink",
+	soft: "text-ink-soft",
+	faint: "text-ink-faint",
 } as const;
 
 const WEIGHT = {

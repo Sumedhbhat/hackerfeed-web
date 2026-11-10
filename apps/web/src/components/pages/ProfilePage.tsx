@@ -1,13 +1,14 @@
-import { Button } from "@hackerfeed/ui/atoms/Button";
+import { Button, ButtonLink } from "@hackerfeed/ui/atoms/Button";
 import { Heading } from "@hackerfeed/ui/atoms/Heading";
 import { IconBadge } from "@hackerfeed/ui/atoms/IconBadge";
 import { PageContainer } from "@hackerfeed/ui/atoms/PageContainer";
 import { Panel } from "@hackerfeed/ui/atoms/Panel";
+import { Row } from "@hackerfeed/ui/atoms/Row";
 import { Skeleton, SkeletonGroup } from "@hackerfeed/ui/atoms/Skeleton";
 import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { Text } from "@hackerfeed/ui/atoms/Text";
 import { ProfileSummary } from "@hackerfeed/ui/molecules/ProfileSummary";
-import { User } from "lucide-react";
+import { Settings, User } from "lucide-react";
 import { AiProvidersCard } from "#/components/organisms/ai/AiProvidersCard";
 import { signIn, useAuthSession } from "#/hooks/useAuthSession";
 import { useFeatureFlag } from "#/hooks/useFeatureFlags";
@@ -87,6 +88,13 @@ export function ProfilePage({ search }: { search: ProfileSearch }) {
 						imageUrl={user.profilePictureUrl}
 						initials={getInitials(user.firstName, user.lastName, user.email)}
 					/>
+
+					<Row>
+						<ButtonLink to="/settings" variant="secondary">
+							<Settings size={15} aria-hidden="true" />
+							Settings
+						</ButtonLink>
+					</Row>
 
 					{aiChat ? (
 						<AiProvidersCard

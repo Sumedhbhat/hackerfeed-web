@@ -8,7 +8,7 @@ export function Kicker({
 	as?: "p" | "span";
 }) {
 	return (
-		<Element className="m-0 text-sm font-medium text-(--lagoon-deep)">
+		<Element className="m-0 text-sm font-medium text-accent-strong">
 			{children}
 		</Element>
 	);

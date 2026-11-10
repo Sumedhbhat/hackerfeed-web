@@ -4,7 +4,7 @@ export function Spinner({ label = "Loading" }: { label?: string }) {
 		<div
 			role="status"
 			aria-label={label}
-			className="h-8 w-8 animate-spin rounded-full border-2 border-(--chip-line) border-t-(--lagoon)"
+			className="h-8 w-8 animate-spin rounded-full border-2 border-muted-line border-t-accent"
 		/>
 	);
 }

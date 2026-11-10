@@ -1,22 +1,21 @@
 (() => {
 	try {
-		const stored = window.localStorage.getItem("theme");
-		const mode =
-			stored === "light" || stored === "dark" || stored === "auto"
-				? stored
-				: "auto";
-		const prefersDark = window.matchMedia(
-			"(prefers-color-scheme: dark)",
-		).matches;
-		const resolved = mode === "auto" ? (prefersDark ? "dark" : "light") : mode;
 		const root = document.documentElement;
-		root.classList.remove("light", "dark");
-		root.classList.add(resolved);
-		if (mode === "auto") {
-			root.removeAttribute("data-theme");
-		} else {
+		const cached = JSON.parse(
+			window.localStorage.getItem("hackerfeed:appearance") || "null",
+		);
+		const mode = cached ? cached.mode : window.localStorage.getItem("theme");
+		if (mode === "light" || mode === "dark") {
 			root.setAttribute("data-theme", mode);
 		}
-		root.style.colorScheme = resolved;
+		const hex = /^#[0-9a-f]{6}$/i;
+		for (const [role, pair] of Object.entries(cached?.colors || {})) {
+			if (/^[a-z-]+$/.test(role) && hex.test(pair[0]) && hex.test(pair[1])) {
+				root.style.setProperty(
+					`--${role}`,
+					`light-dark(${pair[0]}, ${pair[1]})`,
+				);
+			}
+		}
 	} catch {}
 })();

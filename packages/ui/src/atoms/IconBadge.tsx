@@ -1,8 +1,8 @@
 import type { LucideIcon } from "lucide-react";
 
 const TONE = {
-	accent: "text-(--lagoon-deep)",
-	soft: "text-(--sea-ink-soft)",
+	accent: "text-accent-strong",
+	soft: "text-ink-soft",
 } as const;
 
 /** Icon inside a round chip, used at the top of status panels. */
@@ -19,7 +19,7 @@ export function IconBadge({
 }) {
 	return (
 		<div
-			className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-(--lagoon-tint) ${TONE[tone]}`}
+			className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent-tint ${TONE[tone]}`}
 		>
 			<Glyph
 				size={size}

@@ -5,7 +5,7 @@ import { MenuItem, MenuLinkItem } from "@hackerfeed/ui/atoms/Menu";
 import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { Text } from "@hackerfeed/ui/atoms/Text";
 import { DropdownMenu } from "@hackerfeed/ui/molecules/DropdownMenu";
-import { LogOut, User } from "lucide-react";
+import { LogOut, Settings, User } from "lucide-react";
 import { useUserMenu } from "#/hooks/useUserMenu";
 
 export default function UserMenu() {
@@ -55,6 +55,10 @@ export default function UserMenu() {
 			<MenuLinkItem to="/profile">
 				<User size={15} aria-hidden="true" />
 				Profile
+			</MenuLinkItem>
+			<MenuLinkItem to="/settings">
+				<Settings size={15} aria-hidden="true" />
+				Settings
 			</MenuLinkItem>
 			<MenuItem onClick={() => signOut()}>
 				<LogOut size={15} aria-hidden="true" />

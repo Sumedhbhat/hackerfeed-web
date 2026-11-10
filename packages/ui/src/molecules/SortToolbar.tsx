@@ -20,7 +20,7 @@ export function SortToolbar<T extends string>({
 			<div className="flex min-w-0 items-center gap-3">
 				<span
 					id={labelId}
-					className="sr-only text-sm text-(--sea-ink-soft) sm:not-sr-only"
+					className="sr-only text-sm text-ink-soft sm:not-sr-only"
 				>
 					Sort by
 				</span>

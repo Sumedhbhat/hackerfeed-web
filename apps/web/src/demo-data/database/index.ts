@@ -3,6 +3,7 @@ import { getTableName } from "drizzle-orm";
 import { activityEventRows } from "./activity-events";
 import { aiProviderConnectionRows, aiProviderRows } from "./ai-providers";
 import { appUserRows } from "./app-users";
+import { paletteRows, userPreferencesRows } from "./appearance";
 import { authorRows } from "./authors";
 import { dailyPaperEntryRows } from "./daily-paper-entries";
 import { favoriteRows } from "./favorites";
@@ -26,6 +27,8 @@ export const databaseFixtures = new Map<string, FixtureRow[]>(
 			[schema.hfOrganizations, organizationRows],
 			[schema.hfPapers, paperRows],
 			[schema.paperFavorites, paperFavoriteRows],
+			[schema.palettes, paletteRows],
+			[schema.userPreferences, userPreferencesRows],
 			[schema.activityEvents, activityEventRows],
 			[schema.hfAuthors, authorRows],
 			[schema.hfPaperAuthors, paperAuthorRows],

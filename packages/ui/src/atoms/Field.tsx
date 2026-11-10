@@ -40,9 +40,7 @@ export function FieldDescription({
 }) {
 	return (
 		<BaseField.Description
-			className={
-				visuallyHidden ? "sr-only" : "m-0 text-meta text-(--sea-ink-faint)"
-			}
+			className={visuallyHidden ? "sr-only" : "m-0 text-meta text-ink-faint"}
 		>
 			{children}
 		</BaseField.Description>
@@ -54,7 +52,7 @@ export function FieldError({ children }: { children: ReactNode }) {
 		<BaseField.Error
 			match
 			aria-live="polite"
-			className="m-0 text-meta font-medium text-(--danger)"
+			className="m-0 text-meta font-medium text-danger"
 		>
 			{children}
 		</BaseField.Error>

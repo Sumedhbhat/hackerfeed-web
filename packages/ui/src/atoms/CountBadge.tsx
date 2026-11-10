@@ -12,7 +12,7 @@ export function CountBadge({
 }) {
 	return (
 		<span
-			className={`${compact ? "min-[360px]:max-xs:sr-only " : ""}inline-flex min-w-5 items-center justify-center rounded-full bg-(--bookmark-tint) px-1.5 py-0.5 text-xs font-semibold tabular-nums text-(--bookmark)`}
+			className={`${compact ? "min-[360px]:max-xs:sr-only " : ""}inline-flex min-w-5 items-center justify-center rounded-full bg-bookmark-tint px-1.5 py-0.5 text-xs font-semibold tabular-nums text-bookmark`}
 		>
 			{count}
 		</span>

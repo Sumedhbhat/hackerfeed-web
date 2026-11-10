@@ -15,7 +15,7 @@ export function TitleTag({
 	return (
 		<>
 			<span
-				className={`font-sans font-semibold whitespace-nowrap text-(--lagoon-deep) ${SIZE[size]}`}
+				className={`font-sans font-semibold whitespace-nowrap text-accent-strong ${SIZE[size]}`}
 			>
 				{children}
 				<span className="sr-only">:</span>
