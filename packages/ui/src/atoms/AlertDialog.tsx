@@ -28,8 +28,8 @@ export function AlertDialogTrigger({
 export function AlertDialogPopup({ children }: { children: ReactNode }) {
 	return (
 		<BaseAlertDialog.Portal>
-			<BaseAlertDialog.Backdrop className="fixed inset-0 z-50 bg-black/40" />
-			<BaseAlertDialog.Popup className="fixed top-1/2 left-1/2 z-50 flex w-[min(24rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 flex-col gap-2 rounded-lg border border-(--line) bg-(--surface-strong) p-5 shadow-lg outline-none">
+			<BaseAlertDialog.Backdrop className="fixed inset-0 z-50 bg-(--overlay)" />
+			<BaseAlertDialog.Popup className="fixed top-1/2 left-1/2 z-50 flex w-[min(24rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 flex-col gap-2 rounded-xl border border-(--line) bg-(--surface-strong) p-5 shadow-(--shadow-popup) outline-none">
 				{children}
 			</BaseAlertDialog.Popup>
 		</BaseAlertDialog.Portal>

@@ -1,24 +1,18 @@
 import type { ReactNode } from "react";
+import { readingCardClassName } from "./ReadingList";
 
-/** Bordered surface for one paper in a list; fades in, optionally staggered. */
 export function PaperCard({
 	children,
-	animationDelay,
+	saved = false,
 }: {
 	children: ReactNode;
-	/** Entrance animation delay in ms. */
-	animationDelay?: number;
+	saved?: boolean;
 }) {
 	return (
-		<article
-			className="papers-card papers-row rise-in"
-			style={
-				animationDelay === undefined
-					? undefined
-					: { animationDelay: `${animationDelay}ms` }
-			}
-		>
-			{children}
-		</article>
+		<li className={readingCardClassName(saved)}>
+			<article className="flex flex-col gap-4 p-4 sm:gap-5 sm:p-5">
+				{children}
+			</article>
+		</li>
 	);
 }

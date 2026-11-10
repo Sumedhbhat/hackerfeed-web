@@ -1,18 +1,18 @@
 import type { hfDailyPaperEntries } from "@hackerfeed/backend/database/schema";
-import { DEMO_DATE, ingestedTimestamps, isoAt } from "../defaults";
-import { paperRows } from "./papers";
+import { DEMO_DATE, ingestedTimestamps } from "../defaults";
+import { snapshotPapers } from "../snapshot";
+import { paperId } from "./papers";
 
 type DailyPaperEntry = typeof hfDailyPaperEntries.$inferSelect;
 
-/** Today's edition lists every paper, ranked in paperRows order. */
-export const dailyPaperEntryRows: DailyPaperEntry[] = paperRows.map(
-	(paper, index) => ({
-		id: `${paper.id}-entry-${DEMO_DATE}`,
+export const dailyPaperEntryRows: DailyPaperEntry[] = snapshotPapers.map(
+	(entry) => ({
+		id: `${paperId(entry.arxivId)}-entry-${DEMO_DATE}`,
 		editionDate: DEMO_DATE,
-		paperId: paper.id,
-		entryPublishedAt: isoAt(`0${index}:00:00`),
-		isAuthorParticipating: index % 2 === 0,
-		rank: index + 1,
+		paperId: paperId(entry.arxivId),
+		entryPublishedAt: entry.entryPublishedAt,
+		isAuthorParticipating: entry.isAuthorParticipating,
+		rank: entry.rank,
 		...ingestedTimestamps,
 	}),
 );

@@ -1,23 +1,34 @@
+import type { SavedPaper } from "@hackerfeed/contracts/paper-favorites";
+import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
 import { Button } from "@hackerfeed/ui/atoms/Button";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
 import { TextLink } from "@hackerfeed/ui/atoms/Link";
+import { LiveStatus } from "@hackerfeed/ui/atoms/LiveStatus";
 import { PageContainer } from "@hackerfeed/ui/atoms/PageContainer";
 import { PaperList } from "@hackerfeed/ui/atoms/PaperList";
+import { ReadingList } from "@hackerfeed/ui/atoms/ReadingList";
 import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { TabPanel, Tabs } from "@hackerfeed/ui/atoms/Tabs";
 import { Text } from "@hackerfeed/ui/atoms/Text";
+import { useShowToast } from "@hackerfeed/ui/atoms/Toast";
 import { ConfirmButton } from "@hackerfeed/ui/molecules/ConfirmButton";
 import { EmptyState } from "@hackerfeed/ui/molecules/EmptyState";
 import { InlineNotice } from "@hackerfeed/ui/molecules/InlineNotice";
+import { PageHeader } from "@hackerfeed/ui/molecules/PageHeader";
+import { SearchField } from "@hackerfeed/ui/molecules/SearchField";
 import { SortToolbar } from "@hackerfeed/ui/molecules/SortToolbar";
 import { ArrowRight, RefreshCw } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { FavoritesTabs } from "#/components/organisms/favorites/FavoritesTabs";
 import { PaperRow } from "#/components/organisms/papers/PaperRow";
 import { StoryCard } from "#/components/organisms/story/StoryCard";
 import { useFavorites } from "#/hooks/useFavorites";
 import { usePaperFavorites } from "#/hooks/usePaperFavorites";
+import { useRestoreReturnFocus } from "#/hooks/useRestoreReturnFocus";
+import { useResultCountAnnouncement } from "#/hooks/useResultCountAnnouncement";
 import { useViewActivity } from "#/hooks/useViewActivity";
+import { focusFirstIn, focusIsLost } from "#/lib/a11y/focus";
+import { matchesFilters } from "#/lib/papers/presentation";
 import type { FavoritesType } from "#/routes/favorites";
 
 type SortOrder = "newest" | "oldest" | "score";
@@ -30,12 +41,31 @@ type FavoritesPageProps = {
 };
 
 export function FavoritesPage({
-	activeType = "stories",
+	activeType: requestedType,
 	onTypeChange = () => undefined,
 }: FavoritesPageProps) {
 	const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
+	const [query, setQuery] = useState("");
 	const stories = useFavorites();
 	const papers = usePaperFavorites();
+	// With no saved stories, show Papers while they load or fail, so the reader
+	// sees "loading" or the error rather than a premature "nothing saved".
+	const autoType: FavoritesType =
+		stories.count === 0 &&
+		(papers.count > 0 || papers.isLoading || Boolean(papers.error))
+			? "papers"
+			: "stories";
+	// Once the automatic choice has found something, keep it: unsaving the last
+	// story must not flip the page to Papers under the reader's focus.
+	const settledTypeRef = useRef<FavoritesType | null>(null);
+	if (
+		!settledTypeRef.current &&
+		(autoType === "stories" ? stories.count : papers.count) > 0
+	) {
+		settledTypeRef.current = autoType;
+	}
+	const activeType: FavoritesType =
+		requestedType ?? settledTypeRef.current ?? autoType;
 	const { recordPaperView } = useViewActivity();
 	const isStories = activeType === "stories";
 	const activeCount = isStories ? stories.count : papers.count;
@@ -54,18 +84,63 @@ export function FavoritesPage({
 		return all;
 	}, [papers.savedPapers, sortOrder]);
 
+	const needle = query.trim().toLocaleLowerCase();
+	const visibleStories = needle
+		? sortedStories.filter((story) =>
+				[story.title, story.url, story.by]
+					.join(" ")
+					.toLocaleLowerCase()
+					.includes(needle),
+			)
+		: sortedStories;
+	const visiblePapers = needle
+		? sortedPapers.filter((paper) => matchesFilters(paper, needle))
+		: sortedPapers;
+	const visibleCount = isStories ? visibleStories.length : visiblePapers.length;
+	const restoredTitleRef = useRef<string | null>(null);
+	useRemovalToast(stories.getFavorites(), papers.savedPapers, (removed) => {
+		if (removed.kind === "story") stories.toggleFavorite(removed.item);
+		else papers.toggleFavorite(removed.item);
+		restoredTitleRef.current = removed.item.title;
+	});
+	// A restored row comes back once its save completes (papers go through the
+	// server), so focus its Saved button when it reappears.
+	useEffect(() => {
+		const title = restoredTitleRef.current;
+		if (!title) return;
+		const button = [
+			...document.querySelectorAll<HTMLElement>("button[aria-label]"),
+		].find(
+			(element) => element.getAttribute("aria-label") === `Saved ${title}`,
+		);
+		if (!button) return;
+		restoredTitleRef.current = null;
+		button.focus();
+	});
+	useRestoreReturnFocus(activeCount > 0);
+	const searchResult = useResultCountAnnouncement(
+		visibleCount,
+		isStories
+			? ["saved story", "saved stories"]
+			: ["saved paper", "saved papers"],
+		needle,
+	);
+
 	function clearAll() {
 		if (isStories) stories.clearAllFavorites();
 		else papers.clearAll();
 	}
 
-	const browseLabel = `Browse ${isStories ? "the feed" : "papers"}`;
+	const browseLabel = `Browse ${isStories ? "stories" : "papers"}`;
 
 	return (
-		<PageContainer spacing="compact">
+		<PageContainer>
+			<LiveStatus message={searchResult} />
 			<Tabs value={activeType} onValueChange={onTypeChange}>
 				<Stack gap="lg">
-					<FavoritesTabs />
+					<PageHeader title="Saved">
+						<FavoritesTabs />
+					</PageHeader>
 
 					{TYPES.map((type) => (
 						<TabPanel key={type} value={type}>
@@ -85,9 +160,9 @@ export function FavoritesPage({
 								/>
 							) : activeCount === 0 ? (
 								<EmptyState
-									kicker="Nothing saved yet"
-									title={`Your saved ${isStories ? "stories" : "papers"} list is empty.`}
-									description={`${browseLabel} and use the star to save items here.`}
+									title={`No saved ${isStories ? "stories" : "papers"} yet`}
+									headingSize="section"
+									description={`${browseLabel} and press Save on anything you want to keep.`}
 									action={
 										<TextLink to={isStories ? "/" : "/papers"} variant="accent">
 											{browseLabel} <Icon icon={ArrowRight} />
@@ -95,7 +170,15 @@ export function FavoritesPage({
 									}
 								/>
 							) : (
-								<>
+								<Stack gap="md">
+									<SearchField
+										value={query}
+										onChange={setQuery}
+										label={`Search saved ${isStories ? "stories" : "papers"}`}
+										placeholder={
+											isStories ? "Search saved stories" : "Search saved papers"
+										}
+									/>
 									<SortToolbar
 										options={[
 											{ value: "newest", label: "Newest" },
@@ -136,23 +219,28 @@ export function FavoritesPage({
 											}
 										/>
 									) : null}
-									{isStories ? (
-										<Stack as="section" gap="md" aria-label="Saved stories">
-											{sortedStories.map((story, index) => (
+									{visibleCount === 0 ? (
+										<Text tone="soft">
+											No saved {isStories ? "stories" : "papers"} match “
+											{query.trim()}”.
+										</Text>
+									) : isStories ? (
+										<ReadingList id="saved-list" aria-label="Saved stories">
+											{visibleStories.map((story) => (
 												<StoryCard
 													key={story.id}
 													story={story}
-													animationDelay={index * 50 + 60}
+													markSaved={false}
 												/>
 											))}
-										</Stack>
+										</ReadingList>
 									) : (
-										<PaperList aria-label="Saved papers">
-											{sortedPapers.map((paper, index) => (
+										<PaperList id="saved-list" aria-label="Saved papers">
+											{visiblePapers.map((paper) => (
 												<PaperRow
 													key={paper.arxivId}
 													paper={paper}
-													index={index}
+													markSaved={false}
 													canFavorite={papers.canFavorite}
 													isFavorited={papers.isFavorited(paper.arxivId)}
 													isPending={
@@ -167,7 +255,7 @@ export function FavoritesPage({
 											))}
 										</PaperList>
 									)}
-								</>
+								</Stack>
 							)}
 						</TabPanel>
 					))}
@@ -175,4 +263,78 @@ export function FavoritesPage({
 			</Tabs>
 		</PageContainer>
 	);
+}
+
+type Removed =
+	| { kind: "story"; item: HackerNewsStoryRecord }
+	| { kind: "paper"; item: SavedPaper };
+
+/**
+ * Unsaving removes the row, and the focused Save button with it: show a toast
+ * (announced, with Undo for a single item) and put focus on the row that took
+ * its place, or on the empty state's link when nothing is left.
+ */
+function useRemovalToast(
+	stories: HackerNewsStoryRecord[],
+	papers: SavedPaper[],
+	onUndo: (removed: Removed) => void,
+) {
+	const showToast = useShowToast();
+	const previousRef = useRef({ stories, papers });
+	const focusedRowRef = useRef(0);
+	const onUndoRef = useRef(onUndo);
+	onUndoRef.current = onUndo;
+
+	useEffect(() => {
+		const onFocusIn = (event: FocusEvent) => {
+			const list = document.getElementById("saved-list");
+			const row = (event.target as Element | null)?.closest("#saved-list > li");
+			if (list && row) focusedRowRef.current = [...list.children].indexOf(row);
+		};
+		document.addEventListener("focusin", onFocusIn);
+		return () => document.removeEventListener("focusin", onFocusIn);
+	}, []);
+
+	useEffect(() => {
+		const previous = previousRef.current;
+		previousRef.current = { stories, papers };
+		const removedStories = previous.stories.filter(
+			(story) => !stories.some((kept) => kept.id === story.id),
+		);
+		const removedPapers = previous.papers.filter(
+			(paper) => !papers.some((kept) => kept.arxivId === paper.arxivId),
+		);
+		const removedCount = removedStories.length + removedPapers.length;
+		if (removedCount === 0) return;
+
+		const left = removedStories.length > 0 ? stories.length : papers.length;
+		const description =
+			left === 0 ? "Nothing saved here now." : `${left} left.`;
+		const single: Removed | null =
+			removedCount !== 1
+				? null
+				: removedStories[0]
+					? { kind: "story", item: removedStories[0] }
+					: { kind: "paper", item: removedPapers[0] };
+		showToast(
+			single
+				? {
+						title: `Removed “${single.item.title}” from Saved`,
+						description,
+						timeout: 10_000,
+						action: { label: "Undo", onClick: () => onUndoRef.current(single) },
+					}
+				: { title: `Removed ${removedCount} from Saved`, description },
+		);
+
+		requestAnimationFrame(() => {
+			if (!focusIsLost()) return;
+			const rows = document.getElementById("saved-list")?.children;
+			if (rows?.length) {
+				focusFirstIn(rows[Math.min(focusedRowRef.current, rows.length - 1)]);
+			} else {
+				focusFirstIn(document.querySelector('[role="tabpanel"]:not([hidden])'));
+			}
+		});
+	}, [stories, papers, showToast]);
 }

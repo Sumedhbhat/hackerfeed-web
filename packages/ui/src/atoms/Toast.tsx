@@ -14,6 +14,7 @@ export type ToastOptions = {
 	timeout?: number;
 	/** "high" interrupts a screen reader, for failures. */
 	priority?: "low" | "high";
+	action?: { label: string; onClick: () => void };
 };
 
 /** Holds toasts raised anywhere inside it and shows them bottom-right. */
@@ -46,6 +47,9 @@ function ToastList() {
 					<BaseToast.Description className="m-0 text-sm text-(--sea-ink-soft)" />
 					{(toast.data as ToastData | undefined)?.details}
 				</div>
+				{toast.actionProps ? (
+					<BaseToast.Action className={buttonClassName("secondary")} />
+				) : null}
 				<BaseToast.Close
 					aria-label="Dismiss"
 					className={buttonClassName("icon")}
@@ -59,11 +63,23 @@ function ToastList() {
 
 /** Returns a function that shows a toast; call it inside `ToastProvider`. */
 export function useShowToast(): (options: ToastOptions) => void {
-	const { add } = BaseToast.useToastManager();
+	const { add, close } = BaseToast.useToastManager();
 	return useCallback(
-		({ details, ...options }: ToastOptions) => {
-			add<ToastData>({ ...options, data: { details } });
+		({ details, action, ...options }: ToastOptions) => {
+			const id: string = add<ToastData>({
+				...options,
+				data: { details },
+				...(action && {
+					actionProps: {
+						children: action.label,
+						onClick: () => {
+							action.onClick();
+							close(id);
+						},
+					},
+				}),
+			});
 		},
-		[add],
+		[add, close],
 	);
 }

@@ -1,20 +1,16 @@
 import type { ReactNode } from "react";
 
-/** Bottom of a PaperCard: facts, then actions, then keywords. */
 export function PaperCardFooter({
-	signals,
 	actions,
-	keywords,
+	save,
 }: {
-	signals: ReactNode;
 	actions: ReactNode;
-	keywords?: ReactNode;
+	save?: ReactNode;
 }) {
 	return (
-		<footer className="papers-row-footer">
-			{signals}
-			<div className="papers-row-actions">{actions}</div>
-			{keywords}
+		<footer className="action-row relative z-10 -ml-1.5 flex flex-wrap items-center gap-1 sm:-mr-2 sm:-ml-2">
+			<div className="flex flex-wrap items-center gap-x-0.5">{actions}</div>
+			{save ? <div className="ml-auto shrink-0">{save}</div> : null}
 		</footer>
 	);
 }

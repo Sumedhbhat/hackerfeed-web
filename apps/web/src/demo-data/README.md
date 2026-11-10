@@ -1,41 +1,31 @@
 # Demo data
 
-Dummy data that previews show instead of anything real. Nothing here comes
-from production, Hacker News or Hugging Face.
+What previews show: a snapshot of real public data, so the UI is judged on
+what readers actually see. Nothing here comes from production (no user data);
+the content is public Hacker News and Hugging Face data.
 
+- `snapshot/hacker-news.json`: the first 20 top, new and best stories, with a
+  sample of each top story's comments (up to 4 top-level comments and 2
+  replies each). `descendants` is Hacker News's real count, so a story can
+  show more comments than the snapshot holds.
+- `snapshot/papers.json`: one day's 20 most upvoted Hugging Face daily papers,
+  validated with production ingestion's own validator
+  (`packages/backend/src/huggingface-papers/schema.ts`), keeping what the app
+  shows: titles, summaries, AI summaries, author names, organizations and
+  keywords.
+- `hacker-news.ts` serves the Hacker News snapshot in the API's response
+  shape; preview builds (`VITE_DEMO_DATA=true`) answer Hacker News requests
+  from it (`src/lib/hacker-news/demo-api.ts`).
 - `database/<table>.ts`: every row of every D1 table, typed from
-  `packages/backend/src/database/schema.ts`. `database/index.ts` lists them all.
-- `hacker-news.ts`: stories, comments and feed orderings, in the Hacker News
-  API's response shape. Preview builds (`VITE_DEMO_DATA=true`) answer Hacker
-  News requests from it (`src/lib/hacker-news/demo-api.ts`).
+  `packages/backend/src/database/schema.ts` and built from the snapshots
+  (papers, authors, organizations, keywords, the day's edition) plus the demo
+  reader's own rows (saved stories and papers, activity). `database/index.ts`
+  lists them all. `defaults.ts` dates everything on the snapshot's edition day.
 
-## Writing rows
+## Refreshing
 
-Each table has a factory that fills in defaults, so a row only states what
-makes it different:
-
-```ts
-export const smallModels = paper({
-	arxivId: "2601.00003",
-	title: "Training Small Models on Dummy Data",
-	summary: "…",
-	paperPublishedAt: "2026-01-12T09:00:00.000Z",
-	upvotes: 90,
-});
-```
-
-Rows that reference other rows take the row, rather than its id, so the files import
-each other and the data stays linked:
-
-```ts
-paperFavorite(smallModels, { createdAt: sqliteAt("10:45:00") });
-paperAuthors(smallModels, [chen, dana]);
-```
-
-Some values are derived rather than written: stored stories (`stories.ts`) are
-built from the Hacker News threads, comment `parent`/`kids`/`descendants` from
-the nesting, feed orders from score and time, and ingestion counts from the
-row lists. Shared dates and timestamp helpers live in `defaults.ts`.
+`bun run demo-data:refresh` (from `apps/web`) fetches the live APIs and
+rewrites both snapshot files. Commit the result; previews then show it.
 
 ## Where it is used
 
@@ -73,11 +63,11 @@ and fails, naming the table, row and column, when:
 - a row references a row that does not exist,
 - a table is missing from `database/index.ts`.
 
-So adding a column usually means adding a default to that table's factory, and
-overriding it on the rows that should show the feature off.
+So adding a column usually means mapping it in that table's builder (from the
+snapshot where the data has it, otherwise a default), and refreshing the
+snapshot if ingestion now stores a new Hugging Face field.
 
 ## Checking against the live APIs
 
 `bun run demo-data:compare` fetches a few live Hacker News items and reports
-fields the live API returns that no demo item has, or whose type differs. It
-only compares shapes; nothing live is saved.
+fields the live API returns that no demo item has, or whose type differs.

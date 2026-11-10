@@ -19,6 +19,7 @@
     "db:migrate:local": "bun run --cwd apps/web db:migrate:local",
     "security:audit": "bun audit --audit-level=high",
     "test": "nx run-many -t test",
+    "e2e": "nx run web-e2e:e2e",
     "typecheck": "nx run-many -t typecheck",
     "format": "biome format",
     "lint": "biome lint",

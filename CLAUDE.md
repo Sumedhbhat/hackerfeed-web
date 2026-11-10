@@ -18,6 +18,7 @@ gh workflow run deploy.yaml  # Deploy with Terraform outputs in CI
 
 # Testing
 bun run test         # Every project's tests, through Nx
+bun run e2e          # End-to-end tests (apps/web-e2e): flows and accessibility
 bunx nx test backend # One project's tests
 cd packages/hacker-news && bunx vitest run src/utils.test.ts   # A single test file
 
@@ -84,7 +85,7 @@ Every component lives in one of four layers: atoms and molecules in `packages/ui
 | Layer | What goes here | Styling (`className`/`style`) | Data / hooks |
 |---|---|---|---|
 | `packages/ui/src/atoms/` | One styled element: `Button`, `ButtonLink`, `TextLink`, `Text`, `Heading`, `Kicker`, `Stack`, `Row`, `Card`, `Panel`, `PageContainer`, `Skeleton`, `Icon`, `Avatar`, `TextInput`… | Yes, the only place Tailwind classes are written | No |
-| `packages/ui/src/molecules/` | A few atoms composed into a reusable piece: `TabList`, `EmptyState`, `StatusPanel`, `BackLink`, `MetaLine`, `LoadingScreen`… | Yes, layout glue only | No, props in, callbacks out |
+| `packages/ui/src/molecules/` | A few atoms composed into a reusable piece: `TabList`, `EmptyState`, `StatusPanel`, `BackLink`, `StoryMeta`, `FeedRow`, `LoadingScreen`… | Yes, layout glue only | No, props in, callbacks out |
 | `components/organisms/<feature>/` | A feature section with behavior: `StoryCard`, `SiteHeader`, `Comment`, `PapersFeed`… | **No** | Yes |
 | `components/pages/` | The full body of one screen, rendered by a route: `FeedPage`, `StoryPage`, `PapersPage`… | **No** | Yes |
 
@@ -95,16 +96,30 @@ Interactive atoms are built on [Base UI](https://base-ui.com) (`@base-ui/react`)
 | Need | Atom (Base UI part) |
 |---|---|
 | Button | `Button` (`Button`). Links that look like buttons stay `<a>`: `ButtonLink`, `ExternalButtonLink` |
-| On/off button, pick-one chips | `ToggleButton`, `ToggleGroup` (`Toggle`, `ToggleGroup`) |
+| On/off button | `ToggleButton` (`Toggle`) |
+| Pick one of a few (chips, segments) | `ToggleGroup` + `ToggleGroupItem` (`Toolbar` around `ToggleGroup`, items are `Toolbar.Button` rendering `Toggle`) |
 | Tabs | `Tabs`, `TabList`, `Tab`, `TabPanel` (`Tabs`) |
 | Drop-down menu | `Menu`, `MenuTrigger`, `MenuPopup`, `MenuGroup`, `MenuItem`, `MenuLinkItem` (`Menu`) |
 | Dropdown field | `Select`, `SelectLabel`, `SelectTrigger`, `SelectOptions` (`Select`) |
 | Show/hide | `Collapsible`, `CollapsibleTrigger`, `CollapsiblePanel` (`Collapsible`) |
 | "Are you sure?" | `AlertDialog*` atoms, composed by the `ConfirmButton` molecule (`AlertDialog`) |
 | Picture or initials | `Avatar` (`Avatar`) |
-| Text input | `TextInput` (`Input`). `TextArea` is native: Base UI has none |
+| Text input | `TextInput` (`Input`), `TextArea` (`Field.Control` rendering a `<textarea>`) |
+| Label, hint and error for a control | `Field`, `FieldLabel`, `FieldDescription`, `FieldError` (`Field`): ids, `aria-describedby` and `aria-invalid` are wired for you |
+| Something happened (removed, disconnected), optionally with Undo | `useShowToast` (`Toast`); pass `action` for Undo. For silent status (counts, "replying…") use `LiveStatus` |
 
-These atoms manage their own ARIA state: pass `value`, `pressed` or `open`, never `aria-selected`/`aria-pressed`/`aria-expanded` by hand. A toggle keeps one label while pressed (`aria-label="Save to favorites"` + `pressed`). Never use `window.confirm`; use `ConfirmButton`. For a new interactive pattern, check whether Base UI has the component and wrap it in a new atom.
+These atoms manage their own ARIA state: pass `value`, `pressed` or `open`, never `aria-selected`/`aria-pressed`/`aria-expanded` by hand. A toggle's accessible name starts with the word it shows (WCAG 2.5.3 Label in Name): `aria-label={`${saved ? "Saved" : "Save"} ${title}`}` + `pressed`. Never use `window.confirm`; use `ConfirmButton`. For a new interactive pattern, check whether Base UI has the component and wrap it in a new atom.
+
+Accessibility rules (WCAG 2.2 AA; `apps/web-e2e` checks most of them). Code follows these without comments repeating them:
+- **Names match what's on screen.** An accessible name contains the visible text, first (2.5.3). axe ignores text in brackets, so `"DR, user menu"`, not `"User menu (DR)"`.
+- **Focus never drops to the page.** When an action removes the focused control (unsave, Stop, Disconnect, Load more), move focus to its replacement: the next row, the composer, the new button, or the empty state's link (2.4.3).
+- **Busy or unavailable controls stay focusable.** Use `Button busy`, `focusableWhenDisabled`, or `ToggleButton disabled` (all `aria-disabled`), never the native `disabled` on a control that might have focus.
+- **Say what happened, once.** Events (removed, disconnected, started a new chat) get a toast; silent status (result counts, "replying…") a `LiveStatus` that stays mounted. Announce outcomes, not every change.
+- **Fields don't act while you type.** Date and filter fields commit on blur or Enter (3.2.2).
+- **Every route has its own title** through `titleHead` (2.4.2).
+- **Text wraps, never clips.** Long user text (emails, domains, usernames) wraps (`breakAnywhere`), rows wrap instead of squeezing at 200% text or 320px, and nothing is cut off with an ellipsis (1.4.4, 1.4.10).
+- **Cards open from anywhere.** A row card's title uses the `card` link variant, whose hit area covers the card; controls inside sit above it with `relative z-10`. Card sections are spaced like the card's padding (16px, 20px from `sm`), so every visible gap is equal.
+- **Colour has one meaning each.** Brass is only for saved things; the sparkle icon only for in-app AI.
 
 Before building UI, list `packages/ui/src/atoms/` and `packages/ui/src/molecules/` and reuse what is there. Import them as `@hackerfeed/ui/atoms/<Name>`; a new one also needs an entry in `packages/ui/package.json` `exports`. Add a variant to an existing atom before adding a new atom.
 
@@ -114,7 +129,7 @@ Rules, enforced by Biome (`bun run check`) and guarded by `tools/workspace/src/l
 - `noRestrictedImports` stops atoms and molecules from importing app code (`#/*`) or any workspace package but `@hackerfeed/ui`, so they stay presentational, and stops atoms from importing molecules. It also stops everything outside `packages/ui/src/atoms/` from importing `@base-ui/*`.
 - Exempt (in `biome.json` overrides, never inline): tests, and the stylesheet-free error UI in `apps/web/src/client-entry.tsx`, `router.tsx` and `src/server/errors/`.
 
-When a rule blocks you, change the component, not the rule. Do not edit `biome.json` or `lint/`, add `biome-ignore` for these rules (the test fails on it), restyle elements from `packages/ui/src/styles.css`, or move files to dodge a rule. If the request can't be met within the layers, stop and say so. Colors come from the CSS variables in `packages/ui/src/styles.css` (`--lagoon`, `--sea-ink`…); add a token there rather than using raw Tailwind palette colors or hex values.
+When a rule blocks you, change the component, not the rule. Do not edit `biome.json` or `lint/`, add `biome-ignore` for these rules (the test fails on it), restyle elements from `packages/ui/src/styles.css`, or move files to dodge a rule. If the request can't be met within the layers, stop and say so. Colors come from the CSS variables in `packages/ui/src/styles.css` (`--lagoon`, `--sea-ink`…), each defined once as `light-dark(<light>, <dark>)`; add a token there rather than using raw Tailwind palette colors or hex values. Text sizes that repeat (`text-meta`, `text-read`, `text-row`…) are `@theme` tokens in the same file. Brass (`--bookmark*`) means "saved" and nothing else.
 
 Prefer props that describe intent (`tone="soft"`, `size="page"`, `variant="accent"`) over props that leak CSS. Tests that mock `@tanstack/react-router` must provide `createLink` (see `src/test/createLinkMock.tsx`), because the link atoms are built with it.
 
@@ -125,5 +140,7 @@ Shared and server packages run Vitest with its defaults (`node`, no config file)
 - **`browser`** — component and browser-API tests using `happy-dom` (`src/components/**/*.test.*` and `src/**/*.browser.test.*`)
 
 In `apps/web`, use the `.browser.test.ts` suffix for anything that touches `window`, `localStorage`, or DOM APIs. Inject collaborators into package code (as `createAiClient(auth)` does) rather than mocking another package's internals.
+
+End-to-end tests live in `apps/web-e2e` (Playwright). They build the static demo (`VITE_DEMO_DATA=true`, `VITE_DEMO_AI_CHAT=true`), serve it with `wrangler.preview.jsonc` like PR previews, block every request that leaves that server, and fake `/api/ai/*` (`src/support/fixtures.ts`). Each test runs at desktop (1440px) and phone (390px) widths. `accessibility.spec.ts` checks every page for axe (WCAG 2.2 AA, light and dark), no sideways scroll or overlapping tap targets, reflow at 320px, WCAG text spacing, 200% text, a focus ring on each tab stop, and evenly spaced card sections; add new pages to its `SCREENS` list. Flow specs are grouped by area (`feed`, `story`, `saved`, `papers`, `chat`) and read their stories from the demo snapshot (`src/support/data.ts`), so they keep working after `demo-data:refresh`. CI runs them in the build job. Locally, `PLAYWRIGHT_CHROMIUM_PATH=/usr/bin/google-chrome bun run e2e` uses an installed Chrome instead of downloading one; the run leaves `apps/web/dist` behind, which `bun run check` lints, so delete it afterwards.
 
 Base UI in tests: keyboard focus moves a tick after the key press, so wrap focus assertions in `waitFor`. A select option only takes a mouse click that started on it: `fireEvent.pointerDown(option, { pointerType: "mouse" })`, then `fireEvent.click(option)` (see `choose()` in `StoryChatPage.test.tsx`). Popups render in a portal, so query them from `screen`.

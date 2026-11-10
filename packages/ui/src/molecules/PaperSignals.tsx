@@ -1,29 +1,36 @@
-import { CalendarDays, Code2, ThumbsUp } from "lucide-react";
+import { FactLine } from "../atoms/FactLine";
 
-/** Upvotes, publish date and "has code" facts under a paper. */
+const SHOWN_TOPICS = 3;
+
 export function PaperSignals({
+	authors,
 	upvotes,
 	publishedLabel,
-	hasCode,
+	topics = [],
 }: {
+	authors: string;
 	upvotes: number;
 	/** Already formatted, e.g. "21 Jun". */
 	publishedLabel: string;
-	hasCode: boolean;
+	topics?: string[];
 }) {
 	return (
-		<div className="papers-signals">
-			<span>
-				<ThumbsUp size={14} aria-hidden="true" /> {upvotes}
+		<FactLine>
+			{authors ? (
+				<span className="text-(--sea-ink-soft)">{authors}</span>
+			) : null}
+			<span className="tabular-nums">
+				{upvotes} {upvotes === 1 ? "upvote" : "upvotes"}
 			</span>
-			<span>
-				<CalendarDays size={14} aria-hidden="true" /> {publishedLabel}
-			</span>
-			{hasCode ? (
+			<span>{publishedLabel}</span>
+			{topics.length > 0 ? (
 				<span>
-					<Code2 size={14} aria-hidden="true" /> Code
+					{topics.slice(0, SHOWN_TOPICS).join(", ")}
+					{topics.length > SHOWN_TOPICS
+						? ` +${topics.length - SHOWN_TOPICS} more`
+						: ""}
 				</span>
 			) : null}
-		</div>
+		</FactLine>
 	);
 }

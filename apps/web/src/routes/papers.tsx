@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { PapersPage } from "#/components/pages/PapersPage";
+import { titleHead } from "#/lib/page-title";
 
 type PapersSearch = {
 	date?: string;
@@ -12,6 +13,7 @@ function optionalSearchValue(value: unknown): string | undefined {
 }
 
 export const Route = createFileRoute("/papers")({
+	head: () => titleHead("Papers"),
 	validateSearch: (search: Record<string, unknown>): PapersSearch => ({
 		date: optionalSearchValue(search.date),
 		query: optionalSearchValue(search.query),

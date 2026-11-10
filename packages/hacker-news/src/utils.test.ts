@@ -5,6 +5,8 @@ import {
 	getDiscussionUrl,
 	getStoryDomain,
 	getStoryTitle,
+	isDiscussionPost,
+	splitPostKind,
 	stripHtml,
 } from "./utils";
 
@@ -105,5 +107,38 @@ describe("formatStoryAge", () => {
 		const twoHoursAgo = Math.floor(Date.now() / 1000) - 7200;
 		const result = formatStoryAge(twoHoursAgo);
 		expect(result).toContain("hour");
+	});
+});
+
+describe("splitPostKind", () => {
+	it("splits a Show HN / Ask HN prefix from the title", () => {
+		expect(splitPostKind("Show HN: A tiny spreadsheet")).toEqual({
+			kind: "Show HN",
+			text: "A tiny spreadsheet",
+		});
+		expect(splitPostKind("Ask HN: Why?")).toEqual({
+			kind: "Ask HN",
+			text: "Why?",
+		});
+	});
+
+	it("leaves other titles whole", () => {
+		expect(splitPostKind("Showing HN data")).toEqual({
+			text: "Showing HN data",
+		});
+		expect(splitPostKind("Show HN:")).toEqual({ text: "Show HN:" });
+	});
+});
+
+describe("isDiscussionPost", () => {
+	it("is true for Ask HN, Show HN and link-less posts, false for articles", () => {
+		expect(isDiscussionPost({ title: "Ask HN: Why?", url: null })).toBe(true);
+		expect(
+			isDiscussionPost({ title: "Show HN: A tool", url: "https://a.example" }),
+		).toBe(true);
+		expect(isDiscussionPost({ title: "Tell HN: Hello" })).toBe(true);
+		expect(
+			isDiscussionPost({ title: "A good article", url: "https://a.example" }),
+		).toBe(false);
 	});
 });

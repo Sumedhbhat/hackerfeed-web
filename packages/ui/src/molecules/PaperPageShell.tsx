@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
+import { PageContainer } from "../atoms/PageContainer";
 
-/** Full-height page background and centered column for the papers screen. */
 export function PaperPageShell({ children }: { children: ReactNode }) {
 	return (
-		<main className="papers-page">
-			<div className="papers-shell">{children}</div>
-		</main>
+		<PageContainer>
+			<div className="flex flex-col gap-4">{children}</div>
+		</PageContainer>
 	);
 }

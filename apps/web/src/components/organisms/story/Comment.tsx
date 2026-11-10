@@ -4,14 +4,18 @@ import {
 	CollapsiblePanel,
 	CollapsibleTrigger,
 } from "@hackerfeed/ui/atoms/Collapsible";
+import { Icon } from "@hackerfeed/ui/atoms/Icon";
 import { Prose } from "@hackerfeed/ui/atoms/Prose";
 import { Row } from "@hackerfeed/ui/atoms/Row";
 import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { Text } from "@hackerfeed/ui/atoms/Text";
-import { ThreadItem } from "@hackerfeed/ui/atoms/ThreadItem";
+import { ThreadItem, ThreadList } from "@hackerfeed/ui/atoms/ThreadItem";
 import { CommentSkeleton } from "@hackerfeed/ui/molecules/CommentSkeleton";
+import { useSuspenseQueries } from "@tanstack/react-query";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { Suspense } from "react";
 import { useComment } from "#/hooks/useComment";
+import { commentQueryOptions } from "#/lib/hacker-news/queries";
 
 type CommentProps = {
 	comment: HackerNewsCommentRecord;
@@ -24,7 +28,6 @@ export function Comment({ comment, depth = 0 }: CommentProps) {
 		setCollapsed,
 		repliesOpen,
 		setRepliesOpen,
-		childQueries,
 		age,
 		replyCount,
 	} = useComment(comment);
@@ -40,8 +43,7 @@ export function Comment({ comment, depth = 0 }: CommentProps) {
 				onOpenChange={(open) => setCollapsed(!open)}
 			>
 				<Stack gap="sm">
-					{/* Header row: author + age + collapse toggle */}
-					<Row gap="sm">
+					<Row gap="sm" wrap>
 						{comment.deleted ? (
 							<Text as="span" size="xs" tone="faint" italic>
 								[deleted]
@@ -52,7 +54,7 @@ export function Comment({ comment, depth = 0 }: CommentProps) {
 							</Text>
 						) : (
 							<>
-								<Text as="span" size="xs" weight="semibold">
+								<Text as="span" size="sm" weight="semibold">
 									{comment.by ?? "unknown"}
 								</Text>
 								<Text as="span" size="xs" tone="faint">
@@ -62,32 +64,35 @@ export function Comment({ comment, depth = 0 }: CommentProps) {
 						)}
 
 						{!isGone && (
-							<Row as="span" pushEnd>
+							<Row as="span">
 								<CollapsibleTrigger
+									inline
 									aria-label={`Comment by ${comment.by ?? "unknown"}`}
 								>
-									{collapsed ? "[+]" : "[-]"}
+									<Icon icon={collapsed ? ChevronRight : ChevronDown} />
 								</CollapsibleTrigger>
 							</Row>
 						)}
 					</Row>
 
 					<CollapsiblePanel>
-						<Stack gap="md">
+						<Stack gap="sm">
 							{comment.text && <Prose html={comment.text} />}
 
 							{replyCount > 0 && (
 								<Collapsible open={repliesOpen} onOpenChange={setRepliesOpen}>
 									<Stack gap="md">
 										<Row>
-											<CollapsibleTrigger>
+											<CollapsibleTrigger flush>
+												<Icon icon={repliesOpen ? ChevronDown : ChevronRight} />
 												{repliesOpen
 													? "Hide replies"
 													: `${replyCount} ${replyCount === 1 ? "reply" : "replies"}`}
 											</CollapsibleTrigger>
 										</Row>
 
-										{/* Nested replies — wrapped in Suspense so parent comment isn't affected while loading */}
+										{/* Replies load inside this boundary, so the comment and its
+										    "Hide replies" trigger stay mounted (and focused) meanwhile. */}
 										<CollapsiblePanel>
 											<Suspense
 												fallback={
@@ -98,18 +103,9 @@ export function Comment({ comment, depth = 0 }: CommentProps) {
 													</Stack>
 												}
 											>
-												<Stack gap="none">
-													{childQueries.map((q) => {
-														if (!q.data) return null;
-														return (
-															<Comment
-																key={q.data.id}
-																comment={q.data}
-																depth={depth + 1}
-															/>
-														);
-													})}
-												</Stack>
+												{repliesOpen ? (
+													<Replies ids={comment.kids} depth={depth + 1} />
+												) : null}
 											</Suspense>
 										</CollapsiblePanel>
 									</Stack>
@@ -120,5 +116,20 @@ export function Comment({ comment, depth = 0 }: CommentProps) {
 				</Stack>
 			</Collapsible>
 		</ThreadItem>
+	);
+}
+
+function Replies({ ids, depth }: { ids: number[]; depth: number }) {
+	const queries = useSuspenseQueries({
+		queries: ids.map((id) => commentQueryOptions(id)),
+	});
+	return (
+		<ThreadList>
+			{queries.map((q) =>
+				q.data ? (
+					<Comment key={q.data.id} comment={q.data} depth={depth} />
+				) : null,
+			)}
+		</ThreadList>
 	);
 }

@@ -19,6 +19,9 @@ function renderAt(path: string) {
 				<TextLink to="/" variant="nav">
 					Feed
 				</TextLink>
+				<TextLink to="/saved" variant="nav">
+					Saved
+				</TextLink>
 			</>
 		),
 	});
@@ -30,11 +33,15 @@ function renderAt(path: string) {
 }
 
 describe("router link atoms", () => {
-	it("keep their own classes when the router marks them active", async () => {
+	it("mark only the current page's links as the current page", async () => {
 		renderAt("/");
-		const [brand, feed] = await screen.findAllByRole("link");
-		expect(brand.getAttribute("data-status")).toBe("active");
-		expect(brand.className).toContain("flex");
-		expect(feed.className).toContain("nav-link");
+		const brand = await screen.findByRole("link", { name: "HackerFeed" });
+		expect(brand.getAttribute("aria-current")).toBe("page");
+		expect(
+			screen.getByRole("link", { name: "Feed" }).getAttribute("aria-current"),
+		).toBe("page");
+		const saved = screen.getByRole("link", { name: "Saved" });
+		expect(saved.getAttribute("href")).toBe("/saved");
+		expect(saved.getAttribute("aria-current")).toBeNull();
 	});
 });

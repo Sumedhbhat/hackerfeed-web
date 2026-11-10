@@ -1,17 +1,23 @@
 import type { PaperEdition } from "@hackerfeed/contracts/papers";
 import { Button } from "@hackerfeed/ui/atoms/Button";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
+import { LiveStatus } from "@hackerfeed/ui/atoms/LiveStatus";
 import { PaperList } from "@hackerfeed/ui/atoms/PaperList";
 import { InlineNotice } from "@hackerfeed/ui/molecules/InlineNotice";
 import { LoadMoreButton } from "@hackerfeed/ui/molecules/LoadMoreButton";
+import { PageHeader } from "@hackerfeed/ui/molecules/PageHeader";
 import { PaperEditionToolbar } from "@hackerfeed/ui/molecules/PaperEditionToolbar";
 import { PaperFeedMessage } from "@hackerfeed/ui/molecules/PaperFeedMessage";
 import { PaperPageShell } from "@hackerfeed/ui/molecules/PaperPageShell";
 import { PaperTopicNav } from "@hackerfeed/ui/molecules/PaperTopicNav";
 import { RefreshCw } from "lucide-react";
 import { useMemo, useState } from "react";
+import { useLoadMoreFocus } from "#/hooks/useLoadMoreFocus";
+import { usePaperEdition } from "#/hooks/usePaperEdition";
 import { usePaperFavorites } from "#/hooks/usePaperFavorites";
+import { useResultCountAnnouncement } from "#/hooks/useResultCountAnnouncement";
 import { useViewActivity } from "#/hooks/useViewActivity";
+import { formatEditionDate } from "#/lib/dates/edition";
 import { matchesFilters } from "#/lib/papers/presentation";
 import { PaperRow } from "./PaperRow";
 
@@ -35,6 +41,8 @@ export function PapersFeed({
 	onFiltersChange,
 }: PapersFeedProps) {
 	const favorites = usePaperFavorites();
+	// The undated edition is the latest one (cached once /papers has loaded).
+	const latestDate = usePaperEdition().data?.editionDate;
 	const { recordPaperView } = useViewActivity();
 	const [visibleCount, setVisibleCount] = useState(INITIAL_PAPER_COUNT);
 	const query = filters.query?.trim() ?? "";
@@ -46,22 +54,42 @@ export function PapersFeed({
 		[edition.papers, filters.topic, query],
 	);
 	const visiblePapers = filteredPapers.slice(0, visibleCount);
+	const withFocus = useLoadMoreFocus("papers-list", visiblePapers.length);
 	const selectedDate = filters.date ?? edition.editionDate ?? "";
 	const hasPapers = edition.papers.length > 0;
 	const hasActiveFilters = Boolean(query || filters.topic);
 	const emptyMessage = hasPapers
 		? "No papers match these filters."
 		: filters.date
-			? "No successful paper edition exists for this date."
+			? `No papers for ${formatEditionDate(filters.date)}.${
+					latestDate && latestDate !== filters.date
+						? ` The latest edition is ${formatEditionDate(latestDate)}.`
+						: ""
+				}`
 			: selectedDate
 				? "No papers are available for this edition."
 				: "No paper editions have been ingested yet.";
+	const resultCount = useResultCountAnnouncement(
+		filteredPapers.length,
+		["paper", "papers"],
+		`${query}|${filters.topic ?? ""}|${selectedDate}`,
+		emptyMessage,
+	);
 
 	return (
 		<PaperPageShell>
+			<LiveStatus message={resultCount} />
+			<PageHeader
+				title="Papers"
+				description="The day’s most discussed research papers."
+			/>
 			<PaperEditionToolbar
 				query={filters.query ?? ""}
 				date={selectedDate}
+				latestDate={latestDate ?? undefined}
+				canGoNext={Boolean(
+					latestDate && selectedDate && selectedDate < latestDate,
+				)}
 				onQueryChange={(value) =>
 					onFiltersChange({ ...filters, query: value || undefined })
 				}
@@ -98,11 +126,10 @@ export function PapersFeed({
 
 			{visiblePapers.length > 0 ? (
 				<>
-					<PaperList aria-label="Papers">
-						{visiblePapers.map((paper, index) => (
+					<PaperList id="papers-list" aria-label="Papers">
+						{visiblePapers.map((paper) => (
 							<PaperRow
 								canFavorite={favorites.canFavorite}
-								index={index}
 								isFavorited={favorites.isFavorited(paper.arxivId)}
 								isPending={favorites.isPending(paper.arxivId)}
 								key={paper.arxivId}
@@ -115,9 +142,9 @@ export function PapersFeed({
 					{visibleCount < filteredPapers.length ? (
 						<LoadMoreButton
 							label="Load more papers"
-							onClick={() =>
-								setVisibleCount((count) => count + INITIAL_PAPER_COUNT)
-							}
+							onClick={withFocus(() =>
+								setVisibleCount((count) => count + INITIAL_PAPER_COUNT),
+							)}
 						/>
 					) : null}
 				</>

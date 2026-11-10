@@ -23,16 +23,20 @@ export function Collapsible({
 
 export function CollapsibleTrigger({
 	variant = "ghost",
+	flush = false,
+	inline = false,
 	children,
 	"aria-label": ariaLabel,
 }: {
 	variant?: ButtonVariant;
+	flush?: boolean;
+	inline?: boolean;
 	children: ReactNode;
 	"aria-label"?: string;
 }) {
 	return (
 		<BaseCollapsible.Trigger
-			className={buttonClassName(variant)}
+			className={`${buttonClassName(variant)}${flush ? " -ml-1.5 sm:-ml-2" : ""}${inline ? " -my-2.5 sm:-my-1.5" : ""}`}
 			aria-label={ariaLabel}
 		>
 			{children}

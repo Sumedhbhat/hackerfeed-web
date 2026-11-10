@@ -1,41 +1,38 @@
 import type { HackerNewsCommentRecord } from "@hackerfeed/hacker-news/records";
 import { formatStoryAge } from "@hackerfeed/hacker-news/utils";
-import { useSuspenseQueries } from "@tanstack/react-query";
-import { useState } from "react";
-import { commentQueryOptions } from "#/lib/hacker-news/queries";
+import { useEffect, useRef, useState } from "react";
+import { useThreadExpansion } from "./useThreadExpansion";
 
 export type UseCommentReturn = {
 	collapsed: boolean;
 	setCollapsed: (value: boolean | ((prev: boolean) => boolean)) => void;
 	repliesOpen: boolean;
 	setRepliesOpen: (value: boolean | ((prev: boolean) => boolean)) => void;
-	childQueries: ReturnType<
-		typeof useSuspenseQueries<ReturnType<typeof commentQueryOptions>[]>
-	>;
 	age: string;
 	replyCount: number;
 };
 
 export function useComment(comment: HackerNewsCommentRecord): UseCommentReturn {
+	const expansion = useThreadExpansion();
 	const [collapsed, setCollapsed] = useState(false);
-	const [repliesOpen, setRepliesOpen] = useState(false);
+	// Replies that load after "Expand all" open too.
+	const [repliesOpen, setRepliesOpen] = useState(expansion.mode === "expand");
 
-	const childQueries = useSuspenseQueries({
-		queries: repliesOpen
-			? comment.kids.map((id) => commentQueryOptions(id))
-			: [],
-	});
-
-	const age = formatStoryAge(comment.time);
-	const replyCount = comment.kids.length;
+	// Compare `revision`, not `mode`, so pressing the same button twice applies.
+	const appliedRef = useRef(expansion.revision);
+	useEffect(() => {
+		if (expansion.revision === appliedRef.current) return;
+		appliedRef.current = expansion.revision;
+		setRepliesOpen(expansion.mode === "expand");
+		if (expansion.mode === "expand") setCollapsed(false);
+	}, [expansion]);
 
 	return {
 		collapsed,
 		setCollapsed,
 		repliesOpen,
 		setRepliesOpen,
-		childQueries,
-		age,
-		replyCount,
+		age: formatStoryAge(comment.time),
+		replyCount: comment.kids.length,
 	};
 }

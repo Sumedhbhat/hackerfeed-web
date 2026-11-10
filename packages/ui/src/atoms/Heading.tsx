@@ -2,13 +2,15 @@ import type { ReactNode } from "react";
 
 const SIZE = {
 	/** Large page title. */
-	page: "text-2xl font-semibold tracking-tight",
+	page: "font-serif text-page-sm font-semibold tracking-[-0.01em] sm:text-page",
 	/** Article/story title at the top of a detail page. */
-	title: "text-xl font-semibold leading-snug sm:text-2xl",
+	title:
+		"font-serif text-headline-sm font-semibold tracking-[-0.01em] sm:text-headline",
 	/** Section heading inside a page or card. */
-	section: "text-xl font-semibold tracking-tight",
-	/** Card or list item title. */
-	card: "text-lg font-semibold leading-snug sm:text-xl",
+	section: "text-lg font-semibold tracking-tight",
+	card: "font-serif text-row font-semibold leading-snug sm:text-xl",
+	row: "text-lg font-semibold leading-snug sm:text-xl",
+	inline: "text-read font-semibold",
 	/** Small heading for panels and groups. */
 	small: "text-base font-semibold tracking-tight",
 } as const;
@@ -18,22 +20,20 @@ type HeadingProps = {
 	level?: 1 | 2 | 3 | 4;
 	size?: keyof typeof SIZE;
 	id?: string;
-	/** Cut off with an ellipsis instead of wrapping. */
-	truncate?: boolean;
+	breakAnywhere?: boolean;
+	visuallyHidden?: boolean;
 };
 
 export function Heading({
 	level = 2,
 	size = "section",
-	truncate = false,
+	breakAnywhere = false,
+	visuallyHidden = false,
 	...props
 }: HeadingProps) {
 	const Element = `h${level}` as const;
-	const truncation = truncate ? " truncate" : "";
-	return (
-		<Element
-			className={`m-0 text-(--sea-ink) ${SIZE[size]}${truncation}`}
-			{...props}
-		/>
-	);
+	const className = visuallyHidden
+		? "sr-only"
+		: `m-0 text-(--sea-ink) ${size === "row" ? "" : "text-pretty "}${SIZE[size]}${breakAnywhere ? " min-w-0 [overflow-wrap:anywhere]" : ""}`;
+	return <Element className={className} {...props} />;
 }

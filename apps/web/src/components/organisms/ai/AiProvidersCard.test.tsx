@@ -7,6 +7,7 @@ import {
 	within,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { expectNoAxeViolations } from "#/test/axe";
 import { renderWithQueryClient as render } from "#/test/renderWithQueryClient";
 import { AiProvidersCard, getAiResultMessage } from "./AiProvidersCard";
 
@@ -179,6 +180,35 @@ describe("AiProvidersCard", () => {
 			"/api/ai/providers/claude/disconnect",
 			expect.objectContaining({ method: "POST" }),
 		);
+	});
+
+	it("keeps focus and announces the result when disconnecting by keyboard", async () => {
+		providers = [
+			provider({ connected: true, account: { email: "a@b.c", name: null } }),
+		];
+		render(<AiProvidersCard />);
+
+		const disconnect = await screen.findByRole("button", {
+			name: "Disconnect ChatGPT",
+		});
+		disconnect.focus();
+		fireEvent.click(disconnect);
+
+		const signIn = await screen.findByRole("button", {
+			name: "Sign in with ChatGPT",
+		});
+		await waitFor(() => expect(document.activeElement).toBe(signIn));
+		expect(await screen.findByText("ChatGPT disconnected")).toBeDefined();
+	});
+
+	it("has no axe violations with connected and disconnected rows", async () => {
+		providers = [
+			provider({ connected: true, account: { email: "a@b.c", name: null } }),
+			provider({ id: "claude", name: "Claude" }),
+		];
+		const { container } = render(<AiProvidersCard />);
+		await screen.findByRole("button", { name: "Disconnect ChatGPT" });
+		await expectNoAxeViolations(container);
 	});
 
 	it("shows a disconnect failure", async () => {

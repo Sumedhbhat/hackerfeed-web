@@ -5,6 +5,7 @@ const HEIGHT = {
 	lg: "h-5",
 	xl: "h-6",
 	block: "h-16",
+	control: "h-9",
 	avatar: "h-20",
 } as const;
 
@@ -33,7 +34,7 @@ export function Skeleton({
 	return (
 		<div
 			aria-hidden="true"
-			className={`shrink-0 bg-(--sand) ${HEIGHT[height]} ${SHAPE[shape]}`}
+			className={`shrink-0 bg-(--chip-line) ${HEIGHT[height]} ${SHAPE[shape]}`}
 			style={{ width, opacity }}
 		/>
 	);

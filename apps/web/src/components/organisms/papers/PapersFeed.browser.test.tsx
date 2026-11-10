@@ -1,12 +1,20 @@
 import type { PaperEdition } from "@hackerfeed/contracts/papers";
-import { cleanup, fireEvent, screen } from "@testing-library/react";
+import {
+	act,
+	cleanup,
+	fireEvent,
+	screen,
+	waitFor,
+} from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { expectNoAxeViolations } from "#/test/axe";
 import { renderWithQueryClient as render } from "#/test/renderWithQueryClient";
 import { PapersFeed } from "./PapersFeed";
 
 const authMock = vi.hoisted(() => ({ userId: "papers-page-user" }));
 const trpcMock = vi.hoisted(() => ({
 	add: vi.fn(),
+	latestEdition: vi.fn(),
 	list: vi.fn(),
 	remove: vi.fn(),
 	viewPaper: vi.fn(),
@@ -21,6 +29,9 @@ vi.mock("#/hooks/useAuthSession", () => ({
 
 vi.mock("#/lib/trpc/client", () => ({
 	createTrpcClient: () => ({
+		papers: {
+			edition: { query: trpcMock.latestEdition },
+		},
 		paperFavorites: {
 			add: { mutate: trpcMock.add },
 			list: { query: trpcMock.list },
@@ -92,6 +103,54 @@ afterEach(() => {
 });
 
 describe("PapersFeed", () => {
+	it("offers the next day only before the latest edition", async () => {
+		trpcMock.latestEdition.mockResolvedValue({
+			...emptyEdition,
+			editionDate: "2026-06-22",
+		});
+		const onFiltersChange = vi.fn();
+		const { rerender } = render(
+			<PapersFeed
+				edition={edition}
+				filters={{ date: "2026-06-21" }}
+				onFiltersChange={onFiltersChange}
+			/>,
+		);
+
+		const next = await screen.findByRole("button", { name: "Next day" });
+		await waitFor(() =>
+			expect(next.getAttribute("aria-disabled")).not.toBe("true"),
+		);
+		next.focus();
+		fireEvent.click(next);
+		expect(onFiltersChange).toHaveBeenCalledWith(
+			expect.objectContaining({ date: "2026-06-22" }),
+		);
+
+		rerender(
+			<PapersFeed
+				edition={{ ...edition, editionDate: "2026-06-22" }}
+				filters={{ date: "2026-06-22" }}
+				onFiltersChange={onFiltersChange}
+			/>,
+		);
+		// aria-disabled, not disabled, so focus isn't dropped to the page.
+		const latestNext = screen.getByRole("button", { name: "Next day" });
+		expect(latestNext.getAttribute("aria-disabled")).toBe("true");
+		expect(document.activeElement).toBe(latestNext);
+		onFiltersChange.mockClear();
+		fireEvent.click(latestNext);
+		expect(onFiltersChange).not.toHaveBeenCalled();
+	});
+
+	it("has no axe violations", async () => {
+		const { container } = render(
+			<PapersFeed edition={edition} filters={{}} onFiltersChange={vi.fn()} />,
+		);
+		await screen.findByRole("button", { name: "Next day" });
+		await expectNoAxeViolations(container);
+	});
+
 	it("shows the short summary and expands to the original abstract", () => {
 		render(
 			<PapersFeed edition={edition} filters={{}} onFiltersChange={vi.fn()} />,
@@ -161,7 +220,9 @@ describe("PapersFeed", () => {
 		);
 
 		fireEvent.click(
-			screen.getByRole("link", { name: "Discuss Reasoning Paper in ChatGPT" }),
+			screen.getByRole("link", {
+				name: "Open in ChatGPT: Reasoning Paper",
+			}),
 		);
 
 		expect(trpcMock.viewPaper).toHaveBeenCalledWith({
@@ -203,22 +264,23 @@ describe("PapersFeed", () => {
 		);
 
 		const save = screen.getByRole("button", {
-			name: "Save Reasoning Paper to favorites",
+			name: "Save Reasoning Paper",
 		});
 		expect(save.getAttribute("aria-pressed")).toBe("false");
 		expect(save.textContent).toContain("Save");
 		fireEvent.click(save);
 
 		const remove = await screen.findByRole("button", {
-			name: "Save Reasoning Paper to favorites",
+			name: "Saved Reasoning Paper",
 			pressed: true,
 		});
 		expect(remove.getAttribute("aria-pressed")).toBe("true");
-		expect(remove.textContent).toContain("Saved");
 		expect(trpcMock.add).toHaveBeenCalledWith({ arxivId: "2606.00001" });
 		expect(screen.getByRole("link", { name: "Reasoning Paper" })).toBeTruthy();
 		expect(
-			screen.getByRole("link", { name: "Discuss Reasoning Paper in ChatGPT" }),
+			screen.getByRole("link", {
+				name: "Open in ChatGPT: Reasoning Paper",
+			}),
 		).toBeTruthy();
 	});
 
@@ -238,7 +300,7 @@ describe("PapersFeed", () => {
 		);
 		fireEvent.click(
 			screen.getByRole("button", {
-				name: "Save Reasoning Paper to favorites",
+				name: "Save Reasoning Paper",
 			}),
 		);
 
@@ -254,7 +316,7 @@ describe("PapersFeed", () => {
 		fireEvent.click(refresh);
 
 		await screen.findByRole("button", {
-			name: "Save Reasoning Paper to favorites",
+			name: "Save Reasoning Paper",
 		});
 		expect(trpcMock.list).toHaveBeenCalledTimes(2);
 		expect(trpcMock.add).toHaveBeenCalledTimes(1);
@@ -266,7 +328,7 @@ describe("PapersFeed", () => {
 		);
 
 		const discussLink = screen.getByRole("link", {
-			name: "Discuss Reasoning Paper in ChatGPT",
+			name: "Open in ChatGPT: Reasoning Paper",
 		});
 		const chatUrl = new URL(discussLink.getAttribute("href") ?? "");
 		const prompt = chatUrl.searchParams.get("q") ?? "";
@@ -302,6 +364,8 @@ describe("PapersFeed", () => {
 		fireEvent.change(screen.getByLabelText("Choose edition date"), {
 			target: { value: "2026-06-18" },
 		});
+		expect(onFiltersChange).not.toHaveBeenCalled();
+		fireEvent.blur(screen.getByLabelText("Choose edition date"));
 
 		expect(onFiltersChange).toHaveBeenCalledWith({
 			date: "2026-06-18",
@@ -326,10 +390,64 @@ describe("PapersFeed", () => {
 		fireEvent.change(screen.getByLabelText("Choose edition date"), {
 			target: { value: "2026-06-18" },
 		});
+		expect(onFiltersChange).not.toHaveBeenCalled();
+		fireEvent.blur(screen.getByLabelText("Choose edition date"));
 
 		expect(onFiltersChange).toHaveBeenCalledWith({
 			date: "2026-06-18",
 			topic: undefined,
 		});
+	});
+});
+
+describe("PapersFeed result count announcement", () => {
+	beforeEach(() => vi.useFakeTimers());
+	afterEach(() => vi.useRealTimers());
+
+	const announced = () =>
+		screen
+			.getAllByRole("status")
+			.map((status) => status.textContent)
+			.filter(Boolean);
+
+	const feed = (query: string, papers = edition.papers) => (
+		<PapersFeed
+			edition={{ ...edition, papers }}
+			filters={{ date: "2026-06-21", query }}
+			onFiltersChange={vi.fn()}
+		/>
+	);
+
+	it("stays quiet on load and announces the count once a search settles", () => {
+		const { rerender } = render(feed(""));
+		act(() => vi.advanceTimersByTime(1000));
+		expect(announced()).toEqual([]);
+
+		rerender(feed("rea"));
+		act(() => vi.advanceTimersByTime(300));
+		rerender(feed("reaz"));
+		act(() => vi.advanceTimersByTime(300));
+		expect(announced()).toEqual([]);
+		act(() => vi.advanceTimersByTime(700));
+		expect(announced()).toEqual(["No papers match these filters."]);
+
+		rerender(feed("rea"));
+		act(() => vi.advanceTimersByTime(700));
+		expect(announced()).toEqual(["1 paper"]);
+
+		rerender(feed(""));
+		act(() => vi.advanceTimersByTime(700));
+		expect(announced()).toEqual(["2 papers"]);
+	});
+
+	it("stays quiet when the list changes without a new search", () => {
+		const { rerender } = render(feed("paper"));
+		rerender(feed(""));
+		act(() => vi.advanceTimersByTime(700));
+		expect(announced()).toEqual(["2 papers"]);
+
+		rerender(feed("", edition.papers.slice(0, 1)));
+		act(() => vi.advanceTimersByTime(1000));
+		expect(announced()).toEqual(["2 papers"]);
 	});
 });

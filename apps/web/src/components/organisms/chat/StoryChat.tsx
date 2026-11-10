@@ -2,18 +2,25 @@ import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
 import {
 	buildChatGptStoryDiscussionUrl,
 	getStoryTitle,
+	splitPostKind,
 } from "@hackerfeed/hacker-news/utils";
 import {
 	Button,
 	ButtonLink,
 	ExternalButtonLink,
 } from "@hackerfeed/ui/atoms/Button";
+import { Icon } from "@hackerfeed/ui/atoms/Icon";
+import { TitleTag } from "@hackerfeed/ui/atoms/TitleTag";
+import { ToggleButton } from "@hackerfeed/ui/atoms/Toggle";
+import { ToggleLabel } from "@hackerfeed/ui/atoms/ToggleLabel";
 import { CardSkeleton } from "@hackerfeed/ui/molecules/CardSkeleton";
 import { NoticeCard } from "@hackerfeed/ui/molecules/NoticeCard";
 import { StoryChatHeader } from "@hackerfeed/ui/molecules/StoryChatHeader";
+import { Bookmark, MessageSquare } from "lucide-react";
 import { ChatConversation } from "#/components/organisms/chat/ChatConversation";
 import { useAiProviders } from "#/hooks/useAiProviders";
 import { signIn } from "#/hooks/useAuthSession";
+import { useFavorites } from "#/hooks/useFavorites";
 
 /** Story header plus the chat, or what the user needs to do before chatting. */
 export function StoryChat({ story }: { story: HackerNewsStoryRecord }) {
@@ -23,10 +30,14 @@ export function StoryChat({ story }: { story: HackerNewsStoryRecord }) {
 
 	return (
 		<>
-			<StoryChatHeader title={getStoryTitle(story)} url={story.url} />
+			<StoryChatHeader
+				title={<StoryTitle title={getStoryTitle(story)} />}
+				url={story.url}
+				actions={<StoryChatActions story={story} />}
+			/>
 
 			{status.isLoading ? (
-				<CardSkeleton width="50%" />
+				<CardSkeleton width="50%" label="Loading AI assistants" />
 			) : !status.isSignedIn ? (
 				<NoticeCard
 					message="Sign in to HackerFeed, then connect an AI assistant from your profile to discuss this story here."
@@ -63,6 +74,42 @@ export function StoryChat({ story }: { story: HackerNewsStoryRecord }) {
 			) : (
 				<ChatConversation storyId={story.id} providers={connectedProviders} />
 			)}
+		</>
+	);
+}
+
+function StoryChatActions({ story }: { story: HackerNewsStoryRecord }) {
+	const { isFavorited, toggleFavorite } = useFavorites();
+	const saved = isFavorited(story.id);
+	const comments = story.descendants ?? 0;
+	return (
+		<>
+			<ButtonLink
+				variant="ghost"
+				to="/story/$storyId"
+				params={{ storyId: story.id }}
+			>
+				<Icon icon={MessageSquare} />
+				{comments} {comments === 1 ? "comment" : "comments"}
+			</ButtonLink>
+			<ToggleButton
+				aria-label={`${saved ? "Saved" : "Save"} ${getStoryTitle(story)}`}
+				pressed={saved}
+				onPressedChange={() => toggleFavorite(story)}
+			>
+				<Icon icon={Bookmark} filled={saved} />
+				<ToggleLabel on={saved} offLabel="Save" onLabel="Saved" />
+			</ToggleButton>
+		</>
+	);
+}
+
+function StoryTitle({ title }: { title: string }) {
+	const { kind, text } = splitPostKind(title);
+	return (
+		<>
+			{kind ? <TitleTag size="headline">{kind}</TitleTag> : null}
+			{text}
 		</>
 	);
 }

@@ -25,7 +25,7 @@ export default function UserMenu() {
 
 	return (
 		<DropdownMenu
-			triggerLabel="User menu"
+			triggerLabel={`${initials}, user menu`}
 			trigger={
 				<Avatar
 					name={displayName}
@@ -42,10 +42,10 @@ export default function UserMenu() {
 						size="md"
 					/>
 					<Stack gap="none" grow>
-						<Text as="div" weight="semibold" truncate>
+						<Text as="div" weight="semibold" breakAnywhere>
 							{displayName}
 						</Text>
-						<Text as="div" size="xs" tone="soft" truncate>
+						<Text as="div" size="xs" tone="soft" breakAnywhere>
 							{user.email}
 						</Text>
 					</Stack>

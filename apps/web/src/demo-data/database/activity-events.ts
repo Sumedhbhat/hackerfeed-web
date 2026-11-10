@@ -7,12 +7,7 @@ import { sqliteAt } from "../defaults";
 import { demoUser } from "./app-users";
 import { favoriteRows } from "./favorites";
 import { paperFavoriteRows } from "./paper-favorites";
-import {
-	diffusionFixtures,
-	reasoningBenchmark,
-	smallModels,
-	sparseAttention,
-} from "./papers";
+import { paperRows } from "./papers";
 import { storyRows } from "./stories";
 
 type ActivityEvent = typeof activityEvents.$inferSelect;
@@ -48,12 +43,11 @@ const events = [
 			occurredAt: sqliteAt(`0${index + 1}:15:00`),
 		}),
 	),
-	...[sparseAttention, reasoningBenchmark, smallModels, diffusionFixtures].map(
-		(paper, index) =>
-			paperEvent(paper, {
-				action: "paper.read",
-				occurredAt: sqliteAt(`0${index + 1}:40:00`),
-			}),
+	...paperRows.slice(0, 4).map((paper, index) =>
+		paperEvent(paper, {
+			action: "paper.read",
+			occurredAt: sqliteAt(`0${index + 1}:40:00`),
+		}),
 	),
 	...favoriteRows.map((favorite) =>
 		activityEvent({

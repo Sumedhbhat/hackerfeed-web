@@ -2,7 +2,7 @@ import { Tabs as BaseTabs } from "@base-ui/react/tabs";
 import type { ReactNode } from "react";
 
 const TAB_CLASSES =
-	"inline-flex cursor-pointer items-center pb-3 text-sm font-medium text-(--sea-ink-soft) transition-colors hover:text-(--sea-ink) focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-(--lagoon) data-active:text-(--lagoon-deep)";
+	"inline-flex min-h-8 cursor-pointer items-center gap-1.5 rounded-md border border-transparent px-3.5 py-1 text-sm font-medium text-(--sea-ink-soft) transition-colors hover:text-(--sea-ink) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--lagoon) data-active:border-(--lagoon) data-active:bg-(--surface-strong) data-active:text-(--sea-ink) data-active:shadow-(--shadow-raised) forced-colors:data-active:outline-2 forced-colors:data-active:outline-[Highlight]";
 
 export function Tabs<T extends string>({
 	value,
@@ -36,7 +36,7 @@ export function TabList({
 		<BaseTabs.List
 			activateOnFocus={activateOnFocus}
 			aria-label={ariaLabel}
-			className="flex items-center gap-6 border-b border-(--line)"
+			className="inline-flex max-w-full flex-wrap items-center gap-1 self-start rounded-lg border border-(--line) bg-(--chip-bg) p-1"
 		>
 			{children}
 		</BaseTabs.List>
@@ -67,7 +67,8 @@ export function TabPanel({
 	children: ReactNode;
 }) {
 	return (
-		<BaseTabs.Panel value={value} keepMounted={keepMounted}>
+		// Panels always hold links or buttons, so the panel itself is not a tab stop.
+		<BaseTabs.Panel value={value} keepMounted={keepMounted} tabIndex={-1}>
 			{children}
 		</BaseTabs.Panel>
 	);

@@ -4,6 +4,7 @@ const SIZE = {
 	sm: "h-8 w-8 text-xs",
 	md: "h-11 w-11 text-sm",
 	lg: "h-20 w-20 text-xl",
+	profile: "h-12 w-12 text-base sm:h-20 sm:w-20 sm:text-xl",
 } as const;
 
 type AvatarProps = {
@@ -29,7 +30,7 @@ export function Avatar({
 			{...(labelled
 				? { role: "img", "aria-label": name }
 				: { "aria-hidden": true })}
-			className={`${SIZE[size]} flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-(--chip-line) bg-(--lagoon) font-semibold text-white`}
+			className={`${SIZE[size]} flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-(--lagoon) font-semibold text-(--on-lagoon)`}
 		>
 			{imageUrl ? (
 				<BaseAvatar.Image

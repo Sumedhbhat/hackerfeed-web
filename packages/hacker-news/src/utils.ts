@@ -80,3 +80,21 @@ export function getStoryDomain(url: string | null): string {
 export function getStoryTitle(story: HackerNewsStoryRecord): string {
 	return story.title?.trim() || "Untitled Hacker News story";
 }
+
+const POST_KIND = /^(Show HN|Ask HN|Tell HN|Launch HN):\s*(.+)$/;
+
+export function splitPostKind(title: string): { kind?: string; text: string } {
+	const match = POST_KIND.exec(title);
+	return match?.[1] && match[2]
+		? { kind: match[1], text: match[2] }
+		: { text: title };
+}
+
+/** Ask HN and Show HN open the discussion view even with a link: the post text and replies are the content. */
+export function isDiscussionPost(story: {
+	title?: string | null;
+	url?: string | null;
+}): boolean {
+	const { kind } = splitPostKind(story.title ?? "");
+	return !story.url || kind === "Ask HN" || kind === "Show HN";
+}

@@ -6,6 +6,7 @@ const GAP = {
 	sm: "gap-2",
 	md: "gap-3",
 	lg: "gap-5",
+	section: "gap-4 sm:gap-5",
 	xl: "gap-8",
 } as const;
 
@@ -23,6 +24,7 @@ type StackProps = Omit<HTMLAttributes<HTMLElement>, "className" | "style"> & {
 	divided?: boolean;
 	/** Take the remaining width in a Row and allow children to shrink. */
 	grow?: boolean;
+	measure?: boolean;
 };
 
 /** Lays children out top to bottom with even spacing. */
@@ -32,6 +34,7 @@ export function Stack({
 	align = "stretch",
 	divided = false,
 	grow = false,
+	measure = false,
 	...props
 }: StackProps) {
 	const className = [
@@ -40,6 +43,7 @@ export function Stack({
 		ALIGN[align],
 		divided && "divide-y divide-(--line)",
 		grow && "min-w-0 flex-1",
+		measure && "max-w-[72ch]",
 	]
 		.filter(Boolean)
 		.join(" ");

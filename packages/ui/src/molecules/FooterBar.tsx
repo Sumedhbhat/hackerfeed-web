@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 
-/** Site footer: product name and tagline on one side, copyright on the other. */
 export function FooterBar({
 	title,
 	tagline,
@@ -11,19 +10,15 @@ export function FooterBar({
 	copyright: ReactNode;
 }) {
 	return (
-		<footer className="site-footer px-4 pt-5 pb-8 text-(--sea-ink-soft) sm:pt-8 sm:pb-12">
-			<div className="page-wrap">
-				<div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-					<div>
-						<p className="m-0 mb-1 text-base font-semibold tracking-tight text-(--sea-ink)">
-							{title}
-						</p>
-						<p className="m-0 max-w-sm text-sm leading-relaxed">{tagline}</p>
-					</div>
-					<div className="mt-8 pt-6">
-						<p className="m-0 text-xs tracking-wide opacity-50">{copyright}</p>
-					</div>
-				</div>
+		<footer className="border-t border-(--line) py-6 text-sm text-(--sea-ink-faint)">
+			<div className="page-wrap flex flex-col gap-1 px-4 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6 sm:px-6">
+				<p className="m-0 flex flex-col sm:flex-row sm:gap-3">
+					<span className="font-serif font-semibold text-(--sea-ink-soft)">
+						{title}
+					</span>
+					<span>{tagline}</span>
+				</p>
+				<p className="m-0">{copyright}</p>
 			</div>
 		</footer>
 	);

@@ -1,42 +1,26 @@
-import { ExternalLink, MessageCircle } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
+import { ExternalButtonLink } from "../atoms/Button";
+import { Icon } from "../atoms/Icon";
 
-/** "Discuss" in ChatGPT plus optional project and code links for a paper. */
+/** No sparkle icon: that marks in-app AI, and this hands the paper off to ChatGPT. */
 export function PaperLinks({
 	title,
 	discussUrl,
-	projectPage,
-	githubRepo,
 	onDiscuss,
 }: {
 	title: string;
 	discussUrl: string;
-	projectPage: string | null;
-	githubRepo: string | null;
 	onDiscuss?: () => void;
 }) {
 	return (
-		<div className="papers-external-links is-compact">
-			<a
-				className="papers-chat-link"
-				href={discussUrl}
-				target="_blank"
-				rel="noreferrer"
-				aria-label={`Discuss ${title} in ChatGPT`}
-				onClick={onDiscuss}
-			>
-				<MessageCircle size={14} aria-hidden="true" />
-				Discuss
-			</a>
-			{projectPage ? (
-				<a href={projectPage} target="_blank" rel="noreferrer">
-					Project <ExternalLink size={14} aria-hidden="true" />
-				</a>
-			) : null}
-			{githubRepo ? (
-				<a href={githubRepo} target="_blank" rel="noreferrer">
-					Code <ExternalLink size={14} aria-hidden="true" />
-				</a>
-			) : null}
-		</div>
+		<ExternalButtonLink
+			variant="ghost"
+			href={discussUrl}
+			aria-label={`Open in ChatGPT: ${title}`}
+			title="Opens ChatGPT in a new tab with this paper"
+			onClick={onDiscuss}
+		>
+			Open in ChatGPT <Icon icon={ArrowUpRight} size={14} />
+		</ExternalButtonLink>
 	);
 }

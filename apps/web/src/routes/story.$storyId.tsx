@@ -7,6 +7,7 @@ import {
 	commentQueryOptions,
 	storyQueryOptions,
 } from "#/lib/hacker-news/queries";
+import { titleHead } from "#/lib/page-title";
 
 export const Route = createFileRoute("/story/$storyId")({
 	params: {
@@ -46,6 +47,7 @@ export const Route = createFileRoute("/story/$storyId")({
 			throw err;
 		}
 	},
+	head: ({ loaderData }) => titleHead(loaderData?.title),
 	component: StoryRoute,
 	errorComponent: StoryErrorPage,
 	notFoundComponent: StoryNotFoundPage,

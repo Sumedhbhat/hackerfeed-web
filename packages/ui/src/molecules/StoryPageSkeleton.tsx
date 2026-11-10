@@ -1,34 +1,33 @@
-import { Card } from "../atoms/Card";
 import { PageContainer } from "../atoms/PageContainer";
-import { Row } from "../atoms/Row";
 import { Skeleton, SkeletonGroup } from "../atoms/Skeleton";
 
-/** Placeholder for the story detail page: back link and story header card. */
 export function StoryPageSkeleton() {
 	return (
 		<PageContainer>
-			<SkeletonGroup>
-				<div className="mb-6">
-					<Skeleton width="3rem" height="md" shape="block" opacity={0.6} />
-				</div>
-				<Card padding="md">
-					<div className="flex flex-col">
-						<div className="mb-3">
-							<Skeleton width="6rem" height="xs" opacity={0.4} />
+			<output aria-label="Loading story" className="block">
+				<SkeletonGroup>
+					<div className="flex flex-col gap-4">
+						<Skeleton width="4rem" height="md" opacity={0.5} />
+						<Skeleton width="14rem" height="xs" opacity={0.5} />
+						<Skeleton width="85%" height="xl" shape="block" opacity={0.7} />
+						<Skeleton width="55%" height="xl" shape="block" opacity={0.6} />
+						<div className="flex gap-2">
+							<Skeleton
+								width="8rem"
+								height="control"
+								shape="block"
+								opacity={0.4}
+							/>
+							<Skeleton
+								width="6rem"
+								height="control"
+								shape="block"
+								opacity={0.3}
+							/>
 						</div>
-						<div className="mb-4">
-							<Skeleton width="75%" height="xl" shape="block" opacity={0.5} />
-						</div>
-						<div className="mb-5">
-							<Skeleton width="8rem" height="sm" opacity={0.3} />
-						</div>
-						<Row gap="lg">
-							<Skeleton width="6rem" height="md" shape="block" opacity={0.4} />
-							<Skeleton width="5rem" height="md" shape="block" opacity={0.3} />
-						</Row>
 					</div>
-				</Card>
-			</SkeletonGroup>
+				</SkeletonGroup>
+			</output>
 		</PageContainer>
 	);
 }

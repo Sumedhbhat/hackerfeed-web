@@ -1,7 +1,7 @@
 import type { favorites, stories } from "@hackerfeed/backend/database/schema";
 import { sqliteAt } from "../defaults";
 import { demoUser } from "./app-users";
-import { buildCache, sideProjects, tinySpreadsheet } from "./stories";
+import { storyRows } from "./stories";
 
 type Favorite = typeof favorites.$inferSelect;
 
@@ -15,8 +15,8 @@ export const favorite = (
 	...fields,
 });
 
-export const favoriteRows: Favorite[] = [
-	favorite(tinySpreadsheet, { createdAt: sqliteAt("10:30:00") }),
-	favorite(buildCache, { createdAt: sqliteAt("11:30:00") }),
-	favorite(sideProjects, { createdAt: sqliteAt("12:30:00") }),
-];
+export const favoriteRows: Favorite[] = storyRows
+	.slice(0, 3)
+	.map((story, index) =>
+		favorite(story, { createdAt: sqliteAt(`1${index}:30:00`) }),
+	);
