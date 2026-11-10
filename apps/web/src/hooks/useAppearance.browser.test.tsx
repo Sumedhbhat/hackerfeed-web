@@ -58,6 +58,14 @@ function renderAppearance() {
 	);
 }
 
+function deferredAccount() {
+	let resolve: (account: Account) => void = () => {};
+	const promise = new Promise<Account>((done) => {
+		resolve = done;
+	});
+	return { promise, resolve };
+}
+
 const shownMode = () => document.documentElement.getAttribute("data-theme");
 
 beforeEach(() => {
@@ -143,6 +151,42 @@ describe("useAppearance", () => {
 
 		await waitFor(() => expect(result.current.mode).toBe("auto"));
 		expect(shownMode()).toBeNull();
+	});
+
+	it("saves quick changes one at a time, so the last one wins", async () => {
+		const first = deferredAccount();
+		trpcMock.update
+			.mockReturnValueOnce(first.promise)
+			.mockResolvedValueOnce(account({ mode: "light" }));
+		const { result } = renderAppearance();
+		await waitFor(() => expect(trpcMock.me).toHaveBeenCalled());
+
+		act(() => result.current.setMode("dark"));
+		act(() => result.current.setMode("light"));
+		await waitFor(() => expect(trpcMock.update).toHaveBeenCalledTimes(1));
+		first.resolve(account({ mode: "dark" }));
+
+		await waitFor(() => expect(trpcMock.update).toHaveBeenCalledTimes(2));
+		expect(trpcMock.update).toHaveBeenLastCalledWith({ mode: "light" });
+		await waitFor(() => expect(shownMode()).toBe("light"));
+		expect(result.current.mode).toBe("light");
+	});
+
+	it("ignores an account fetch that started before the save", async () => {
+		const stale = deferredAccount();
+		trpcMock.me.mockReturnValue(stale.promise);
+		const saved = deferredAccount();
+		trpcMock.update.mockReturnValue(saved.promise);
+		const { result } = renderAppearance();
+		await waitFor(() => expect(trpcMock.me).toHaveBeenCalled());
+
+		act(() => result.current.setMode("dark"));
+		await waitFor(() => expect(trpcMock.update).toHaveBeenCalled());
+		await act(async () => saved.resolve(account({ mode: "dark" })));
+		await act(async () => stale.resolve(account({ mode: "light" })));
+
+		expect(result.current.mode).toBe("dark");
+		expect(shownMode()).toBe("dark");
 	});
 
 	it("changes only this device when signed out", () => {

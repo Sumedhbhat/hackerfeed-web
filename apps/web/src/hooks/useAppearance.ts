@@ -48,10 +48,17 @@ function useSavePreferences() {
 	const queryKey = accountQueryKey(user?.id);
 	return useMutation({
 		mutationKey: SAVE_MUTATION_KEY,
+		// One save at a time, in the order they were made, so the last choice wins.
+		scope: { id: "preferences" },
 		mutationFn: ({ changes }: SaveVariables) =>
 			createTrpcClient().preferences.update.mutate(changes),
+		// An account fetch already on its way would bring back the old choice.
+		onMutate: () => queryClient.cancelQueries({ queryKey }),
 		onSuccess: (account) => queryClient.setQueryData(queryKey, account),
-		onError: (_error, { previous }) => showAppearance(previous),
+		onError: (_error, { previous }) => {
+			showAppearance(previous);
+			return queryClient.invalidateQueries({ queryKey });
+		},
 	});
 }
 
