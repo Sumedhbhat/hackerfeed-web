@@ -21,6 +21,7 @@ import { ErrorNotifications } from "../components/organisms/layout/ErrorNotifica
 import { RouteAnnouncer } from "../components/organisms/layout/RouteAnnouncer";
 import SiteFooter from "../components/organisms/layout/SiteFooter";
 import SiteHeader from "../components/organisms/layout/SiteHeader";
+import { useAccount, useAppearanceSync } from "../hooks/useAppearance";
 import { signIn, useAuthSession } from "../hooks/useAuthSession";
 import { useErrorReport } from "../hooks/useErrorReport";
 import { useFeatureFlags } from "../hooks/useFeatureFlags";
@@ -28,6 +29,7 @@ import { useLocalFavoritesMigration } from "../hooks/useLocalFavoritesMigration"
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 import TanStackQueryProvider from "../integrations/tanstack-query/root-provider";
 import { AuthProvider } from "../integrations/workos/provider";
+import { DEFAULT_TOKENS } from "../lib/appearance/appearance";
 import themeInit from "../lib/theme-init.js?raw";
 
 interface MyRouterContext {
@@ -52,10 +54,12 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 				content:
 					"A fast Hacker News reader for top, new, and best stories with favorites and mobile-friendly reading flows.",
 			},
-			{
+			...(["light", "dark"] as const).map((scheme) => ({
 				name: "theme-color",
-				content: "#f3faf5",
-			},
+				content: DEFAULT_TOKENS[scheme].page,
+				media: `(prefers-color-scheme: ${scheme})`,
+				"data-scheme": scheme,
+			})),
 			{
 				name: "apple-mobile-web-app-capable",
 				content: "yes",
@@ -159,6 +163,7 @@ function AppLayout() {
 				<ToastProvider>
 					<ErrorNotifications />
 					<RouteAnnouncer />
+					<AppearanceSync />
 					{import.meta.env.VITE_DEMO_DATA !== "true" && (
 						<LocalFavoritesMigration />
 					)}
@@ -189,13 +194,14 @@ function SessionGate({ children }: { children: ReactNode }) {
 	const { pathname } = useLocation();
 	const { isLoading, user } = useAuthSession();
 	const { isPending: flagsPending } = useFeatureFlags();
+	const { isPending: accountPending } = useAccount();
 	const isPublic = isPublicPath(pathname);
 
 	useEffect(() => {
 		if (!isPublic && !isLoading && !user) signIn();
 	}, [isPublic, isLoading, user]);
 
-	if (isPublic || (user && !flagsPending)) return children;
+	if (isPublic || (user && !flagsPending && !accountPending)) return children;
 
 	return <LoadingScreen />;
 }
@@ -207,6 +213,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			<Scripts />
 		</Document>
 	);
+}
+
+function AppearanceSync() {
+	useAppearanceSync();
+
+	return null;
 }
 
 function LocalFavoritesMigration() {

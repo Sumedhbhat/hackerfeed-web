@@ -2,13 +2,13 @@ import { Button } from "@hackerfeed/ui/atoms/Button";
 import { LiveStatus } from "@hackerfeed/ui/atoms/LiveStatus";
 import { Moon, Sun, SunMoon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useTheme } from "#/hooks/useTheme";
+import { useAppearance } from "#/hooks/useAppearance";
 
 const MODE_NAMES = { auto: "Automatic", light: "Light", dark: "Dark" } as const;
 
 export default function ThemeToggle() {
-	const { mode, toggleMode } = useTheme();
-	const name = MODE_NAMES[mode as keyof typeof MODE_NAMES] ?? mode;
+	const { mode, setMode } = useAppearance();
+	const name = MODE_NAMES[mode];
 
 	// A changed name on the focused button isn't announced everywhere, so
 	// also say the new theme in a status message.
@@ -24,7 +24,7 @@ export default function ThemeToggle() {
 		<>
 			<Button
 				variant="icon"
-				onClick={toggleMode}
+				onClick={() => setMode(mode === "light" ? "dark" : "light")}
 				aria-label={`Theme: ${name}`}
 				title={`Theme: ${name}. Press to change.`}
 			>
