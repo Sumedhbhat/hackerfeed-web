@@ -460,7 +460,7 @@ Styling uses Tailwind CSS in `packages/ui/src/styles.css`, which the app loads
 as `@hackerfeed/ui/styles.css`. Tailwind scans `packages/ui/src` through
 `@source`; only atoms and molecules carry classes.
 
-Colours are roles (`--paper`, `--ink`, `--accent`…), each one `light-dark()`
+Colours are roles (`--paper`, `--ink`, `--accent`…), each a `light-dark()`
 pair, registered as Tailwind colours (`bg-paper`, `text-ink`). Tailwind's own
 palette is switched off, so only the roles compile.
 

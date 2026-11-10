@@ -38,7 +38,16 @@ export function PaletteEditor({
 	onSave: (palette: PaletteInput) => void;
 	onCancel: () => void;
 }) {
-	const [draft, setDraft] = useState<PaletteInput>(palette ?? NEW_PALETTE);
+	const [draft, setDraft] = useState<PaletteInput>(
+		palette
+			? {
+					name: palette.name,
+					baseRole: palette.baseRole,
+					baseColor: palette.baseColor,
+					accentColor: palette.accentColor,
+				}
+			: NEW_PALETTE,
+	);
 	const [nameMissing, setNameMissing] = useState(false);
 	const { notes } = derivePalette(draft);
 	const picked = draft.baseRole === "background" ? "Background" : "Text";

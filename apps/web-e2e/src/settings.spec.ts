@@ -88,6 +88,35 @@ test("a new palette is previewed, saved, selected, and can be deleted again", as
 	expect(await accent(page)).toBe("");
 });
 
+test("editing a palette saves the change and keeps it selected", async ({
+	page,
+}) => {
+	await open(page, "/settings");
+	await page.getByRole("button", { name: "Sunset", exact: true }).click();
+	const before = await accent(page);
+
+	await page.getByRole("button", { name: "Edit Sunset" }).click();
+	await page.getByRole("textbox", { name: "Name" }).fill("Dusk");
+	const accentField = page.getByRole("textbox", {
+		name: "Accent colour",
+		exact: true,
+	});
+	await accentField.fill("#0F766E");
+	await accentField.press("Enter");
+	await page.getByRole("button", { name: "Save palette" }).click();
+
+	await expect(
+		page.getByRole("region", { name: "Notifications" }),
+	).toContainText("Saved Dusk");
+	await expect(
+		page.getByRole("button", { name: "Dusk", exact: true }),
+	).toHaveAttribute("aria-pressed", "true");
+	await expect(page.getByRole("button", { name: "Edit Sunset" })).toHaveCount(
+		0,
+	);
+	expect(await accent(page)).not.toBe(before);
+});
+
 for (const palette of ["Ember", "Iris", "Midnight", "Sunset"]) {
 	for (const scheme of ["light", "dark"] as const) {
 		test(`${palette} passes axe in ${scheme} mode on the feed and in settings`, async ({
