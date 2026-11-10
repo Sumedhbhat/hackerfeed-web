@@ -3,12 +3,12 @@
 	"private": true,
 	"type": "module",
 	"devDependencies": {
-		"wrangler": "^4.151.0"
+		"wrangler": "^4.153.0"
 	},
 	"scripts": {
 		"cf:typegen": "wrangler types"
 	},
 	"dependencies": {
-		"jose": "^6.2.12"
+		"jose": "^6.2.13"
 	}
 }
