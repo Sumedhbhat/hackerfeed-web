@@ -18,7 +18,7 @@ registerMode(modeOklab);
 registerMode(modeLrgb);
 
 export const PALETTE_ROLES = [
-	"page",
+	"paper",
 	"surface",
 	"ink",
 	"ink-soft",
@@ -47,14 +47,14 @@ const TEXT_TARGET = 15;
 const BASE_MIN = 10;
 const READABLE = 4.5;
 const BOUNDARY = 3;
-const SOFT_ON_PAGE = 7.5;
-const FAINT_ON_PAGE = 5.3;
-const FIELD_LINE_ON_PAGE = 3.3;
+const SOFT_ON_PAPER = 7.5;
+const FAINT_ON_PAPER = 5.3;
+const FIELD_LINE_ON_PAPER = 3.3;
 
 const SCHEME = {
 	light: {
-		pageL: 0.975,
-		pageC: 0.03,
+		paperL: 0.975,
+		paperC: 0.03,
 		midBackgroundL: 0.975,
 		midTextL: 0.235,
 		towards: 0,
@@ -62,7 +62,7 @@ const SCHEME = {
 		muted: 0.03,
 		line: 0.09,
 		mutedLine: 0.16,
-		accentOnPage: 5.5,
+		accentOnPaper: 5.5,
 		strongShift: -0.08,
 		accentTint: 0.08,
 		bookmark: { mode: "oklch", l: 0.533, c: 0.11, h: 71 },
@@ -71,8 +71,8 @@ const SCHEME = {
 		danger: { mode: "oklch", l: 0.485, c: 0.15, h: 28 },
 	},
 	dark: {
-		pageL: 0.187,
-		pageC: 0.02,
+		paperL: 0.187,
+		paperC: 0.02,
 		midBackgroundL: 0.187,
 		midTextL: 0.934,
 		towards: 1,
@@ -80,7 +80,7 @@ const SCHEME = {
 		muted: 0.1,
 		line: 0.15,
 		mutedLine: 0.235,
-		accentOnPage: 7.5,
+		accentOnPaper: 7.5,
 		strongShift: 0.07,
 		accentTint: 0.2,
 		bookmark: { mode: "oklch", l: 0.789, c: 0.121, h: 80 },
@@ -121,9 +121,9 @@ function reach(
 	return withL(color, far);
 }
 
-/** The least `ink` mixed into `page` that `passes`. */
+/** The least `ink` mixed into `paper` that `passes`. */
 function leastMix(
-	page: string,
+	paper: string,
 	ink: string,
 	passes: (candidate: string) => boolean,
 ) {
@@ -131,10 +131,10 @@ function leastMix(
 	let high = 1;
 	for (let step = 0; step < 20; step++) {
 		const middle = (low + high) / 2;
-		if (passes(mix(page, ink, middle))) high = middle;
+		if (passes(mix(paper, ink, middle))) high = middle;
 		else low = middle;
 	}
-	return mix(page, ink, high);
+	return mix(paper, ink, high);
 }
 
 const isLight = (color: string) =>
@@ -142,28 +142,28 @@ const isLight = (color: string) =>
 
 function deriveScheme(
 	scheme: Scheme,
-	page: string,
+	paper: string,
 	ink: string,
 	accentInput: Oklch,
 ) {
 	const s = SCHEME[scheme];
-	const pageColor = toOklch(page) as Oklch;
-	const surface = withL(pageColor, pageColor.l + s.surfaceLift);
-	const muted = mix(page, ink, s.muted);
-	const plain = [page, surface, muted];
+	const paperColor = toOklch(paper) as Oklch;
+	const surface = withL(paperColor, paperColor.l + s.surfaceLift);
+	const muted = mix(paper, ink, s.muted);
+	const plain = [paper, surface, muted];
 	const readableOn = (backgrounds: string[]) => (candidate: string) =>
 		worstContrast(candidate, backgrounds) >= READABLE;
 
 	const firstAccent = reach(accentInput, readableOn(plain), s.towards);
-	const accentTint = mix(page, firstAccent, s.accentTint);
+	const accentTint = mix(paper, firstAccent, s.accentTint);
 	const firstBookmark = reach(s.bookmark, readableOn(plain), s.towards);
-	const bookmarkTint = mix(page, firstBookmark, s.bookmarkTint);
-	const bookmarkTintStrong = mix(page, firstBookmark, s.bookmarkTintStrong);
+	const bookmarkTint = mix(paper, firstBookmark, s.bookmarkTint);
+	const bookmarkTintStrong = mix(paper, firstBookmark, s.bookmarkTintStrong);
 
 	const backgrounds = [...plain, accentTint, bookmarkTint];
 	const readable = readableOn(backgrounds);
-	const comfortable = (onPage: number) => (candidate: string) =>
-		readable(candidate) && wcagContrast(candidate, page) >= onPage;
+	const comfortable = (onPaper: number) => (candidate: string) =>
+		readable(candidate) && wcagContrast(candidate, paper) >= onPaper;
 	const keepOrAdjust = (
 		color: Oklch,
 		passes: (candidate: string) => boolean,
@@ -173,7 +173,7 @@ function deriveScheme(
 	const accent = keepOrAdjust(
 		accentInput,
 		readable,
-		comfortable(s.accentOnPage),
+		comfortable(s.accentOnPaper),
 	);
 	const accentColor = toOklch(accent) as Oklch;
 	const onSavedTints = (candidate: string) =>
@@ -181,32 +181,32 @@ function deriveScheme(
 		wcagContrast(candidate, bookmarkTintStrong) >= READABLE;
 
 	const tokens: PaletteTokens = {
-		page,
+		paper,
 		surface,
 		ink,
-		"ink-soft": leastMix(page, ink, comfortable(SOFT_ON_PAGE)),
-		"ink-faint": leastMix(page, ink, comfortable(FAINT_ON_PAGE)),
-		line: mix(page, ink, s.line),
+		"ink-soft": leastMix(paper, ink, comfortable(SOFT_ON_PAPER)),
+		"ink-faint": leastMix(paper, ink, comfortable(FAINT_ON_PAPER)),
+		line: mix(paper, ink, s.line),
 		muted,
-		"muted-line": mix(page, ink, s.mutedLine),
+		"muted-line": mix(paper, ink, s.mutedLine),
 		"field-line": leastMix(
-			page,
+			paper,
 			ink,
 			(candidate) =>
 				worstContrast(candidate, plain) >= BOUNDARY &&
-				wcagContrast(candidate, page) >= FIELD_LINE_ON_PAGE,
+				wcagContrast(candidate, paper) >= FIELD_LINE_ON_PAPER,
 		),
 		accent,
 		"accent-strong": withL(accentColor, accentColor.l + s.strongShift),
 		"accent-tint": accentTint,
 		"on-accent":
-			wcagContrast(surface, accent) >= wcagContrast(page, accent)
+			wcagContrast(surface, accent) >= wcagContrast(paper, accent)
 				? surface
-				: page,
+				: paper,
 		bookmark: keepOrAdjust(s.bookmark, onSavedTints, onSavedTints),
 		"bookmark-tint": bookmarkTint,
 		"bookmark-tint-strong": bookmarkTintStrong,
-		danger: keepOrAdjust(s.danger, readable, comfortable(FAINT_ON_PAGE)),
+		danger: keepOrAdjust(s.danger, readable, comfortable(FAINT_ON_PAPER)),
 	};
 
 	return { tokens, accentAdjusted: accent !== hex(accentInput) };
@@ -243,31 +243,31 @@ export function derivePalette({
 	}
 
 	const hueless = base.h === undefined;
-	const inkFor = (page: Oklch, scheme: Scheme) =>
+	const inkFor = (paper: Oklch, scheme: Scheme) =>
 		reach(
-			{ ...page, c: hueless ? 0 : INK_CHROMA },
-			(candidate) => wcagContrast(candidate, hex(page)) >= TEXT_TARGET,
+			{ ...paper, c: hueless ? 0 : INK_CHROMA },
+			(candidate) => wcagContrast(candidate, hex(paper)) >= TEXT_TARGET,
 			SCHEME[scheme].towards,
 		);
-	const pageFor = (scheme: Scheme): Oklch => ({
+	const paperFor = (scheme: Scheme): Oklch => ({
 		...base,
-		l: SCHEME[scheme].pageL,
-		c: Math.min(base.c, SCHEME[scheme].pageC),
+		l: SCHEME[scheme].paperL,
+		c: Math.min(base.c, SCHEME[scheme].paperC),
 	});
 
-	const pairs = {} as Record<Scheme, { page: string; ink: string }>;
+	const pairs = {} as Record<Scheme, { paper: string; ink: string }>;
 	for (const scheme of ["light", "dark"] as const) {
 		if (scheme !== ownScheme) {
-			const page = pageFor(scheme);
-			pairs[scheme] = { page: hex(page), ink: inkFor(page, scheme) };
+			const paper = paperFor(scheme);
+			pairs[scheme] = { paper: hex(paper), ink: inkFor(paper, scheme) };
 		} else if (baseRole === "background") {
-			pairs[scheme] = { page: hex(base), ink: inkFor(base, scheme) };
+			pairs[scheme] = { paper: hex(base), ink: inkFor(base, scheme) };
 		} else {
 			const ink = hex(base);
 			pairs[scheme] = {
 				ink,
-				page: reach(
-					{ ...base, c: Math.min(base.c, SCHEME[scheme].pageC) },
+				paper: reach(
+					{ ...base, c: Math.min(base.c, SCHEME[scheme].paperC) },
 					(candidate) => wcagContrast(candidate, ink) >= TEXT_TARGET,
 					scheme === "light" ? 1 : 0,
 				),
@@ -277,11 +277,11 @@ export function derivePalette({
 
 	const light = deriveScheme(
 		"light",
-		pairs.light.page,
+		pairs.light.paper,
 		pairs.light.ink,
 		accent,
 	);
-	const dark = deriveScheme("dark", pairs.dark.page, pairs.dark.ink, accent);
+	const dark = deriveScheme("dark", pairs.dark.paper, pairs.dark.ink, accent);
 	if (light.accentAdjusted)
 		notes.push("The accent was darkened in light mode so it stays readable.");
 	if (dark.accentAdjusted)
@@ -299,7 +299,7 @@ export type ContrastCheck = {
 };
 
 const BACKGROUND_ROLES = [
-	"page",
+	"paper",
 	"surface",
 	"muted",
 	"accent-tint",
@@ -330,7 +330,7 @@ export function contrastChecks(palette: DerivedPalette): ContrastCheck[] {
 			});
 		for (const on of BACKGROUND_ROLES)
 			for (const text of TEXT_ROLES) add(text, on, READABLE);
-		for (const on of ["page", "surface", "muted"] as const)
+		for (const on of ["paper", "surface", "muted"] as const)
 			add("field-line", on, BOUNDARY);
 		add("bookmark", "bookmark-tint-strong", READABLE);
 		add("on-accent", "accent", READABLE);

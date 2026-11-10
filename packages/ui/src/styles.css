@@ -32,7 +32,7 @@
 }
 
 @theme inline {
-  --color-page: var(--page);
+  --color-paper: var(--paper);
   --color-surface: var(--surface);
   --color-ink: var(--ink);
   --color-ink-soft: var(--ink-soft);
@@ -62,7 +62,7 @@
 */
 :root {
   color-scheme: light dark;
-  --page: light-dark(#F6F7F4, #0E1512);
+  --paper: light-dark(#F6F7F4, #0E1512);
   --surface: light-dark(#FFFFFF, #151E1A);
   --ink: light-dark(#15211C, #E4EBE7);
   --ink-soft: light-dark(#44514B, #A6B4AD);
@@ -80,8 +80,8 @@
   --bookmark-tint-strong: light-dark(#F8ECD3, #3A3122);
   --danger: light-dark(#A3322A, #F08A80);
   --header-bg: light-dark(
-    color-mix(in srgb, var(--page) 92%, transparent),
-    color-mix(in srgb, var(--page) 90%, transparent)
+    color-mix(in srgb, var(--paper) 92%, transparent),
+    color-mix(in srgb, var(--paper) 90%, transparent)
   );
   --overlay: light-dark(color-mix(in srgb, var(--ink) 40%, transparent), rgb(0 0 0 / 0.6));
   --shadow-tone: light-dark(color-mix(in srgb, var(--ink) 12%, transparent), rgb(0 0 0 / 0.5));
@@ -140,7 +140,7 @@ body {
   font-family: var(--font-sans);
   font-size: 1rem;
   line-height: 1.5;
-  background-color: var(--page);
+  background-color: var(--paper);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

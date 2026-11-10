@@ -71,7 +71,7 @@ describe("derivePalette", () => {
 			baseColor: "#FFF6D5",
 			accentColor: "#7C3AED",
 		});
-		expect(palette.light.page).toBe("#fff6d5");
+		expect(palette.light.paper).toBe("#fff6d5");
 		expect(palette.light.accent).toBe("#7c3aed");
 		expect(palette.notes).toEqual([
 			"The accent was lightened in dark mode so it stays readable.",
@@ -93,7 +93,7 @@ describe("derivePalette", () => {
 			baseColor: "#C25A28",
 			accentColor: "#2563EB",
 		});
-		expect(palette.light.page).not.toBe("#c25a28");
+		expect(palette.light.paper).not.toBe("#c25a28");
 		expect(palette.notes[0]).toContain("too mid-tone");
 	});
 });

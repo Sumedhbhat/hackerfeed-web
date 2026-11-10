@@ -63,8 +63,8 @@ describe("showAppearance", () => {
 			expect(root.style.getPropertyValue(`--${role}`)).toBe(
 				`light-dark(${tokens.light[role]}, ${tokens.dark[role]})`,
 			);
-		expect(themeColor("light")).toBe(tokens.dark.page);
-		expect(themeColor("dark")).toBe(tokens.dark.page);
+		expect(themeColor("light")).toBe(tokens.dark.paper);
+		expect(themeColor("dark")).toBe(tokens.dark.paper);
 		expect(appearanceStore.state.palette).toBe(ember);
 	});
 
@@ -74,8 +74,8 @@ describe("showAppearance", () => {
 
 		expect(root.hasAttribute("data-theme")).toBe(false);
 		expect(root.style.getPropertyValue("--accent")).toBe("");
-		expect(themeColor("light")).toBe(DEFAULT_TOKENS.light.page);
-		expect(themeColor("dark")).toBe(DEFAULT_TOKENS.dark.page);
+		expect(themeColor("light")).toBe(DEFAULT_TOKENS.light.paper);
+		expect(themeColor("dark")).toBe(DEFAULT_TOKENS.dark.paper);
 	});
 
 	it("caches what it showed for the next visit", () => {
@@ -112,7 +112,7 @@ describe("theme-init, before first paint", () => {
 			JSON.stringify({
 				mode: "sideways",
 				colors: {
-					page: ["url(https://example.com/a)", "#000000"],
+					paper: ["url(https://example.com/a)", "#000000"],
 					"ink;x": ["#000000", "#FFFFFF"],
 					accent: ["#112233", "#445566"],
 				},

@@ -56,7 +56,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 			},
 			...(["light", "dark"] as const).map((scheme) => ({
 				name: "theme-color",
-				content: DEFAULT_TOKENS[scheme].page,
+				content: DEFAULT_TOKENS[scheme].paper,
 				media: `(prefers-color-scheme: ${scheme})`,
 				"data-scheme": scheme,
 			})),

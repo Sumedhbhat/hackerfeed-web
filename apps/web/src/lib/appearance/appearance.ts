@@ -26,7 +26,7 @@ export const DEFAULT_APPEARANCE: Appearance = {
 /** The default palette is hand-tuned in the stylesheet; this is the same set of values. */
 export const DEFAULT_TOKENS: SchemeTokens = {
 	light: {
-		page: "#F6F7F4",
+		paper: "#F6F7F4",
 		surface: "#FFFFFF",
 		ink: "#15211C",
 		"ink-soft": "#44514B",
@@ -45,7 +45,7 @@ export const DEFAULT_TOKENS: SchemeTokens = {
 		danger: "#A3322A",
 	},
 	dark: {
-		page: "#0E1512",
+		paper: "#0E1512",
 		surface: "#151E1A",
 		ink: "#E4EBE7",
 		"ink-soft": "#A6B4AD",
@@ -125,7 +125,7 @@ function applyAppearance({ mode, palette }: Appearance) {
 	for (const scheme of ["light", "dark"] as const)
 		document
 			.querySelector(`meta[name="theme-color"][data-scheme="${scheme}"]`)
-			?.setAttribute("content", tokens[mode === "auto" ? scheme : mode].page);
+			?.setAttribute("content", tokens[mode === "auto" ? scheme : mode].paper);
 
 	try {
 		window.localStorage.setItem(
