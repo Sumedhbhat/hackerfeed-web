@@ -66,7 +66,7 @@ export function ChatComposer({
 		<Field invalid={tooLong}>
 			<form
 				onSubmit={submit}
-				className="flex items-end gap-2 rounded-xl border border-(--field-line) bg-(--surface-strong) p-2 focus-within:border-(--lagoon) focus-within:outline-1 focus-within:outline-(--lagoon)"
+				className="flex items-end gap-2 rounded-xl border border-field-line bg-surface p-2 focus-within:border-accent focus-within:outline-1 focus-within:outline-accent"
 			>
 				<FieldLabel visuallyHidden>{label}</FieldLabel>
 				<FieldDescription visuallyHidden>

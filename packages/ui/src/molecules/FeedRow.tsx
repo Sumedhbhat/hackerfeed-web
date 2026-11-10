@@ -20,7 +20,7 @@ export function FeedRow({
 }) {
 	return (
 		<li
-			className={`${readingCardClassName(saved)} p-4 transition-colors sm:p-5 ${saved ? "" : "hover:border-(--field-line)"}`}
+			className={`${readingCardClassName(saved)} p-4 transition-colors sm:p-5 ${saved ? "" : "hover:border-field-line"}`}
 		>
 			<div className="flex min-w-0 flex-col gap-4 sm:gap-5">
 				<div className="flex flex-col gap-2">

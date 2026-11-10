@@ -4,14 +4,14 @@ import type { AnchorHTMLAttributes } from "react";
 const VARIANT_CLASSES = {
 	/** Quiet grey link that darkens on hover (secondary actions, "Back"). */
 	subtle:
-		"rounded-sm text-sm text-(--sea-ink-soft) no-underline hover:text-(--sea-ink) hover:underline",
+		"rounded-sm text-sm text-ink-soft no-underline hover:text-ink hover:underline",
 	accent:
-		"rounded-sm text-sm font-medium text-(--lagoon-deep) no-underline underline-offset-[3px] hover:text-(--lagoon-deep) hover:underline",
-	nav: "min-h-9 gap-1.5 rounded-md px-2 py-1.5 xs:px-2.5 text-sm font-medium whitespace-nowrap text-(--sea-ink-soft) no-underline hover:bg-(--chip-bg) hover:text-(--sea-ink) data-[status=active]:bg-(--lagoon-tint) data-[status=active]:text-(--lagoon-deep) sm:px-3",
+		"rounded-sm text-sm font-medium text-accent-strong no-underline underline-offset-[3px] hover:text-accent-strong hover:underline",
+	nav: "min-h-9 gap-1.5 rounded-md px-2 py-1.5 xs:px-2.5 text-sm font-medium whitespace-nowrap text-ink-soft no-underline hover:bg-muted hover:text-ink data-[status=active]:bg-accent-tint data-[status=active]:text-accent-strong sm:px-3",
 	inline:
-		"text-(--lagoon-deep) underline decoration-(--lagoon)/40 underline-offset-[3px] hover:text-(--lagoon-deep) hover:decoration-(--lagoon)",
+		"text-accent-strong underline decoration-accent/40 underline-offset-[3px] hover:text-accent-strong hover:decoration-accent",
 	/** The hit area covers the nearest `position: relative` ancestor (the card). */
-	card: "rounded-sm text-inherit no-underline decoration-(--lagoon)/50 underline-offset-[3px] after:absolute after:inset-0 after:content-[''] hover:text-inherit hover:underline visited:text-(--sea-ink-soft)",
+	card: "rounded-sm text-inherit no-underline decoration-accent/50 underline-offset-[3px] after:absolute after:inset-0 after:content-[''] hover:text-inherit hover:underline visited:text-ink-soft",
 } as const;
 
 export type LinkVariant = keyof typeof VARIANT_CLASSES;
@@ -28,7 +28,7 @@ function StyledAnchor({ variant = "subtle", ...props }: StyledAnchorProps) {
 	return (
 		<a
 			{...props}
-			className={`${variant === "inline" || variant === "card" ? "" : "inline-flex items-center gap-1 "}focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--lagoon) ${VARIANT_CLASSES[variant]}`}
+			className={`${variant === "inline" || variant === "card" ? "" : "inline-flex items-center gap-1 "}focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${VARIANT_CLASSES[variant]}`}
 		/>
 	);
 }

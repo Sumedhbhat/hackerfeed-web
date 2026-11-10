@@ -36,7 +36,7 @@ export function ErrorDetails({
 					<div className="flex items-center gap-2">
 						<span>
 							Error ID:{" "}
-							<code className="select-all wrap-anywhere text-(--sea-ink)">
+							<code className="select-all wrap-anywhere text-ink">
 								{errorId}
 							</code>
 						</span>

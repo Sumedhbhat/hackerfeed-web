@@ -19,7 +19,7 @@ export function PaperFeedSkeleton({
 						{[0, 1, 2].map((row) => (
 							<div
 								key={row}
-								className="flex flex-col gap-3 rounded-xl border border-(--line) bg-(--surface-strong) p-4 shadow-(--shadow-raised) sm:p-6"
+								className="flex flex-col gap-3 rounded-xl border border-line bg-surface p-4 shadow-(--shadow-raised) sm:p-6"
 							>
 								<Skeleton width="70%" height="lg" />
 								<Skeleton width="30%" height="xs" />

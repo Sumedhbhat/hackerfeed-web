@@ -15,7 +15,7 @@ export function AppShell({
 		<div className="app-shell">
 			<a
 				href="#content"
-				className="sr-only rounded-md bg-(--surface-strong) px-3 py-2 text-sm font-semibold text-(--lagoon-deep) shadow-(--shadow-raised) focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[60]"
+				className="sr-only rounded-md bg-surface px-3 py-2 text-sm font-semibold text-accent-strong shadow-(--shadow-raised) focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[60]"
 			>
 				Skip to content
 			</a>

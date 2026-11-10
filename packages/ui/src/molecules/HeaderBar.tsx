@@ -37,7 +37,7 @@ export function HeaderBar({
 	return (
 		<header
 			ref={headerRef}
-			className="sticky top-0 z-50 [@media(max-height:500px)]:static border-b border-(--line) bg-(--header-bg) backdrop-blur-md"
+			className="sticky top-0 z-50 [@media(max-height:500px)]:static border-b border-line bg-header backdrop-blur-md"
 		>
 			{/* Below 360px the nav takes its own row. Above that its links wrap rather
 			    than slide under the actions. */}

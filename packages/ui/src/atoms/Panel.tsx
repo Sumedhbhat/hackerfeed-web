@@ -18,7 +18,7 @@ export function Panel({
 }: PanelProps) {
 	return (
 		<Element
-			className={`w-full rounded-xl border border-(--line) bg-(--surface-strong) p-5 shadow-(--shadow-raised) sm:p-6 ${WIDTH[width]}`}
+			className={`w-full rounded-xl border border-line bg-surface p-5 shadow-(--shadow-raised) sm:p-6 ${WIDTH[width]}`}
 			{...props}
 		/>
 	);

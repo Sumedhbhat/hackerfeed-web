@@ -24,14 +24,14 @@ export function ChatMessage({
 			<div
 				className={
 					isUser
-						? "min-w-0 max-w-[85%] whitespace-pre-wrap break-words rounded-xl rounded-br-sm bg-(--lagoon-tint) px-3.5 py-2 text-read text-(--sea-ink)"
-						: "min-w-0 max-w-[68ch] break-words border-l-2 border-(--lagoon) py-0.5 pl-4 text-read text-(--sea-ink)"
+						? "min-w-0 max-w-[85%] whitespace-pre-wrap break-words rounded-xl rounded-br-sm bg-accent-tint px-3.5 py-2 text-read text-ink"
+						: "min-w-0 max-w-[68ch] break-words border-l-2 border-accent py-0.5 pl-4 text-read text-ink"
 				}
 			>
 				<span className="sr-only">{isUser ? "You: " : `${authorName}: `}</span>
 				{isUser ? content : <ChatMarkdown text={content} />}
 				{incomplete ? (
-					<p className="mt-2 mb-0 text-meta text-(--sea-ink-faint) italic">
+					<p className="mt-2 mb-0 text-meta text-ink-faint italic">
 						Reply cut off.
 					</p>
 				) : null}

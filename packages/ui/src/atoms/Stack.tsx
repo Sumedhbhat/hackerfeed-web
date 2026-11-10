@@ -41,7 +41,7 @@ export function Stack({
 		"m-0 flex list-none flex-col p-0",
 		GAP[gap],
 		ALIGN[align],
-		divided && "divide-y divide-(--line)",
+		divided && "divide-y divide-line",
 		grow && "min-w-0 flex-1",
 		measure && "max-w-[72ch]",
 	]

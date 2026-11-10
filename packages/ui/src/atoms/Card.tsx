@@ -18,7 +18,7 @@ export function Card({
 }: CardProps) {
 	return (
 		<Element
-			className={`rounded-xl border border-(--line) bg-(--surface-strong) shadow-(--shadow-raised) ${PADDING[padding]}`}
+			className={`rounded-xl border border-line bg-surface shadow-(--shadow-raised) ${PADDING[padding]}`}
 			{...props}
 		/>
 	);

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 export function readingCardClassName(saved = false): string {
-	return `relative rounded-xl border border-(--line) shadow-(--shadow-raised) ${saved ? "bg-(--bookmark-tint)" : "bg-(--surface-strong)"}`;
+	return `relative rounded-xl border border-line shadow-(--shadow-raised) ${saved ? "bg-bookmark-tint" : "bg-surface"}`;
 }
 
 export function ReadingList({

@@ -3,8 +3,8 @@ import type { ReactNode } from "react";
 import { Icon } from "../atoms/Icon";
 
 const TONE = {
-	default: "text-(--sea-ink)",
-	soft: "text-(--sea-ink-soft)",
+	default: "text-ink",
+	soft: "text-ink-soft",
 } as const;
 
 /** A short line of text led by an icon, e.g. "✓ ChatGPT is connected." */

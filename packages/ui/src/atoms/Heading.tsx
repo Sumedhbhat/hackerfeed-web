@@ -34,6 +34,6 @@ export function Heading({
 	const Element = `h${level}` as const;
 	const className = visuallyHidden
 		? "sr-only"
-		: `m-0 text-(--sea-ink) ${size === "row" ? "" : "text-pretty "}${SIZE[size]}${breakAnywhere ? " min-w-0 [overflow-wrap:anywhere]" : ""}`;
+		: `m-0 text-ink ${size === "row" ? "" : "text-pretty "}${SIZE[size]}${breakAnywhere ? " min-w-0 [overflow-wrap:anywhere]" : ""}`;
 	return <Element className={className} {...props} />;
 }
