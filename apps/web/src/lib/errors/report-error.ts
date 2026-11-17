@@ -25,7 +25,8 @@ function getStatus(error: unknown): number | undefined {
 	if (error instanceof TRPCClientError) {
 		const status = (error.data as { httpStatus?: unknown } | undefined)
 			?.httpStatus;
-		return typeof status === "number" ? status : undefined;
+		// The API rejects a missing or expired token before tRPC runs.
+		return typeof status === "number" ? status : getResponse(error)?.status;
 	}
 	return undefined;
 }

@@ -1,3 +1,4 @@
+import { createTrpcClient } from "@hackerfeed/api-client/trpc";
 import { TRPCClientError } from "@trpc/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -52,6 +53,20 @@ describe("toUserMessage", () => {
 		expect(toUserMessage(offline, "save")).toMatch(/couldn't reach/i);
 		expect(toUserMessage(trpcError(401), "save")).toMatch(/sign in again/i);
 		expect(toUserMessage(trpcError(429), "save")).toMatch(/too many/i);
+	});
+
+	it("asks to sign in again when the API rejects the token before tRPC", async () => {
+		vi.stubGlobal("fetch", async () =>
+			Response.json({ error: "Unauthorized" }, { status: 401 }),
+		);
+		const client = createTrpcClient({
+			apiUrl: "https://api.test",
+			auth: { getHeaders: async () => ({}) },
+		});
+		const error = await client.account.me.query().catch((cause) => cause);
+		vi.unstubAllGlobals();
+
+		expect(toUserMessage(error, "load")).toMatch(/sign in again/i);
 	});
 });
 
