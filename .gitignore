@@ -30,3 +30,4 @@ __pycache__/
 # Nx
 .nx/cache
 .nx/workspace-data
+apps/api/wrangler.production.json
