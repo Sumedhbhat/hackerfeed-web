@@ -7,7 +7,6 @@ declare namespace Cloudflare {
 	}
 	interface Env {
 		DB: D1Database;
-		SERVER_URL: "";
 		VITE_APP_TITLE: "Hacker Feed";
 		VITE_SENTRY_ENVIRONMENT: "production";
 		VITE_SENTRY_TRACES_SAMPLE_RATE: "0.1";
@@ -15,7 +14,6 @@ declare namespace Cloudflare {
 		SENTRY_TRACES_SAMPLE_RATE: "0.1";
 		VITE_WORKOS_API_HOSTNAME: "api.workos.com";
 		VITE_WORKOS_REDIRECT_URI: "https://hackerfeed-web.kgqk4vdcfq.workers.dev/auth/callback";
-		AI_TOKEN_ENCRYPTION_KEY: string;
 	}
 }
 interface Env extends Cloudflare.Env {}
@@ -23,7 +21,7 @@ type StringifyValues<EnvType extends Record<string, unknown>> = {
 	[Binding in keyof EnvType]: EnvType[Binding] extends string ? EnvType[Binding] : string;
 };
 declare namespace NodeJS {
-	interface ProcessEnv extends StringifyValues<Pick<Cloudflare.Env, "SERVER_URL" | "VITE_APP_TITLE" | "VITE_SENTRY_ENVIRONMENT" | "VITE_SENTRY_TRACES_SAMPLE_RATE" | "SENTRY_ENVIRONMENT" | "SENTRY_TRACES_SAMPLE_RATE" | "VITE_WORKOS_API_HOSTNAME" | "VITE_WORKOS_REDIRECT_URI" | "AI_TOKEN_ENCRYPTION_KEY">> {}
+	interface ProcessEnv extends StringifyValues<Pick<Cloudflare.Env, "VITE_APP_TITLE" | "VITE_SENTRY_ENVIRONMENT" | "VITE_SENTRY_TRACES_SAMPLE_RATE" | "SENTRY_ENVIRONMENT" | "SENTRY_TRACES_SAMPLE_RATE" | "VITE_WORKOS_API_HOSTNAME" | "VITE_WORKOS_REDIRECT_URI">> {}
 }
 
 // Begin runtime types

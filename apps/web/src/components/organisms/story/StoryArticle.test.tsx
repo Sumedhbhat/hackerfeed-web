@@ -13,10 +13,6 @@ vi.mock("#/hooks/useAuthSession", () => ({
 	useAuthSession: () => ({ isLoading: false, user: authMock.user }),
 }));
 
-vi.mock("#/hooks/useFeatureFlags", () => ({
-	useFeatureFlag: () => true,
-}));
-
 vi.mock("#/lib/trpc/client", () => ({
 	createTrpcClient: vi.fn(() => ({
 		views: { story: { mutate: viewStory } },
@@ -49,12 +45,12 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe("StoryArticle activity", () => {
-	it("records signed-in article and AI chat opens", () => {
+	it("records signed-in article and ChatGPT opens", () => {
 		authMock.user = { id: "workos-story-reader" };
 		render(<StoryArticle story={story} />);
 
 		fireEvent.click(screen.getByRole("link", { name: /read article/i }));
-		fireEvent.click(screen.getByRole("link", { name: /^discuss with ai: /i }));
+		fireEvent.click(screen.getByRole("link", { name: /^open in chatgpt: /i }));
 
 		expect(viewStory.mock.calls).toEqual([
 			[{ action: "read", story }],

@@ -1,11 +1,12 @@
 import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
 import {
+	buildChatGptStoryDiscussionUrl,
 	formatStoryAge,
 	getStoryDomain,
 	getStoryTitle,
 	splitPostKind,
 } from "@hackerfeed/hacker-news/utils";
-import { ButtonLink, ExternalButtonLink } from "@hackerfeed/ui/atoms/Button";
+import { ExternalButtonLink } from "@hackerfeed/ui/atoms/Button";
 import { Heading } from "@hackerfeed/ui/atoms/Heading";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
 import { Prose } from "@hackerfeed/ui/atoms/Prose";
@@ -15,16 +16,13 @@ import { TitleTag } from "@hackerfeed/ui/atoms/TitleTag";
 import { ToggleButton } from "@hackerfeed/ui/atoms/Toggle";
 import { ToggleLabel } from "@hackerfeed/ui/atoms/ToggleLabel";
 import { StoryMeta } from "@hackerfeed/ui/molecules/StoryMeta";
-import { ArrowUpRight, Bookmark, Sparkles } from "lucide-react";
+import { ArrowUpRight, Bookmark } from "lucide-react";
 import { useFavorites } from "#/hooks/useFavorites";
-import { useFeatureFlag } from "#/hooks/useFeatureFlags";
 import { useViewActivity } from "#/hooks/useViewActivity";
-import { rememberReturnFocus } from "#/lib/a11y/return-focus";
 
 export function StoryArticle({ story }: { story: HackerNewsStoryRecord }) {
 	const title = getStoryTitle(story);
 	const { kind: postKind, text: titleText } = splitPostKind(title);
-	const aiChat = useFeatureFlag("aiChat");
 	const { recordStoryView } = useViewActivity();
 	const { isFavorited, toggleFavorite } = useFavorites();
 	const isFav = isFavorited(story.id);
@@ -53,21 +51,14 @@ export function StoryArticle({ story }: { story: HackerNewsStoryRecord }) {
 						Read article <Icon icon={ArrowUpRight} size={14} />
 					</ExternalButtonLink>
 				)}
-				{aiChat ? (
-					<ButtonLink
-						variant="soft"
-						to="/chat/$storyId"
-						params={{ storyId: story.id }}
-						aria-label={`Discuss with AI: ${title}`}
-						onClick={(event) => {
-							rememberReturnFocus(event.currentTarget);
-							recordStoryView(story, "chat_opened");
-						}}
-					>
-						<Icon icon={Sparkles} accent />
-						Discuss with AI
-					</ButtonLink>
-				) : null}
+				<ExternalButtonLink
+					variant="soft"
+					href={buildChatGptStoryDiscussionUrl(story)}
+					aria-label={`Open in ChatGPT: ${title}`}
+					onClick={() => recordStoryView(story, "chat_opened")}
+				>
+					Open in ChatGPT <Icon icon={ArrowUpRight} size={14} />
+				</ExternalButtonLink>
 				<ToggleButton
 					aria-label={`${isFav ? "Saved" : "Save"} ${title}`}
 					pressed={isFav}

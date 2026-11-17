@@ -10,10 +10,8 @@ const loggerMock = vi.hoisted(() => ({
 
 vi.mock("@hackerfeed/runtime/logger", () => loggerMock);
 
-import { AiRequestError } from "@hackerfeed/api-client/ai";
 import {
 	type ErrorNotice,
-	getServerTraceId,
 	onErrorNotice,
 	reportError,
 	toUserMessage,
@@ -54,19 +52,6 @@ describe("toUserMessage", () => {
 		expect(toUserMessage(offline, "save")).toMatch(/couldn't reach/i);
 		expect(toUserMessage(trpcError(401), "save")).toMatch(/sign in again/i);
 		expect(toUserMessage(trpcError(429), "save")).toMatch(/too many/i);
-	});
-
-	it("keeps the server's own wording for AI errors", () => {
-		const error = new AiRequestError(
-			{ code: "model_unavailable", message: "That model is offline." },
-			new Response(null, {
-				status: 503,
-				headers: { "x-sentry-trace-id": SERVER_TRACE_ID },
-			}),
-		);
-
-		expect(toUserMessage(error, "load")).toBe("That model is offline.");
-		expect(getServerTraceId(error)).toBe(SERVER_TRACE_ID);
 	});
 });
 

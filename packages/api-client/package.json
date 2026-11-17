@@ -3,7 +3,6 @@
 	"private": true,
 	"type": "module",
 	"exports": {
-		"./ai": "./src/ai.ts",
 		"./auth": "./src/auth.ts",
 		"./feature-flags": "./src/feature-flags.ts",
 		"./trpc": "./src/trpc.ts"

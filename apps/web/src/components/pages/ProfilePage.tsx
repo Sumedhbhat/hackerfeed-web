@@ -9,16 +9,7 @@ import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { Text } from "@hackerfeed/ui/atoms/Text";
 import { ProfileSummary } from "@hackerfeed/ui/molecules/ProfileSummary";
 import { Settings, User } from "lucide-react";
-import { AiProvidersCard } from "#/components/organisms/ai/AiProvidersCard";
 import { signIn, useAuthSession } from "#/hooks/useAuthSession";
-import { useFeatureFlag } from "#/hooks/useFeatureFlags";
-
-export type ProfileSearch = {
-	/** Result of an AI provider sign-in, set by the provider callback. */
-	ai?: "connected" | "error";
-	provider?: string;
-	reason?: string;
-};
 
 function getDisplayName(
 	firstName: string | null,
@@ -39,9 +30,8 @@ function getInitials(
 	return email[0].toUpperCase();
 }
 
-export function ProfilePage({ search }: { search: ProfileSearch }) {
+export function ProfilePage() {
 	const { user, isLoading } = useAuthSession();
-	const aiChat = useFeatureFlag("aiChat");
 
 	if (isLoading) {
 		return (
@@ -95,14 +85,6 @@ export function ProfilePage({ search }: { search: ProfileSearch }) {
 							Settings
 						</ButtonLink>
 					</Row>
-
-					{aiChat ? (
-						<AiProvidersCard
-							result={search.ai}
-							resultProviderId={search.provider}
-							reason={search.reason}
-						/>
-					) : null}
 				</Stack>
 			</Panel>
 		</PageContainer>

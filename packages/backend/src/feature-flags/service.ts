@@ -32,6 +32,9 @@ export function evaluateFeatureFlags(
 	config: FeatureFlagConfig = featureFlags,
 ): FeatureFlags {
 	return Object.fromEntries(
-		Object.entries(config).map(([name, flag]) => [name, isEnabled(flag, user)]),
+		Object.entries<FeatureFlagDefinition>(config).map(([name, flag]) => [
+			name,
+			isEnabled(flag, user),
+		]),
 	) as FeatureFlags;
 }

@@ -41,8 +41,6 @@ vi.mock("#/hooks/useAuthSession", () => ({
 	}),
 }));
 
-vi.mock("#/hooks/useFeatureFlags", () => ({ useFeatureFlag: () => false }));
-
 import { FeedPage } from "#/components/pages/FeedPage";
 
 function readyIdsQuery(ids: number[]) {

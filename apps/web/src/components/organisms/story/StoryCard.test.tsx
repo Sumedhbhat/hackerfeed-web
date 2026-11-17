@@ -17,8 +17,6 @@ const authMock = vi.hoisted(() => ({
 	user: null as { id: string } | null,
 }));
 
-const flagsMock = vi.hoisted(() => ({ aiChat: true }));
-
 const trpcMock = vi.hoisted(() => ({
 	add: vi.fn(),
 	clear: vi.fn(),
@@ -32,10 +30,6 @@ vi.mock("#/hooks/useAuthSession", () => ({
 		isLoading: authMock.isLoading,
 		user: authMock.user,
 	}),
-}));
-
-vi.mock("#/hooks/useFeatureFlags", () => ({
-	useFeatureFlag: (name: keyof typeof flagsMock) => flagsMock[name],
 }));
 
 vi.mock("#/lib/trpc/client", () => ({
@@ -103,7 +97,6 @@ function makeStory(
 beforeEach(() => {
 	authMock.isLoading = false;
 	authMock.user = null;
-	flagsMock.aiChat = true;
 	trpcMock.add.mockResolvedValue(undefined);
 	trpcMock.clear.mockResolvedValue(undefined);
 	trpcMock.list.mockResolvedValue([]);
@@ -211,19 +204,13 @@ describe("StoryCard link actions", () => {
 		expect(link.getAttribute("href")).toContain("99999");
 	});
 
-	it("'Discuss with AI' opens the in-app AI chat for the story", () => {
+	it("'Open in ChatGPT' opens a ChatGPT prompt about the story in a new tab", () => {
 		render(<StoryCard story={makeStory({ id: 4242 })} />);
-		const link = screen.getByRole("link", { name: /^discuss with ai: /i });
-		expect(link.getAttribute("href")).toBe("/chat/4242");
-		expect(link.getAttribute("target")).toBeNull();
-	});
-
-	it("hides 'Discuss with AI' while the aiChat flag is off", () => {
-		flagsMock.aiChat = false;
-		render(<StoryCard story={makeStory()} />);
-		expect(
-			screen.queryByRole("link", { name: /^discuss with ai: /i }),
-		).toBeNull();
+		const link = screen.getByRole("link", { name: /^open in chatgpt: /i });
+		const href = new URL(link.getAttribute("href") ?? "");
+		expect(href.origin).toBe("https://chatgpt.com");
+		expect(href.searchParams.get("q")).toContain("item?id=4242");
+		expect(link.getAttribute("target")).toBe("_blank");
 	});
 
 	it("records signed-in title clicks as reads", () => {
@@ -252,13 +239,13 @@ describe("StoryCard link actions", () => {
 		]);
 	});
 
-	it("records signed-in discussion and AI chat opens", () => {
+	it("records signed-in discussion and ChatGPT opens", () => {
 		authMock.user = { id: "workos-story-viewer" };
 		const story = makeStory();
 		render(<StoryCard story={story} />);
 
 		fireEvent.click(screen.getByRole("link", { name: /^17 comments: / }));
-		fireEvent.click(screen.getByRole("link", { name: /^discuss with ai: /i }));
+		fireEvent.click(screen.getByRole("link", { name: /^open in chatgpt: /i }));
 
 		expect(trpcMock.viewStory.mock.calls).toEqual([
 			[{ action: "discussion_opened", story }],
