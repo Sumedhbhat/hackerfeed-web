@@ -8,7 +8,7 @@ import {
 	isDiscussionPost,
 	splitPostKind,
 } from "@hackerfeed/hacker-news/utils";
-import { ButtonLink, ExternalButtonLink } from "@hackerfeed/ui/atoms/Button";
+import { ButtonLink } from "@hackerfeed/ui/atoms/Button";
 import { Heading } from "@hackerfeed/ui/atoms/Heading";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
 import { ExternalLink, TextLink } from "@hackerfeed/ui/atoms/Link";
@@ -16,9 +16,10 @@ import { TitleTag } from "@hackerfeed/ui/atoms/TitleTag";
 import { ToggleButton } from "@hackerfeed/ui/atoms/Toggle";
 import { ToggleLabel } from "@hackerfeed/ui/atoms/ToggleLabel";
 import { WideText } from "@hackerfeed/ui/atoms/WideText";
+import { ChatGptLink } from "@hackerfeed/ui/molecules/ChatGptLink";
 import { FeedRow } from "@hackerfeed/ui/molecules/FeedRow";
 import { StoryMeta } from "@hackerfeed/ui/molecules/StoryMeta";
-import { ArrowUpRight, Bookmark, MessageSquare } from "lucide-react";
+import { Bookmark, MessageSquare } from "lucide-react";
 import { useFavorites } from "#/hooks/useFavorites";
 import { useViewActivity } from "#/hooks/useViewActivity";
 import { rememberReturnFocus } from "#/lib/a11y/return-focus";
@@ -89,18 +90,12 @@ export function StoryCard({ story, markSaved = true }: StoryCardProps) {
 				/>
 			}
 			actions={[
-				<ExternalButtonLink
+				<ChatGptLink
 					key="chatgpt"
-					variant="accent"
-					href={buildChatGptStoryDiscussionUrl(story)}
-					aria-label={`Open in ChatGPT: ${title}`}
-					onClick={() => recordStoryView(story, "chat_opened")}
-				>
-					<span>
-						Open<WideText from="xs"> in ChatGPT</WideText>
-					</span>
-					<Icon icon={ArrowUpRight} size={14} />
-				</ExternalButtonLink>,
+					title={title}
+					discussUrl={buildChatGptStoryDiscussionUrl(story)}
+					onDiscuss={() => recordStoryView(story, "chat_opened")}
+				/>,
 				<ButtonLink
 					key="comments"
 					variant={comments > 0 ? "ghost" : "quiet"}

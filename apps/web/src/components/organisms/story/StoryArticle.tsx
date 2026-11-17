@@ -15,6 +15,7 @@ import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { TitleTag } from "@hackerfeed/ui/atoms/TitleTag";
 import { ToggleButton } from "@hackerfeed/ui/atoms/Toggle";
 import { ToggleLabel } from "@hackerfeed/ui/atoms/ToggleLabel";
+import { ChatGptLink } from "@hackerfeed/ui/molecules/ChatGptLink";
 import { StoryMeta } from "@hackerfeed/ui/molecules/StoryMeta";
 import { ArrowUpRight, Bookmark } from "lucide-react";
 import { useFavorites } from "#/hooks/useFavorites";
@@ -51,14 +52,11 @@ export function StoryArticle({ story }: { story: HackerNewsStoryRecord }) {
 						Read article <Icon icon={ArrowUpRight} size={14} />
 					</ExternalButtonLink>
 				)}
-				<ExternalButtonLink
-					variant="soft"
-					href={buildChatGptStoryDiscussionUrl(story)}
-					aria-label={`Open in ChatGPT: ${title}`}
-					onClick={() => recordStoryView(story, "chat_opened")}
-				>
-					Open in ChatGPT <Icon icon={ArrowUpRight} size={14} />
-				</ExternalButtonLink>
+				<ChatGptLink
+					title={title}
+					discussUrl={buildChatGptStoryDiscussionUrl(story)}
+					onDiscuss={() => recordStoryView(story, "chat_opened")}
+				/>
 				<ToggleButton
 					aria-label={`${isFav ? "Saved" : "Save"} ${title}`}
 					pressed={isFav}
