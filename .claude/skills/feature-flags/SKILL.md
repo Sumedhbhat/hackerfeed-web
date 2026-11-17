@@ -42,12 +42,11 @@ flag off.
 2. **Enforce it on the server** for every endpoint the feature uses. Hiding UI
    only hides it; anyone can still call the API. Use
    `isFeatureEnabled("newThing", user)` and answer `404` with
-   `code: "feature_disabled"`. For an example, see `isEnabled` in
-   `packages/backend/src/ai/http.ts` (wired in `packages/backend/src/ai/runtime.ts`). In tRPC, check
+   `code: "feature_disabled"`. In tRPC, check
    `ctx.user` inside the procedure.
 3. Hide the UI with `const on = useFeatureFlag("newThing")`. Call the hook at
    the top of the component, before any early return. For a whole route, render
-   `<Navigate … replace />` when the flag is off, like `apps/web/src/routes/chat.$storyId.tsx`.
+   `<Navigate to="/" replace />` when the flag is off.
 4. Tests:
    - Server: inject the flag check, e.g. `isEnabled: () => false`, and assert
      the 404 plus that the service was never called. Evaluation tests pass a
