@@ -1,7 +1,7 @@
 import {
 	BUILT_IN_PALETTES,
 	type PaletteColors,
-} from "@hackerfeed/contracts/appearance";
+} from "@hackerfeed/entities/appearance";
 import { describe, expect, it } from "vitest";
 import { contrastChecks, derivePalette, PALETTE_ROLES } from "./derive-palette";
 

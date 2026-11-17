@@ -1,4 +1,4 @@
-import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
+import type { HackerNewsStoryRecord } from "@hackerfeed/entities/hacker-news";
 import { describe, expect, it } from "vitest";
 import { UnauthorizedError } from "../auth/current-user";
 import { createFavoriteService } from "./service";

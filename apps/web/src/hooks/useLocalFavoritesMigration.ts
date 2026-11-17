@@ -1,5 +1,5 @@
-import { hackerNewsStorySchema } from "@hackerfeed/contracts/favorites";
-import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
+import { hackerNewsStorySchema } from "@hackerfeed/entities/favorites";
+import type { HackerNewsStoryRecord } from "@hackerfeed/entities/hacker-news";
 import { useEffect, useRef } from "react";
 import { reportError } from "#/lib/errors/report-error";
 import {

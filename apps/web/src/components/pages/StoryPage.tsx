@@ -1,4 +1,3 @@
-import { getDiscussionUrl } from "@hackerfeed/hacker-news/utils";
 import { Button } from "@hackerfeed/ui/atoms/Button";
 import { Heading } from "@hackerfeed/ui/atoms/Heading";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
@@ -27,6 +26,7 @@ import {
 	ThreadExpansionProvider,
 } from "#/hooks/useThreadExpansion";
 import { goBackIfReturningTo } from "#/lib/a11y/return-focus";
+import { getDiscussionUrl } from "#/lib/hacker-news/display";
 
 type StoryPageProps = {
 	storyId: number;

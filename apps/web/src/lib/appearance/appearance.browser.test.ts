@@ -3,7 +3,7 @@ import { createRequire } from "node:module";
 import {
 	BUILT_IN_PALETTES,
 	DEFAULT_PALETTE,
-} from "@hackerfeed/contracts/appearance";
+} from "@hackerfeed/entities/appearance";
 import { beforeEach, describe, expect, it } from "vitest";
 import themeInit from "../theme-init.js?raw";
 import {

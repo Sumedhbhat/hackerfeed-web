@@ -1,4 +1,4 @@
-import type { HackerNewsCommentRecord } from "@hackerfeed/hacker-news/records";
+import type { HackerNewsCommentRecord } from "@hackerfeed/entities/hacker-news";
 import {
 	Collapsible,
 	CollapsiblePanel,

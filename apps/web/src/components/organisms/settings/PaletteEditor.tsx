@@ -2,7 +2,7 @@ import type {
 	Palette,
 	PaletteBaseRole,
 	PaletteInput,
-} from "@hackerfeed/contracts/appearance";
+} from "@hackerfeed/entities/appearance";
 import { Button } from "@hackerfeed/ui/atoms/Button";
 import { Field, FieldError, FieldLabel } from "@hackerfeed/ui/atoms/Field";
 import { Heading } from "@hackerfeed/ui/atoms/Heading";

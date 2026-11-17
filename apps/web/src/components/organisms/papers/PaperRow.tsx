@@ -1,4 +1,4 @@
-import type { PaperViewAction } from "@hackerfeed/contracts/view-activity";
+import type { PaperViewAction } from "@hackerfeed/entities/view-activity";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
 import { PaperCard } from "@hackerfeed/ui/atoms/PaperCard";
 import { Stack } from "@hackerfeed/ui/atoms/Stack";

@@ -1,5 +1,5 @@
+import type { HackerNewsStoryRecord } from "@hackerfeed/entities/hacker-news";
 import { describe, expect, it } from "vitest";
-import type { HackerNewsStoryRecord } from "./records";
 import {
 	formatStoryAge,
 	getDiscussionUrl,
@@ -8,7 +8,7 @@ import {
 	isDiscussionPost,
 	splitPostKind,
 	stripHtml,
-} from "./utils";
+} from "./display";
 
 function makeStory(
 	overrides: Partial<HackerNewsStoryRecord> = {},

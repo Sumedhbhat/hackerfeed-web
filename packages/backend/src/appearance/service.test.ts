@@ -4,7 +4,7 @@ import {
 	MAX_PALETTES_PER_USER,
 	type PaletteInput,
 	type ThemeMode,
-} from "@hackerfeed/contracts/appearance";
+} from "@hackerfeed/entities/appearance";
 import { describe, expect, it } from "vitest";
 import type {
 	AppearanceRepository,

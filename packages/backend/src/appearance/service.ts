@@ -8,7 +8,7 @@ import {
 	type Palette,
 	type PaletteInput,
 	type PreferencesUpdateInput,
-} from "@hackerfeed/contracts/appearance";
+} from "@hackerfeed/entities/appearance";
 import {
 	type AuthenticatedWorkosUser,
 	resolveCurrentWorkosUser,

@@ -3,7 +3,7 @@ import "@tanstack/react-start/server-only";
 import type {
 	PaperEdition,
 	PopularPaperKeyword,
-} from "@hackerfeed/contracts/papers";
+} from "@hackerfeed/entities/papers";
 import type { DatabaseContext } from "../database/client";
 import {
 	createHuggingFacePaperFeedRepository,

@@ -1,4 +1,4 @@
-import { DEFAULT_PALETTE } from "@hackerfeed/contracts/appearance";
+import { DEFAULT_PALETTE } from "@hackerfeed/entities/appearance";
 import { describe, expect, it } from "vitest";
 import {
 	type AppearanceService,

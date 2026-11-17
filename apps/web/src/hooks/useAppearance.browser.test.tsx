@@ -2,7 +2,7 @@ import {
 	type Account,
 	BUILT_IN_PALETTES,
 	DEFAULT_PALETTE,
-} from "@hackerfeed/contracts/appearance";
+} from "@hackerfeed/entities/appearance";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";

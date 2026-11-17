@@ -1,5 +1,5 @@
-import type { SavedPaper } from "@hackerfeed/contracts/paper-favorites";
-import type { PaperFeedPaper } from "@hackerfeed/contracts/papers";
+import type { SavedPaper } from "@hackerfeed/entities/paper-favorites";
+import type { PaperFeedPaper } from "@hackerfeed/entities/papers";
 import {
 	act,
 	cleanup,

@@ -29,8 +29,7 @@
         "@cloudflare/vite-plugin": "^1.64.0",
         "@hackerfeed/api-client": "workspace:*",
         "@hackerfeed/backend": "workspace:*",
-        "@hackerfeed/contracts": "workspace:*",
-        "@hackerfeed/hacker-news": "workspace:*",
+        "@hackerfeed/entities": "workspace:*",
         "@hackerfeed/runtime": "workspace:*",
         "@hackerfeed/ui": "workspace:*",
         "@sentry/cloudflare": "^11.7.0",
@@ -92,7 +91,6 @@
     "packages/api-client": {
       "name": "@hackerfeed/api-client",
       "dependencies": {
-        "@hackerfeed/contracts": "workspace:*",
         "@hackerfeed/runtime": "workspace:*",
         "@sentry/core": "^11.7.0",
         "@trpc/client": "^11.19.0",
@@ -108,8 +106,7 @@
     "packages/backend": {
       "name": "@hackerfeed/backend",
       "dependencies": {
-        "@hackerfeed/contracts": "workspace:*",
-        "@hackerfeed/hacker-news": "workspace:*",
+        "@hackerfeed/entities": "workspace:*",
         "@hackerfeed/runtime": "workspace:*",
         "@sentry/cloudflare": "^11.7.0",
         "@sentry/core": "^11.7.0",
@@ -125,17 +122,11 @@
         "vitest": "^5.0.4",
       },
     },
-    "packages/contracts": {
-      "name": "@hackerfeed/contracts",
+    "packages/entities": {
+      "name": "@hackerfeed/entities",
       "dependencies": {
         "zod": "^4.6.5",
       },
-      "devDependencies": {
-        "vitest": "^5.0.4",
-      },
-    },
-    "packages/hacker-news": {
-      "name": "@hackerfeed/hacker-news",
       "devDependencies": {
         "vitest": "^5.0.4",
       },
@@ -340,9 +331,7 @@
 
     "@hackerfeed/backend": ["@hackerfeed/backend@workspace:packages/backend"],
 
-    "@hackerfeed/contracts": ["@hackerfeed/contracts@workspace:packages/contracts"],
-
-    "@hackerfeed/hacker-news": ["@hackerfeed/hacker-news@workspace:packages/hacker-news"],
+    "@hackerfeed/entities": ["@hackerfeed/entities@workspace:packages/entities"],
 
     "@hackerfeed/runtime": ["@hackerfeed/runtime@workspace:packages/runtime"],
 

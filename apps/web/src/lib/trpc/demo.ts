@@ -8,23 +8,23 @@ import {
 	paletteUpdateInputSchema,
 	preferencesUpdateInputSchema,
 	type ThemeMode,
-} from "@hackerfeed/contracts/appearance";
+} from "@hackerfeed/entities/appearance";
 import {
 	type FavoriteStoryInput,
 	favoriteStoryIdInputSchema,
 	hackerNewsStorySchema,
 	importLocalFavoritesInputSchema,
-} from "@hackerfeed/contracts/favorites";
+} from "@hackerfeed/entities/favorites";
 import {
 	paperFavoriteInputSchema,
 	paperFavoritesListInputSchema,
 	type SavedPaper,
-} from "@hackerfeed/contracts/paper-favorites";
-import { paperEditionInputSchema } from "@hackerfeed/contracts/papers";
+} from "@hackerfeed/entities/paper-favorites";
+import { paperEditionInputSchema } from "@hackerfeed/entities/papers";
 import {
 	paperViewInputSchema,
 	storyViewInputSchema,
-} from "@hackerfeed/contracts/view-activity";
+} from "@hackerfeed/entities/view-activity";
 import { TRPCClientError, type TRPCLink } from "@trpc/client";
 import { observable } from "@trpc/server/observable";
 import {

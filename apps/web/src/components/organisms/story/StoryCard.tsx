@@ -1,13 +1,4 @@
-import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
-import {
-	buildChatGptStoryDiscussionUrl,
-	formatStoryAge,
-	getDiscussionUrl,
-	getStoryDomain,
-	getStoryTitle,
-	isDiscussionPost,
-	splitPostKind,
-} from "@hackerfeed/hacker-news/utils";
+import type { HackerNewsStoryRecord } from "@hackerfeed/entities/hacker-news";
 import { ButtonLink } from "@hackerfeed/ui/atoms/Button";
 import { Heading } from "@hackerfeed/ui/atoms/Heading";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
@@ -23,6 +14,15 @@ import { Bookmark, MessageSquare } from "lucide-react";
 import { useFavorites } from "#/hooks/useFavorites";
 import { useViewActivity } from "#/hooks/useViewActivity";
 import { rememberReturnFocus } from "#/lib/a11y/return-focus";
+import {
+	buildChatGptStoryDiscussionUrl,
+	formatStoryAge,
+	getDiscussionUrl,
+	getStoryDomain,
+	getStoryTitle,
+	isDiscussionPost,
+	splitPostKind,
+} from "#/lib/hacker-news/display";
 
 type StoryCardProps = {
 	story: HackerNewsStoryRecord;

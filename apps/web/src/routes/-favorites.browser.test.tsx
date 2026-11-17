@@ -1,5 +1,5 @@
-import type { SavedPaper } from "@hackerfeed/contracts/paper-favorites";
-import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
+import type { HackerNewsStoryRecord } from "@hackerfeed/entities/hacker-news";
+import type { SavedPaper } from "@hackerfeed/entities/paper-favorites";
 import {
 	cleanup,
 	fireEvent,

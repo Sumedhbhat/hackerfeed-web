@@ -1,6 +1,6 @@
-import { favoriteStoriesOutputSchema } from "@hackerfeed/contracts/favorites";
-import { paperFavoritesListOutputSchema } from "@hackerfeed/contracts/paper-favorites";
-import { paperEditionOutputSchema } from "@hackerfeed/contracts/papers";
+import { favoriteStoriesOutputSchema } from "@hackerfeed/entities/favorites";
+import { paperFavoritesListOutputSchema } from "@hackerfeed/entities/paper-favorites";
+import { paperEditionOutputSchema } from "@hackerfeed/entities/papers";
 import { render, renderHook, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { snapshotPapers } from "#/demo-data/snapshot";

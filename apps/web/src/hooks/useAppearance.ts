@@ -4,7 +4,7 @@ import {
 	type PaletteInput,
 	type PreferencesUpdateInput,
 	type ThemeMode,
-} from "@hackerfeed/contracts/appearance";
+} from "@hackerfeed/entities/appearance";
 import {
 	useIsMutating,
 	useMutation,

@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 
-import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
+import type { HackerNewsStoryRecord } from "@hackerfeed/entities/hacker-news";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
 	clearAllFavorites,

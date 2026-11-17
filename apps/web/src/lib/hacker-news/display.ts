@@ -1,4 +1,4 @@
-import type { HackerNewsStoryRecord } from "./records";
+import type { HackerNewsStoryRecord } from "@hackerfeed/entities/hacker-news";
 
 const RELATIVE_TIME_FORMATTER = new Intl.RelativeTimeFormat("en", {
 	numeric: "auto",
