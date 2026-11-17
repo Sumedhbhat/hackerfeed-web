@@ -7,23 +7,24 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "bun run --cwd apps/web dev",
+    "dev": "bun run --filter '@hackerfeed/web' --filter '@hackerfeed/api' dev",
     "dev:demo": "bun run --cwd apps/web dev:demo",
     "build": "nx run web:build",
     "build:demo": "nx run web:build-demo",
     "preview": "bun run --cwd apps/web preview",
     "preview:private": "bun run --cwd apps/web preview:private",
     "demo-data:compare": "bun run --cwd apps/web demo-data:compare",
-    "cf:typegen": "bun run --cwd apps/web cf:typegen",
+    "cf:typegen": "bun run --filter '@hackerfeed/web' --filter '@hackerfeed/api' cf:typegen",
     "db:generate": "bun run --cwd packages/backend db:generate",
-    "db:migrate:local": "bun run --cwd apps/web db:migrate:local",
+    "db:migrate:local": "bun run --cwd apps/api db:migrate:local",
     "security:audit": "bun audit --audit-level=high",
     "test": "nx run-many -t test",
     "e2e": "nx run web-e2e:e2e",
     "typecheck": "nx run-many -t typecheck",
     "format": "biome format",
     "lint": "biome lint",
-    "check": "biome check"
+    "check": "biome check",
+    "dev:api": "bun run --cwd apps/api dev"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",

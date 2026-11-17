@@ -14,10 +14,15 @@ describe("fetchFeatureFlags", () => {
 		);
 		vi.stubGlobal("fetch", fetchMock);
 
-		expect(await fetchFeatureFlags(auth)).toEqual({ example: true });
-		expect(fetchMock).toHaveBeenCalledWith("/api/feature-flags", {
-			headers: { accept: "application/json", Authorization: "Bearer token" },
+		expect(await fetchFeatureFlags("https://api.example", auth)).toEqual({
+			example: true,
 		});
+		expect(fetchMock).toHaveBeenCalledWith(
+			new URL("https://api.example/api/feature-flags"),
+			{
+				headers: { accept: "application/json", Authorization: "Bearer token" },
+			},
+		);
 	});
 
 	it("throws on a failed response", async () => {
@@ -26,6 +31,8 @@ describe("fetchFeatureFlags", () => {
 			vi.fn(async () => new Response(null, { status: 503 })),
 		);
 
-		await expect(fetchFeatureFlags(auth)).rejects.toThrow("503");
+		await expect(
+			fetchFeatureFlags("https://api.example", auth),
+		).rejects.toThrow("503");
 	});
 });

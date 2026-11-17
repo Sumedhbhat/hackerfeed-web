@@ -14,14 +14,12 @@
     "preview:private": "scripts/private-preview.sh",
     "demo-data:compare": "bun scripts/compare-demo-data.ts",
     "cf:typegen": "wrangler types",
-    "db:migrate:local": "wrangler d1 migrations apply DB --local",
     "demo-data:refresh": "bun scripts/refresh-demo-data.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
     "@cloudflare/vite-plugin": "^1.64.0",
     "@hackerfeed/api-client": "workspace:*",
-    "@hackerfeed/backend": "workspace:*",
     "@hackerfeed/entities": "workspace:*",
     "@hackerfeed/runtime": "workspace:*",
     "@hackerfeed/ui": "workspace:*",
@@ -54,6 +52,7 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@hackerfeed/backend": "workspace:*",
     "@sentry/vite-plugin": "11.8.0",
     "@tailwindcss/typography": "^0.5.20",
     "@tanstack/devtools-event-client": "latest",

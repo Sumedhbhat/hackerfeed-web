@@ -2,6 +2,7 @@ import {
 	type FeatureFlags,
 	fetchFeatureFlags as fetchSessionFeatureFlags,
 } from "@hackerfeed/api-client/feature-flags";
+import { env } from "#/env";
 import { getApiHeaders } from "#/lib/auth/authkit";
 
 export type {
@@ -11,5 +12,7 @@ export type {
 
 export async function fetchFeatureFlags(): Promise<Partial<FeatureFlags>> {
 	if (import.meta.env.VITE_DEMO_DATA === "true") return {};
-	return fetchSessionFeatureFlags({ getHeaders: getApiHeaders });
+	return fetchSessionFeatureFlags(env.VITE_API_URL, {
+		getHeaders: getApiHeaders,
+	});
 }

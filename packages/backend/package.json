@@ -7,8 +7,7 @@
 		"./api-types": "./src/api-types.ts",
 		"./database/client": "./src/database/client.ts",
 		"./database/schema": "./src/database/schema.ts",
-		"./huggingface-papers/ingestion": "./src/huggingface-papers/ingestion.ts",
-		"./tracing/client-trace": "./src/tracing/client-trace.ts"
+		"./huggingface-papers/ingestion": "./src/huggingface-papers/ingestion.ts"
 	},
 	"scripts": {
 		"db:generate": "drizzle-kit generate"

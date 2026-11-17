@@ -10,9 +10,10 @@ const featureFlagsResponseSchema = z.object({
 });
 
 export async function fetchFeatureFlags(
+	apiUrl: string,
 	auth: Pick<ApiAuth, "getHeaders">,
 ): Promise<Partial<FeatureFlags>> {
-	const response = await fetch("/api/feature-flags", {
+	const response = await fetch(new URL("/api/feature-flags", apiUrl), {
 		headers: { accept: "application/json", ...(await auth.getHeaders()) },
 	});
 	if (!response.ok) {
