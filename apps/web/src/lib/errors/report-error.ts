@@ -1,4 +1,3 @@
-import { AiRequestError } from "@hackerfeed/api-client/ai";
 import { type LogContext, logger } from "@hackerfeed/runtime/logger";
 import { readServerTraceId } from "@hackerfeed/runtime/trace-headers";
 import { TRPCClientError } from "@trpc/client";
@@ -23,7 +22,6 @@ const FALLBACK_MESSAGES: Record<FailedAction, string> = {
 };
 
 function getStatus(error: unknown): number | undefined {
-	if (error instanceof AiRequestError) return error.status;
 	if (error instanceof TRPCClientError) {
 		const status = (error.data as { httpStatus?: unknown } | undefined)
 			?.httpStatus;
@@ -48,7 +46,6 @@ function isNetworkError(error: unknown): boolean {
 }
 
 export function getServerTraceId(error: unknown): string | undefined {
-	if (error instanceof AiRequestError) return error.traceId;
 	const response = getResponse(error);
 	return response ? readServerTraceId(response) : undefined;
 }
@@ -66,7 +63,6 @@ export function toUserMessage(
 	if (status === 401) return "Your session expired. Sign in again to continue.";
 	if (status === 429)
 		return "Too many requests. Wait a moment, then try again.";
-	if (error instanceof AiRequestError) return error.message;
 	return fallback;
 }
 

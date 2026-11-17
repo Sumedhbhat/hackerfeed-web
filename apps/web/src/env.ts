@@ -9,15 +9,7 @@ const runtimeEnv =
 export const env = createEnv({
 	// Static demos never initialize WorkOS or server services.
 	skipValidation: import.meta.env.VITE_DEMO_DATA === "true",
-	server: {
-		SERVER_URL: z.url().optional(),
-		// Encrypts stored AI provider tokens and the provider sign-in flow cookie.
-		AI_TOKEN_ENCRYPTION_KEY: z.string().min(32),
-		// Sign in with ChatGPT. Without a client id issued by OpenAI, sign-in
-		// only works on http://127.0.0.1 via dynamic registration.
-		CHATGPT_CLIENT_ID: z.string().min(1).optional(),
-		CHATGPT_CLIENT_SECRET: z.string().min(1).optional(),
-	},
+	server: {},
 
 	clientPrefix: "VITE_",
 

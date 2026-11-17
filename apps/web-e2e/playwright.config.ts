@@ -33,7 +33,6 @@ export default defineConfig({
 		command: `bunx vite build && bunx wrangler dev --config wrangler.preview.jsonc --local --ip 127.0.0.1 --port ${PORT}`,
 		env: {
 			VITE_DEMO_DATA: "true",
-			VITE_DEMO_AI_CHAT: "true",
 			WRANGLER_SEND_METRICS: "false",
 		},
 		url: `http://127.0.0.1:${PORT}`,

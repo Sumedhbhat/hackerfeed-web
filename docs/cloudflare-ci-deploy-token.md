@@ -92,9 +92,8 @@ The workflows use two GitHub environments:
 3. In both environments, add `CLOUDFLARE_ACCOUNT_ID`. The account id is an
    identifier, not a secret, but keeping it alongside the deployment
    configuration is fine.
-4. Only `production` needs `VITE_SENTRY_DSN`, `VITE_WORKOS_CLIENT_ID`,
-   `SENTRY_AUTH_TOKEN`, and `AI_TOKEN_ENCRYPTION_KEY`. Preview builds receive
-   none of these secrets.
+4. Only `production` needs `VITE_SENTRY_DSN`, `VITE_WORKOS_CLIENT_ID`, and
+   `SENTRY_AUTH_TOKEN`. Preview builds receive none of these secrets.
 5. Do not commit any of these values to `.env*`, `.dev.vars`, or the
    repository.
 

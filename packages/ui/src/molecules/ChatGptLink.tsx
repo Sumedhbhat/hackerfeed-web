@@ -2,8 +2,8 @@ import { ArrowUpRight } from "lucide-react";
 import { ExternalButtonLink } from "../atoms/Button";
 import { Icon } from "../atoms/Icon";
 
-/** No sparkle icon: that marks in-app AI, and this hands the paper off to ChatGPT. */
-export function PaperLinks({
+/** No sparkle icon: that marks in-app AI, and this hands the story or paper off to ChatGPT. */
+export function ChatGptLink({
 	title,
 	discussUrl,
 	onDiscuss,
@@ -17,7 +17,7 @@ export function PaperLinks({
 			variant="ghost"
 			href={discussUrl}
 			aria-label={`Open in ChatGPT: ${title}`}
-			title="Opens ChatGPT in a new tab with this paper"
+			title="Opens ChatGPT in a new tab"
 			onClick={onDiscuss}
 		>
 			Open in ChatGPT <Icon icon={ArrowUpRight} size={14} />

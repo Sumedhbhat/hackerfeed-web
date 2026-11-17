@@ -118,6 +118,6 @@ describe("fixture demo", () => {
 			isLoading: false,
 			user: { id: "demo-user", email: "demo@example.com" },
 		});
-		expect(await fetchFeatureFlags()).toEqual({ aiChat: false });
+		expect(await fetchFeatureFlags()).toEqual({});
 	});
 });

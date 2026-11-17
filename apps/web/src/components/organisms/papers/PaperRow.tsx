@@ -4,8 +4,8 @@ import { PaperCard } from "@hackerfeed/ui/atoms/PaperCard";
 import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { ToggleButton } from "@hackerfeed/ui/atoms/Toggle";
 import { ToggleLabel } from "@hackerfeed/ui/atoms/ToggleLabel";
+import { ChatGptLink } from "@hackerfeed/ui/molecules/ChatGptLink";
 import { PaperCardFooter } from "@hackerfeed/ui/molecules/PaperCardFooter";
-import { PaperLinks } from "@hackerfeed/ui/molecules/PaperLinks";
 import { PaperResourceLinks } from "@hackerfeed/ui/molecules/PaperResourceLinks";
 import { PaperSignals } from "@hackerfeed/ui/molecules/PaperSignals";
 import { PaperTitle } from "@hackerfeed/ui/molecules/PaperTitle";
@@ -62,7 +62,7 @@ export function PaperRow({
 			/>
 			<PaperCardFooter
 				actions={
-					<PaperLinks
+					<ChatGptLink
 						title={paper.title}
 						discussUrl={buildChatGptPaperDiscussionUrl(paper)}
 						onDiscuss={() => onView("chat_opened")}

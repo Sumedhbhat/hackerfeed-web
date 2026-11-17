@@ -6,7 +6,6 @@ import { renderWithQueryClient as render } from "#/test/renderWithQueryClient";
 const authMock = vi.hoisted(() => ({
 	isLoading: false,
 	user: null as Record<string, unknown> | null,
-	search: {} as Record<string, unknown>,
 }));
 
 vi.mock("#/hooks/useAuthSession", () => ({
@@ -17,24 +16,15 @@ vi.mock("#/hooks/useAuthSession", () => ({
 	signIn: vi.fn(),
 }));
 
-const flagsMock = vi.hoisted(() => ({ aiChat: true }));
-
-vi.mock("#/hooks/useFeatureFlags", () => ({
-	useFeatureFlag: (name: keyof typeof flagsMock) => flagsMock[name],
-}));
-
 vi.mock("@tanstack/react-router", async () => ({
 	createLink: (await import("#/test/createLinkMock")).createLinkMock,
-	createFileRoute: () => (options: Record<string, unknown>) => ({
-		...options,
-		useSearch: () => authMock.search,
-	}),
+	createFileRoute: () => (options: Record<string, unknown>) => options,
 	Link: ({ children, to }: { children: ReactNode; to: string }) => (
 		<a href={to}>{children}</a>
 	),
 }));
 
-import { parseProfileSearch, Route } from "./profile";
+import { Route } from "./profile";
 
 // createFileRoute is mocked to return its options, so the component sits on Route.
 const ProfilePage = (Route as unknown as { component: ComponentType })
@@ -42,58 +32,14 @@ const ProfilePage = (Route as unknown as { component: ComponentType })
 
 beforeEach(() => {
 	authMock.user = null;
-	authMock.search = {};
-	flagsMock.aiChat = true;
-	vi.stubGlobal(
-		"fetch",
-		vi.fn(async () =>
-			Response.json({
-				providers: [
-					{
-						id: "chatgpt",
-						name: "ChatGPT",
-						description: "Use your ChatGPT plan.",
-						manageUrl: null,
-						canConnect: true,
-						connected: false,
-						account: null,
-					},
-				],
-			}),
-		),
-	);
 });
 
 afterEach(() => {
 	cleanup();
-	vi.unstubAllGlobals();
-});
-
-describe("parseProfileSearch", () => {
-	it.each([
-		[{}, {}],
-		[
-			{ ai: "connected", provider: "chatgpt" },
-			{ ai: "connected", provider: "chatgpt" },
-		],
-		[
-			{ ai: "connected", provider: "chatgpt", reason: "x" },
-			{ ai: "connected", provider: "chatgpt" },
-		],
-		[
-			{ ai: "error", provider: "claude", reason: "access_denied" },
-			{ ai: "error", provider: "claude", reason: "access_denied" },
-		],
-		[{ ai: "error", provider: "<x>", reason: "<script>" }, { ai: "error" }],
-		[{ ai: "bogus", provider: "chatgpt", reason: "expired" }, {}],
-		[{ provider: "chatgpt" }, {}],
-	])("parses %j", (input, expected) => {
-		expect(parseProfileSearch(input)).toEqual(expected);
-	});
 });
 
 describe("ProfilePage", () => {
-	it("shows the AI assistants section for signed-in users", async () => {
+	it("shows the signed-in reader's name and a link to settings", () => {
 		authMock.user = {
 			id: "u1",
 			email: "reader@example.com",
@@ -103,46 +49,13 @@ describe("ProfilePage", () => {
 		};
 		render(<ProfilePage />);
 
-		expect(
-			screen.getByRole("heading", { name: "AI assistants" }),
-		).toBeDefined();
-		await screen.findByRole("button", { name: "Sign in with ChatGPT" });
+		expect(screen.getByText("Ada")).toBeDefined();
+		expect(screen.getByRole("link", { name: "Settings" })).toBeDefined();
 	});
 
-	it("passes callback results to the AI assistants section", async () => {
-		authMock.user = {
-			id: "u1",
-			email: "reader@example.com",
-			firstName: null,
-			lastName: null,
-			profilePictureUrl: null,
-		};
-		authMock.search = { ai: "error", provider: "chatgpt", reason: "expired" };
+	it("asks signed-out readers to sign in", () => {
 		render(<ProfilePage />);
 
-		expect((await screen.findByRole("alert")).textContent).toContain(
-			"took too long",
-		);
-	});
-
-	it("doesn't show the AI assistants section to signed-out users", () => {
-		render(<ProfilePage />);
-
-		expect(screen.queryByRole("heading", { name: "AI assistants" })).toBeNull();
-	});
-
-	it("hides the AI assistants section while the aiChat flag is off", () => {
-		authMock.user = {
-			id: "u1",
-			email: "reader@example.com",
-			firstName: null,
-			lastName: null,
-			profilePictureUrl: null,
-		};
-		flagsMock.aiChat = false;
-		render(<ProfilePage />);
-
-		expect(screen.queryByRole("heading", { name: "AI assistants" })).toBeNull();
-		expect(fetch).not.toHaveBeenCalled();
+		expect(screen.getByRole("button", { name: "Sign in" })).toBeDefined();
 	});
 });

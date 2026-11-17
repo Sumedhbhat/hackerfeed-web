@@ -407,7 +407,6 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("environment: production", deploy)
         preview = (ROOT / ".github/workflows/preview.yaml").read_text()
         self.assertNotIn("d1 ", preview)
-        self.assertNotIn("AI_TOKEN_ENCRYPTION_KEY", preview)
         self.assertNotIn("VITE_WORKOS_CLIENT_ID", preview)
         self.assertIn("--config apps/web/wrangler.preview.jsonc", preview)
         self.assertNotIn("wrangler deploy", preview)

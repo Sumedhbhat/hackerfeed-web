@@ -1,7 +1,6 @@
 import * as schema from "@hackerfeed/backend/database/schema";
 import { getTableName } from "drizzle-orm";
 import { activityEventRows } from "./activity-events";
-import { aiProviderConnectionRows, aiProviderRows } from "./ai-providers";
 import { appUserRows } from "./app-users";
 import { paletteRows, userPreferencesRows } from "./appearance";
 import { authorRows } from "./authors";
@@ -35,8 +34,6 @@ export const databaseFixtures = new Map<string, FixtureRow[]>(
 			[schema.hfPaperKeywords, paperKeywordRows],
 			[schema.hfDailyPaperEntries, dailyPaperEntryRows],
 			[schema.hfIngestionRuns, ingestionRunRows],
-			[schema.aiProviders, aiProviderRows],
-			[schema.aiProviderConnections, aiProviderConnectionRows],
 		] as const
 	).map(([table, rows]) => [getTableName(table), rows]),
 );

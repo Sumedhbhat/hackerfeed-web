@@ -17,15 +17,8 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ApiFeatureFlagsRouteImport } from './routes/api.feature-flags'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as AuthSignedOutRouteImport } from './routes/auth.signed-out'
-import { Route as ChatStoryIdRouteImport } from './routes/chat.$storyId'
 import { Route as StoryStoryIdRouteImport } from './routes/story.$storyId'
-import { Route as AiProviderCallbackRouteImport } from './routes/ai.$provider.callback'
-import { Route as AiProviderConnectRouteImport } from './routes/ai.$provider.connect'
-import { Route as ApiAiChatRouteImport } from './routes/api.ai.chat'
-import { Route as ApiAiProvidersRouteImport } from './routes/api.ai.providers'
 import { Route as ApiTrpcSplatRouteImport } from './routes/api/trpc/$'
-import { Route as ApiAiProvidersProviderDisconnectRouteImport } from './routes/api.ai.providers_.$provider.disconnect'
-import { Route as ApiAiProvidersProviderModelsRouteImport } from './routes/api.ai.providers_.$provider.models'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -67,34 +60,9 @@ const AuthSignedOutRoute = AuthSignedOutRouteImport.update({
   path: '/auth/signed-out',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ChatStoryIdRoute = ChatStoryIdRouteImport.update({
-  id: '/chat/$storyId',
-  path: '/chat/$storyId',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const StoryStoryIdRoute = StoryStoryIdRouteImport.update({
   id: '/story/$storyId',
   path: '/story/$storyId',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AiProviderCallbackRoute = AiProviderCallbackRouteImport.update({
-  id: '/ai/$provider/callback',
-  path: '/ai/$provider/callback',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AiProviderConnectRoute = AiProviderConnectRouteImport.update({
-  id: '/ai/$provider/connect',
-  path: '/ai/$provider/connect',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAiChatRoute = ApiAiChatRouteImport.update({
-  id: '/api/ai/chat',
-  path: '/api/ai/chat',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAiProvidersRoute = ApiAiProvidersRouteImport.update({
-  id: '/api/ai/providers',
-  path: '/api/ai/providers',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiTrpcSplatRoute = ApiTrpcSplatRouteImport.update({
@@ -102,18 +70,6 @@ const ApiTrpcSplatRoute = ApiTrpcSplatRouteImport.update({
   path: '/api/trpc/$',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiAiProvidersProviderDisconnectRoute =
-  ApiAiProvidersProviderDisconnectRouteImport.update({
-    id: '/api/ai/providers_/$provider/disconnect',
-    path: '/api/ai/providers/$provider/disconnect',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiAiProvidersProviderModelsRoute =
-  ApiAiProvidersProviderModelsRouteImport.update({
-    id: '/api/ai/providers_/$provider/models',
-    path: '/api/ai/providers/$provider/models',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -124,15 +80,8 @@ export interface FileRoutesByFullPath {
   '/api/feature-flags': typeof ApiFeatureFlagsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/signed-out': typeof AuthSignedOutRoute
-  '/chat/$storyId': typeof ChatStoryIdRoute
   '/story/$storyId': typeof StoryStoryIdRoute
-  '/ai/$provider/callback': typeof AiProviderCallbackRoute
-  '/ai/$provider/connect': typeof AiProviderConnectRoute
-  '/api/ai/chat': typeof ApiAiChatRoute
-  '/api/ai/providers': typeof ApiAiProvidersRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
-  '/api/ai/providers/$provider/disconnect': typeof ApiAiProvidersProviderDisconnectRoute
-  '/api/ai/providers/$provider/models': typeof ApiAiProvidersProviderModelsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -143,15 +92,8 @@ export interface FileRoutesByTo {
   '/api/feature-flags': typeof ApiFeatureFlagsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/signed-out': typeof AuthSignedOutRoute
-  '/chat/$storyId': typeof ChatStoryIdRoute
   '/story/$storyId': typeof StoryStoryIdRoute
-  '/ai/$provider/callback': typeof AiProviderCallbackRoute
-  '/ai/$provider/connect': typeof AiProviderConnectRoute
-  '/api/ai/chat': typeof ApiAiChatRoute
-  '/api/ai/providers': typeof ApiAiProvidersRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
-  '/api/ai/providers/$provider/disconnect': typeof ApiAiProvidersProviderDisconnectRoute
-  '/api/ai/providers/$provider/models': typeof ApiAiProvidersProviderModelsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -163,15 +105,8 @@ export interface FileRoutesById {
   '/api/feature-flags': typeof ApiFeatureFlagsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/signed-out': typeof AuthSignedOutRoute
-  '/chat/$storyId': typeof ChatStoryIdRoute
   '/story/$storyId': typeof StoryStoryIdRoute
-  '/ai/$provider/callback': typeof AiProviderCallbackRoute
-  '/ai/$provider/connect': typeof AiProviderConnectRoute
-  '/api/ai/chat': typeof ApiAiChatRoute
-  '/api/ai/providers': typeof ApiAiProvidersRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
-  '/api/ai/providers_/$provider/disconnect': typeof ApiAiProvidersProviderDisconnectRoute
-  '/api/ai/providers_/$provider/models': typeof ApiAiProvidersProviderModelsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -184,15 +119,8 @@ export interface FileRouteTypes {
     | '/api/feature-flags'
     | '/auth/callback'
     | '/auth/signed-out'
-    | '/chat/$storyId'
     | '/story/$storyId'
-    | '/ai/$provider/callback'
-    | '/ai/$provider/connect'
-    | '/api/ai/chat'
-    | '/api/ai/providers'
     | '/api/trpc/$'
-    | '/api/ai/providers/$provider/disconnect'
-    | '/api/ai/providers/$provider/models'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -203,15 +131,8 @@ export interface FileRouteTypes {
     | '/api/feature-flags'
     | '/auth/callback'
     | '/auth/signed-out'
-    | '/chat/$storyId'
     | '/story/$storyId'
-    | '/ai/$provider/callback'
-    | '/ai/$provider/connect'
-    | '/api/ai/chat'
-    | '/api/ai/providers'
     | '/api/trpc/$'
-    | '/api/ai/providers/$provider/disconnect'
-    | '/api/ai/providers/$provider/models'
   id:
     | '__root__'
     | '/'
@@ -222,15 +143,8 @@ export interface FileRouteTypes {
     | '/api/feature-flags'
     | '/auth/callback'
     | '/auth/signed-out'
-    | '/chat/$storyId'
     | '/story/$storyId'
-    | '/ai/$provider/callback'
-    | '/ai/$provider/connect'
-    | '/api/ai/chat'
-    | '/api/ai/providers'
     | '/api/trpc/$'
-    | '/api/ai/providers_/$provider/disconnect'
-    | '/api/ai/providers_/$provider/models'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -242,15 +156,8 @@ export interface RootRouteChildren {
   ApiFeatureFlagsRoute: typeof ApiFeatureFlagsRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   AuthSignedOutRoute: typeof AuthSignedOutRoute
-  ChatStoryIdRoute: typeof ChatStoryIdRoute
   StoryStoryIdRoute: typeof StoryStoryIdRoute
-  AiProviderCallbackRoute: typeof AiProviderCallbackRoute
-  AiProviderConnectRoute: typeof AiProviderConnectRoute
-  ApiAiChatRoute: typeof ApiAiChatRoute
-  ApiAiProvidersRoute: typeof ApiAiProvidersRoute
   ApiTrpcSplatRoute: typeof ApiTrpcSplatRoute
-  ApiAiProvidersProviderDisconnectRoute: typeof ApiAiProvidersProviderDisconnectRoute
-  ApiAiProvidersProviderModelsRoute: typeof ApiAiProvidersProviderModelsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -311,13 +218,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSignedOutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/chat/$storyId': {
-      id: '/chat/$storyId'
-      path: '/chat/$storyId'
-      fullPath: '/chat/$storyId'
-      preLoaderRoute: typeof ChatStoryIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/story/$storyId': {
       id: '/story/$storyId'
       path: '/story/$storyId'
@@ -325,53 +225,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StoryStoryIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/ai/$provider/callback': {
-      id: '/ai/$provider/callback'
-      path: '/ai/$provider/callback'
-      fullPath: '/ai/$provider/callback'
-      preLoaderRoute: typeof AiProviderCallbackRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ai/$provider/connect': {
-      id: '/ai/$provider/connect'
-      path: '/ai/$provider/connect'
-      fullPath: '/ai/$provider/connect'
-      preLoaderRoute: typeof AiProviderConnectRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/ai/chat': {
-      id: '/api/ai/chat'
-      path: '/api/ai/chat'
-      fullPath: '/api/ai/chat'
-      preLoaderRoute: typeof ApiAiChatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/ai/providers': {
-      id: '/api/ai/providers'
-      path: '/api/ai/providers'
-      fullPath: '/api/ai/providers'
-      preLoaderRoute: typeof ApiAiProvidersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/trpc/$': {
       id: '/api/trpc/$'
       path: '/api/trpc/$'
       fullPath: '/api/trpc/$'
       preLoaderRoute: typeof ApiTrpcSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/ai/providers_/$provider/disconnect': {
-      id: '/api/ai/providers_/$provider/disconnect'
-      path: '/api/ai/providers/$provider/disconnect'
-      fullPath: '/api/ai/providers/$provider/disconnect'
-      preLoaderRoute: typeof ApiAiProvidersProviderDisconnectRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/ai/providers_/$provider/models': {
-      id: '/api/ai/providers_/$provider/models'
-      path: '/api/ai/providers/$provider/models'
-      fullPath: '/api/ai/providers/$provider/models'
-      preLoaderRoute: typeof ApiAiProvidersProviderModelsRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -386,15 +244,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiFeatureFlagsRoute: ApiFeatureFlagsRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   AuthSignedOutRoute: AuthSignedOutRoute,
-  ChatStoryIdRoute: ChatStoryIdRoute,
   StoryStoryIdRoute: StoryStoryIdRoute,
-  AiProviderCallbackRoute: AiProviderCallbackRoute,
-  AiProviderConnectRoute: AiProviderConnectRoute,
-  ApiAiChatRoute: ApiAiChatRoute,
-  ApiAiProvidersRoute: ApiAiProvidersRoute,
   ApiTrpcSplatRoute: ApiTrpcSplatRoute,
-  ApiAiProvidersProviderDisconnectRoute: ApiAiProvidersProviderDisconnectRoute,
-  ApiAiProvidersProviderModelsRoute: ApiAiProvidersProviderModelsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

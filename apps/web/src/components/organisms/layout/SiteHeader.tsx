@@ -15,7 +15,7 @@ export default function SiteHeader() {
 	const { count: paperCount } = usePaperFavorites();
 	const totalCount = favCount + (user ? paperCount : 0);
 	const { pathname } = useLocation();
-	const inFeed = /^\/(story|chat)\//.test(pathname);
+	const inFeed = pathname.startsWith("/story/");
 
 	return (
 		<HeaderBar
@@ -25,7 +25,7 @@ export default function SiteHeader() {
 					<TextLink
 						to="/"
 						variant="nav"
-						// A story and its AI chat belong to the feed, so keep Feed marked there.
+						// A story belongs to the feed, so keep Feed marked there.
 						data-status={inFeed ? "active" : undefined}
 						aria-current={inFeed ? "true" : undefined}
 					>

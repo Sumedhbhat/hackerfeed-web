@@ -1,5 +1,6 @@
 import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
 import {
+	buildChatGptStoryDiscussionUrl,
 	formatStoryAge,
 	getDiscussionUrl,
 	getStoryDomain,
@@ -15,11 +16,11 @@ import { TitleTag } from "@hackerfeed/ui/atoms/TitleTag";
 import { ToggleButton } from "@hackerfeed/ui/atoms/Toggle";
 import { ToggleLabel } from "@hackerfeed/ui/atoms/ToggleLabel";
 import { WideText } from "@hackerfeed/ui/atoms/WideText";
+import { ChatGptLink } from "@hackerfeed/ui/molecules/ChatGptLink";
 import { FeedRow } from "@hackerfeed/ui/molecules/FeedRow";
 import { StoryMeta } from "@hackerfeed/ui/molecules/StoryMeta";
-import { Bookmark, MessageSquare, Sparkles } from "lucide-react";
+import { Bookmark, MessageSquare } from "lucide-react";
 import { useFavorites } from "#/hooks/useFavorites";
-import { useFeatureFlag } from "#/hooks/useFeatureFlags";
 import { useViewActivity } from "#/hooks/useViewActivity";
 import { rememberReturnFocus } from "#/lib/a11y/return-focus";
 
@@ -31,7 +32,6 @@ type StoryCardProps = {
 export function StoryCard({ story, markSaved = true }: StoryCardProps) {
 	const { isFavorited, toggleFavorite } = useFavorites();
 	const { recordStoryView } = useViewActivity();
-	const aiChat = useFeatureFlag("aiChat");
 	const isFav = isFavorited(story.id);
 
 	const title = getStoryTitle(story);
@@ -90,24 +90,12 @@ export function StoryCard({ story, markSaved = true }: StoryCardProps) {
 				/>
 			}
 			actions={[
-				aiChat ? (
-					<ButtonLink
-						key="ai"
-						variant="accent"
-						to="/chat/$storyId"
-						params={{ storyId: story.id }}
-						aria-label={`Discuss with AI: ${title}`}
-						onClick={(event) => {
-							rememberReturnFocus(event.currentTarget);
-							recordStoryView(story, "chat_opened");
-						}}
-					>
-						<Icon icon={Sparkles} accent />
-						<span>
-							Discuss<WideText from="xs"> with AI</WideText>
-						</span>
-					</ButtonLink>
-				) : null,
+				<ChatGptLink
+					key="chatgpt"
+					title={title}
+					discussUrl={buildChatGptStoryDiscussionUrl(story)}
+					onDiscuss={() => recordStoryView(story, "chat_opened")}
+				/>,
 				<ButtonLink
 					key="comments"
 					variant={comments > 0 ? "ghost" : "quiet"}

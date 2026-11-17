@@ -14,7 +14,6 @@ import { expect, test } from "./support/fixtures";
 const SCREENS = [
 	["feed", "/"],
 	["story", `/story/${threadStory.id}`],
-	["chat", `/chat/${threadStory.id}`],
 	["papers", "/papers"],
 	["saved stories", "/favorites?type=stories"],
 	["saved papers", "/favorites?type=papers"],
