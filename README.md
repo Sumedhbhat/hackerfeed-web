@@ -36,8 +36,7 @@ its own checks.
 |---|---|---|
 | `web` | `apps/web` | The TanStack Start host: routes, pages, hooks, demo data, Vite and Wrangler config |
 | `ui` | `packages/ui` | Atoms, molecules and the design tokens stylesheet |
-| `contracts` | `packages/contracts` | Zod request/response schemas shared by browser and Worker |
-| `hacker-news` | `packages/hacker-news` | Hacker News record types and display helpers |
+| `entities` | `packages/entities` | Every type and Zod schema the browser and the Worker both use, including Hacker News records |
 | `runtime` | `packages/runtime` | Logger, trace headers, Sentry data policy, HTTP client |
 | `backend` | `packages/backend` | Services, repositories, the Drizzle schema, migrations and the tRPC router |
 | `api-client` | `packages/api-client` | Browser transports for tRPC, AI and feature flags |
@@ -58,7 +57,7 @@ Run one project's targets with Nx, for example `bunx nx test backend` or
 `bunx nx run-many -t typecheck,test -p ui,web`. `bunx nx graph` draws the
 project graph.
 
-To add a shared library, copy a small one such as `packages/hacker-news`,
+To add a shared library, copy a small one such as `packages/entities`,
 rename it in `package.json` and `project.json`, and run `bun install`. Nx finds
 its `typecheck` and `test` targets, so CI checks it without workflow changes.
 
@@ -318,7 +317,7 @@ move to an independent API service.
   backend import. Server-only app code (`apps/web/src/backend.ts`, `server.ts`)
   imports the backend freely, and the demo build bundles
   `@hackerfeed/backend/database/schema` for its in-memory fixtures.
-- Shared schemas live in `packages/contracts`, never next to the Drizzle
+- Shared schemas live in `packages/entities`, never next to the Drizzle
   tables. The backend maps rows to these DTOs.
 - `packages/ui` is presentational: no app code, workspace packages, API clients
   or auth.
