@@ -10,10 +10,10 @@
 	"dependencies": {
 		"@hackerfeed/backend": "workspace:*",
 		"@hackerfeed/runtime": "workspace:*",
-		"@sentry/cloudflare": "^11.7.0"
+		"@sentry/cloudflare": "^11.10.0"
 	},
 	"devDependencies": {
-		"vitest": "^5.0.4",
-		"wrangler": "^4.151.0"
+		"vitest": "^5.1.0",
+		"wrangler": "^4.157.0"
 	}
 }
