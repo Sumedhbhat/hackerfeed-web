@@ -1,7 +1,7 @@
 import type {
 	HackerNewsCommentRecord,
 	HackerNewsStoryRecord,
-} from "@hackerfeed/hacker-news/records";
+} from "@hackerfeed/entities/hacker-news";
 import { http } from "@hackerfeed/runtime/http";
 import { logger } from "@hackerfeed/runtime/logger";
 import { queryOptions } from "@tanstack/react-query";

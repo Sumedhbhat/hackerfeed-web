@@ -1,4 +1,4 @@
-import type { HackerNewsCommentRecord } from "@hackerfeed/hacker-news/records";
+import type { HackerNewsCommentRecord } from "@hackerfeed/entities/hacker-news";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, cleanup, render, screen } from "@testing-library/react";
 import { Suspense } from "react";

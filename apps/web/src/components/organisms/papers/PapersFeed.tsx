@@ -1,4 +1,4 @@
-import type { PaperEdition } from "@hackerfeed/contracts/papers";
+import type { PaperEdition } from "@hackerfeed/entities/papers";
 import { Button } from "@hackerfeed/ui/atoms/Button";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
 import { LiveStatus } from "@hackerfeed/ui/atoms/LiveStatus";

@@ -1,4 +1,4 @@
-import type { PaperEdition } from "@hackerfeed/contracts/papers";
+import type { PaperEdition } from "@hackerfeed/entities/papers";
 import {
 	act,
 	cleanup,

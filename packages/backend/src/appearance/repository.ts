@@ -1,6 +1,6 @@
 import "@tanstack/react-start/server-only";
 
-import type { PaletteInput, ThemeMode } from "@hackerfeed/contracts/appearance";
+import type { PaletteInput, ThemeMode } from "@hackerfeed/entities/appearance";
 import { and, asc, count, eq, sql } from "drizzle-orm";
 import type { DatabaseContext } from "../database/client";
 import { palettes, userPreferences } from "../database/schema";

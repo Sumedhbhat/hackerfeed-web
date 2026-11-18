@@ -2,7 +2,7 @@ import type {
 	Palette,
 	PaletteInput,
 	ThemeMode,
-} from "@hackerfeed/contracts/appearance";
+} from "@hackerfeed/entities/appearance";
 import { Button } from "@hackerfeed/ui/atoms/Button";
 import { PaletteSwatch } from "@hackerfeed/ui/atoms/PaletteSwatch";
 import { PanelSection } from "@hackerfeed/ui/atoms/PanelSection";

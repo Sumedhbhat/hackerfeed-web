@@ -110,7 +110,7 @@ const HEX_COLOR_GLOB = `'#[0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F]'`;
  * A reader's own colour palette. Only the three picked inputs are stored; the
  * colours the UI uses are derived from them in the browser, so improving the
  * derivation improves every palette. Built-in palettes live in
- * `@hackerfeed/contracts/appearance`, not here.
+ * `@hackerfeed/entities/appearance`, not here.
  */
 export const palettes = sqliteTable(
 	"palettes",

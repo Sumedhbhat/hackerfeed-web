@@ -20,7 +20,7 @@ gh workflow run deploy.yaml  # Deploy with Terraform outputs in CI
 bun run test         # Every project's tests, through Nx
 bun run e2e          # End-to-end tests (apps/web-e2e): flows and accessibility
 bunx nx test backend # One project's tests
-cd packages/hacker-news && bunx vitest run src/utils.test.ts   # A single test file
+cd apps/web && bunx vitest run src/lib/hacker-news/display.test.ts   # A single test file
 
 # Linting / formatting
 bun run lint         # Biome lint
@@ -36,7 +36,7 @@ bunx nx graph        # Project graph
 
 **Framework stack:** TanStack Start (SSR React framework) + TanStack Router (file-based routing) + TanStack Query (data fetching) + TanStack Store (client state). Deployed to Cloudflare Workers via `@cloudflare/vite-plugin`.
 
-**Workspace:** an Nx workspace of Bun workspace packages, deployed as one Worker. `apps/web` is the TanStack Start host; shared code lives in `packages/` (`ui`, `contracts`, `hacker-news`, `runtime`, `backend`, `api-client`); infrastructure in `apps/state-backend`, `infra/` and `tools/infra-ci`. README > Workspace lists every project. Packages import each other only through their `package.json` `exports` (`@hackerfeed/ui/atoms/Button`); never reach into another project with a relative path. Add a package by copying a small one (`packages/hacker-news`) and renaming it.
+**Workspace:** an Nx workspace of Bun workspace packages, deployed as one Worker. `apps/web` is the TanStack Start host; shared code lives in `packages/` (`ui`, `entities`, `runtime`, `backend`, `api-client`); every type or schema the frontend and the backend both use goes in `packages/entities`; infrastructure in `apps/state-backend`, `infra/` and `tools/infra-ci`. README > Workspace lists every project. Packages import each other only through their `package.json` `exports` (`@hackerfeed/ui/atoms/Button`); never reach into another project with a relative path. Add a package by copying a small one (`packages/entities`) and renaming it.
 
 **Boundaries:** installs are isolated (`bunfig.toml`), so a package can import only the npm and workspace packages its own `package.json` declares; those `dependencies` are the allowed edges, and adding one is a design change to raise with the user. No tool stops a relative import into another project or a root devDependency used from a package, so don't write either. The backend never reaches the production browser bundle: browser code uses only `import type` from `@hackerfeed/backend/api-types` (a Biome rule holds `api-client` to it), and TanStack Start's import protection in `apps/web/vite.config.ts` fails the client build on any other backend import. Server-only app code (`src/backend.ts`, `src/server.ts`) imports the backend freely, and the demo build bundles `@hackerfeed/backend/database/schema` for its in-memory fixtures. Packages don't read env; `apps/web/src/backend.ts` passes config into `createBackend`. When a check blocks you, change the code, not the rule.
 
@@ -54,7 +54,7 @@ The feed page (`src/routes/index.tsx`) uses a two-layer query model:
 
 The route loader (`loader` in `index.tsx`) SSR-prefetches the ID list and warms the cache for the first `PAGE_SIZE` items. On the client, switching tabs or loading more items fetches incrementally without resetting previously loaded tabs.
 
-All HN API calls go through `src/lib/hacker-news/queries.ts` (direct calls to `hacker-news.firebaseio.com`). Normalization (`normalizeStoryItem`, `normalizeStoryIds`) strips dead/deleted items and coerces types before anything touches React. The record types and display helpers live in `packages/hacker-news`; the backend gets the fetchers through `createBackend`.
+All HN API calls go through `src/lib/hacker-news/queries.ts` (direct calls to `hacker-news.firebaseio.com`). Normalization (`normalizeStoryItem`, `normalizeStoryIds`) strips dead/deleted items and coerces types before anything touches React. The record types live in `@hackerfeed/entities/hacker-news`, the display helpers in `src/lib/hacker-news/display.ts`; the backend gets the fetchers through `createBackend`.
 
 ### Favorites
 
@@ -66,7 +66,7 @@ WorkOS AuthKit owns the session entirely in the browser (`src/integrations/worko
 
 ### Appearance
 
-A reader picks a mode (light, dark, auto) and a palette; both are saved to their account (`user_preferences`, `palettes`) and returned by `account.me`, so they follow the reader to every device. A palette is three inputs (`baseRole`: whether the reader picked the background or the text, `baseColor`, `accentColor`), always `#RRGGBB`. Nothing else is stored: `derivePalette` in `src/lib/appearance/derive-palette.ts` works out all 17 colour roles for light and dark and keeps every text pair at 4.5:1. Never store derived colours or accept any other CSS text. Built-in palettes are constants in `@hackerfeed/contracts/appearance`; the default one, "Reading room", is the hand-tuned stylesheet itself (`DEFAULT_TOKENS` mirrors it, and a test compares them), so a reader with no row sees it and gets any later change to it.
+A reader picks a mode (light, dark, auto) and a palette; both are saved to their account (`user_preferences`, `palettes`) and returned by `account.me`, so they follow the reader to every device. A palette is three inputs (`baseRole`: whether the reader picked the background or the text, `baseColor`, `accentColor`), always `#RRGGBB`. Nothing else is stored: `derivePalette` in `src/lib/appearance/derive-palette.ts` works out all 17 colour roles for light and dark and keeps every text pair at 4.5:1. Never store derived colours or accept any other CSS text. Built-in palettes are constants in `@hackerfeed/entities/appearance`; the default one, "Reading room", is the hand-tuned stylesheet itself (`DEFAULT_TOKENS` mirrors it, and a test compares them), so a reader with no row sees it and gets any later change to it.
 
 `showAppearance` in `src/lib/appearance/appearance.ts` is the only place that changes the look: it sets `data-theme` and each role as `light-dark(<light>, <dark>)` on `<html>`, updates `theme-color`, and caches the result in localStorage for `src/lib/theme-init.js` to repaint before first paint. Read and change it with `useAppearance()` (`mode`, `palette`, `setMode`, `setPalette`): a change shows at once, saves, and goes back if the save fails. `SessionGate` waits for `account.me` like it waits for flags, and the account always wins over the device's cache. The UI is `/settings` (`components/organisms/settings/`).
 

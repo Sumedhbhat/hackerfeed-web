@@ -1,4 +1,4 @@
-import type { PaletteColors } from "@hackerfeed/contracts/appearance";
+import type { PaletteColors } from "@hackerfeed/entities/appearance";
 import {
 	clampChroma,
 	formatHex,

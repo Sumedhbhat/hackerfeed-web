@@ -1,4 +1,4 @@
-import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
+import type { HackerNewsStoryRecord } from "@hackerfeed/entities/hacker-news";
 import { TRPCError } from "@trpc/server";
 import { describe, expect, it } from "vitest";
 import type { DatabaseContext } from "../database/client";

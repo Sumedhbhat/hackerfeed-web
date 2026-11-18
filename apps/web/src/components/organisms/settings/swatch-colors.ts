@@ -1,4 +1,4 @@
-import type { PaletteColors } from "@hackerfeed/contracts/appearance";
+import type { PaletteColors } from "@hackerfeed/entities/appearance";
 import type { SwatchColors } from "@hackerfeed/ui/atoms/PaletteSwatch";
 import { paletteTokens } from "#/lib/appearance/appearance";
 import type { PaletteTokens } from "#/lib/appearance/derive-palette";

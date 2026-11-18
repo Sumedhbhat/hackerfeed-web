@@ -8,32 +8,32 @@ import {
 	paletteSchema,
 	paletteUpdateInputSchema,
 	preferencesUpdateInputSchema,
-} from "@hackerfeed/contracts/appearance";
+} from "@hackerfeed/entities/appearance";
 import {
 	favoriteStoriesOutputSchema,
 	favoriteStoryIdInputSchema,
 	hackerNewsStorySchema,
 	importLocalFavoritesInputSchema,
-} from "@hackerfeed/contracts/favorites";
+} from "@hackerfeed/entities/favorites";
+import type { HackerNewsStoryRecord } from "@hackerfeed/entities/hacker-news";
 import {
 	type PaperFavoritesListInput,
 	type PaperFavoritesListOutput,
 	paperFavoriteInputSchema,
 	paperFavoritesListInputSchema,
 	paperFavoritesListOutputSchema,
-} from "@hackerfeed/contracts/paper-favorites";
+} from "@hackerfeed/entities/paper-favorites";
 import {
 	type PaperEdition,
 	paperEditionInputSchema,
 	paperEditionOutputSchema,
-} from "@hackerfeed/contracts/papers";
+} from "@hackerfeed/entities/papers";
 import {
 	type PaperViewAction,
 	paperViewInputSchema,
 	type StoryViewAction,
 	storyViewInputSchema,
-} from "@hackerfeed/contracts/view-activity";
-import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
+} from "@hackerfeed/entities/view-activity";
 import * as Sentry from "@sentry/cloudflare";
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";

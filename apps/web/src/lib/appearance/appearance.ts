@@ -5,7 +5,7 @@ import {
 	paletteSchema,
 	type ThemeMode,
 	themeModeSchema,
-} from "@hackerfeed/contracts/appearance";
+} from "@hackerfeed/entities/appearance";
 import { Store } from "@tanstack/store";
 import { z } from "zod";
 import {

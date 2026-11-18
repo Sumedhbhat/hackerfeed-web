@@ -1,11 +1,4 @@
-import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
-import {
-	buildChatGptStoryDiscussionUrl,
-	formatStoryAge,
-	getStoryDomain,
-	getStoryTitle,
-	splitPostKind,
-} from "@hackerfeed/hacker-news/utils";
+import type { HackerNewsStoryRecord } from "@hackerfeed/entities/hacker-news";
 import { ExternalButtonLink } from "@hackerfeed/ui/atoms/Button";
 import { Heading } from "@hackerfeed/ui/atoms/Heading";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
@@ -20,6 +13,13 @@ import { StoryMeta } from "@hackerfeed/ui/molecules/StoryMeta";
 import { ArrowUpRight, Bookmark } from "lucide-react";
 import { useFavorites } from "#/hooks/useFavorites";
 import { useViewActivity } from "#/hooks/useViewActivity";
+import {
+	buildChatGptStoryDiscussionUrl,
+	formatStoryAge,
+	getStoryDomain,
+	getStoryTitle,
+	splitPostKind,
+} from "#/lib/hacker-news/display";
 
 export function StoryArticle({ story }: { story: HackerNewsStoryRecord }) {
 	const title = getStoryTitle(story);

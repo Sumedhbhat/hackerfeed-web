@@ -8,7 +8,6 @@
 		"./trpc": "./src/trpc.ts"
 	},
 	"dependencies": {
-		"@hackerfeed/contracts": "workspace:*",
 		"@hackerfeed/runtime": "workspace:*",
 		"@sentry/core": "^11.7.0",
 		"@trpc/client": "^11.19.0",

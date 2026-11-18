@@ -1,8 +1,8 @@
 {
 	"$schema": "../../node_modules/nx/schemas/project-schema.json",
-	"name": "contracts",
+	"name": "entities",
 	"projectType": "library",
-	"sourceRoot": "packages/contracts/src",
+	"sourceRoot": "packages/entities/src",
 	"targets": {
 		"typecheck": {},
 		"test": {}

@@ -1,4 +1,4 @@
-import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
+import type { HackerNewsStoryRecord } from "@hackerfeed/entities/hacker-news";
 import { Store } from "@tanstack/store";
 
 const STORAGE_KEY = "hackerfeed:favorites";

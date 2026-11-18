@@ -1,6 +1,6 @@
-import type { HackerNewsCommentRecord } from "@hackerfeed/hacker-news/records";
-import { formatStoryAge } from "@hackerfeed/hacker-news/utils";
+import type { HackerNewsCommentRecord } from "@hackerfeed/entities/hacker-news";
 import { useEffect, useRef, useState } from "react";
+import { formatStoryAge } from "#/lib/hacker-news/display";
 import { useThreadExpansion } from "./useThreadExpansion";
 
 export type UseCommentReturn = {

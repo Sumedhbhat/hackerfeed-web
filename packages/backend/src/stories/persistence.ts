@@ -1,6 +1,6 @@
 import "@tanstack/react-start/server-only";
 
-import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
+import type { HackerNewsStoryRecord } from "@hackerfeed/entities/hacker-news";
 
 export function mapHackerNewsStory(story: HackerNewsStoryRecord) {
 	return {

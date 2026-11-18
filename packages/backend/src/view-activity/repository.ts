@@ -1,10 +1,10 @@
 import "@tanstack/react-start/server-only";
 
+import type { HackerNewsStoryRecord } from "@hackerfeed/entities/hacker-news";
 import type {
 	PaperViewAction,
 	StoryViewAction,
-} from "@hackerfeed/contracts/view-activity";
-import type { HackerNewsStoryRecord } from "@hackerfeed/hacker-news/records";
+} from "@hackerfeed/entities/view-activity";
 import { eq, sql } from "drizzle-orm";
 import type { DatabaseContext } from "../database/client";
 import { activityEvents, hfPapers, stories } from "../database/schema";
