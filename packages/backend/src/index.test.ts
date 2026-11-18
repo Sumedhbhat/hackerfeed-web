@@ -27,7 +27,9 @@ describe("createBackend", () => {
 	it("routes a request with a valid WorkOS token", async () => {
 		const { privateKey, publicKey } = await generateKeyPair("RS256");
 		const jwk = { ...(await exportJWK(publicKey)), kid: "k1", alg: "RS256" };
-		const fetchJwks = vi.fn(async () => Response.json({ keys: [jwk] }));
+		const fetchJwks = vi.fn(async (_url: RequestInfo | URL) =>
+			Response.json({ keys: [jwk] }),
+		);
 		vi.stubGlobal("fetch", fetchJwks);
 		const token = await new SignJWT({})
 			.setProtectedHeader({ alg: "RS256", kid: "k1" })
