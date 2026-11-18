@@ -6,7 +6,6 @@ declare namespace Cloudflare {
 		mainModule: typeof import("./src/server");
 	}
 	interface Env {
-		DB: D1Database;
 		VITE_APP_TITLE: "Hacker Feed";
 		VITE_SENTRY_ENVIRONMENT: "production";
 		VITE_SENTRY_TRACES_SAMPLE_RATE: "0.1";

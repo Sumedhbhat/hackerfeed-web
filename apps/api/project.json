@@ -1,0 +1,16 @@
+{
+	"$schema": "../../node_modules/nx/schemas/project-schema.json",
+	"name": "api",
+	"projectType": "application",
+	"sourceRoot": "apps/api/src",
+	"targets": {
+		"typecheck": {},
+		"test": {},
+		"build": {
+			"command": "wrangler deploy --dry-run --outdir dist",
+			"options": {
+				"cwd": "{projectRoot}"
+			}
+		}
+	}
+}

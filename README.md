@@ -2,12 +2,13 @@
 
 HackerFeed is a TanStack Start app for reading Hacker News stories, saving
 favorites, and browsing the latest ingested Hugging Face Daily Papers edition.
-It runs on Cloudflare Workers with D1 for persistent app data.
+It runs as two Cloudflare Workers: the web app (`apps/web`) and its API
+(`apps/api`), which owns the D1 database.
 
 ## Stack
 
 - TanStack Start, TanStack Router, TanStack Query, React 19
-- Cloudflare Workers via `@cloudflare/vite-plugin`
+- Cloudflare Workers: the web app via `@cloudflare/vite-plugin`, the API via Wrangler
 - Cloudflare D1 with Drizzle ORM migrations
 - tRPC for the browser-to-backend application boundary
 - WorkOS AuthKit for authentication
@@ -28,18 +29,20 @@ The dev server listens on port 3000.
 
 ## Workspace
 
-The repository is an Nx workspace of Bun workspace packages. HackerFeed is
-still one deployed Worker; the packages give each part a public interface and
-its own checks.
+The repository is an Nx workspace of Bun workspace packages. HackerFeed
+deploys two Workers, `hackerfeed-web` (`apps/web`) and `hackerfeed-api`
+(`apps/api`); the packages give each part a public interface and its own
+checks.
 
 | Project | Path | What it holds |
 |---|---|---|
-| `web` | `apps/web` | The TanStack Start host: routes, pages, hooks, demo data, Vite and Wrangler config |
+| `web` | `apps/web` | The frontend Worker (TanStack Start): routes, pages, hooks, demo data, Vite and Wrangler config |
+| `api` | `apps/api` | The API Worker: origin check, CORS, the D1 binding, the papers cron, Wrangler config |
 | `ui` | `packages/ui` | Atoms, molecules and the design tokens stylesheet |
-| `entities` | `packages/entities` | Every type and Zod schema the browser and the Worker both use, including Hacker News records |
-| `runtime` | `packages/runtime` | Logger, trace headers, Sentry data policy, HTTP client |
+| `entities` | `packages/entities` | Every type and Zod schema the frontend and the backend both use, Hacker News records included |
+| `runtime` | `packages/runtime` | Logger, trace headers and client-trace linking, Sentry data policy, HTTP client |
 | `backend` | `packages/backend` | Services, repositories, the Drizzle schema, migrations and the tRPC router |
-| `api-client` | `packages/api-client` | Browser transports for tRPC, AI and feature flags |
+| `api-client` | `packages/api-client` | Browser transports for tRPC and feature flags |
 | `state-backend` | `apps/state-backend` | The Terraform state Worker |
 | `infra-prod` | `infra/cloudflare-prod` | Terraform root for the `prod` state |
 | `infra-deploy` | `infra/deploy-access` | Terraform root for the production-only `deploy` state |
@@ -64,8 +67,9 @@ its `typecheck` and `test` targets, so CI checks it without workflow changes.
 ## Scripts
 
 ```bash
-bun run dev              # Start Vite dev server on port 3000
-bun run build            # Production build (apps/web/dist)
+bun run dev              # Web app on port 3000 and API on port 8787
+bun run dev:api          # Only the API, on port 8787
+bun run build            # Production builds (apps/web/dist, apps/api/dist)
 gh workflow run deploy.yaml  # Deploy with Terraform outputs in CI
 bun run test             # Every project's tests, through Nx
 bun run typecheck        # Every project's typecheck, through Nx
@@ -77,20 +81,20 @@ bun run security:audit   # Audit dependencies at high severity and above
 
 ## Environment
 
-Application environment variables are validated in `apps/web/src/env.ts`.
-Cloudflare bindings and production defaults live in `apps/web/wrangler.jsonc`.
-The app reads env once and passes what the backend needs to `createBackend` in
-`apps/web/src/backend.ts`; packages never read env themselves.
+The web app validates its environment in `apps/web/src/env.ts`; its Worker
+settings live in `apps/web/wrangler.jsonc`. The API reads its bindings and
+variables from `apps/api/wrangler.jsonc` and passes what the backend needs to
+`createBackend` in `apps/api/src/index.ts`; packages never read env
+themselves. `VITE_API_URL` tells the web app where the API is
+(`apps/web/.env.development` and `.env.production` set it), and the API's
+`ALLOWED_ORIGIN` names the only origin it answers. `bun run dev` sets that to
+`http://localhost:3000`.
 
-For local development, put public Vite values in `apps/web/.env.local` and
-Worker-only secrets in `apps/web/.dev.vars`. Vite and wrangler read them from
-the app's directory, so in a checkout from before the move, move both files
-there from the repo root:
+For local development, put values in each app's directory:
 
 ```bash
 # apps/web/.env.local
 VITE_WORKOS_CLIENT_ID=...
-VITE_WORKOS_REDIRECT_URI=http://localhost:3000/auth/callback
 VITE_WORKOS_API_HOSTNAME=api.workos.com
 VITE_APP_TITLE=Hacker Feed
 VITE_SENTRY_DSN=...
@@ -101,9 +105,15 @@ VITE_SENTRY_TRACES_SAMPLE_RATE=0.1
 SENTRY_DSN=...
 SENTRY_ENVIRONMENT=development
 SENTRY_TRACES_SAMPLE_RATE=0.1
+
+# apps/api/.dev.vars
+WORKOS_CLIENT_ID=...   # the same client id as VITE_WORKOS_CLIENT_ID
+SENTRY_DSN=...
+SENTRY_ENVIRONMENT=development
+SENTRY_TRACES_SAMPLE_RATE=0.1
 ```
 
-`VITE_SENTRY_DSN` is a build-time browser value. `SENTRY_DSN` is read by the
+`VITE_SENTRY_DSN` is a build-time browser value. `SENTRY_DSN` is read by each
 Worker at runtime. Production deploys upload the required secrets in
 `.github/workflows/deploy.yaml`.
 
@@ -116,7 +126,7 @@ bun run cf:typegen
 ## Database
 
 Persistent data uses Cloudflare D1 through the `DB` binding in
-`apps/web/wrangler.jsonc`. Tables are defined in
+`apps/api/wrangler.jsonc`; the web Worker has no database. Tables are defined in
 `packages/backend/src/database/schema.ts`, SQL migrations live in
 `packages/backend/migrations/`, and Wrangler applies them.
 
@@ -129,7 +139,7 @@ bun run db:migrate:local
 gh workflow run deploy.yaml
 ```
 
-The Worker creates one typed `DatabaseContext` from its D1 binding. tRPC
+The API Worker creates one typed `DatabaseContext` from its D1 binding. tRPC
 contexts, services, and repositories receive that Drizzle context; application
 code must not access `env.DB` directly outside the Worker boundary.
 
@@ -181,16 +191,17 @@ The Terraform roots in `infra/cloudflare-prod` (`prod` state) and
 `infra/deploy-access` (`deploy` state) create the Cloudflare resources the app
 runs on: today, the D1 database and CI's Cloudflare tokens. Both use the
 `infra/modules/ci-token` module. They create resources and nothing else.
-Wrangler deploys the Worker and its settings from `apps/web/wrangler.jsonc`,
-and CI applies `packages/backend/migrations/` in its own step.
+Wrangler deploys the Workers and their settings from `apps/api/wrangler.jsonc`
+and `apps/web/wrangler.jsonc`, API first, and CI applies
+`packages/backend/migrations/` in its own step.
 
 Terraform owns the production database `hackerfeed` in the `prod` state. The
 import block adopts the existing database on the first apply. Its UUID appears
 only there for bootstrap. CI reconciles it on every production run, reads
-`database_id` and `database_name`, and passes them to the build as
-`D1_DATABASE_ID` and `D1_DATABASE_NAME`. `apps/web/vite.config.ts` writes them
-into the `DB` binding of the generated `apps/web/dist/server/wrangler.json`,
-which migrations and deployment both use.
+`database_id` and `database_name`, and writes them into the `DB` binding of
+`apps/api/wrangler.production.json`, a copy of `apps/api/wrangler.jsonc` that
+migrations and the API deploy both use. CI also checks that the web Worker
+binds no database.
 The checked-in Wrangler binding uses `local-hackerfeed` for local development;
 it is not a remote database identity. Run remote migrations through CI.
 
@@ -201,7 +212,8 @@ than the last release, roll back from the dashboard's deployment list or with
 `wrangler rollback <version-id>`: a bare `wrangler rollback` targets the
 previous upload, which may be a PR demo. Every browser page gets a fixed demo session; favorites
 and views reset on refresh. No D1, WorkOS, AI connections, or production secrets
-are used. Previews do not validate migrations or backend behavior. Run
+are used, and the API isn't called. Previews do not validate migrations or
+backend behavior. Run
 `bun run dev:demo` locally, or see [private previews](docs/private-preview.md).
 
 ### Cloudflare tokens
@@ -282,8 +294,8 @@ remote state or live infrastructure (the first run downloads providers).
 ## Hugging Face Papers
 
 The `/papers` route serves the latest successful Hugging Face Daily Papers
-edition from D1. The same Worker runs ingestion from the Cloudflare cron
-configured in `apps/web/wrangler.jsonc`:
+edition from D1. The API Worker runs ingestion from the Cloudflare cron
+configured in `apps/api/wrangler.jsonc`:
 
 ```text
 30 23 * * *  # 23:30 UTC / 05:00 Asia/Kolkata
@@ -300,25 +312,33 @@ Planning docs for this feature live in `docs/paper/`:
 
 ## Project boundaries
 
-HackerFeed is a modular monolith: one Worker, built from packages with
-enforced interfaces. The backend lives in `packages/backend` so it can later
-move to an independent API service.
+The frontend and the backend are separate Workers at separate URLs. The
+backend's code is in `packages/backend`; `apps/api` is its only host.
 
-- `apps/web` is the host. Its routes are thin adapters that call the
-  `backend` built in `apps/web/src/backend.ts`.
+- `apps/api` is the API Worker. It answers only requests whose `Origin` is
+  `ALLOWED_ORIGIN` (the web app): any other origin, or none, gets `403`. Its
+  CORS headers name that one origin, allow `authorization`, `content-type` and
+  `x-client-trace`, expose `x-sentry-trace-id`, and let browsers cache the
+  preflight for a day. Every other request goes to `createBackend`, which
+  verifies the WorkOS access token in `Authorization: Bearer` before any
+  route runs: without a valid one, the answer is `401`. The origin check stops
+  other websites from calling the API from a visitor's browser; scripts can
+  send any `Origin`, so the token is what protects the data.
+- `apps/web` is the frontend Worker. It has no API routes, no database and no
+  backend code: TanStack Start's import protection (`apps/web/vite.config.ts`)
+  fails both its client and server builds on any backend import but
+  `@hackerfeed/backend/api-types` (and, for the demo build, the Drizzle
+  schema's types). Its responses carry a `Content-Security-Policy` whose
+  `connect-src` lists only the web app, the API, WorkOS, Hacker News and
+  Sentry (`apps/web/src/server/content-security-policy.ts`).
 - The browser reaches backend behavior only over HTTP, through the clients in
-  `packages/api-client`.
-- `api-client` is the only project allowed to import `backend`, and only the
+  `packages/api-client`, at `VITE_API_URL`. `api-client` imports only the
   types in `@hackerfeed/backend/api-types` (tRPC infers its client from the
   router's type). `api-types` exports only types, so `verbatimModuleSyntax`
   makes every import of it `import type`, and a Biome rule stops `api-client`
-  importing any other backend path. In `apps/web`, TanStack Start's import
-  protection (`apps/web/vite.config.ts`) fails the client build on any other
-  backend import. Server-only app code (`apps/web/src/backend.ts`, `server.ts`)
-  imports the backend freely, and the demo build bundles
-  `@hackerfeed/backend/database/schema` for its in-memory fixtures.
-- Shared schemas live in `packages/entities`, never next to the Drizzle
-  tables. The backend maps rows to these DTOs.
+  importing any other backend path.
+- Every type or schema used on both sides lives in `packages/entities`, never
+  next to the Drizzle tables. The backend maps rows to these DTOs.
 - `packages/ui` is presentational: no app code, workspace packages, API clients
   or auth.
 
@@ -354,15 +374,15 @@ There is no remote cache.
 
 ## Observability
 
-Sentry tracing and structured logs are enabled in both the browser and the
-Cloudflare Worker. Application `logger` calls are attached to the active trace
+Sentry tracing and structured logs are enabled in the browser and in both
+Cloudflare Workers. Application `logger` calls are attached to the active trace
 so the events leading to an error can be inspected alongside it.
 
-The browser and the Worker keep separate traces. The Worker never continues
+The browser and the Workers keep separate traces. A Worker never continues
 trace headers from the internet: it strips `sentry-trace`, `baggage`,
 `traceparent` and `tracestate`, then starts its own trace for each request, so
 a client cannot choose a server trace ID or force sampling. The browser sends
-its trace context as `x-client-trace` instead, and the Worker records it as a
+its trace context as `x-client-trace` on API calls instead, and the API records it as a
 span link plus a `client.trace_id` attribute on the request's root span. Every
 response returns the server trace ID in `x-sentry-trace-id`. To go from one to
 the other in Sentry, search `client.trace_id:<browser trace ID>` for the
@@ -375,11 +395,12 @@ Sentry ingests warning and error logs. Trace volume is controlled by
 browser and the Worker sample on their own, so a quoted trace ID always finds
 its error, but its spans only when that side was sampled.
 
-Production builds upload browser and Worker source maps to Sentry when
+Production builds upload the browser's and the web Worker's source maps to Sentry when
 `SENTRY_AUTH_TOKEN` (a Sentry organization token, stored as a GitHub secret) is
 set, then delete the `.map` files so they are never deployed. Each deploy is
 tagged with its commit SHA as the Sentry release (`SENTRY_RELEASE`). Builds
-without the token skip source maps.
+without the token skip source maps. The API Worker doesn't upload source maps
+yet.
 
 ## Routing
 

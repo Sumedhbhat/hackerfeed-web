@@ -14,11 +14,9 @@ import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as PapersRouteImport } from './routes/papers'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as SettingsRouteImport } from './routes/settings'
-import { Route as ApiFeatureFlagsRouteImport } from './routes/api.feature-flags'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as AuthSignedOutRouteImport } from './routes/auth.signed-out'
 import { Route as StoryStoryIdRouteImport } from './routes/story.$storyId'
-import { Route as ApiTrpcSplatRouteImport } from './routes/api/trpc/$'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -45,11 +43,6 @@ const SettingsRoute = SettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiFeatureFlagsRoute = ApiFeatureFlagsRouteImport.update({
-  id: '/api/feature-flags',
-  path: '/api/feature-flags',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthCallbackRoute = AuthCallbackRouteImport.update({
   id: '/auth/callback',
   path: '/auth/callback',
@@ -65,11 +58,6 @@ const StoryStoryIdRoute = StoryStoryIdRouteImport.update({
   path: '/story/$storyId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiTrpcSplatRoute = ApiTrpcSplatRouteImport.update({
-  id: '/api/trpc/$',
-  path: '/api/trpc/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -77,11 +65,9 @@ export interface FileRoutesByFullPath {
   '/papers': typeof PapersRoute
   '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRoute
-  '/api/feature-flags': typeof ApiFeatureFlagsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/signed-out': typeof AuthSignedOutRoute
   '/story/$storyId': typeof StoryStoryIdRoute
-  '/api/trpc/$': typeof ApiTrpcSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -89,11 +75,9 @@ export interface FileRoutesByTo {
   '/papers': typeof PapersRoute
   '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRoute
-  '/api/feature-flags': typeof ApiFeatureFlagsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/signed-out': typeof AuthSignedOutRoute
   '/story/$storyId': typeof StoryStoryIdRoute
-  '/api/trpc/$': typeof ApiTrpcSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -102,11 +86,9 @@ export interface FileRoutesById {
   '/papers': typeof PapersRoute
   '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRoute
-  '/api/feature-flags': typeof ApiFeatureFlagsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/signed-out': typeof AuthSignedOutRoute
   '/story/$storyId': typeof StoryStoryIdRoute
-  '/api/trpc/$': typeof ApiTrpcSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -116,11 +98,9 @@ export interface FileRouteTypes {
     | '/papers'
     | '/profile'
     | '/settings'
-    | '/api/feature-flags'
     | '/auth/callback'
     | '/auth/signed-out'
     | '/story/$storyId'
-    | '/api/trpc/$'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -128,11 +108,9 @@ export interface FileRouteTypes {
     | '/papers'
     | '/profile'
     | '/settings'
-    | '/api/feature-flags'
     | '/auth/callback'
     | '/auth/signed-out'
     | '/story/$storyId'
-    | '/api/trpc/$'
   id:
     | '__root__'
     | '/'
@@ -140,11 +118,9 @@ export interface FileRouteTypes {
     | '/papers'
     | '/profile'
     | '/settings'
-    | '/api/feature-flags'
     | '/auth/callback'
     | '/auth/signed-out'
     | '/story/$storyId'
-    | '/api/trpc/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -153,11 +129,9 @@ export interface RootRouteChildren {
   PapersRoute: typeof PapersRoute
   ProfileRoute: typeof ProfileRoute
   SettingsRoute: typeof SettingsRoute
-  ApiFeatureFlagsRoute: typeof ApiFeatureFlagsRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   AuthSignedOutRoute: typeof AuthSignedOutRoute
   StoryStoryIdRoute: typeof StoryStoryIdRoute
-  ApiTrpcSplatRoute: typeof ApiTrpcSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -197,13 +171,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/feature-flags': {
-      id: '/api/feature-flags'
-      path: '/api/feature-flags'
-      fullPath: '/api/feature-flags'
-      preLoaderRoute: typeof ApiFeatureFlagsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/auth/callback': {
       id: '/auth/callback'
       path: '/auth/callback'
@@ -225,13 +192,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StoryStoryIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/trpc/$': {
-      id: '/api/trpc/$'
-      path: '/api/trpc/$'
-      fullPath: '/api/trpc/$'
-      preLoaderRoute: typeof ApiTrpcSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -241,11 +201,9 @@ const rootRouteChildren: RootRouteChildren = {
   PapersRoute: PapersRoute,
   ProfileRoute: ProfileRoute,
   SettingsRoute: SettingsRoute,
-  ApiFeatureFlagsRoute: ApiFeatureFlagsRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   AuthSignedOutRoute: AuthSignedOutRoute,
   StoryStoryIdRoute: StoryStoryIdRoute,
-  ApiTrpcSplatRoute: ApiTrpcSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

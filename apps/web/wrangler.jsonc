@@ -7,7 +7,7 @@
 	],
 	"main": "src/server.ts",
 	"triggers": {
-		"crons": ["30 23 * * *"]
+		"crons": []
 	},
 	"observability": {
 		"enabled": true,
@@ -25,13 +25,5 @@
 		"SENTRY_TRACES_SAMPLE_RATE": "0.1",
 		"VITE_WORKOS_API_HOSTNAME": "api.workos.com",
 		"VITE_WORKOS_REDIRECT_URI": "https://hackerfeed-web.kgqk4vdcfq.workers.dev/auth/callback"
-	},
-	"d1_databases": [
-		{
-			"binding": "DB",
-			"database_name": "hackerfeed",
-			"database_id": "local-hackerfeed",
-			"migrations_dir": "../../packages/backend/migrations"
-		}
-	]
+	}
 }

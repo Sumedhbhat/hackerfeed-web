@@ -15,13 +15,14 @@ third-party flag service, so don't add one.
 | --- | --- | --- |
 | Config | `packages/backend/src/feature-flags/config.ts` | Every flag: `description`, `enabled`, optional `enabledForUserIds`. Server-only, so the config and its user ids never reach the browser. |
 | Evaluator | `packages/backend/src/feature-flags/service.ts` | `evaluateFeatureFlags(user)` returns all flags for a session. `isFeatureEnabled(name, user)` checks one flag inside server code. |
-| API | `apps/web/src/routes/api.feature-flags.ts` → `handleFeatureFlagsRequest` in `packages/backend/src/index.ts` | `GET /api/feature-flags` returns `{ flags: { [name]: boolean } }` for the bearer token's user, or the signed-out defaults. `no-store`. |
+| API | `createBackend` in `packages/backend/src/index.ts`, served by `apps/api` | `GET /api/feature-flags` returns `{ flags: { [name]: boolean } }` for the bearer token's user. Like every API route, it answers `401` without a valid token. `no-store`. |
 | Client fetch | `packages/api-client/src/feature-flags.ts`, configured in `apps/web/src/lib/feature-flags/client.ts` | `fetchFeatureFlags()` sends the AuthKit bearer token. The flag types reach the browser as types only, through `@hackerfeed/backend/api-types`. |
-| Hooks | `apps/web/src/hooks/useFeatureFlags.ts` | `useFeatureFlag(name)` returns a boolean. The query is keyed by user id, so signing in or out refetches. |
+| Hooks | `apps/web/src/hooks/useFeatureFlags.ts` | `useFeatureFlag(name)` returns a boolean. The query runs only once someone is signed in and is keyed by user id, so signing in again refetches. |
 | Gate | `SessionGate` in `apps/web/src/routes/__root.tsx` | Holds every non-public page until both the auth state and that session's flags are known. |
 
-How a flag evaluates: `enabled: true` turns it on for everyone, signed in or
-not. Otherwise it is on only for signed-in users listed in `enabledForUserIds`.
+How a flag evaluates: `enabled: true` turns it on for every signed-in user.
+Otherwise it is on only for users listed in `enabledForUserIds`. Signed-out
+visitors never get flags; every page but sign-in is behind `SessionGate`.
 
 It fails closed. If the flags request fails or a name is missing from the
 response, `useFeatureFlag` returns `false`. The app still loads, with every

@@ -10,7 +10,7 @@ export function useFeatureFlags() {
 	return useQuery({
 		queryKey: ["feature-flags", user?.id ?? null],
 		queryFn: fetchFeatureFlags,
-		enabled: !isLoading,
+		enabled: !isLoading && user !== null,
 		staleTime: 5 * 60_000,
 		retry: 1,
 	});

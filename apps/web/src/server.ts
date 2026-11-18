@@ -1,14 +1,7 @@
 import {
-	createDatabaseContext,
-	type D1DatabaseBinding,
-	setDatabaseContext,
-} from "@hackerfeed/backend/database/client";
-import { runHuggingFaceDailyPapersIngestion } from "@hackerfeed/backend/huggingface-papers/ingestion";
-import {
-	linkClientTrace,
 	withoutIncomingTrace,
 	withServerTraceId,
-} from "@hackerfeed/backend/tracing/client-trace";
+} from "@hackerfeed/runtime/client-trace";
 import { getTraceId, logger } from "@hackerfeed/runtime/logger";
 import { sentryDataCollection } from "@hackerfeed/runtime/sentry-data-collection";
 import { SERVER_TRACE_ID_HEADER } from "@hackerfeed/runtime/trace-headers";
@@ -20,10 +13,11 @@ import {
 	type RequestHandler,
 } from "@tanstack/react-start/server";
 import { createServerEntry } from "@tanstack/react-start/server-entry";
+import { env } from "#/env";
+import { buildContentSecurityPolicy } from "#/server/content-security-policy";
 import { renderServerErrorPage } from "#/server/errors/server-error-page";
 
 type WorkerEnv = {
-	DB: D1DatabaseBinding;
 	SENTRY_DSN?: string;
 	SENTRY_ENVIRONMENT?: string;
 	SENTRY_TRACES_SAMPLE_RATE?: string;
@@ -38,15 +32,26 @@ function getSentrySampleRate(value: string | undefined, fallback: number) {
 	return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+// Dev tools connect to their own local servers, so only built apps get it.
+const contentSecurityPolicy = import.meta.env.DEV
+	? undefined
+	: buildContentSecurityPolicy({
+			apiUrl: env.VITE_API_URL,
+			workosApiHostname: env.VITE_WORKOS_API_HOSTNAME,
+			sentryDsn: env.VITE_SENTRY_DSN,
+		});
+
+function withContentSecurityPolicy(response: Response): Response {
+	if (!contentSecurityPolicy) return response;
+	const secured = new Response(response.body, response);
+	secured.headers.set("Content-Security-Policy", contentSecurityPolicy);
+	return secured;
+}
+
 function wantsJson(request: Request) {
-	const url = new URL(request.url);
 	const accept = request.headers.get("accept") ?? "";
 
-	return (
-		url.pathname.startsWith("/api/") ||
-		accept.includes("application/json") ||
-		!accept.includes("text/html")
-	);
+	return accept.includes("application/json") || !accept.includes("text/html");
 }
 
 function renderErrorResponse(request: Request, traceId: string | undefined) {
@@ -68,16 +73,11 @@ function renderErrorResponse(request: Request, traceId: string | undefined) {
 	return new Response(renderServerErrorPage(traceId), { status: 500, headers });
 }
 
-function createWorkerDatabaseContext(env: WorkerEnv) {
-	return createDatabaseContext(env.DB);
-}
-
-async function handleAppFetch(request: Request, env: WorkerEnv) {
-	setDatabaseContext(createWorkerDatabaseContext(env));
-	linkClientTrace(request);
-
+async function handleAppFetch(request: Request) {
 	try {
-		return withServerTraceId(await startFetch(request), getTraceId());
+		return withContentSecurityPolicy(
+			withServerTraceId(await startFetch(request), getTraceId()),
+		);
 	} catch (error) {
 		// Still inside Sentry's request span, so the issue, logs and spans share
 		// the trace ID the user sees on the error page.
@@ -86,7 +86,7 @@ async function handleAppFetch(request: Request, env: WorkerEnv) {
 			method: request.method,
 			pathname: new URL(request.url).pathname,
 		});
-		return renderErrorResponse(request, traceId);
+		return withContentSecurityPolicy(renderErrorResponse(request, traceId));
 	}
 }
 
@@ -94,19 +94,7 @@ const serverEntry = createServerEntry({
 	fetch: handleAppFetch as unknown as RequestHandler<Register>,
 });
 
-const worker = {
-	...serverEntry,
-	scheduled(
-		_controller: ScheduledController,
-		env: WorkerEnv,
-		context: ExecutionContext,
-	) {
-		const database = createWorkerDatabaseContext(env);
-		const ingestion = runHuggingFaceDailyPapersIngestion(database);
-		context.waitUntil(ingestion);
-		return ingestion;
-	},
-} as unknown as ExportedHandler<WorkerEnv>;
+const worker = serverEntry as unknown as ExportedHandler<WorkerEnv>;
 
 const instrumentedWorker = Sentry.withSentry((env: WorkerEnv) => {
 	if (!env.SENTRY_DSN) return undefined;

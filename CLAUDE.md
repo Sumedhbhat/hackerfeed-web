@@ -10,10 +10,10 @@ Before writing, reviewing, or refactoring code, load and follow the `karpathy-gu
 
 ```bash
 # Development
-bun run dev          # Start dev server on port 3000
+bun run dev          # Web app on port 3000 and API on port 8787
 
 # Build & deploy
-bun run build        # Production build
+bun run build        # Production builds of both Workers
 gh workflow run deploy.yaml  # Deploy with Terraform outputs in CI
 
 # Testing
@@ -34,17 +34,17 @@ bunx nx graph        # Project graph
 
 ## Architecture
 
-**Framework stack:** TanStack Start (SSR React framework) + TanStack Router (file-based routing) + TanStack Query (data fetching) + TanStack Store (client state). Deployed to Cloudflare Workers via `@cloudflare/vite-plugin`.
+**Framework stack:** TanStack Start (SSR React framework) + TanStack Router (file-based routing) + TanStack Query (data fetching) + TanStack Store (client state). Deployed to Cloudflare Workers via `@cloudflare/vite-plugin`; the API is a separate Worker deployed with Wrangler.
 
-**Workspace:** an Nx workspace of Bun workspace packages, deployed as one Worker. `apps/web` is the TanStack Start host; shared code lives in `packages/` (`ui`, `entities`, `runtime`, `backend`, `api-client`); every type or schema the frontend and the backend both use goes in `packages/entities`; infrastructure in `apps/state-backend`, `infra/` and `tools/infra-ci`. README > Workspace lists every project. Packages import each other only through their `package.json` `exports` (`@hackerfeed/ui/atoms/Button`); never reach into another project with a relative path. Add a package by copying a small one (`packages/entities`) and renaming it.
+**Workspace:** an Nx workspace of Bun workspace packages, deployed as two Workers at separate URLs. `apps/web` is the frontend (TanStack Start, `hackerfeed-web`); `apps/api` is the API (`hackerfeed-api`), the only host of `packages/backend` and the only Worker with the database. Shared code lives in `packages/` (`ui`, `entities`, `runtime`, `backend`, `api-client`); every type or schema the frontend and the backend both use goes in `packages/entities`. Infrastructure is in `apps/state-backend`, `infra/` and `tools/infra-ci`. README > Workspace lists every project. Packages import each other only through their `package.json` `exports` (`@hackerfeed/ui/atoms/Button`); never reach into another project with a relative path. Add a package by copying a small one (`packages/entities`) and renaming it.
 
-**Boundaries:** installs are isolated (`bunfig.toml`), so a package can import only the npm and workspace packages its own `package.json` declares; those `dependencies` are the allowed edges, and adding one is a design change to raise with the user. No tool stops a relative import into another project or a root devDependency used from a package, so don't write either. The backend never reaches the production browser bundle: browser code uses only `import type` from `@hackerfeed/backend/api-types` (a Biome rule holds `api-client` to it), and TanStack Start's import protection in `apps/web/vite.config.ts` fails the client build on any other backend import. Server-only app code (`src/backend.ts`, `src/server.ts`) imports the backend freely, and the demo build bundles `@hackerfeed/backend/database/schema` for its in-memory fixtures. Packages don't read env; `apps/web/src/backend.ts` passes config into `createBackend`. When a check blocks you, change the code, not the rule.
+**Boundaries:** installs are isolated (`bunfig.toml`), so a package can import only the npm and workspace packages its own `package.json` declares; those `dependencies` are the allowed edges, and adding one is a design change to raise with the user. No tool stops a relative import into another project or a root devDependency used from a package, so don't write either. The web app never contains backend code: it uses only `import type` from `@hackerfeed/backend/api-types` (a Biome rule holds `api-client` to it) and the Drizzle schema's types for demo fixtures, and TanStack Start's import protection in `apps/web/vite.config.ts` fails its client and server builds on any other backend import. Never add API routes to `apps/web`; they go in the backend, served by `apps/api`. The API answers only the web app's origin (`ALLOWED_ORIGIN`, 403 otherwise) and `createBackend` rejects any request without a valid WorkOS bearer token (401) before routing. The web app's `Content-Security-Policy` (`src/server/content-security-policy.ts`) limits `connect-src` to itself, the API, WorkOS, Hacker News and Sentry: a new origin the browser calls must be added there. Packages don't read env; `apps/api/src/index.ts` passes config into `createBackend`, and the web app finds the API at `VITE_API_URL`. When a check blocks you, change the code, not the rule.
 
-**Path alias:** inside `apps/web`, `#/*` maps to `apps/web/src/*` (its `package.json` `imports` and `tsconfig.json`). Paths below are relative to `apps/web` unless they start with `packages/`, `infra/` or `tools/`.
+**Path alias:** inside `apps/web`, `#/*` maps to `apps/web/src/*` (its `package.json` `imports` and `tsconfig.json`). Paths below are relative to `apps/web` unless they start with `apps/`, `packages/`, `infra/` or `tools/`.
 
 ### Infrastructure
 
-The Terraform roots `infra/cloudflare-prod` (`prod` state) and `infra/deploy-access` (production-only `deploy` state), with the shared `infra/modules/ci-token` module, create Cloudflare resources (today, the production D1 database `hackerfeed` and CI's Cloudflare tokens) and nothing else. GitHub stores only the Terraform token; Terraform mints the deploy token in `deploy` and the preview token in `prod`, which PR jobs can read, and jobs read them with `tools/infra-ci/cloudflare-token.sh`. Terraform must not deploy code or run migrations: the Worker is deployed by wrangler from `apps/web/wrangler.jsonc`, and migrations (`packages/backend/migrations`) run in their own CI step. CI reconciles production infrastructure and the state server on every production run, always through `tools/infra-ci/terraform.sh`, which maps the state names `prod` and `deploy` to their roots: state lives in the `apps/state-backend` Worker, which signs CI in with GitHub OIDC, so there is no state password and Terraform runs only in CI. Never rename a state or move resource addresses when moving files. CI reads its database identity from Terraform outputs before building and migrating. PR demos deploy static assets with browser-memory fixtures through `apps/web/wrangler.preview.jsonc`. See README > Infrastructure.
+The Terraform roots `infra/cloudflare-prod` (`prod` state) and `infra/deploy-access` (production-only `deploy` state), with the shared `infra/modules/ci-token` module, create Cloudflare resources (today, the production D1 database `hackerfeed` and CI's Cloudflare tokens) and nothing else. GitHub stores only the Terraform token; Terraform mints the deploy token in `deploy` and the preview token in `prod`, which PR jobs can read, and jobs read them with `tools/infra-ci/cloudflare-token.sh`. Terraform must not deploy code or run migrations: the Workers are deployed by wrangler from `apps/api/wrangler.jsonc` (API first) and `apps/web/wrangler.jsonc`, and migrations (`packages/backend/migrations`) run in their own CI step. CI reconciles production infrastructure and the state server on every production run, always through `tools/infra-ci/terraform.sh`, which maps the state names `prod` and `deploy` to their roots: state lives in the `apps/state-backend` Worker, which signs CI in with GitHub OIDC, so there is no state password and Terraform runs only in CI. Never rename a state or move resource addresses when moving files. CI reads its database identity from Terraform outputs and writes it into `apps/api/wrangler.production.json` before migrating and deploying the API. PR demos deploy static assets with browser-memory fixtures through `apps/web/wrangler.preview.jsonc`. See README > Infrastructure.
 
 ### Data flow
 
@@ -54,7 +54,7 @@ The feed page (`src/routes/index.tsx`) uses a two-layer query model:
 
 The route loader (`loader` in `index.tsx`) SSR-prefetches the ID list and warms the cache for the first `PAGE_SIZE` items. On the client, switching tabs or loading more items fetches incrementally without resetting previously loaded tabs.
 
-All HN API calls go through `src/lib/hacker-news/queries.ts` (direct calls to `hacker-news.firebaseio.com`). Normalization (`normalizeStoryItem`, `normalizeStoryIds`) strips dead/deleted items and coerces types before anything touches React. The record types live in `@hackerfeed/entities/hacker-news`, the display helpers in `src/lib/hacker-news/display.ts`; the backend gets the fetchers through `createBackend`.
+All HN API calls go through `src/lib/hacker-news/queries.ts` (direct calls to `hacker-news.firebaseio.com`). Normalization (`normalizeStoryItem`, `normalizeStoryIds`) strips dead/deleted items and coerces types before anything touches React. The record types live in `@hackerfeed/entities/hacker-news`; the display helpers in `src/lib/hacker-news/display.ts`.
 
 ### Favorites
 
@@ -62,7 +62,7 @@ All HN API calls go through `src/lib/hacker-news/queries.ts` (direct calls to `h
 
 ### Auth
 
-WorkOS AuthKit owns the session entirely in the browser (`src/integrations/workos/provider.tsx`, `devMode` keeps the refresh token in localStorage). There are no HackerFeed session cookies. `SessionGate` in `__root.tsx` sends signed-out users to WorkOS; only `/auth/callback` and `/auth/signed-out` are public. API calls (the `packages/api-client` transports, configured in `src/lib/trpc/client.ts` and `src/lib/feature-flags/client.ts`) send `Authorization: Bearer <access token>` via `getApiHeaders()` in `src/lib/auth/authkit.ts`; the server verifies it against WorkOS's JWKS with the authenticator from `createRequestAuthenticator()` in `packages/backend/src/auth/workos-access-token.ts`.
+WorkOS AuthKit owns the session entirely in the browser (`src/integrations/workos/provider.tsx`, `devMode` keeps the refresh token in localStorage). There are no HackerFeed session cookies. `SessionGate` in `__root.tsx` sends signed-out users to WorkOS; only `/auth/callback` and `/auth/signed-out` are public. API calls (the `packages/api-client` transports, configured in `src/lib/trpc/client.ts` and `src/lib/feature-flags/client.ts`) send `Authorization: Bearer <access token>` via `getApiHeaders()` in `src/lib/auth/authkit.ts`; the API verifies it against WorkOS's JWKS with the authenticator from `createRequestAuthenticator()` in `packages/backend/src/auth/workos-access-token.ts`, once per request in `createBackend`, before any route runs.
 
 ### Appearance
 
@@ -72,7 +72,7 @@ A reader picks a mode (light, dark, auto) and a palette; both are saved to their
 
 ### Feature flags
 
-Flags are code, not a service. `packages/backend/src/feature-flags/config.ts` defines them, `GET /api/feature-flags` returns them for the requesting session, and `SessionGate` in `__root.tsx` holds the app until the auth state and that session's flags are both known. Read flags with `useFeatureFlag(name)` on the client, and enforce them with `isFeatureEnabled(name, user)` on the server. Follow `.claude/skills/feature-flags/SKILL.md` to add, target or remove a flag.
+Flags are code, not a service. `packages/backend/src/feature-flags/config.ts` defines them, the API's `GET /api/feature-flags` returns them for the signed-in session (only signed-in sessions ask), and `SessionGate` in `__root.tsx` holds the app until the auth state and that session's flags are both known. Read flags with `useFeatureFlag(name)` on the client, and enforce them with `isFeatureEnabled(name, user)` on the server. Follow `.claude/skills/feature-flags/SKILL.md` to add, target or remove a flag.
 
 ### Logging and debugging
 

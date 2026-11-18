@@ -3,11 +3,12 @@
 	"private": true,
 	"type": "module",
 	"exports": {
+		"./client-trace": "./src/client-trace.ts",
 		"./http": "./src/http.ts",
 		"./logger": "./src/logger.ts",
 		"./sentry-data-collection": "./src/sentry-data-collection.ts",
-		"./trace-headers": "./src/trace-headers.ts",
-		"./testing/sentry-test-client": "./src/testing/sentry-test-client.ts"
+		"./testing/sentry-test-client": "./src/testing/sentry-test-client.ts",
+		"./trace-headers": "./src/trace-headers.ts"
 	},
 	"dependencies": {
 		"@sentry/core": "^11.7.0",

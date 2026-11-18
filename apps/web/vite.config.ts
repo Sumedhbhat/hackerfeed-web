@@ -9,16 +9,12 @@ import viteReact from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
 const demo = process.env.VITE_DEMO_DATA === "true";
-// The browser may import only the backend's types; the demo build also bundles
-// its schema for the in-memory database.
-const backendInBrowser = demo
+// The backend runs in apps/api. The web app may import only its types; the
+// demo build also bundles its schema for the in-memory database.
+const backendCode = demo
 	? /(^|\/)packages\/backend\/(?!src\/(api-types|database\/schema)\.ts$)/
 	: /(^|\/)packages\/backend\/(?!src\/api-types\.ts$)/;
 const sentryAuthToken = process.env.SENTRY_AUTH_TOKEN;
-const { D1_DATABASE_ID, D1_DATABASE_NAME } = process.env;
-if (!D1_DATABASE_ID !== !D1_DATABASE_NAME) {
-	throw new Error("Set both D1_DATABASE_ID and D1_DATABASE_NAME, or neither");
-}
 
 const config = defineConfig({
 	build: {
@@ -29,19 +25,7 @@ const config = defineConfig({
 	},
 	plugins: [
 		devtools(),
-		!demo &&
-			cloudflare({
-				viteEnvironment: { name: "ssr" },
-				config: (worker) => {
-					if (!D1_DATABASE_ID || !D1_DATABASE_NAME) return;
-					for (const database of worker.d1_databases) {
-						if (database.binding === "DB") {
-							database.database_id = D1_DATABASE_ID;
-							database.database_name = D1_DATABASE_NAME;
-						}
-					}
-				},
-			}),
+		!demo && cloudflare({ viteEnvironment: { name: "ssr" } }),
 
 		tailwindcss(),
 		tanstackStart({
@@ -56,7 +40,8 @@ const config = defineConfig({
 			},
 			importProtection: {
 				include: [/^src\//, /(^|\/)packages\//],
-				client: { files: ["**/*.server.*", backendInBrowser] },
+				client: { files: ["**/*.server.*", backendCode] },
+				server: { files: ["**/*.client.*", backendCode] },
 			},
 		}),
 		viteReact(),

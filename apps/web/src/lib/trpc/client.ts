@@ -4,10 +4,12 @@ import {
 } from "@hackerfeed/api-client/trpc";
 import { TRPCClientError, type TRPCLink } from "@trpc/client";
 import { observable } from "@trpc/server/observable";
+import { env } from "#/env";
 import { getApiHeaders } from "#/lib/auth/authkit";
 
 export function createTrpcClient() {
 	return createApiTrpcClient({
+		apiUrl: env.VITE_API_URL,
 		auth: { getHeaders: getApiHeaders },
 		link: import.meta.env.VITE_DEMO_DATA === "true" ? demoLink : undefined,
 	});

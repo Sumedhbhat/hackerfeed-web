@@ -1,0 +1,19 @@
+{
+	"name": "@hackerfeed/api",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "wrangler dev --port 8787 --var ALLOWED_ORIGIN:http://localhost:3000",
+		"cf:typegen": "wrangler types",
+		"db:migrate:local": "wrangler d1 migrations apply DB --local"
+	},
+	"dependencies": {
+		"@hackerfeed/backend": "workspace:*",
+		"@hackerfeed/runtime": "workspace:*",
+		"@sentry/cloudflare": "^11.7.0"
+	},
+	"devDependencies": {
+		"vitest": "^5.0.4",
+		"wrangler": "^4.151.0"
+	}
+}

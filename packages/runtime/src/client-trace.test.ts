@@ -1,8 +1,3 @@
-import { installSentryTestClient } from "@hackerfeed/runtime/testing/sentry-test-client";
-import {
-	CLIENT_TRACE_HEADER,
-	SERVER_TRACE_ID_HEADER,
-} from "@hackerfeed/runtime/trace-headers";
 import * as Sentry from "@sentry/core";
 import { beforeAll, describe, expect, it } from "vitest";
 import {
@@ -11,6 +6,8 @@ import {
 	withoutIncomingTrace,
 	withServerTraceId,
 } from "./client-trace";
+import { installSentryTestClient } from "./testing/sentry-test-client";
+import { CLIENT_TRACE_HEADER, SERVER_TRACE_ID_HEADER } from "./trace-headers";
 
 const FORGED_TRACE_ID = "deadbeefdeadbeefdeadbeefdeadbeef";
 const FORGED_SENTRY_TRACE = `${FORGED_TRACE_ID}-1234567890abcdef-1`;
