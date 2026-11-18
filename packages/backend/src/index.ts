@@ -23,7 +23,10 @@ export function createBackend(config: BackendConfig) {
 		if (!user) {
 			return Response.json(
 				{ error: "Unauthorized", message: "Sign in to use HackerFeed." },
-				{ status: 401 },
+				{
+					status: 401,
+					headers: { "WWW-Authenticate": 'Bearer realm="HackerFeed"' },
+				},
 			);
 		}
 
