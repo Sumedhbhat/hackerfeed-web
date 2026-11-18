@@ -1,5 +1,6 @@
 import { exportJWK, generateKeyPair, SignJWT } from "jose";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { evaluateFeatureFlags } from "./feature-flags/service";
 import { createBackend } from "./index";
 
 const handle = createBackend({ workos: { clientId: "client_test" } });
@@ -46,7 +47,9 @@ describe("createBackend", () => {
 		);
 
 		expect(response.status).toBe(200);
-		expect(await response.json()).toEqual({ flags: {} });
+		expect(await response.json()).toEqual({
+			flags: evaluateFeatureFlags({ workosUserId: "workos-user-1" }),
+		});
 		expect(String(fetchJwks.mock.calls[0]?.[0])).toContain(
 			"/sso/jwks/client_valid",
 		);
