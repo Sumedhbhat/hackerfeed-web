@@ -1,0 +1,1 @@
+CREATE INDEX `activity_events_app_user_id_story_id_occurred_at_idx` ON `activity_events` (`appUserId`,`storyId`,`occurredAt`);

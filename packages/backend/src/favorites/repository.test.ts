@@ -55,6 +55,7 @@ describe("favorite repository", () => {
 		await repository.listFavorites("user-1");
 
 		expect(statements[0]?.values).toContain("user-1");
+		expect(statements[0]?.sql).toContain('left join (select "storyId", max(');
 		expect(statements[0]?.sql).toContain(
 			'order by "favorites"."createdAt" desc, "favorites"."id" desc',
 		);

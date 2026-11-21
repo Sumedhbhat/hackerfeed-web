@@ -1,7 +1,8 @@
 import type { HackerNewsStoryRecord } from "@hackerfeed/entities/hacker-news";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { StoryArticle } from "#/components/organisms/story/StoryArticle";
+import { renderWithQueryClient } from "#/test/renderWithQueryClient";
 
 const authMock = vi.hoisted(() => ({
 	user: null as { id: string } | null,
@@ -47,7 +48,7 @@ afterEach(cleanup);
 describe("StoryArticle activity", () => {
 	it("records signed-in article and ChatGPT opens", () => {
 		authMock.user = { id: "workos-story-reader" };
-		render(<StoryArticle story={story} />);
+		renderWithQueryClient(<StoryArticle story={story} />);
 
 		fireEvent.click(screen.getByRole("link", { name: /read article/i }));
 		fireEvent.click(screen.getByRole("link", { name: /^open in chatgpt: /i }));
@@ -59,7 +60,7 @@ describe("StoryArticle activity", () => {
 	});
 
 	it("does not record signed-out opens", () => {
-		render(<StoryArticle story={story} />);
+		renderWithQueryClient(<StoryArticle story={story} />);
 
 		fireEvent.click(screen.getByRole("link", { name: /read article/i }));
 

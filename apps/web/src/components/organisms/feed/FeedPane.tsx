@@ -12,6 +12,7 @@ import { StoryCard } from "#/components/organisms/story/StoryCard";
 import { FeedStatus, useFeed } from "#/hooks/useFeed";
 import { useLoadMoreFocus } from "#/hooks/useLoadMoreFocus";
 import { useRestoreReturnFocus } from "#/hooks/useRestoreReturnFocus";
+import { useStoriesLastViewed } from "#/hooks/useStoriesLastViewed";
 import {
 	type HackerNewsFeedKey,
 	storyQueryOptions,
@@ -40,6 +41,7 @@ export function FeedPane({ feed, prefetchNextBatch }: FeedPaneProps) {
 		loadMore,
 		refetch,
 	} = useFeed(feed);
+	const lastViewed = useStoriesLastViewed(displayedIds);
 
 	const listId = `feed-${feed}-stories`;
 	const renderedCount = storyQueries
@@ -74,7 +76,15 @@ export function FeedPane({ feed, prefetchNextBatch }: FeedPaneProps) {
 				{displayedIds.map((storyId, i) => {
 					const story = storyQueries[i]?.data;
 					if (!story) return null;
-					return <StoryCard key={`${feed}-${storyId}`} story={story} />;
+					return (
+						<StoryCard
+							key={`${feed}-${storyId}`}
+							story={{
+								...story,
+								lastViewedAt: lastViewed.get(storyId) ?? null,
+							}}
+						/>
+					);
 				})}
 			</ReadingList>
 

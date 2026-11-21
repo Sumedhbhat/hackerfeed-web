@@ -11,7 +11,7 @@ const VARIANT_CLASSES = {
 	inline:
 		"text-accent-strong underline decoration-accent/40 underline-offset-[3px] hover:text-accent-strong hover:decoration-accent",
 	/** The hit area covers the nearest `position: relative` ancestor (the card). */
-	card: "rounded-sm text-inherit no-underline decoration-accent/50 underline-offset-[3px] after:absolute after:inset-0 after:content-[''] hover:text-inherit hover:underline visited:text-ink-soft",
+	card: "rounded-sm text-inherit no-underline decoration-accent/50 underline-offset-[3px] after:absolute after:inset-0 after:content-[''] hover:text-inherit hover:underline visited:text-ink-faint data-viewed:text-ink-faint",
 } as const;
 
 export type LinkVariant = keyof typeof VARIANT_CLASSES;
@@ -21,13 +21,20 @@ type StyledAnchorProps = Omit<
 	"className" | "style"
 > & {
 	variant?: LinkVariant;
+	/** Greyed like a visited link: the reader opened it before, on any device. */
+	viewed?: boolean;
 	ref?: React.Ref<HTMLAnchorElement>;
 };
 
-function StyledAnchor({ variant = "subtle", ...props }: StyledAnchorProps) {
+function StyledAnchor({
+	variant = "subtle",
+	viewed = false,
+	...props
+}: StyledAnchorProps) {
 	return (
 		<a
 			{...props}
+			data-viewed={viewed || undefined}
 			className={`${variant === "inline" || variant === "card" ? "" : "inline-flex items-center gap-1 "}focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${VARIANT_CLASSES[variant]}`}
 		/>
 	);

@@ -3,6 +3,7 @@ import "@tanstack/react-start/server-only";
 import type { HackerNewsStoryRecord } from "@hackerfeed/entities/hacker-news";
 import type {
 	PaperViewAction,
+	StoryLastViewed,
 	StoryViewAction,
 } from "@hackerfeed/entities/view-activity";
 import {
@@ -21,6 +22,10 @@ type ViewActivityRepositoryDependency = {
 		story: HackerNewsStoryRecord,
 		action: StoryViewAction,
 	): PromiseLike<void>;
+	listStoriesLastViewed(
+		appUserId: string,
+		hnStoryIds: number[],
+	): PromiseLike<StoryLastViewed[]>;
 	findPaperByArxivId(arxivId: string): PromiseLike<{ id: string } | null>;
 	recordPaperView(
 		appUserId: string,
@@ -59,6 +64,14 @@ export function createViewActivityService(
 		): Promise<void> {
 			const appUser = await getAppUser(user);
 			await views.recordStoryView(appUser.id, story, action);
+		},
+
+		async listStoriesLastViewed(
+			user: CurrentUserInput,
+			hnStoryIds: number[],
+		): Promise<StoryLastViewed[]> {
+			const appUser = await getAppUser(user);
+			return views.listStoriesLastViewed(appUser.id, hnStoryIds);
 		},
 
 		async recordPaperView(

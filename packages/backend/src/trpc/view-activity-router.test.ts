@@ -30,6 +30,7 @@ function createHarness() {
 				action: string;
 		  }
 		| { name: "paper"; user: unknown; arxivId: string; action: string }
+		| { name: "lastViewed"; user: unknown; hnStoryIds: number[] }
 	> = [];
 	const views = {
 		async recordStoryView(
@@ -38,6 +39,12 @@ function createHarness() {
 			action: string,
 		) {
 			calls.push({ name: "story", user, story: viewedStory, action });
+		},
+		async listStoriesLastViewed(user: unknown, hnStoryIds: number[]) {
+			calls.push({ name: "lastViewed", user, hnStoryIds });
+			return [
+				{ hnStoryId: 123, lastViewedAt: new Date("2026-11-20T09:30:00Z") },
+			];
 		},
 		async recordPaperView(user: unknown, arxivId: string, action: string) {
 			calls.push({ name: "paper", user, arxivId, action });
@@ -55,10 +62,13 @@ function createHarness() {
 }
 
 describe("view activity tRPC router", () => {
-	it("protects both write procedures", async () => {
+	it("protects every procedure", async () => {
 		const { database, router } = createHarness();
 		const caller = router.createCaller(createTrpcContext({ database }));
 
+		await expect(
+			caller.views.storiesLastViewed({ hnStoryIds: [123] }),
+		).rejects.toMatchObject({ code: "UNAUTHORIZED" });
 		await expect(
 			caller.views.story({ action: "read", story }),
 		).rejects.toMatchObject({
@@ -109,6 +119,29 @@ describe("view activity tRPC router", () => {
 				action: "read";
 				story: HackerNewsStoryRecord;
 			}),
+		).rejects.toBeInstanceOf(TRPCError);
+		expect(calls).toEqual([]);
+	});
+
+	it("returns when the reader last opened each story", async () => {
+		const { caller, calls } = createHarness();
+
+		await expect(
+			caller.views.storiesLastViewed({ hnStoryIds: [123, 456] }),
+		).resolves.toEqual([
+			{ hnStoryId: 123, lastViewedAt: new Date("2026-11-20T09:30:00Z") },
+		]);
+		expect(calls).toEqual([
+			{ name: "lastViewed", user: currentUser, hnStoryIds: [123, 456] },
+		]);
+	});
+
+	it("caps a last-viewed lookup below D1's bound-parameter limit", async () => {
+		const { caller, calls } = createHarness();
+		const hnStoryIds = Array.from({ length: 51 }, (_, i) => i + 1);
+
+		await expect(
+			caller.views.storiesLastViewed({ hnStoryIds }),
 		).rejects.toBeInstanceOf(TRPCError);
 		expect(calls).toEqual([]);
 	});

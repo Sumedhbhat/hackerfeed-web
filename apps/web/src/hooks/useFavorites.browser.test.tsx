@@ -1,5 +1,6 @@
 import type { HackerNewsStoryRecord } from "@hackerfeed/entities/hacker-news";
 import {
+	act,
 	cleanup,
 	fireEvent,
 	render,
@@ -7,7 +8,7 @@ import {
 	waitFor,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useFavorites } from "#/hooks/useFavorites";
+import { markFavoriteViewed, useFavorites } from "#/hooks/useFavorites";
 import { clearAllFavorites, toggleFavorite } from "#/lib/favorites-store";
 
 const authMock = vi.hoisted(() => ({
@@ -20,6 +21,7 @@ const trpcMock = vi.hoisted(() => ({
 	clear: vi.fn(),
 	list: vi.fn(),
 	remove: vi.fn(),
+	lastViewed: vi.fn(),
 }));
 
 const reportErrorMock = vi.hoisted(() => vi.fn());
@@ -40,6 +42,9 @@ vi.mock("#/lib/trpc/client", () => ({
 			clear: { mutate: trpcMock.clear },
 			list: { query: trpcMock.list },
 			remove: { mutate: trpcMock.remove },
+		},
+		views: {
+			storiesLastViewed: { query: trpcMock.lastViewed },
 		},
 	})),
 }));
@@ -76,7 +81,12 @@ function FavoritesProbe() {
 			</button>
 			<ul>
 				{favorites.getFavorites().map((story) => (
-					<li key={story.id}>{story.title}</li>
+					<li key={story.id}>
+						{story.title}
+						{story.lastViewedAt
+							? ` (viewed ${story.lastViewedAt.toISOString().slice(0, 10)})`
+							: ""}
+					</li>
 				))}
 			</ul>
 		</div>
@@ -90,6 +100,7 @@ beforeEach(() => {
 	trpcMock.clear.mockResolvedValue(undefined);
 	trpcMock.list.mockResolvedValue([]);
 	trpcMock.remove.mockResolvedValue(undefined);
+	trpcMock.lastViewed.mockResolvedValue([]);
 	localStorage.clear();
 	clearAllFavorites();
 	vi.clearAllMocks();
@@ -135,6 +146,41 @@ describe("useFavorites backend source of truth", () => {
 		});
 		expect(screen.queryByText("Local saved story")).toBeNull();
 		expect(screen.getByTestId("count").textContent).toBe("1");
+	});
+
+	it("marks a saved story viewed once the reader opens it, keeping the latest time", async () => {
+		authMock.user = { id: "workos-use-favorites-viewed" };
+		trpcMock.list.mockResolvedValue([
+			{ ...makeStory({ id: 40, title: "Saved unread" }), lastViewedAt: null },
+		]);
+
+		render(<FavoritesProbe />);
+		await waitFor(() => {
+			expect(screen.getByText("Saved unread")).toBeDefined();
+		});
+
+		act(() => markFavoriteViewed(40, new Date("2026-11-21T08:00:00Z")));
+		act(() => markFavoriteViewed(40, new Date("2026-11-20T08:00:00Z")));
+
+		expect(screen.getByText("Saved unread (viewed 2026-11-21)")).toBeDefined();
+	});
+
+	it("shows a newly saved story as viewed when the reader opened it before", async () => {
+		authMock.user = { id: "workos-use-favorites-save-viewed" };
+		trpcMock.lastViewed.mockResolvedValue([
+			{ hnStoryId: 30, lastViewedAt: new Date("2026-11-21T08:00:00Z") },
+		]);
+
+		render(<FavoritesProbe />);
+		await waitFor(() => expect(trpcMock.list).toHaveBeenCalled());
+		fireEvent.click(screen.getByRole("button", { name: "save story" }));
+
+		await waitFor(() => {
+			expect(
+				screen.getByText("A Test Story Title (viewed 2026-11-21)"),
+			).toBeDefined();
+		});
+		expect(trpcMock.lastViewed).toHaveBeenCalledWith({ hnStoryIds: [30] });
 	});
 
 	it("rolls back and reports a save that fails", async () => {

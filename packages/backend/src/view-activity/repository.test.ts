@@ -79,6 +79,38 @@ describe("view activity repository", () => {
 		expect(batches[0]?.[1]?.values).toContain(123);
 	});
 
+	it("joins each story to the reader's latest open or discussion view", async () => {
+		const { database, statements } = createDatabase();
+		const repository = createViewActivityRepository(database);
+
+		await repository.listStoriesLastViewed("user-1", [123, 456]);
+
+		const [lookup] = statements;
+		expect(lookup?.sql).toContain(
+			'inner join (select "storyId", max("occurredAt") as "lastViewedAt" from "activity_events"',
+		);
+		expect(lookup?.sql).toContain(
+			'"activity_events"."storyId" in (select "id" from "stories" where "stories"."hnStoryId" in (?, ?))) group by "activity_events"."storyId"',
+		);
+		expect(lookup?.values).toEqual([
+			"user-1",
+			"story.read",
+			"story.discussion_opened",
+			123,
+			456,
+		]);
+	});
+
+	it("skips the database when there are no stories to look up", async () => {
+		const { database, statements } = createDatabase();
+		const repository = createViewActivityRepository(database);
+
+		await expect(
+			repository.listStoriesLastViewed("user-1", []),
+		).resolves.toEqual([]);
+		expect(statements).toEqual([]);
+	});
+
 	it("resolves a paper and logs the activity against it", async () => {
 		const { database, statements } = createDatabase();
 		const repository = createViewActivityRepository(database);

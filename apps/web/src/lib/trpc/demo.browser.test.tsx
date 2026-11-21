@@ -43,6 +43,27 @@ describe("fixture demo", () => {
 		fetch.mockRestore();
 	});
 
+	it("remembers when each story was last viewed, as the database would", () => {
+		const api = createDemoApi();
+		const [seeded] = favoriteStoriesOutputSchema.parse(
+			api("favorites.list", undefined),
+		);
+		expect(seeded.lastViewedAt).toBeInstanceOf(Date);
+		const unseen = { ...seeded, id: 999_999_999 };
+		expect(
+			api("views.storiesLastViewed", { hnStoryIds: [seeded.id, unseen.id] }),
+		).toEqual([{ hnStoryId: seeded.id, lastViewedAt: seeded.lastViewedAt }]);
+
+		api("views.story", { action: "chat_opened", story: unseen });
+		expect(api("views.storiesLastViewed", { hnStoryIds: [unseen.id] })).toEqual(
+			[],
+		);
+		api("views.story", { action: "discussion_opened", story: unseen });
+		expect(api("views.storiesLastViewed", { hnStoryIds: [unseen.id] })).toEqual(
+			[{ hnStoryId: unseen.id, lastViewedAt: expect.any(Date) }],
+		);
+	});
+
 	it("serves dated paper editions, authors, keywords and saved-paper pagination", () => {
 		const api = createDemoApi();
 		const edition = paperEditionOutputSchema.parse(api("papers.edition", {}));

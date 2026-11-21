@@ -10,6 +10,10 @@ import {
 	stories as storiesTable,
 } from "../database/schema";
 import { mapHackerNewsStory } from "../stories/persistence";
+import {
+	lastStoryViews,
+	parseActivityTimestamp,
+} from "../view-activity/last-viewed";
 
 type StoryRow = typeof storiesTable.$inferSelect;
 type FavoriteRow = typeof favoritesTable.$inferSelect;
@@ -36,6 +40,7 @@ type FavoriteRecord = {
 
 type ListedFavoriteRecord = FavoriteRecord & {
 	story: StoryRecord;
+	lastViewedAt: Date | null;
 };
 
 function parseCommentIds(value: string | null): number[] {
@@ -237,13 +242,16 @@ export function createFavoriteRepository(database: DatabaseContext) {
 		},
 
 		async listFavorites(appUserId: string) {
+			const lastViews = lastStoryViews(database, appUserId);
 			const rows = await database
 				.select({
 					favorite: favoritesTable,
 					story: storiesTable,
+					lastViewedAt: lastViews.lastViewedAt,
 				})
 				.from(favoritesTable)
 				.innerJoin(storiesTable, eq(storiesTable.id, favoritesTable.storyId))
+				.leftJoin(lastViews, eq(lastViews.storyId, favoritesTable.storyId))
 				.where(eq(favoritesTable.appUserId, appUserId))
 				.orderBy(desc(favoritesTable.createdAt), desc(favoritesTable.id))
 				.all();
@@ -252,6 +260,9 @@ export function createFavoriteRepository(database: DatabaseContext) {
 				(row): ListedFavoriteRecord => ({
 					...mapFavoriteRow(row.favorite),
 					story: mapStoryRow(row.story),
+					lastViewedAt: row.lastViewedAt
+						? parseActivityTimestamp(row.lastViewedAt)
+						: null,
 				}),
 			);
 		},

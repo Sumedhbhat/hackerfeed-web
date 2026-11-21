@@ -13,6 +13,7 @@ import {
 	favoriteStoriesOutputSchema,
 	favoriteStoryIdInputSchema,
 	hackerNewsStorySchema,
+	importedFavoritesOutputSchema,
 	importLocalFavoritesInputSchema,
 } from "@hackerfeed/entities/favorites";
 import type { HackerNewsStoryRecord } from "@hackerfeed/entities/hacker-news";
@@ -31,7 +32,10 @@ import {
 import {
 	type PaperViewAction,
 	paperViewInputSchema,
+	type StoryLastViewed,
 	type StoryViewAction,
+	storiesLastViewedInputSchema,
+	storiesLastViewedOutputSchema,
 	storyViewInputSchema,
 } from "@hackerfeed/entities/view-activity";
 import * as Sentry from "@sentry/cloudflare";
@@ -68,6 +72,7 @@ type ListedFavorite = {
 		commentCount: number;
 		commentIds: number[];
 	};
+	lastViewedAt: Date | null;
 };
 
 type FavoritesApiService = {
@@ -104,6 +109,10 @@ type ViewActivityApiService = {
 		story: HackerNewsStoryRecord,
 		action: StoryViewAction,
 	): Promise<void>;
+	listStoriesLastViewed(
+		user: TrpcContext["user"],
+		hnStoryIds: number[],
+	): Promise<StoryLastViewed[]>;
 	recordPaperView(
 		user: TrpcContext["user"],
 		arxivId: string,
@@ -130,7 +139,8 @@ const protectedProcedure = tracedProcedure.use(({ ctx, next }) => {
 
 function mapListedFavoriteToStory({
 	story,
-}: ListedFavorite): HackerNewsStoryRecord {
+	lastViewedAt,
+}: ListedFavorite): HackerNewsStoryRecord & { lastViewedAt: Date | null } {
 	return {
 		by: story.authorUsername,
 		descendants: story.commentCount,
@@ -144,6 +154,7 @@ function mapListedFavoriteToStory({
 		title: story.title,
 		type: "story",
 		url: story.url,
+		lastViewedAt,
 	};
 }
 
@@ -321,7 +332,7 @@ export function createAppRouter(
 
 			importLocal: protectedProcedure
 				.input(importLocalFavoritesInputSchema)
-				.output(favoriteStoriesOutputSchema)
+				.output(importedFavoritesOutputSchema)
 				.mutation(async ({ ctx, input }) => {
 					const service = getFavoritesApiService(ctx.database, favorites);
 					await service.importLocalFavorites(ctx.user, input.stories);
@@ -397,6 +408,16 @@ export function createAppRouter(
 					const service = getViewActivityApiService(ctx.database, viewActivity);
 					await service.recordStoryView(ctx.user, input.story, input.action);
 				}),
+
+			storiesLastViewed: protectedProcedure
+				.input(storiesLastViewedInputSchema)
+				.output(storiesLastViewedOutputSchema)
+				.query(({ ctx, input }) =>
+					getViewActivityApiService(
+						ctx.database,
+						viewActivity,
+					).listStoriesLastViewed(ctx.user, input.hnStoryIds),
+				),
 
 			paper: protectedProcedure
 				.input(paperViewInputSchema)

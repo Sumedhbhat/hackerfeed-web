@@ -19,6 +19,22 @@ export const storyViewInputSchema = z
 	})
 	.strict();
 
+export const storiesLastViewedInputSchema = z
+	.object({
+		hnStoryIds: z.array(z.number().int().positive()).max(50),
+	})
+	.strict();
+
+export const storiesLastViewedOutputSchema = z.array(
+	z.object({
+		hnStoryId: z.number().int().positive(),
+		lastViewedAt: z.date(),
+	}),
+);
+export type StoryLastViewed = z.infer<
+	typeof storiesLastViewedOutputSchema
+>[number];
+
 export const paperViewInputSchema = z
 	.object({
 		action: paperViewActionSchema,

@@ -184,6 +184,11 @@ export const activityActions = [
 
 export type ActivityAction = (typeof activityActions)[number];
 
+export const storyViewedActions = [
+	"story.read",
+	"story.discussion_opened",
+] as const satisfies ActivityAction[];
+
 export const activityEvents = sqliteTable(
 	"activity_events",
 	{
@@ -208,6 +213,11 @@ export const activityEvents = sqliteTable(
 			table.occurredAt,
 		),
 		index("activity_events_story_id_idx").on(table.storyId),
+		index("activity_events_app_user_id_story_id_occurred_at_idx").on(
+			table.appUserId,
+			table.storyId,
+			table.occurredAt,
+		),
 		index("activity_events_paper_id_idx").on(table.paperId),
 		check(
 			"activity_events_subject_check",

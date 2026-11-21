@@ -77,3 +77,22 @@ test("the skip link moves focus past the header", async ({ page }) => {
 	await page.keyboard.press("Tab");
 	await expect(page.getByRole("main").locator(":focus")).toHaveCount(1);
 });
+
+test("stories the reader opened before, on any device, stay greyed like visited links", async ({
+	page,
+}) => {
+	await open(page, "/");
+	const cards = page
+		.getByRole("list", { name: "Top stories" })
+		.getByRole("listitem");
+	const title = (card: typeof cards) =>
+		card.getByRole("heading", { level: 2 }).getByRole("link");
+	await expect(title(cards.first())).toHaveAttribute("data-viewed");
+
+	const unread = cards.nth(11);
+	await expect(title(unread)).not.toHaveAttribute("data-viewed");
+	await unread.getByRole("link", { name: /^\d+ comments?: / }).click();
+	await expect(page).toHaveURL(/\/story\/\d+$/);
+	await page.goBack();
+	await expect(title(cards.nth(11))).toHaveAttribute("data-viewed");
+});
