@@ -52,7 +52,7 @@
 							"a": "Use <TextLink>/<ExternalLink> from @hackerfeed/ui/atoms/Link or <ButtonLink>/<ExternalButtonLink> from @hackerfeed/ui/atoms/Button.",
 							"input": "Use <TextInput> from @hackerfeed/ui/atoms/TextField, or add a field atom.",
 							"textarea": "Use <TextArea> from @hackerfeed/ui/atoms/TextField.",
-							"select": "Use <Select> from @hackerfeed/ui/atoms/TextField or <SelectField> from @hackerfeed/ui/molecules/SelectField.",
+							"select": "Use <Select> from @hackerfeed/ui/atoms/Select.",
 							"h1": "Use <Heading level={1}> from @hackerfeed/ui/atoms/Heading.",
 							"h2": "Use <Heading level={2}> from @hackerfeed/ui/atoms/Heading.",
 							"h3": "Use <Heading level={3}> from @hackerfeed/ui/atoms/Heading.",
