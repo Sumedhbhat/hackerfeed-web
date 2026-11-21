@@ -48,6 +48,7 @@ function createHarness() {
 						commentCount: 3,
 						commentIds: [1, 2],
 					},
+					lastViewedAt: new Date("2026-11-20T09:30:00Z"),
 				},
 			];
 		},
@@ -93,11 +94,14 @@ function createHarness() {
 }
 
 describe("favorites tRPC router", () => {
-	it("lists favorites as current UI story records", async () => {
+	it("lists favorites as current UI story records with the reader's last view", async () => {
 		const { caller, calls } = createHarness();
 
 		await expect(caller.favorites.list()).resolves.toEqual([
-			createStory({ id: 123 }),
+			{
+				...createStory({ id: 123 }),
+				lastViewedAt: new Date("2026-11-20T09:30:00Z"),
+			},
 		]);
 		expect(calls).toEqual([
 			{ name: "list", user: { workosUserId: "workos-user-1" } },

@@ -5,10 +5,11 @@ import type {
 	PaperViewAction,
 	StoryViewAction,
 } from "@hackerfeed/entities/view-activity";
-import { eq, sql } from "drizzle-orm";
+import { eq, inArray, sql } from "drizzle-orm";
 import type { DatabaseContext } from "../database/client";
 import { activityEvents, hfPapers, stories } from "../database/schema";
 import { mapHackerNewsStory } from "../stories/persistence";
+import { lastStoryViews, parseActivityTimestamp } from "./last-viewed";
 
 export function createViewActivityRepository(database: DatabaseContext) {
 	return {
@@ -33,6 +34,27 @@ export function createViewActivityRepository(database: DatabaseContext) {
 			});
 
 			await database.batch([upsertStory, insertView]);
+		},
+
+		async listStoriesLastViewed(appUserId: string, hnStoryIds: number[]) {
+			if (hnStoryIds.length === 0) return [];
+
+			const lastViews = lastStoryViews(database, appUserId);
+			const rows = await database
+				.select({
+					hnStoryId: stories.hnStoryId,
+					lastViewedAt: lastViews.lastViewedAt,
+				})
+				.from(stories)
+				.innerJoin(lastViews, eq(lastViews.storyId, stories.id))
+				.where(inArray(stories.hnStoryId, hnStoryIds))
+				.all();
+
+			return rows.flatMap(({ hnStoryId, lastViewedAt }) =>
+				lastViewedAt
+					? [{ hnStoryId, lastViewedAt: parseActivityTimestamp(lastViewedAt) }]
+					: [],
+			);
 		},
 
 		async findPaperByArxivId(arxivId: string) {

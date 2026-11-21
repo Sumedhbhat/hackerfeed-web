@@ -33,6 +33,13 @@ function createHarness() {
 			async recordStoryView(appUserId, viewedStory, action) {
 				storyViews.push({ appUserId, story: viewedStory, action });
 			},
+			async listStoriesLastViewed(appUserId, hnStoryIds) {
+				return hnStoryIds.map((hnStoryId) => ({
+					hnStoryId,
+					lastViewedAt: new Date(`2026-11-20T09:30:00Z`),
+					appUserId,
+				}));
+			},
 			async findPaperByArxivId(arxivId) {
 				return arxivId === "2607.00001" ? { id: "paper-1" } : null;
 			},
@@ -70,9 +77,26 @@ describe("view activity service", () => {
 		]);
 	});
 
+	it("looks up last views for the authenticated app user", async () => {
+		const { service } = createHarness();
+
+		await expect(
+			service.listStoriesLastViewed(currentUser, [123]),
+		).resolves.toEqual([
+			{
+				hnStoryId: 123,
+				lastViewedAt: new Date("2026-11-20T09:30:00Z"),
+				appUserId: "app-workos-user-1",
+			},
+		]);
+	});
+
 	it("requires authentication", async () => {
 		const { service } = createHarness();
 
+		await expect(
+			service.listStoriesLastViewed(null, [123]),
+		).rejects.toBeInstanceOf(UnauthorizedError);
 		await expect(
 			service.recordStoryView(null, story, "read"),
 		).rejects.toBeInstanceOf(UnauthorizedError);

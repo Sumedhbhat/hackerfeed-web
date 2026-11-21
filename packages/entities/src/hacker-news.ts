@@ -11,6 +11,11 @@ export type HackerNewsStoryRecord = {
 	url: string | null;
 };
 
+/** `lastViewedAt` is when the signed-in reader last opened the story, on any device. */
+export type ViewedStoryRecord = HackerNewsStoryRecord & {
+	lastViewedAt?: Date | null;
+};
+
 export type HackerNewsCommentRecord = {
 	id: number;
 	by: string | null;

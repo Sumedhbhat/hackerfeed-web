@@ -21,6 +21,10 @@ export const importLocalFavoritesInputSchema = z.object({
 	stories: z.array(hackerNewsStorySchema),
 });
 
-export const favoriteStoriesOutputSchema = z.array(hackerNewsStorySchema);
+export const favoriteStoriesOutputSchema = z.array(
+	hackerNewsStorySchema.extend({ lastViewedAt: z.date().nullable() }),
+);
+
+export const importedFavoritesOutputSchema = z.array(hackerNewsStorySchema);
 
 export type FavoriteStoryInput = z.infer<typeof hackerNewsStorySchema>;
