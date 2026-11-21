@@ -250,7 +250,7 @@ describe("paper favorite service", () => {
 			githubRepo: "https://github.com/example/paper",
 			keywords: ["agents", "reasoning"],
 			paperPublishedAt: "2026-07-01T10:00:00.000Z",
-			paperUrl: "https://huggingface.co/papers/2607.00002",
+			paperUrl: "https://arxiv.org/abs/2607.00002",
 			projectPage: "https://example.com/paper",
 			savedAt: "2026-07-10T12:00:00.000Z",
 			summary: "Source summary",
