@@ -23,9 +23,10 @@ bunx nx test backend # One project's tests
 cd apps/web && bunx vitest run src/lib/hacker-news/display.test.ts   # A single test file
 
 # Linting / formatting
-bun run lint         # Biome lint
+bun run lint         # Biome lint and unused UI check
+bun run lint:ui      # Unused UI check
 bun run format       # Biome format
-bun run check        # Biome check (lint + format together)
+bun run check        # Biome lint and format plus unused UI check
 bun run typecheck    # tsc --noEmit for every project (CI fails on any type error)
 
 # Workspace
@@ -106,13 +107,12 @@ Interactive atoms are built on [Base UI](https://base-ui.com) (`@base-ui/react`)
 | Pick one of a few (chips, segments) | `ToggleGroup` + `ToggleGroupItem` (`Toolbar` around `ToggleGroup`, items are `Toolbar.Button` rendering `Toggle`) |
 | Tabs | `Tabs`, `TabList`, `Tab`, `TabPanel` (`Tabs`) |
 | Drop-down menu | `Menu`, `MenuTrigger`, `MenuPopup`, `MenuGroup`, `MenuItem`, `MenuLinkItem` (`Menu`) |
-| Dropdown field | `Select`, `SelectLabel`, `SelectTrigger`, `SelectOptions` (`Select`) |
 | Show/hide | `Collapsible`, `CollapsibleTrigger`, `CollapsiblePanel` (`Collapsible`) |
 | "Are you sure?" | `AlertDialog*` atoms, composed by the `ConfirmButton` molecule (`AlertDialog`) |
 | Picture or initials | `Avatar` (`Avatar`) |
-| Text input | `TextInput` (`Input`), `TextArea` (`Field.Control` rendering a `<textarea>`) |
+| Text input | `TextInput` (`Input`) |
 | Colour | `ColorField` molecule: the browser's picker (`ColorInput`) plus a typed `#RRGGBB` |
-| Label, hint and error for a control | `Field`, `FieldLabel`, `FieldDescription`, `FieldError` (`Field`): ids, `aria-describedby` and `aria-invalid` are wired for you |
+| Label and error for a control | `Field`, `FieldLabel`, `FieldError` (`Field`): ids, `aria-describedby` and `aria-invalid` are wired for you |
 | Something happened (removed, disconnected), optionally with Undo | `useShowToast` (`Toast`); pass `action` for Undo. For silent status (counts, "replying…") use `LiveStatus` |
 
 These atoms manage their own ARIA state: pass `value`, `pressed` or `open`, never `aria-selected`/`aria-pressed`/`aria-expanded` by hand. A toggle's accessible name starts with the word it shows (WCAG 2.5.3 Label in Name): `aria-label={`${saved ? "Saved" : "Save"} ${title}`}` + `pressed`. Never use `window.confirm`; use `ConfirmButton`. For a new interactive pattern, check whether Base UI has the component and wrap it in a new atom.

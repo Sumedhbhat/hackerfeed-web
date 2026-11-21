@@ -32,7 +32,6 @@
 		"./atoms/Prose": "./src/atoms/Prose.tsx",
 		"./atoms/ReadingList": "./src/atoms/ReadingList.tsx",
 		"./atoms/Row": "./src/atoms/Row.tsx",
-		"./atoms/Select": "./src/atoms/Select.tsx",
 		"./atoms/Skeleton": "./src/atoms/Skeleton.tsx",
 		"./atoms/Spinner": "./src/atoms/Spinner.tsx",
 		"./atoms/Stack": "./src/atoms/Stack.tsx",
