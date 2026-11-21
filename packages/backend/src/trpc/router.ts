@@ -1,6 +1,10 @@
 import "@tanstack/react-start/server-only";
 
 import {
+	readingDaysInputSchema,
+	readingDaysOutputSchema,
+} from "@hackerfeed/entities/analytics";
+import {
 	accountOutputSchema,
 	paletteIdInputSchema,
 	paletteInputSchema,
@@ -54,6 +58,10 @@ import {
 	InvalidPaperFavoriteCursorError,
 	PaperNotFoundError,
 } from "../paper-favorites/service";
+import {
+	createReadingActivityServiceFromDatabase,
+	type ReadingActivityService,
+} from "../reading-activity/service";
 import {
 	createViewActivityServiceFromDatabase,
 	ViewedPaperNotFoundError,
@@ -203,6 +211,15 @@ function getAppearanceApiService(
 	return createAppearanceServiceFromDatabase(database);
 }
 
+function getReadingActivityApiService(
+	database: TrpcContext["database"],
+	readingActivity?: ReadingActivityService,
+) {
+	if (readingActivity) return readingActivity;
+
+	return createReadingActivityServiceFromDatabase(database);
+}
+
 function mapAppearanceError(error: unknown): never {
 	if (error instanceof PaletteNotFoundError) {
 		throw new TRPCError({ code: "NOT_FOUND", message: error.message });
@@ -241,8 +258,20 @@ export function createAppRouter(
 	paperFavorites?: PaperFavoritesApiService,
 	viewActivity?: ViewActivityApiService,
 	appearance?: AppearanceService,
+	readingActivity?: ReadingActivityService,
 ) {
 	return t.router({
+		analytics: t.router({
+			readingDays: protectedProcedure
+				.input(readingDaysInputSchema)
+				.output(readingDaysOutputSchema)
+				.query(({ ctx, input }) =>
+					getReadingActivityApiService(
+						ctx.database,
+						readingActivity,
+					).listReadingDays(ctx.user, input.utcOffsetMinutes),
+				),
+		}),
 		account: t.router({
 			me: protectedProcedure
 				.output(accountOutputSchema)

@@ -3,6 +3,7 @@
 	"private": true,
 	"type": "module",
 	"exports": {
+		"./analytics": "./src/analytics.ts",
 		"./appearance": "./src/appearance.ts",
 		"./favorites": "./src/favorites.ts",
 		"./hacker-news": "./src/hacker-news.ts",
