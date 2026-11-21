@@ -14,7 +14,7 @@ describe("projectPaperPresentation", () => {
 		).toEqual({
 			abstract: "Original abstract",
 			githubRepo: "https://github.com/example/repo",
-			paperUrl: "https://huggingface.co/papers/2607.00001",
+			paperUrl: "https://arxiv.org/abs/2607.00001",
 			projectPage: "https://example.com/project",
 			summary: "AI summary",
 		});

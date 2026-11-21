@@ -44,7 +44,7 @@ describe("Hugging Face paper feed service", () => {
 			papers: [
 				{
 					abstract: "Original abstract",
-					paperUrl: "https://huggingface.co/papers/2606.00001",
+					paperUrl: "https://arxiv.org/abs/2606.00001",
 					summary: "AI summary",
 				},
 			],

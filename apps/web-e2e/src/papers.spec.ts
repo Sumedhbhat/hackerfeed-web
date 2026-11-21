@@ -11,7 +11,7 @@ test("a click anywhere on a paper's card opens the paper", async ({
 	const popup = context.waitForEvent("page");
 	await card.click({ position: { x: 8, y: 8 } });
 	expect((await popup).url()).toBe(
-		`https://huggingface.co/papers/${firstPaper.arxivId}`,
+		`https://arxiv.org/abs/${firstPaper.arxivId}`,
 	);
 });
 

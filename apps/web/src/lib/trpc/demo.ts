@@ -57,7 +57,7 @@ const paperPresentations = paperRows.map((paper) => ({
 			: null,
 	paperPublishedAt: paper.paperPublishedAt,
 	upvotes: paper.upvotes,
-	paperUrl: `https://huggingface.co/papers/${paper.arxivId}`,
+	paperUrl: `https://arxiv.org/abs/${paper.arxivId}`,
 	projectPage: paper.projectPage,
 	githubRepo: paper.githubRepo,
 	authors: paperAuthorRows

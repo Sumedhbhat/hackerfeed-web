@@ -24,7 +24,7 @@ export function projectPaperPresentation(paper: PaperPresentationSource) {
 				? paper.summary
 				: null,
 		githubRepo: toHttpsUrl(paper.githubRepo),
-		paperUrl: `https://huggingface.co/papers/${paper.arxivId}`,
+		paperUrl: `https://arxiv.org/abs/${paper.arxivId}`,
 		projectPage: toHttpsUrl(paper.projectPage),
 		summary: paper.aiSummary ?? paper.summary,
 	};
