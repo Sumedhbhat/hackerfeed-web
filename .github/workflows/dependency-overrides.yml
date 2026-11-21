@@ -7,7 +7,7 @@ on:
     branches: [master]
     paths: [bun.lock]               # right after a parent bump lands
   pull_request:
-    paths: [package.json, .github/dependency-overrides.yml]
+    paths: [package.json, .github/dependency-overrides.yml, scripts/check-dependency-overrides.sh]
   workflow_dispatch:
 
 jobs:
@@ -19,17 +19,8 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v7
-      - name: Overrides and ledger match
-        run: |
-          diff -u \
-            <(yq -r '.overrides[] | select(.ecosystem == "bun") | .package' .github/dependency-overrides.yml | sort) \
-            <(jq -r '.overrides // {} | keys[]' package.json | sort)
-      - name: Ledger entries are complete
-        run: |
-          if yq -e '.overrides[] | select(.fixed_in == null or .advisory == null or .reason == null or .owner == null or .added == null)' .github/dependency-overrides.yml; then
-            echo "::error::Every ledger entry needs fixed_in, advisory, reason, owner and added"
-            exit 1
-          fi
+      - name: Check dependency override ledger
+        run: bash scripts/check-dependency-overrides.sh
 
   # Everywhere else: try removing each override and open PRs for the ones that can go.
   remove:

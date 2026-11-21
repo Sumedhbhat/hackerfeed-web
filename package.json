@@ -7,6 +7,7 @@
     "packages/*"
   ],
   "scripts": {
+    "postinstall": "sh scripts/install-git-hooks.sh",
     "dev": "bun run --filter '@hackerfeed/web' --filter '@hackerfeed/api' dev",
     "dev:demo": "bun run --cwd apps/web dev:demo",
     "build": "nx run-many -t build -p web,api",
@@ -25,6 +26,7 @@
     "lint:ui": "node apps/web/scripts/lint-ui.ts",
     "lint": "bun run lint:ui && biome lint",
     "check": "bun run lint:ui && biome check",
+    "check:push": "bash scripts/check-dependency-overrides.sh && bash scripts/check-build.sh",
     "dev:api": "bun run --cwd apps/api dev"
   },
   "devDependencies": {

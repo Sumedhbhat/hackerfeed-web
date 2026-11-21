@@ -80,6 +80,20 @@ bun run check            # Run Biome lint and format checks plus the unused UI c
 bun run security:audit   # Audit dependencies at high severity and above
 ```
 
+### Pre-push checks
+
+`bun install` enables the tracked Git hook for this clone. Existing Git hook
+configurations take precedence. Git runs the hook from the worktree where you
+push, so push from the checkout you want to check.
+
+The hook checks the frozen lockfile, then runs `bun run check:push` and blocks
+the push if a check fails. The command runs the same Build checks and
+dependency override ledger validation as CI. It needs Bun, Node.js 24,
+actionlint, ShellCheck, Terraform (CI uses 1.13.4), Python 3, OpenSSL, jq, and
+Mike Farah's yq v4 on `PATH`. Playwright downloads Chromium on the first run or
+uses the browser at `PLAYWRIGHT_CHROMIUM_PATH`. Install the browser's system
+libraries if needed with `bun run --cwd apps/web-e2e playwright install-deps chromium`.
+
 ## Environment
 
 The web app validates its environment in `apps/web/src/env.ts`; its Worker
