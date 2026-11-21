@@ -1,5 +1,10 @@
 import type { AppRouter } from "@hackerfeed/api-client/trpc";
 import {
+	createReadingDateFormatter,
+	type ReadingDay,
+	readingDaysInputSchema,
+} from "@hackerfeed/entities/analytics";
+import {
 	BUILT_IN_PALETTES,
 	DEFAULT_PALETTE,
 	type Palette,
@@ -70,6 +75,7 @@ const paperPresentations = paperRows.map((paper) => ({
 
 /** One instance per browser page. A reload discards every mutation. */
 export function createDemoApi() {
+	const startedAt = Date.now();
 	const favorites = new Map<number, FavoriteStoryInput>();
 	for (const row of favoriteRows) {
 		const story = storyRows.find((story) => story.id === row.storyId);
@@ -128,6 +134,59 @@ export function createDemoApi() {
 			);
 	}
 	const paperViews = new Set<string>();
+	type Read = (
+		| { kind: "stories"; subject: number }
+		| { kind: "papers"; subject: string }
+	) & { at: number };
+	const seededReads = activityEventRows.flatMap((event): Read[] => {
+		const at = Date.parse(`${event.occurredAt.replace(" ", "T")}Z`);
+		if (
+			event.action === "story.read" ||
+			event.action === "story.discussion_opened"
+		) {
+			const story = storyRows.find(({ id }) => id === event.storyId);
+			if (story) return [{ kind: "stories", subject: story.hnStoryId, at }];
+		}
+		if (event.action === "paper.read") {
+			const paper = paperRows.find(({ id }) => id === event.paperId);
+			if (paper) return [{ kind: "papers", subject: paper.arxivId, at }];
+		}
+		return [];
+	});
+	const seedDay = (at: number) => new Date(at).toISOString().slice(0, 10);
+	const lastSeeded = Math.max(...seededReads.map((read) => read.at));
+	const sessionReads: Read[] = [];
+	const readingDays = (timeZone: string): ReadingDay[] => {
+		const localDate = createReadingDateFormatter(timeZone);
+		// Anchor the seeded history to the day this demo session started.
+		const shift =
+			Date.parse(localDate(startedAt)) - Date.parse(seedDay(lastSeeded));
+		const days = new Map<
+			string,
+			{ stories: Set<number>; papers: Set<string> }
+		>();
+		function countRead(read: Read, date: string) {
+			const day = days.get(date) ?? {
+				stories: new Set<number>(),
+				papers: new Set<string>(),
+			};
+			if (read.kind === "stories") day.stories.add(read.subject);
+			else day.papers.add(read.subject);
+			days.set(date, day);
+		}
+		for (const read of seededReads) {
+			const shifted = new Date(Date.parse(seedDay(read.at)) + shift);
+			countRead(read, shifted.toISOString().slice(0, 10));
+		}
+		for (const read of sessionReads) countRead(read, localDate(read.at));
+		return [...days]
+			.sort(([a], [b]) => a.localeCompare(b))
+			.map(([date, day]) => ({
+				date,
+				stories: day.stories.size,
+				papers: day.papers.size,
+			}));
+	};
 	const findPaper = (arxivId: string) => {
 		const paper = paperPresentations.find((paper) => paper.arxivId === arxivId);
 		if (!paper) throw new Error(`Paper ${arxivId} was not found`);
@@ -245,6 +304,8 @@ export function createDemoApi() {
 			case "paperFavorites.clear":
 				paperFavorites.clear();
 				return;
+			case "analytics.readingDays":
+				return readingDays(readingDaysInputSchema.parse(input).timeZone);
 			case "account.me":
 				return account();
 			case "preferences.update": {
@@ -286,7 +347,14 @@ export function createDemoApi() {
 			}
 			case "views.story": {
 				const { action, story } = storyViewInputSchema.parse(input);
-				if (action !== "chat_opened") storyViews.set(story.id, new Date());
+				if (action !== "chat_opened") {
+					storyViews.set(story.id, new Date());
+					sessionReads.push({
+						kind: "stories",
+						subject: story.id,
+						at: Date.now(),
+					});
+				}
 				return;
 			}
 			case "views.storiesLastViewed":
@@ -297,9 +365,15 @@ export function createDemoApi() {
 						return lastViewedAt ? [{ hnStoryId, lastViewedAt }] : [];
 					});
 			case "views.paper": {
-				const { arxivId } = paperViewInputSchema.parse(input);
+				const { action, arxivId } = paperViewInputSchema.parse(input);
 				findPaper(arxivId);
 				paperViews.add(arxivId);
+				if (action === "read")
+					sessionReads.push({
+						kind: "papers",
+						subject: arxivId,
+						at: Date.now(),
+					});
 				return;
 			}
 			default:

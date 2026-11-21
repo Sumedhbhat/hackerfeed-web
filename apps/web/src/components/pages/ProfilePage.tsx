@@ -8,7 +8,7 @@ import { Skeleton, SkeletonGroup } from "@hackerfeed/ui/atoms/Skeleton";
 import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { Text } from "@hackerfeed/ui/atoms/Text";
 import { ProfileSummary } from "@hackerfeed/ui/molecules/ProfileSummary";
-import { Settings, User } from "lucide-react";
+import { ChartColumn, Settings, User } from "lucide-react";
 import { signIn, useAuthSession } from "#/hooks/useAuthSession";
 
 function getDisplayName(
@@ -79,7 +79,11 @@ export function ProfilePage() {
 						initials={getInitials(user.firstName, user.lastName, user.email)}
 					/>
 
-					<Row>
+					<Row wrap>
+						<ButtonLink to="/analytics" variant="secondary">
+							<ChartColumn size={15} aria-hidden="true" />
+							Analytics
+						</ButtonLink>
 						<ButtonLink to="/settings" variant="secondary">
 							<Settings size={15} aria-hidden="true" />
 							Settings

@@ -19,6 +19,7 @@ const SCREENS = [
 	["saved papers", "/favorites?type=papers"],
 	["profile", "/profile"],
 	["settings", "/settings"],
+	["analytics", "/analytics"],
 	["signed out", "/auth/signed-out"],
 ] as const;
 

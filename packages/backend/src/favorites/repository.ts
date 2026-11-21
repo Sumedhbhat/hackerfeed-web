@@ -2,10 +2,12 @@ import "@tanstack/react-start/server-only";
 
 import type { HackerNewsStoryRecord } from "@hackerfeed/entities/hacker-news";
 import { and, desc, eq, inArray, notExists, type SQL } from "drizzle-orm";
-import { activityEventSelection } from "../activity/events";
+import {
+	activityEventSelection,
+	insertActivityEventsFrom,
+} from "../activity/events";
 import type { DatabaseContext } from "../database/client";
 import {
-	activityEvents,
 	favorites as favoritesTable,
 	stories as storiesTable,
 } from "../database/schema";
@@ -108,7 +110,8 @@ async function getFavorite(
 export function createFavoriteRepository(database: DatabaseContext) {
 	async function removeFavorites(appUserId: string, where: SQL | undefined) {
 		await database.batch([
-			database.insert(activityEvents).select(
+			insertActivityEventsFrom(
+				database,
 				database
 					.select(
 						activityEventSelection(appUserId, "story.unfavorited", {
@@ -173,7 +176,8 @@ export function createFavoriteRepository(database: DatabaseContext) {
 		},
 
 		async addFavorite(appUserId: string, storyId: string) {
-			const recordEvent = database.insert(activityEvents).select(
+			const recordEvent = insertActivityEventsFrom(
+				database,
 				database
 					.select(
 						activityEventSelection(appUserId, "story.favorited", {
