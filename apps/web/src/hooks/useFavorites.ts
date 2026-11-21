@@ -1,7 +1,4 @@
-import type {
-	HackerNewsStoryRecord,
-	ViewedStoryRecord,
-} from "@hackerfeed/entities/hacker-news";
+import type { ViewedStoryRecord } from "@hackerfeed/entities/hacker-news";
 import { useStore } from "@tanstack/react-store";
 import { Store } from "@tanstack/store";
 import { useEffect } from "react";
@@ -17,7 +14,7 @@ import { useAuthSession } from "./useAuthSession";
 export type UseFavoritesReturn = {
 	count: number;
 	isFavorited: (id: number) => boolean;
-	toggleFavorite: (story: HackerNewsStoryRecord) => void;
+	toggleFavorite: (story: ViewedStoryRecord) => void;
 	/** Most recent first. */
 	getFavorites: () => ViewedStoryRecord[];
 	clearAllFavorites: () => void;
@@ -34,6 +31,13 @@ const backendFavoritesStore = new Store<BackendFavoritesState>({
 });
 
 let loadingUserId: string | null = null;
+
+async function loadLastViewed(hnStoryId: number) {
+	const [view] = await createTrpcClient().views.storiesLastViewed.query({
+		hnStoryIds: [hnStoryId],
+	});
+	if (view) markFavoriteViewed(hnStoryId, view.lastViewedAt);
+}
 
 export function markFavoriteViewed(hnStoryId: number, lastViewedAt: Date) {
 	backendFavoritesStore.setState((state) => ({
@@ -111,7 +115,7 @@ export function useFavorites(): UseFavoritesReturn {
 		return activeFavorites.some((story) => story.id === id);
 	}
 
-	function toggleActiveFavorite(story: HackerNewsStoryRecord): void {
+	function toggleActiveFavorite(story: ViewedStoryRecord): void {
 		if (!workosUserId) {
 			toggleFavorite(story);
 			return;
@@ -137,6 +141,9 @@ export function useFavorites(): UseFavoritesReturn {
 					await client.favorites.remove.mutate({ hnStoryId: story.id });
 				} else {
 					await client.favorites.add.mutate(story);
+					if (!story.lastViewedAt) {
+						void loadLastViewed(story.id).catch(() => undefined);
+					}
 				}
 			} catch (error) {
 				backendFavoritesStore.setState(() => ({
