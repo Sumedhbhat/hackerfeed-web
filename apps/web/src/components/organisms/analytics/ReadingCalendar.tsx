@@ -8,6 +8,7 @@ import {
 import {
 	describeReads,
 	formatDay,
+	formatLongDay,
 	formatMonth,
 	plural,
 	readingCalendar,
@@ -31,7 +32,8 @@ export function ReadingCalendar({
 		.flat()
 		.flatMap((day) => (day.reading ? [day.reading] : []));
 	const max = Math.max(1, ...shown.map(reads));
-	const activeDays = shown.filter((day) => reads(day) > 0).length;
+	const readDays = shown.filter((day) => reads(day) > 0);
+	const activeDays = readDays.length;
 
 	return (
 		<Stack gap="section">
@@ -39,6 +41,12 @@ export function ReadingCalendar({
 				Reading calendar
 			</Heading>
 			<ActivityCalendar
+				listingLabel="Days with reads"
+				listing={[...readDays].reverse().map((day) => ({
+					key: day.date,
+					day: formatLongDay(day.date),
+					description: describeReads(day),
+				}))}
 				label={`You read on ${plural(activeDays, "day")} of the last ${plural(shown.length, "day")}.`}
 				weeks={weeks.map((week) => {
 					const firstOfMonth = week.find(({ date }) => date.endsWith("-01"));

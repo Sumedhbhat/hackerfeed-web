@@ -1,4 +1,9 @@
-import type { CSSProperties } from "react";
+import { type CSSProperties, useState } from "react";
+import {
+	Collapsible,
+	CollapsiblePanel,
+	CollapsibleTrigger,
+} from "../atoms/Collapsible";
 
 export type ActivityLevel = 0 | 1 | 2 | 3 | 4;
 
@@ -35,21 +40,36 @@ function columnVisibility(weeksAgo: number) {
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
+export type ActivityListing = {
+	key: string;
+	day: string;
+	description: string;
+};
+
 /**
  * A grid of days like a contribution graph: one column per week, Sunday at the
- * top, darker for busier days. `label` is what assistive technology reads.
+ * top, darker for busier days. The grid is only a picture; `listing` holds the
+ * same days as text behind a button, so keyboard and screen reader users get
+ * every day's details. `label` summarises the picture.
  */
 export function ActivityCalendar({
 	weeks,
 	label,
+	listing,
+	listingLabel,
 	lessLabel = "Less",
 	moreLabel = "More",
 }: {
 	weeks: ActivityWeek[];
 	label: string;
+	/** The days worth listing, newest first. */
+	listing: ActivityListing[];
+	/** Names the listing, e.g. "Days with reads". */
+	listingLabel: string;
 	lessLabel?: string;
 	moreLabel?: string;
 }) {
+	const [listingOpen, setListingOpen] = useState(false);
 	const visibility = new Map(
 		weeks.map((week, index) => [
 			week.key,
@@ -59,9 +79,9 @@ export function ActivityCalendar({
 
 	return (
 		<div className="flex w-fit max-w-full flex-col gap-3">
+			<p className="sr-only">{label}</p>
 			<div
-				role="img"
-				aria-label={label}
+				aria-hidden="true"
 				className="grid w-fit max-w-full grid-cols-[auto_repeat(var(--weeks-phone),minmax(0,1rem))] gap-[3px] sm:grid-cols-[auto_repeat(var(--weeks-tablet),minmax(0,1rem))] lg:grid-cols-[auto_repeat(var(--weeks),minmax(0,1rem))]"
 				style={
 					{
@@ -113,6 +133,36 @@ export function ActivityCalendar({
 				))}
 				<span className="ml-1">{moreLabel}</span>
 			</div>
+			<Collapsible open={listingOpen} onOpenChange={setListingOpen}>
+				<CollapsibleTrigger variant="secondary">
+					{listingOpen ? "Hide" : "Show"} {listingLabel.toLowerCase()}
+				</CollapsibleTrigger>
+				<CollapsiblePanel>
+					<table className="mt-3 w-full text-left text-sm">
+						<caption className="sr-only">{listingLabel}</caption>
+						<thead className="text-ink-soft">
+							<tr>
+								<th scope="col" className="py-1 pr-4 font-medium">
+									Day
+								</th>
+								<th scope="col" className="py-1 font-medium">
+									Read
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							{listing.map((row) => (
+								<tr key={row.key} className="border-t border-line">
+									<th scope="row" className="py-1.5 pr-4 font-normal">
+										{row.day}
+									</th>
+									<td className="py-1.5">{row.description}</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
+				</CollapsiblePanel>
+			</Collapsible>
 		</div>
 	);
 }

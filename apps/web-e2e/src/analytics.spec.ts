@@ -13,8 +13,8 @@ test("the user menu opens analytics with the reader's streak", async ({
 	await expect(page.getByText("18 days").first()).toBeVisible();
 	await expect(page.getByText("6 stories, 4 papers").first()).toBeVisible();
 	await expect(
-		page.getByRole("img", { name: /^You read on \d+ days of the last/ }),
-	).toBeVisible();
+		page.getByText(/^You read on \d+ days of the last/),
+	).toBeAttached();
 });
 
 test("the trend covers the range the reader picks", async ({ page }) => {
@@ -57,4 +57,23 @@ test.describe("at local midnight", () => {
 		await page.getByRole("menuitem", { name: "Analytics" }).click();
 		await expect(page.getByText("1 read", { exact: true })).toBeVisible();
 	});
+});
+
+test("every day with reads in the calendar can be read from the keyboard", async ({
+	page,
+}) => {
+	await open(page, "/analytics");
+	const toggle = page.getByRole("button", { name: "Show days with reads" });
+
+	await toggle.focus();
+	await page.keyboard.press("Enter");
+
+	await expect(
+		page.getByRole("button", { name: "Hide days with reads" }),
+	).toHaveAttribute("aria-expanded", "true");
+	const table = page.getByRole("table", { name: "Days with reads" });
+	await expect(table.getByRole("row").nth(1)).toContainText(
+		"6 stories, 4 papers",
+	);
+	expect(await table.getByRole("row").count()).toBeGreaterThan(30);
 });
