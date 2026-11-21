@@ -14,23 +14,17 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       actions: write
-    env:
-      GH_TOKEN: ${{ github.token }}
-      GH_REPO: ${{ github.repository }}
+      contents: read
     steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: .github/actions
+
       - name: Cancel superseded runs
-        run: |
-          older=$(for status in requested pending queued waiting in_progress; do
-            gh run list --workflow deploy.yaml --status "$status" --limit 100 --json databaseId \
-              --jq '.[] | select(.databaseId < ${{ github.run_id }}) | .databaseId'
-          done)
-          for id in $older; do
-            deploy=$(gh run view "$id" --json jobs --jq '.jobs[] | select(.name == "deploy") | .status')
-            case "$deploy" in
-              in_progress | completed) echo "Run $id is already deploying; leaving it" ;;
-              *) gh run cancel "$id" || echo "::warning::Run $id was not cancelled; it may have finished" ;;
-            esac
-          done
+        uses: ./.github/actions/cancel-superseded-runs
+        with:
+          workflow: deploy.yaml
+          job: deploy
 
   # Read-only work runs without approval, so the run is checked and its
   # infrastructure plan is in the summary before anyone approves.
