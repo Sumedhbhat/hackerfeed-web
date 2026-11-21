@@ -1,5 +1,6 @@
 import type { AppRouter } from "@hackerfeed/api-client/trpc";
 import {
+	createReadingDateFormatter,
 	type ReadingDay,
 	readingDaysInputSchema,
 } from "@hackerfeed/entities/analytics";
@@ -74,6 +75,7 @@ const paperPresentations = paperRows.map((paper) => ({
 
 /** One instance per browser page. A reload discards every mutation. */
 export function createDemoApi() {
+	const startedAt = Date.now();
 	const favorites = new Map<number, FavoriteStoryInput>();
 	for (const row of favoriteRows) {
 		const story = storyRows.find((story) => story.id === row.storyId);
@@ -132,39 +134,51 @@ export function createDemoApi() {
 			);
 	}
 	const paperViews = new Set<string>();
-	type Read = { kind: "stories" | "papers"; subject: unknown; at: number };
+	type Read = (
+		| { kind: "stories"; subject: number }
+		| { kind: "papers"; subject: string }
+	) & { at: number };
 	const seededReads = activityEventRows.flatMap((event): Read[] => {
 		const at = Date.parse(`${event.occurredAt.replace(" ", "T")}Z`);
 		if (
 			event.action === "story.read" ||
 			event.action === "story.discussion_opened"
-		)
-			return [{ kind: "stories", subject: event.storyId, at }];
-		if (event.action === "paper.read")
-			return [{ kind: "papers", subject: event.paperId, at }];
+		) {
+			const story = storyRows.find(({ id }) => id === event.storyId);
+			if (story) return [{ kind: "stories", subject: story.hnStoryId, at }];
+		}
+		if (event.action === "paper.read") {
+			const paper = paperRows.find(({ id }) => id === event.paperId);
+			if (paper) return [{ kind: "papers", subject: paper.arxivId, at }];
+		}
 		return [];
 	});
+	const seedDay = (at: number) => new Date(at).toISOString().slice(0, 10);
+	const lastSeeded = Math.max(...seededReads.map((read) => read.at));
 	const sessionReads: Read[] = [];
-	const readingDays = (utcOffsetMinutes: number): ReadingDay[] => {
-		const localDate = (at: number) =>
-			new Date(at + utcOffsetMinutes * 60_000).toISOString().slice(0, 10);
-		// The seeded history ends today, wherever and whenever the demo runs.
-		const lastSeeded = Math.max(...seededReads.map((read) => read.at));
+	const readingDays = (timeZone: string): ReadingDay[] => {
+		const localDate = createReadingDateFormatter(timeZone);
+		// Anchor the seeded history to the day this demo session started.
 		const shift =
-			Date.parse(localDate(Date.now())) - Date.parse(localDate(lastSeeded));
+			Date.parse(localDate(startedAt)) - Date.parse(seedDay(lastSeeded));
 		const days = new Map<
 			string,
-			{ stories: Set<unknown>; papers: Set<unknown> }
+			{ stories: Set<number>; papers: Set<string> }
 		>();
-		for (const read of [
-			...seededReads.map((read) => ({ ...read, at: read.at + shift })),
-			...sessionReads,
-		]) {
-			const date = localDate(read.at);
-			const day = days.get(date) ?? { stories: new Set(), papers: new Set() };
-			day[read.kind].add(read.subject);
+		function countRead(read: Read, date: string) {
+			const day = days.get(date) ?? {
+				stories: new Set<number>(),
+				papers: new Set<string>(),
+			};
+			if (read.kind === "stories") day.stories.add(read.subject);
+			else day.papers.add(read.subject);
 			days.set(date, day);
 		}
+		for (const read of seededReads) {
+			const shifted = new Date(Date.parse(seedDay(read.at)) + shift);
+			countRead(read, shifted.toISOString().slice(0, 10));
+		}
+		for (const read of sessionReads) countRead(read, localDate(read.at));
 		return [...days]
 			.sort(([a], [b]) => a.localeCompare(b))
 			.map(([date, day]) => ({
@@ -291,9 +305,7 @@ export function createDemoApi() {
 				paperFavorites.clear();
 				return;
 			case "analytics.readingDays":
-				return readingDays(
-					readingDaysInputSchema.parse(input).utcOffsetMinutes,
-				);
+				return readingDays(readingDaysInputSchema.parse(input).timeZone);
 			case "account.me":
 				return account();
 			case "preferences.update": {

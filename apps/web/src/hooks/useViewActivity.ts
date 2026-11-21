@@ -7,21 +7,29 @@ import { useQueryClient } from "@tanstack/react-query";
 import { createTrpcClient } from "#/lib/trpc/client";
 import { useAuthSession } from "./useAuthSession";
 import { markFavoriteViewed } from "./useFavorites";
+import { READING_DAYS_KEY } from "./useReadingDays";
 import { STORIES_LAST_VIEWED_KEY } from "./useStoriesLastViewed";
 
 export function useViewActivity() {
 	const { user } = useAuthSession();
 	const queryClient = useQueryClient();
 
+	const refreshReadingDays = () =>
+		queryClient.invalidateQueries({
+			queryKey: [...READING_DAYS_KEY, user?.id],
+		});
+
 	return {
 		recordStoryView(story: HackerNewsStoryRecord, action: StoryViewAction) {
 			if (!user) return;
 			void createTrpcClient()
 				.views.story.mutate({ action, story })
-				.then(() => {
-					if (action !== "chat_opened")
+				.then(async () => {
+					if (action !== "chat_opened") {
 						markFavoriteViewed(story.id, new Date());
-					return queryClient.invalidateQueries({
+						await refreshReadingDays();
+					}
+					await queryClient.invalidateQueries({
 						queryKey: STORIES_LAST_VIEWED_KEY,
 					});
 				})
@@ -32,6 +40,9 @@ export function useViewActivity() {
 			if (!user) return;
 			void createTrpcClient()
 				.views.paper.mutate({ action, arxivId })
+				.then(() => {
+					if (action === "read") return refreshReadingDays();
+				})
 				.catch(() => undefined);
 		},
 	};

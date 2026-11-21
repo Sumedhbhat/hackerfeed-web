@@ -3,11 +3,11 @@ import { UnauthorizedError } from "../auth/current-user";
 import { createReadingActivityService } from "./service";
 
 function createHarness() {
-	const calls: Array<{ appUserId: string; utcOffsetMinutes: number }> = [];
+	const calls: Array<{ appUserId: string; timeZone: string }> = [];
 	const service = createReadingActivityService(
 		{
-			async listReadingDays(appUserId, utcOffsetMinutes) {
-				calls.push({ appUserId, utcOffsetMinutes });
+			async listReadingDays(appUserId, timeZone) {
+				calls.push({ appUserId, timeZone });
 				return [{ date: "2026-11-20", stories: 2, papers: 1 }];
 			},
 		},
@@ -25,17 +25,20 @@ describe("reading activity service", () => {
 		const { calls, service } = createHarness();
 
 		await expect(
-			service.listReadingDays({ workosUserId: "workos-user-1" }, -300),
+			service.listReadingDays(
+				{ workosUserId: "workos-user-1" },
+				"America/New_York",
+			),
 		).resolves.toEqual([{ date: "2026-11-20", stories: 2, papers: 1 }]);
 		expect(calls).toEqual([
-			{ appUserId: "app-workos-user-1", utcOffsetMinutes: -300 },
+			{ appUserId: "app-workos-user-1", timeZone: "America/New_York" },
 		]);
 	});
 
 	it("requires authentication", async () => {
 		const { calls, service } = createHarness();
 
-		await expect(service.listReadingDays(null, 0)).rejects.toBeInstanceOf(
+		await expect(service.listReadingDays(null, "UTC")).rejects.toBeInstanceOf(
 			UnauthorizedError,
 		);
 		expect(calls).toEqual([]);

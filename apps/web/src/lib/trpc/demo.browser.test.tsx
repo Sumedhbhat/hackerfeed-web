@@ -1,3 +1,4 @@
+import { readingDaysOutputSchema } from "@hackerfeed/entities/analytics";
 import { favoriteStoriesOutputSchema } from "@hackerfeed/entities/favorites";
 import { paperFavoritesListOutputSchema } from "@hackerfeed/entities/paper-favorites";
 import { paperEditionOutputSchema } from "@hackerfeed/entities/papers";
@@ -62,6 +63,23 @@ describe("fixture demo", () => {
 		expect(api("views.storiesLastViewed", { hnStoryIds: [unseen.id] })).toEqual(
 			[{ hnStoryId: unseen.id, lastViewedAt: expect.any(Date) }],
 		);
+	});
+
+	it("counts a seeded story and paper only once when reopened the same day", () => {
+		const api = createDemoApi();
+		const listReadingDays = () =>
+			readingDaysOutputSchema.parse(
+				api("analytics.readingDays", { timeZone: "UTC" }),
+			);
+		const [story] = favoriteStoriesOutputSchema.parse(
+			api("favorites.list", undefined),
+		);
+		const [paper] = snapshotPapers;
+		const before = listReadingDays();
+		expect(before.at(-1)).toMatchObject({ stories: 6, papers: 4 });
+		api("views.story", { action: "discussion_opened", story });
+		api("views.paper", { action: "read", arxivId: paper.arxivId });
+		expect(listReadingDays()).toEqual(before);
 	});
 
 	it("serves dated paper editions, authors, keywords and saved-paper pagination", () => {

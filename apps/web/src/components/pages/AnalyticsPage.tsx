@@ -5,6 +5,7 @@ import { Skeleton, SkeletonGroup } from "@hackerfeed/ui/atoms/Skeleton";
 import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { EmptyState } from "@hackerfeed/ui/molecules/EmptyState";
 import { PageHeader } from "@hackerfeed/ui/molecules/PageHeader";
+import { useEffect, useState } from "react";
 import { ReadingCalendar } from "#/components/organisms/analytics/ReadingCalendar";
 import { ReadingStreak } from "#/components/organisms/analytics/ReadingStreak";
 import { ReadingTrend } from "#/components/organisms/analytics/ReadingTrend";
@@ -13,7 +14,24 @@ import { formatLongDay, localDateKey } from "#/lib/analytics/reading-days";
 
 export function AnalyticsPage() {
 	const { data: days, isError, refetch } = useReadingDays();
-	const today = localDateKey(new Date());
+	const [today, setToday] = useState(() => localDateKey(new Date()));
+	useEffect(() => {
+		let timer: ReturnType<typeof setTimeout>;
+		function refreshDate() {
+			clearTimeout(timer);
+			const now = new Date();
+			setToday(localDateKey(now));
+			const midnight = new Date(now);
+			midnight.setHours(24, 0, 0, 0);
+			timer = setTimeout(refreshDate, midnight.getTime() - now.getTime());
+		}
+		refreshDate();
+		document.addEventListener("visibilitychange", refreshDate);
+		return () => {
+			clearTimeout(timer);
+			document.removeEventListener("visibilitychange", refreshDate);
+		};
+	}, []);
 	const since = days?.[0]?.date;
 
 	return (

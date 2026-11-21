@@ -7,7 +7,7 @@ const currentUser = { workosUserId: "workos-user-1" };
 
 function createHarness() {
 	const database = {} as DatabaseContext;
-	const calls: Array<{ user: unknown; utcOffsetMinutes: number }> = [];
+	const calls: Array<{ user: unknown; timeZone: string }> = [];
 	const router = createAppRouter(
 		undefined,
 		undefined,
@@ -15,8 +15,8 @@ function createHarness() {
 		undefined,
 		undefined,
 		{
-			async listReadingDays(user, utcOffsetMinutes) {
-				calls.push({ user, utcOffsetMinutes });
+			async listReadingDays(user, timeZone) {
+				calls.push({ user, timeZone });
 				return [{ date: "2026-11-20", stories: 2, papers: 1 }];
 			},
 		},
@@ -32,28 +32,28 @@ describe("analytics tRPC router", () => {
 		const { calls, caller } = createHarness();
 
 		await expect(
-			caller(currentUser).analytics.readingDays({ utcOffsetMinutes: 330 }),
+			caller(currentUser).analytics.readingDays({ timeZone: "Asia/Kolkata" }),
 		).resolves.toEqual([{ date: "2026-11-20", stories: 2, papers: 1 }]);
-		expect(calls).toEqual([{ user: currentUser, utcOffsetMinutes: 330 }]);
+		expect(calls).toEqual([{ user: currentUser, timeZone: "Asia/Kolkata" }]);
 	});
 
 	it("requires a session", async () => {
 		const { calls, caller } = createHarness();
 
 		await expect(
-			caller(null).analytics.readingDays({ utcOffsetMinutes: 0 }),
+			caller(null).analytics.readingDays({ timeZone: "UTC" }),
 		).rejects.toMatchObject({ code: "UNAUTHORIZED" });
 		expect(calls).toEqual([]);
 	});
 
-	it("rejects offsets no time zone has", async () => {
+	it("rejects invalid time zones", async () => {
 		const { calls, caller } = createHarness();
 
 		await expect(
-			caller(currentUser).analytics.readingDays({ utcOffsetMinutes: 900 }),
+			caller(currentUser).analytics.readingDays({ timeZone: "Mars/Olympus" }),
 		).rejects.toMatchObject({ code: "BAD_REQUEST" });
 		await expect(
-			caller(currentUser).analytics.readingDays({ utcOffsetMinutes: 1.5 }),
+			caller(currentUser).analytics.readingDays({ timeZone: "" }),
 		).rejects.toMatchObject({ code: "BAD_REQUEST" });
 		expect(calls).toEqual([]);
 	});

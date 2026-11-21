@@ -14,7 +14,7 @@ type CurrentUserInput = Parameters<typeof resolveCurrentWorkosUser>[0];
 type ReadingActivityRepositoryDependency = {
 	listReadingDays(
 		appUserId: string,
-		utcOffsetMinutes: number,
+		timeZone: string,
 	): PromiseLike<ReadingDay[]>;
 };
 
@@ -31,12 +31,12 @@ export function createReadingActivityService(
 	return {
 		async listReadingDays(
 			user: CurrentUserInput,
-			utcOffsetMinutes: number,
+			timeZone: string,
 		): Promise<ReadingDay[]> {
 			const appUser = await users.getOrCreateAppUser(
 				resolveCurrentWorkosUser(user),
 			);
-			return readingActivity.listReadingDays(appUser.id, utcOffsetMinutes);
+			return readingActivity.listReadingDays(appUser.id, timeZone);
 		},
 	};
 }

@@ -269,7 +269,7 @@ export function createAppRouter(
 					getReadingActivityApiService(
 						ctx.database,
 						readingActivity,
-					).listReadingDays(ctx.user, input.utcOffsetMinutes),
+					).listReadingDays(ctx.user, input.timeZone),
 				),
 		}),
 		account: t.router({
