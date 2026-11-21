@@ -259,6 +259,7 @@ describe("StoryCard link actions", () => {
 			/>,
 		);
 		expect(title.hasAttribute("data-viewed")).toBe(true);
+		expect(screen.getByText(/^Viewed /)).toBeDefined();
 	});
 
 	it("refreshes last-viewed times once a view is recorded", async () => {

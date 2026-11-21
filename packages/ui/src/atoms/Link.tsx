@@ -11,7 +11,7 @@ const VARIANT_CLASSES = {
 	inline:
 		"text-accent-strong underline decoration-accent/40 underline-offset-[3px] hover:text-accent-strong hover:decoration-accent",
 	/** The hit area covers the nearest `position: relative` ancestor (the card). */
-	card: "rounded-sm text-inherit no-underline decoration-accent/50 underline-offset-[3px] after:absolute after:inset-0 after:content-[''] hover:text-inherit hover:underline visited:text-ink-soft data-viewed:text-ink-soft",
+	card: "rounded-sm text-inherit no-underline decoration-accent/50 underline-offset-[3px] after:absolute after:inset-0 after:content-[''] hover:text-inherit hover:underline visited:text-ink-faint data-viewed:font-normal data-viewed:text-ink-faint",
 } as const;
 
 export type LinkVariant = keyof typeof VARIANT_CLASSES;

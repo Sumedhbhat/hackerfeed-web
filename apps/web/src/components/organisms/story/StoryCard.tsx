@@ -34,6 +34,9 @@ export function StoryCard({ story, markSaved = true }: StoryCardProps) {
 	const { recordStoryView } = useViewActivity();
 	const isFav = isFavorited(story.id);
 	const viewed = story.lastViewedAt != null;
+	const viewedAge = story.lastViewedAt
+		? formatStoryAge(Math.floor(story.lastViewedAt.getTime() / 1000))
+		: null;
 
 	const title = getStoryTitle(story);
 	const { kind: postKind, text: titleText } = splitPostKind(title);
@@ -90,6 +93,7 @@ export function StoryCard({ story, markSaved = true }: StoryCardProps) {
 					score={story.score}
 					by={story.by}
 					age={formatStoryAge(story.time)}
+					viewed={viewedAge}
 				/>
 			}
 			actions={[
