@@ -3,7 +3,6 @@ import { StoryListSkeleton } from "@hackerfeed/ui/molecules/StoryListSkeleton";
 import {
 	cleanup,
 	fireEvent,
-	render,
 	screen,
 	waitFor,
 	within,
@@ -11,6 +10,7 @@ import {
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { StoryCard } from "#/components/organisms/story/StoryCard";
 import { clearAllFavorites, isFavorited } from "#/lib/favorites-store";
+import { renderWithQueryClient } from "#/test/renderWithQueryClient";
 
 const authMock = vi.hoisted(() => ({
 	isLoading: false,
@@ -117,7 +117,7 @@ afterEach(() => {
 
 describe("StoryListSkeleton", () => {
 	it("tells assistive tech that stories are loading", () => {
-		render(<StoryListSkeleton count={3} />);
+		renderWithQueryClient(<StoryListSkeleton count={3} />);
 		expect(
 			screen.getByRole("status", { name: "Loading stories" }),
 		).toBeDefined();
@@ -126,46 +126,48 @@ describe("StoryListSkeleton", () => {
 
 describe("StoryCard rendering", () => {
 	it("renders the story title", () => {
-		render(<StoryCard story={makeStory()} />);
+		renderWithQueryClient(<StoryCard story={makeStory()} />);
 		expect(
 			screen.getByRole("heading", { name: "A Test Story Title" }),
 		).toBeDefined();
 	});
 
 	it("renders the story author", () => {
-		render(<StoryCard story={makeStory()} />);
+		renderWithQueryClient(<StoryCard story={makeStory()} />);
 		expect(screen.getByText(/author42/i)).toBeDefined();
 	});
 
 	it("renders the score", () => {
-		render(<StoryCard story={makeStory()} />);
+		renderWithQueryClient(<StoryCard story={makeStory()} />);
 		expect(screen.getByText(/210 points/i)).toBeDefined();
 	});
 
 	it("renders the comment count", () => {
-		render(<StoryCard story={makeStory()} />);
+		renderWithQueryClient(<StoryCard story={makeStory()} />);
 		expect(screen.getByRole("link", { name: /^17 comments: / })).toBeDefined();
 	});
 
 	it("renders the domain extracted from the URL", () => {
-		render(
+		renderWithQueryClient(
 			<StoryCard story={makeStory({ url: "https://blog.example.org/p" })} />,
 		);
 		expect(screen.getByText(/blog\.example\.org/i)).toBeDefined();
 	});
 
 	it("leaves the domain out for posts without a URL", () => {
-		render(<StoryCard story={makeStory({ url: null })} />);
+		renderWithQueryClient(<StoryCard story={makeStory({ url: null })} />);
 		expect(screen.queryByText(/news\.ycombinator\.com/i)).toBeNull();
 	});
 
 	it("omits the author when by is null", () => {
-		render(<StoryCard story={makeStory({ by: null })} />);
+		renderWithQueryClient(<StoryCard story={makeStory({ by: null })} />);
 		expect(screen.queryByText(/unknown/i)).toBeNull();
 	});
 
 	it("has no separate 'Read article' action: the title is the link", () => {
-		render(<StoryCard story={makeStory({ url: "https://example.com" })} />);
+		renderWithQueryClient(
+			<StoryCard story={makeStory({ url: "https://example.com" })} />,
+		);
 		expect(screen.queryByRole("link", { name: /read article/i })).toBeNull();
 		expect(
 			screen.getByRole("link", { name: "A Test Story Title" }),
@@ -175,7 +177,7 @@ describe("StoryCard rendering", () => {
 
 describe("StoryCard link actions", () => {
 	it("links an article's title to the story URL in a new tab", () => {
-		render(
+		renderWithQueryClient(
 			<StoryCard story={makeStory({ url: "https://article.example.com" })} />,
 		);
 		const link = screen.getByRole("link", { name: "A Test Story Title" });
@@ -189,7 +191,9 @@ describe("StoryCard link actions", () => {
 		["Show HN: A tiny tool", "https://tool.example.com"],
 		["A post with no link", null],
 	])("opens the in-app discussion for %s", (title, url) => {
-		render(<StoryCard story={makeStory({ id: 777, title, url })} />);
+		renderWithQueryClient(
+			<StoryCard story={makeStory({ id: 777, title, url })} />,
+		);
 		const link = within(screen.getByRole("heading", { level: 2 })).getByRole(
 			"link",
 		);
@@ -198,14 +202,14 @@ describe("StoryCard link actions", () => {
 	});
 
 	it("the comment count links to the internal discussion page", () => {
-		render(<StoryCard story={makeStory({ id: 99999 })} />);
+		renderWithQueryClient(<StoryCard story={makeStory({ id: 99999 })} />);
 		const link = screen.getByRole("link", { name: /^17 comments: /i });
 		expect(link).toBeDefined();
 		expect(link.getAttribute("href")).toContain("99999");
 	});
 
 	it("'Open in ChatGPT' opens a ChatGPT prompt about the story in a new tab", () => {
-		render(<StoryCard story={makeStory({ id: 4242 })} />);
+		renderWithQueryClient(<StoryCard story={makeStory({ id: 4242 })} />);
 		const link = screen.getByRole("link", { name: /^open in chatgpt: /i });
 		const href = new URL(link.getAttribute("href") ?? "");
 		expect(href.origin).toBe("https://chatgpt.com");
@@ -216,7 +220,7 @@ describe("StoryCard link actions", () => {
 	it("records signed-in title clicks as reads", () => {
 		authMock.user = { id: "workos-story-viewer" };
 		const story = makeStory();
-		render(<StoryCard story={story} />);
+		renderWithQueryClient(<StoryCard story={story} />);
 
 		fireEvent.click(screen.getByRole("link", { name: story.title ?? "" }));
 
@@ -228,7 +232,7 @@ describe("StoryCard link actions", () => {
 	it("records middle-click reads but not other auxiliary clicks", () => {
 		authMock.user = { id: "workos-story-viewer" };
 		const story = makeStory();
-		render(<StoryCard story={story} />);
+		renderWithQueryClient(<StoryCard story={story} />);
 		const title = screen.getByRole("link", { name: story.title ?? "" });
 
 		fireEvent(title, new MouseEvent("auxclick", { bubbles: true, button: 1 }));
@@ -239,10 +243,44 @@ describe("StoryCard link actions", () => {
 		]);
 	});
 
+	it("greys the title when the reader viewed the story before, on any device", () => {
+		const { rerender } = renderWithQueryClient(
+			<StoryCard story={{ ...makeStory(), lastViewedAt: null }} />,
+		);
+		const title = screen.getByRole("link", { name: "A Test Story Title" });
+		expect(title.hasAttribute("data-viewed")).toBe(false);
+
+		rerender(
+			<StoryCard
+				story={{
+					...makeStory(),
+					lastViewedAt: new Date("2026-11-20T09:30:00Z"),
+				}}
+			/>,
+		);
+		expect(title.hasAttribute("data-viewed")).toBe(true);
+	});
+
+	it("refreshes last-viewed times once a view is recorded", async () => {
+		authMock.user = { id: "workos-story-viewer" };
+		const { queryClient } = renderWithQueryClient(
+			<StoryCard story={makeStory()} />,
+		);
+		const invalidate = vi.spyOn(queryClient, "invalidateQueries");
+
+		fireEvent.click(screen.getByRole("link", { name: "A Test Story Title" }));
+
+		await waitFor(() =>
+			expect(invalidate).toHaveBeenCalledWith({
+				queryKey: ["views", "stories-last-viewed"],
+			}),
+		);
+	});
+
 	it("records signed-in discussion and ChatGPT opens", () => {
 		authMock.user = { id: "workos-story-viewer" };
 		const story = makeStory();
-		render(<StoryCard story={story} />);
+		renderWithQueryClient(<StoryCard story={story} />);
 
 		fireEvent.click(screen.getByRole("link", { name: /^17 comments: / }));
 		fireEvent.click(screen.getByRole("link", { name: /^open in chatgpt: /i }));
@@ -254,7 +292,7 @@ describe("StoryCard link actions", () => {
 	});
 
 	it("does not record signed-out story clicks", () => {
-		render(<StoryCard story={makeStory()} />);
+		renderWithQueryClient(<StoryCard story={makeStory()} />);
 
 		fireEvent.click(screen.getByRole("link", { name: "A Test Story Title" }));
 
@@ -264,7 +302,7 @@ describe("StoryCard link actions", () => {
 
 describe("StoryCard favorite toggle", () => {
 	it("names the save button after the story when not yet saved", () => {
-		render(<StoryCard story={makeStory()} />);
+		renderWithQueryClient(<StoryCard story={makeStory()} />);
 		const btn = screen.getByRole("button", {
 			name: /^save a test story title$/i,
 		});
@@ -274,7 +312,7 @@ describe("StoryCard favorite toggle", () => {
 
 	it("clicking the favorite button adds the story to the store", () => {
 		const story = makeStory({ id: 777 });
-		render(<StoryCard story={story} />);
+		renderWithQueryClient(<StoryCard story={story} />);
 
 		fireEvent.click(
 			screen.getByRole("button", { name: /^save a test story title$/i }),
@@ -284,7 +322,7 @@ describe("StoryCard favorite toggle", () => {
 	});
 
 	it("reports the saved state through its name and aria-pressed", () => {
-		render(<StoryCard story={makeStory()} />);
+		renderWithQueryClient(<StoryCard story={makeStory()} />);
 		fireEvent.click(
 			screen.getByRole("button", { name: /^save a test story title$/i }),
 		);
@@ -298,7 +336,7 @@ describe("StoryCard favorite toggle", () => {
 	});
 
 	it("aria-pressed is true when the story is favorited", () => {
-		render(<StoryCard story={makeStory()} />);
+		renderWithQueryClient(<StoryCard story={makeStory()} />);
 		fireEvent.click(
 			screen.getByRole("button", { name: /^save a test story title$/i }),
 		);
@@ -311,7 +349,7 @@ describe("StoryCard favorite toggle", () => {
 
 	it("clicking the favorite button again removes the story from the store", () => {
 		const story = makeStory({ id: 888 });
-		render(<StoryCard story={story} />);
+		renderWithQueryClient(<StoryCard story={story} />);
 
 		fireEvent.click(
 			screen.getByRole("button", { name: /^save a test story title$/i }),
@@ -328,7 +366,7 @@ describe("StoryCard favorite toggle", () => {
 	});
 
 	it("shows 'Save' text when not favorited", () => {
-		render(<StoryCard story={makeStory()} />);
+		renderWithQueryClient(<StoryCard story={makeStory()} />);
 		expect(screen.getByText("Save")).toBeDefined();
 	});
 
@@ -337,7 +375,7 @@ describe("StoryCard favorite toggle", () => {
 		authMock.user = { id: "workos-story-card-backend-state" };
 		trpcMock.list.mockResolvedValue([story]);
 
-		render(<StoryCard story={story} />);
+		renderWithQueryClient(<StoryCard story={story} />);
 
 		await waitFor(() => {
 			expect(
@@ -354,7 +392,7 @@ describe("StoryCard favorite toggle", () => {
 		authMock.user = { id: "workos-story-card-add" };
 		trpcMock.list.mockResolvedValue([]);
 
-		render(<StoryCard story={story} />);
+		renderWithQueryClient(<StoryCard story={story} />);
 		await waitFor(() => expect(trpcMock.list).toHaveBeenCalled());
 
 		fireEvent.click(
@@ -369,7 +407,7 @@ describe("StoryCard favorite toggle", () => {
 		authMock.user = { id: "workos-story-card-remove" };
 		trpcMock.list.mockResolvedValue([story]);
 
-		render(<StoryCard story={story} />);
+		renderWithQueryClient(<StoryCard story={story} />);
 		await waitFor(() => {
 			expect(
 				screen.getByRole("button", {

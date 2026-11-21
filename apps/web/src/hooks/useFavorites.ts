@@ -1,4 +1,7 @@
-import type { HackerNewsStoryRecord } from "@hackerfeed/entities/hacker-news";
+import type {
+	HackerNewsStoryRecord,
+	ViewedStoryRecord,
+} from "@hackerfeed/entities/hacker-news";
 import { useStore } from "@tanstack/react-store";
 import { Store } from "@tanstack/store";
 import { useEffect } from "react";
@@ -16,12 +19,12 @@ export type UseFavoritesReturn = {
 	isFavorited: (id: number) => boolean;
 	toggleFavorite: (story: HackerNewsStoryRecord) => void;
 	/** Most recent first. */
-	getFavorites: () => HackerNewsStoryRecord[];
+	getFavorites: () => ViewedStoryRecord[];
 	clearAllFavorites: () => void;
 };
 
 type BackendFavoritesState = {
-	items: HackerNewsStoryRecord[] | null;
+	items: ViewedStoryRecord[] | null;
 	userId: string | null;
 };
 

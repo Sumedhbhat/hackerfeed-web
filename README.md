@@ -164,6 +164,12 @@ only when something changed. Opens are reported by the browser without blocking
 the link, so a dropped request loses an event instead of slowing the user down.
 Importing favorites from an older local session is not logged.
 
+These events also show which stories a reader has opened, on any device. A
+story card's title is greyed like a visited link once the reader has a
+`story.read` or `story.discussion_opened` event for it. `favorites.list` joins
+each saved story's `lastViewedAt` in. The feed's stories come straight from
+Hacker News, so the feed asks `views.storiesLastViewed` one page of IDs at a time.
+
 Query production with `wrangler d1 execute hackerfeed --remote --command "…"`
 or the D1 console in the Cloudflare dashboard:
 

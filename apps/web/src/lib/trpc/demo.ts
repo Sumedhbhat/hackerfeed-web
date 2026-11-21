@@ -23,10 +23,12 @@ import {
 import { paperEditionInputSchema } from "@hackerfeed/entities/papers";
 import {
 	paperViewInputSchema,
+	storiesLastViewedInputSchema,
 	storyViewInputSchema,
 } from "@hackerfeed/entities/view-activity";
 import { TRPCClientError, type TRPCLink } from "@trpc/client";
 import { observable } from "@trpc/server/observable";
+import { activityEventRows } from "#/demo-data/database/activity-events";
 import {
 	paletteRows,
 	userPreferencesRows,
@@ -112,7 +114,19 @@ export function createDemoApi() {
 			saved: preferences !== null,
 		},
 	});
-	const storyViews = new Set<number>();
+	const storyViews = new Map<number, Date>();
+	for (const event of activityEventRows) {
+		const story = storyRows.find((story) => story.id === event.storyId);
+		if (
+			story &&
+			(event.action === "story.read" ||
+				event.action === "story.discussion_opened")
+		)
+			storyViews.set(
+				story.hnStoryId,
+				new Date(`${event.occurredAt.replace(" ", "T")}Z`),
+			);
+	}
 	const paperViews = new Set<string>();
 	const findPaper = (arxivId: string) => {
 		const paper = paperPresentations.find((paper) => paper.arxivId === arxivId);
@@ -123,7 +137,12 @@ export function createDemoApi() {
 	return (path: string, input: unknown): unknown => {
 		switch (path) {
 			case "favorites.list":
-				return structuredClone([...favorites.values()].reverse());
+				return structuredClone(
+					[...favorites.values()].reverse().map((story) => ({
+						...story,
+						lastViewedAt: storyViews.get(story.id) ?? null,
+					})),
+				);
 			case "favorites.add": {
 				const story = hackerNewsStorySchema.parse(input);
 				if (!favorites.has(story.id)) favorites.set(story.id, story);
@@ -265,9 +284,18 @@ export function createDemoApi() {
 				if (preferences?.paletteId === id) preferences.paletteId = null;
 				return;
 			}
-			case "views.story":
-				storyViews.add(storyViewInputSchema.parse(input).story.id);
+			case "views.story": {
+				const { action, story } = storyViewInputSchema.parse(input);
+				if (action !== "chat_opened") storyViews.set(story.id, new Date());
 				return;
+			}
+			case "views.storiesLastViewed":
+				return storiesLastViewedInputSchema
+					.parse(input)
+					.hnStoryIds.flatMap((hnStoryId) => {
+						const lastViewedAt = storyViews.get(hnStoryId);
+						return lastViewedAt ? [{ hnStoryId, lastViewedAt }] : [];
+					});
 			case "views.paper": {
 				const { arxivId } = paperViewInputSchema.parse(input);
 				findPaper(arxivId);

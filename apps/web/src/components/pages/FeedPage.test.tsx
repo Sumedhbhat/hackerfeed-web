@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
 	cleanup,
 	fireEvent,
@@ -74,9 +75,11 @@ function storyResult(id: number) {
 
 function Wrapper({ children }: { children: React.ReactNode }) {
 	return (
-		<Suspense fallback={<div data-testid="suspense-fallback" />}>
-			{children}
-		</Suspense>
+		<QueryClientProvider client={new QueryClient()}>
+			<Suspense fallback={<div data-testid="suspense-fallback" />}>
+				{children}
+			</Suspense>
+		</QueryClientProvider>
 	);
 }
 

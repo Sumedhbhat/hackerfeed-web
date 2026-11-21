@@ -1,4 +1,4 @@
-import type { HackerNewsStoryRecord } from "@hackerfeed/entities/hacker-news";
+import type { ViewedStoryRecord } from "@hackerfeed/entities/hacker-news";
 import { ButtonLink } from "@hackerfeed/ui/atoms/Button";
 import { Heading } from "@hackerfeed/ui/atoms/Heading";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
@@ -25,7 +25,7 @@ import {
 } from "#/lib/hacker-news/display";
 
 type StoryCardProps = {
-	story: HackerNewsStoryRecord;
+	story: ViewedStoryRecord;
 	markSaved?: boolean;
 };
 
@@ -33,6 +33,7 @@ export function StoryCard({ story, markSaved = true }: StoryCardProps) {
 	const { isFavorited, toggleFavorite } = useFavorites();
 	const { recordStoryView } = useViewActivity();
 	const isFav = isFavorited(story.id);
+	const viewed = story.lastViewedAt != null;
 
 	const title = getStoryTitle(story);
 	const { kind: postKind, text: titleText } = splitPostKind(title);
@@ -60,6 +61,7 @@ export function StoryCard({ story, markSaved = true }: StoryCardProps) {
 							to="/story/$storyId"
 							params={{ storyId: story.id }}
 							variant="card"
+							viewed={viewed}
 							onClick={(event) => {
 								rememberReturnFocus(event.currentTarget);
 								recordStoryView(story, "discussion_opened");
@@ -72,6 +74,7 @@ export function StoryCard({ story, markSaved = true }: StoryCardProps) {
 						<ExternalLink
 							href={story.url ?? getDiscussionUrl(story.id)}
 							variant="card"
+							viewed={viewed}
 							onClick={recordRead}
 							onAuxClick={recordMiddleClickRead}
 						>
