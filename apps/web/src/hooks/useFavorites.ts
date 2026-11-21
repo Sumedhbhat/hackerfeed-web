@@ -44,7 +44,10 @@ export function markFavoriteViewed(hnStoryId: number, lastViewedAt: Date) {
 		...state,
 		items:
 			state.items?.map((story) =>
-				story.id === hnStoryId ? { ...story, lastViewedAt } : story,
+				story.id === hnStoryId &&
+				!(story.lastViewedAt && story.lastViewedAt >= lastViewedAt)
+					? { ...story, lastViewedAt }
+					: story,
 			) ?? null,
 	}));
 }

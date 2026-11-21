@@ -83,7 +83,9 @@ function FavoritesProbe() {
 				{favorites.getFavorites().map((story) => (
 					<li key={story.id}>
 						{story.title}
-						{story.lastViewedAt ? " (viewed)" : ""}
+						{story.lastViewedAt
+							? ` (viewed ${story.lastViewedAt.toISOString().slice(0, 10)})`
+							: ""}
 					</li>
 				))}
 			</ul>
@@ -146,7 +148,7 @@ describe("useFavorites backend source of truth", () => {
 		expect(screen.getByTestId("count").textContent).toBe("1");
 	});
 
-	it("marks a saved story viewed once the reader opens it", async () => {
+	it("marks a saved story viewed once the reader opens it, keeping the latest time", async () => {
 		authMock.user = { id: "workos-use-favorites-viewed" };
 		trpcMock.list.mockResolvedValue([
 			{ ...makeStory({ id: 40, title: "Saved unread" }), lastViewedAt: null },
@@ -158,8 +160,9 @@ describe("useFavorites backend source of truth", () => {
 		});
 
 		act(() => markFavoriteViewed(40, new Date("2026-11-21T08:00:00Z")));
+		act(() => markFavoriteViewed(40, new Date("2026-11-20T08:00:00Z")));
 
-		expect(screen.getByText("Saved unread (viewed)")).toBeDefined();
+		expect(screen.getByText("Saved unread (viewed 2026-11-21)")).toBeDefined();
 	});
 
 	it("shows a newly saved story as viewed when the reader opened it before", async () => {
@@ -173,7 +176,9 @@ describe("useFavorites backend source of truth", () => {
 		fireEvent.click(screen.getByRole("button", { name: "save story" }));
 
 		await waitFor(() => {
-			expect(screen.getByText("A Test Story Title (viewed)")).toBeDefined();
+			expect(
+				screen.getByText("A Test Story Title (viewed 2026-11-21)"),
+			).toBeDefined();
 		});
 		expect(trpcMock.lastViewed).toHaveBeenCalledWith({ hnStoryIds: [30] });
 	});
