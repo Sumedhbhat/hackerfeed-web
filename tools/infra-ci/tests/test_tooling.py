@@ -405,7 +405,6 @@ class WorkflowTests(unittest.TestCase):
         # deploy is the one job that waits for approval.
         self.assertEqual(production.count("environment: production"), 1)
         self.assertIn("environment: production", deploy)
-        # Only deploy holds the production slot, and a running deploy is never cancelled.
         self.assertEqual(production.count("concurrency:"), 1)
         self.assertIn("concurrency:\n      group: cloudflare-production\n      cancel-in-progress: false", deploy)
         supersede = production.split("  supersede:\n", 1)[1].split("\n  checks:\n", 1)[0]

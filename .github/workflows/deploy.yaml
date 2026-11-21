@@ -9,9 +9,6 @@ permissions:
   contents: read
 
 jobs:
-  # A newer run cancels older ones whose deploy job hasn't started (still in
-  # checks, queued, or waiting for approval). A deploy already running is never
-  # cancelled; this run's deploy queues behind it.
   supersede:
     if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
