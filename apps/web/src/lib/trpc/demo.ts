@@ -1,5 +1,9 @@
 import type { AppRouter } from "@hackerfeed/api-client/trpc";
 import {
+	type ReadingDay,
+	readingDaysInputSchema,
+} from "@hackerfeed/entities/analytics";
+import {
 	BUILT_IN_PALETTES,
 	DEFAULT_PALETTE,
 	type Palette,
@@ -128,6 +132,47 @@ export function createDemoApi() {
 			);
 	}
 	const paperViews = new Set<string>();
+	type Read = { kind: "stories" | "papers"; subject: unknown; at: number };
+	const seededReads = activityEventRows.flatMap((event): Read[] => {
+		const at = Date.parse(`${event.occurredAt.replace(" ", "T")}Z`);
+		if (
+			event.action === "story.read" ||
+			event.action === "story.discussion_opened"
+		)
+			return [{ kind: "stories", subject: event.storyId, at }];
+		if (event.action === "paper.read")
+			return [{ kind: "papers", subject: event.paperId, at }];
+		return [];
+	});
+	const sessionReads: Read[] = [];
+	const readingDays = (utcOffsetMinutes: number): ReadingDay[] => {
+		const localDate = (at: number) =>
+			new Date(at + utcOffsetMinutes * 60_000).toISOString().slice(0, 10);
+		// The seeded history ends today, wherever and whenever the demo runs.
+		const lastSeeded = Math.max(...seededReads.map((read) => read.at));
+		const shift =
+			Date.parse(localDate(Date.now())) - Date.parse(localDate(lastSeeded));
+		const days = new Map<
+			string,
+			{ stories: Set<unknown>; papers: Set<unknown> }
+		>();
+		for (const read of [
+			...seededReads.map((read) => ({ ...read, at: read.at + shift })),
+			...sessionReads,
+		]) {
+			const date = localDate(read.at);
+			const day = days.get(date) ?? { stories: new Set(), papers: new Set() };
+			day[read.kind].add(read.subject);
+			days.set(date, day);
+		}
+		return [...days]
+			.sort(([a], [b]) => a.localeCompare(b))
+			.map(([date, day]) => ({
+				date,
+				stories: day.stories.size,
+				papers: day.papers.size,
+			}));
+	};
 	const findPaper = (arxivId: string) => {
 		const paper = paperPresentations.find((paper) => paper.arxivId === arxivId);
 		if (!paper) throw new Error(`Paper ${arxivId} was not found`);
@@ -245,6 +290,10 @@ export function createDemoApi() {
 			case "paperFavorites.clear":
 				paperFavorites.clear();
 				return;
+			case "analytics.readingDays":
+				return readingDays(
+					readingDaysInputSchema.parse(input).utcOffsetMinutes,
+				);
 			case "account.me":
 				return account();
 			case "preferences.update": {
@@ -286,7 +335,14 @@ export function createDemoApi() {
 			}
 			case "views.story": {
 				const { action, story } = storyViewInputSchema.parse(input);
-				if (action !== "chat_opened") storyViews.set(story.id, new Date());
+				if (action !== "chat_opened") {
+					storyViews.set(story.id, new Date());
+					sessionReads.push({
+						kind: "stories",
+						subject: story.id,
+						at: Date.now(),
+					});
+				}
 				return;
 			}
 			case "views.storiesLastViewed":
@@ -297,9 +353,15 @@ export function createDemoApi() {
 						return lastViewedAt ? [{ hnStoryId, lastViewedAt }] : [];
 					});
 			case "views.paper": {
-				const { arxivId } = paperViewInputSchema.parse(input);
+				const { action, arxivId } = paperViewInputSchema.parse(input);
 				findPaper(arxivId);
 				paperViews.add(arxivId);
+				if (action === "read")
+					sessionReads.push({
+						kind: "papers",
+						subject: arxivId,
+						at: Date.now(),
+					});
 				return;
 			}
 			default:
