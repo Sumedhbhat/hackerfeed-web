@@ -31,22 +31,6 @@ export function FieldLabel({
 	);
 }
 
-export function FieldDescription({
-	children,
-	visuallyHidden = false,
-}: {
-	children: ReactNode;
-	visuallyHidden?: boolean;
-}) {
-	return (
-		<BaseField.Description
-			className={visuallyHidden ? "sr-only" : "m-0 text-meta text-ink-faint"}
-		>
-			{children}
-		</BaseField.Description>
-	);
-}
-
 export function FieldError({ children }: { children: ReactNode }) {
 	return (
 		<BaseField.Error

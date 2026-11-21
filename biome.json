@@ -40,7 +40,7 @@
 				"noLabelWithoutControl": {
 					"level": "error",
 					"options": {
-						"inputComponents": ["TextInput", "TextArea"]
+						"inputComponents": ["TextInput"]
 					}
 				}
 			},
@@ -52,8 +52,8 @@
 							"button": "Use <Button> from @hackerfeed/ui/atoms/Button.",
 							"a": "Use <TextLink>/<ExternalLink> from @hackerfeed/ui/atoms/Link or <ButtonLink>/<ExternalButtonLink> from @hackerfeed/ui/atoms/Button.",
 							"input": "Use <TextInput> from @hackerfeed/ui/atoms/TextField, or add a field atom.",
-							"textarea": "Use <TextArea> from @hackerfeed/ui/atoms/TextField.",
-							"select": "Use <Select> from @hackerfeed/ui/atoms/Select.",
+							"textarea": "Add a textarea atom in @hackerfeed/ui/atoms.",
+							"select": "Add a select atom in @hackerfeed/ui/atoms.",
 							"h1": "Use <Heading level={1}> from @hackerfeed/ui/atoms/Heading.",
 							"h2": "Use <Heading level={2}> from @hackerfeed/ui/atoms/Heading.",
 							"h3": "Use <Heading level={3}> from @hackerfeed/ui/atoms/Heading.",
@@ -74,7 +74,7 @@
 						"patterns": [
 							{
 								"group": ["@base-ui/**"],
-								"message": "Base UI is wrapped by the atoms in @hackerfeed/ui/atoms (Tabs, Menu, Toggle, Select...). Use or extend an atom instead of importing Base UI here."
+								"message": "Base UI is wrapped by the atoms in @hackerfeed/ui/atoms (Tabs, Menu, Toggle...). Use or extend an atom instead of importing Base UI here."
 							}
 						]
 					}

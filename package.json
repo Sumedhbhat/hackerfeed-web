@@ -23,8 +23,9 @@
     "e2e": "nx run web-e2e:e2e",
     "typecheck": "nx run-many -t typecheck",
     "format": "biome format",
-    "lint": "biome lint",
-    "check": "biome check",
+    "lint:ui": "node apps/web/scripts/lint-ui.ts",
+    "lint": "bun run lint:ui && biome lint",
+    "check": "bun run lint:ui && biome check",
     "check:push": "bash scripts/check-dependency-overrides.sh && bash scripts/check-build.sh",
     "dev:api": "bun run --cwd apps/api dev"
   },

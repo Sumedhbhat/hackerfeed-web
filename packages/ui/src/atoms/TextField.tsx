@@ -1,7 +1,4 @@
-import { Field } from "@base-ui/react/field";
 import { Input } from "@base-ui/react/input";
-import { mergeProps } from "@base-ui/react/merge-props";
-import type { TextareaHTMLAttributes } from "react";
 
 const FIELD =
 	"rounded-md border border-field-line bg-surface text-base text-ink placeholder:text-ink-faint focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-accent sm:text-sm";
@@ -39,31 +36,4 @@ export function TextInput({
 	variant?: keyof typeof INPUT_VARIANT;
 }) {
 	return <Input className={INPUT_VARIANT[variant] || undefined} {...props} />;
-}
-
-export function TextArea({
-	variant = "field",
-	id,
-	...props
-}: Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "className" | "style"> & {
-	variant?: keyof typeof INPUT_VARIANT;
-}) {
-	const look =
-		variant === "bare"
-			? `${INPUT_VARIANT.bare} resize-none px-2 py-1.5 leading-relaxed`
-			: `${FIELD} resize-y px-3 py-2`;
-	return (
-		<Field.Control
-			id={id}
-			render={(controlProps) => (
-				<textarea
-					{...mergeProps<"textarea">(
-						controlProps as TextareaHTMLAttributes<HTMLTextAreaElement>,
-						props,
-					)}
-					className={`${look} min-h-11 flex-1`}
-				/>
-			)}
-		/>
-	);
 }

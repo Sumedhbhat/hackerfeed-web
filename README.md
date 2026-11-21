@@ -73,9 +73,10 @@ bun run build            # Production builds (apps/web/dist, apps/api/dist)
 gh workflow run deploy.yaml  # Deploy with Terraform outputs in CI
 bun run test             # Every project's tests, through Nx
 bun run typecheck        # Every project's typecheck, through Nx
-bun run lint             # Run Biome lint
+bun run lint             # Run Biome lint and the unused UI check
+bun run lint:ui          # Find UI components unused by the app
 bun run format           # Run Biome format
-bun run check            # Run Biome lint and format checks
+bun run check            # Run Biome lint and format checks plus the unused UI check
 bun run security:audit   # Audit dependencies at high severity and above
 ```
 
