@@ -6,7 +6,8 @@ terraform {
       source  = "cloudflare/cloudflare"
       version = "5.27.0"
     }
-    # Destroys the old preview token's time_rotating. Remove after that apply.
+    # Forgets the old preview token's time_rotating. Remove with the removed
+    # block below after that apply.
     time = {
       source  = "hashicorp/time"
       version = "0.14.2"
@@ -38,4 +39,16 @@ resource "cloudflare_d1_database" "this" {
   account_id       = var.cloudflare_account_id
   name             = "hackerfeed"
   read_replication = { mode = "disabled" }
+}
+
+# The preview token moved to ../preview-access. Forgetting it, rather than
+# destroying it, needs no token-reading permission in the read-only plans,
+# which use the new preview token. Revoke the old token in Cloudflare by hand,
+# then remove this block.
+removed {
+  from = module.preview_token
+
+  lifecycle {
+    destroy = false
+  }
 }

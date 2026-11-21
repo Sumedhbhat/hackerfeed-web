@@ -145,15 +145,27 @@ and you replace it by hand:
    it. In the last 14 days the job annotates a warning that it expires soon;
    once it has expired (or was revoked), `plan-production` and `preview` fail
    with "Cloudflare token preview_token from preview is invalid. Run the Rotate
-   preview token workflow".
+   preview token workflow". The deploy workflow's read-only `plan` job uses the
+   same token, so deploys stop at that job too.
 2. In GitHub, open **Actions** > **Rotate preview token** > **Run workflow** on
    `master`. Only people with write access can start it, and it runs in the
    `production` environment, so it waits for your approval.
 3. Approve it. Its summary shows the plan: the old token is destroyed and a new
    90-day token is created, which the last step checks with Cloudflare.
-4. Re-run the failed PR checks.
+4. Re-run the failed PR checks or deploy.
 
 Run it the same way to replace the token early, for example after exposure.
+The workflow also deploys the state server first, so it works even when a
+deploy is stuck on the expired token.
+
+The first time, after the change that moved the preview token out of `prod`:
+
+1. The deploy that merge starts fails at `plan`, because the `preview` state is
+   still empty. Run **Rotate preview token** and approve it.
+2. Re-run the deploy's failed jobs and approve it. Its plan shows the old
+   preview token as no longer managed, not destroyed.
+3. In Cloudflare, revoke the older of the two `hackerfeed-ci-preview` tokens,
+   then remove the `removed` block from `infra/cloudflare-prod/main.tf`.
 
 Rotate the Terraform token by hand before its 90-day expiry:
 
