@@ -39,7 +39,17 @@ export function createViewActivityRepository(database: DatabaseContext) {
 		async listStoriesLastViewed(appUserId: string, hnStoryIds: number[]) {
 			if (hnStoryIds.length === 0) return [];
 
-			const lastViews = lastStoryViews(database, appUserId);
+			const lastViews = lastStoryViews(
+				database,
+				appUserId,
+				inArray(
+					activityEvents.storyId,
+					database
+						.select({ id: stories.id })
+						.from(stories)
+						.where(inArray(stories.hnStoryId, hnStoryIds)),
+				),
+			);
 			const rows = await database
 				.select({
 					hnStoryId: stories.hnStoryId,
@@ -47,7 +57,6 @@ export function createViewActivityRepository(database: DatabaseContext) {
 				})
 				.from(stories)
 				.innerJoin(lastViews, eq(lastViews.storyId, stories.id))
-				.where(inArray(stories.hnStoryId, hnStoryIds))
 				.all();
 
 			return rows.flatMap(({ hnStoryId, lastViewedAt }) =>

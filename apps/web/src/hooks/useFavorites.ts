@@ -35,6 +35,16 @@ const backendFavoritesStore = new Store<BackendFavoritesState>({
 
 let loadingUserId: string | null = null;
 
+export function markFavoriteViewed(hnStoryId: number, lastViewedAt: Date) {
+	backendFavoritesStore.setState((state) => ({
+		...state,
+		items:
+			state.items?.map((story) =>
+				story.id === hnStoryId ? { ...story, lastViewedAt } : story,
+			) ?? null,
+	}));
+}
+
 export function useFavorites(): UseFavoritesReturn {
 	const { user } = useAuthSession();
 	const items = useStore(favoritesStore, (state) => state.items);

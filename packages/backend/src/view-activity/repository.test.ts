@@ -89,7 +89,9 @@ describe("view activity repository", () => {
 		expect(lookup?.sql).toContain(
 			'inner join (select "storyId", max("occurredAt") as "lastViewedAt" from "activity_events"',
 		);
-		expect(lookup?.sql).toContain('group by "activity_events"."storyId"');
+		expect(lookup?.sql).toContain(
+			'"activity_events"."storyId" in (select "id" from "stories" where "stories"."hnStoryId" in (?, ?))) group by "activity_events"."storyId"',
+		);
 		expect(lookup?.values).toEqual([
 			"user-1",
 			"story.read",

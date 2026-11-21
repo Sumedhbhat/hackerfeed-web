@@ -1,11 +1,15 @@
 import "@tanstack/react-start/server-only";
 
-import { and, eq, inArray, max } from "drizzle-orm";
+import { and, eq, inArray, max, type SQL } from "drizzle-orm";
 import type { DatabaseContext } from "../database/client";
 import { activityEvents, storyViewedActions } from "../database/schema";
 
 /** One row per story the reader has opened: `storyId` and the latest `lastViewedAt`. */
-export function lastStoryViews(database: DatabaseContext, appUserId: string) {
+export function lastStoryViews(
+	database: DatabaseContext,
+	appUserId: string,
+	where?: SQL,
+) {
 	return database
 		.select({
 			storyId: activityEvents.storyId,
@@ -16,6 +20,7 @@ export function lastStoryViews(database: DatabaseContext, appUserId: string) {
 			and(
 				eq(activityEvents.appUserId, appUserId),
 				inArray(activityEvents.action, storyViewedActions),
+				where,
 			),
 		)
 		.groupBy(activityEvents.storyId)
