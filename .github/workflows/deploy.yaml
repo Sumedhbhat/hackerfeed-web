@@ -22,8 +22,10 @@ jobs:
     steps:
       - name: Cancel superseded runs
         run: |
-          older=$(gh run list --workflow deploy.yaml --limit 50 --json databaseId,status \
-            --jq '.[] | select(.status != "completed" and .databaseId < ${{ github.run_id }}) | .databaseId')
+          older=$(for status in requested pending queued waiting in_progress; do
+            gh run list --workflow deploy.yaml --status "$status" --limit 100 --json databaseId \
+              --jq '.[] | select(.databaseId < ${{ github.run_id }}) | .databaseId'
+          done)
           for id in $older; do
             deploy=$(gh run view "$id" --json jobs --jq '.jobs[] | select(.name == "deploy") | .status')
             case "$deploy" in
