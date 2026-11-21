@@ -124,6 +124,29 @@ function savedPaper(overrides: Partial<SavedPaper> = {}): SavedPaper {
 	};
 }
 
+// Mirrors the route: no type in the URL until a tab is chosen.
+function RoutedFavorites() {
+	const [type, setType] = useState<FavoritesType | undefined>();
+	return <FavoritesPage activeType={type} onTypeChange={setType} />;
+}
+
+function UrlDrivenFavorites({
+	onTypeChange,
+}: {
+	onTypeChange: (type: FavoritesType) => void;
+}) {
+	const [type, setType] = useState<FavoritesType>("stories");
+	return (
+		<FavoritesPage
+			activeType={type}
+			onTypeChange={(next) => {
+				onTypeChange(next);
+				setType(next);
+			}}
+		/>
+	);
+}
+
 afterEach(() => {
 	cleanup();
 	authMock.isLoading = false;
@@ -452,11 +475,6 @@ describe("FavoritesPage paper collection", () => {
 			items: [savedPaper()],
 			nextCursor: null,
 		});
-		// Mirrors the route: no type in the URL until a tab is chosen.
-		function RoutedFavorites() {
-			const [type, setType] = useState<FavoritesType | undefined>();
-			return <FavoritesPage activeType={type} onTypeChange={setType} />;
-		}
 		render(<RoutedFavorites />);
 
 		const papers = await screen.findByRole("tab", { name: "Papers 1" });
@@ -474,19 +492,7 @@ describe("FavoritesPage paper collection", () => {
 
 	it("exposes accessible URL-driven tabs", async () => {
 		const onTypeChange = vi.fn();
-		function UrlDrivenFavorites() {
-			const [type, setType] = useState<FavoritesType>("stories");
-			return (
-				<FavoritesPage
-					activeType={type}
-					onTypeChange={(next) => {
-						onTypeChange(next);
-						setType(next);
-					}}
-				/>
-			);
-		}
-		render(<UrlDrivenFavorites />);
+		render(<UrlDrivenFavorites onTypeChange={onTypeChange} />);
 		const stories = screen.getByRole("tab", { name: /^Stories( \d+)?$/ });
 		const papers = screen.getByRole("tab", { name: /^Papers( \d+)?$/ });
 		expect(stories.getAttribute("aria-selected")).toBe("true");
