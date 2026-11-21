@@ -58,11 +58,11 @@ export function ActivityCalendar({
 	);
 
 	return (
-		<div className="flex flex-col gap-3">
+		<div className="flex w-fit max-w-full flex-col gap-3">
 			<div
 				role="img"
 				aria-label={label}
-				className="grid grid-cols-[auto_repeat(var(--weeks-phone),minmax(0,0.875rem))] gap-[3px] sm:grid-cols-[auto_repeat(var(--weeks-tablet),minmax(0,0.875rem))] lg:grid-cols-[auto_repeat(var(--weeks),minmax(0,0.875rem))]"
+				className="grid w-fit max-w-full grid-cols-[auto_repeat(var(--weeks-phone),minmax(0,1rem))] gap-[3px] sm:grid-cols-[auto_repeat(var(--weeks-tablet),minmax(0,1rem))] lg:grid-cols-[auto_repeat(var(--weeks),minmax(0,1rem))]"
 				style={
 					{
 						"--weeks-phone": Math.min(17, weeks.length),

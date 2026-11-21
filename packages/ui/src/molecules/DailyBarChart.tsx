@@ -25,7 +25,7 @@ export function DailyBarChart({
 	const last = bars.at(-1);
 
 	return (
-		<figure className="m-0">
+		<figure className="relative m-0">
 			<div
 				aria-hidden="true"
 				className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-2 gap-y-1"
@@ -58,23 +58,25 @@ export function DailyBarChart({
 					{last && last !== first ? <span>{last.label}</span> : null}
 				</div>
 			</div>
-			<table className="sr-only">
-				<caption>{caption}</caption>
-				<thead>
-					<tr>
-						<th scope="col">Day</th>
-						<th scope="col">{valueHeader}</th>
-					</tr>
-				</thead>
-				<tbody>
-					{bars.map((bar) => (
-						<tr key={bar.key}>
-							<th scope="row">{bar.label}</th>
-							<td>{bar.description}</td>
+			<div className="sr-only">
+				<table>
+					<caption>{caption}</caption>
+					<thead>
+						<tr>
+							<th scope="col">Day</th>
+							<th scope="col">{valueHeader}</th>
 						</tr>
-					))}
-				</tbody>
-			</table>
+					</thead>
+					<tbody>
+						{bars.map((bar) => (
+							<tr key={bar.key}>
+								<th scope="row">{bar.label}</th>
+								<td>{bar.description}</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+			</div>
 		</figure>
 	);
 }
