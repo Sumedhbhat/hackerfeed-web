@@ -192,6 +192,14 @@ test("authentication, expiry, repository and environment restrictions remain enf
 		(await request("deploy", "GET", undefined, production, "")).status,
 	).toBe(404);
 	expect(
+		(await request("preview", "GET", undefined, await token("preview"), ""))
+			.status,
+	).toBe(404);
+	expect(
+		(await request("preview", "POST", { ID: "x" }, await token("preview")))
+			.status,
+	).toBe(403);
+	expect(
 		(await request("pr-43", "POST", { ID: "x" }, await token("production")))
 			.status,
 	).toBe(404);

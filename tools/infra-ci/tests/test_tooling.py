@@ -394,6 +394,56 @@ resource "terraform_data" "local" {
             self.assertFalse((directory / "errored.tfstate").exists())
 
 
+class CloudflareTokenTests(unittest.TestCase):
+    def read(self, output, response):
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            tools, binary = directory / "tools", directory / "bin"
+            tools.mkdir()
+            binary.mkdir()
+            for filename in ("cloudflare-token.sh", "ci-signals.sh"):
+                shutil.copy(ROOT / "tools/infra-ci" / filename, tools)
+            for path, value in ((tools / "terraform.sh", output), (binary / "curl", response)):
+                path.write_text("#!/bin/sh\nprintf '%s' " + repr(value) + "\n")
+                path.chmod(0o755)
+            environment = directory / "env"
+            environment.touch()
+            result = subprocess.run(
+                ["bash", str(tools / "cloudflare-token.sh"), "preview", "preview_token"],
+                env={**os.environ, "PATH": f"{binary}:{os.environ['PATH']}", "RUNNER_TEMP": temporary,
+                     "GITHUB_ENV": str(environment), "CLOUDFLARE_ACCOUNT_ID": "account"},
+                capture_output=True, text=True, timeout=30)
+            return result, environment.read_text()
+
+    def verify(self, status, days):
+        expires = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(time.time() + days * 86400))
+        return json.dumps({"success": True, "result": {"status": status, "expires_on": expires}})
+
+    def test_accepts_only_an_active_token_and_warns_before_expiry(self):
+        result, environment = self.read("abc_123", self.verify("active", 80))
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertEqual(environment, "CLOUDFLARE_API_TOKEN=abc_123\n")
+        self.assertNotIn("::warning::", result.stdout)
+
+        result, environment = self.read("abc_123", self.verify("active", 3))
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertEqual(environment, "CLOUDFLARE_API_TOKEN=abc_123\n")
+        self.assertIn("::warning::", result.stdout)
+
+        rejected = (
+            ("\x1b[33mWarning: No outputs found", self.verify("active", 80)),
+            ("abc_123", self.verify("disabled", 80)),
+            ("abc_123", json.dumps({"success": False, "result": None})),
+            ("abc_123", ""),
+        )
+        for output, response in rejected:
+            with self.subTest(output=output, response=response):
+                result, environment = self.read(output, response)
+                self.assertEqual(result.returncode, 1)
+                self.assertEqual(environment, "")
+                self.assertIn("Run the Rotate preview token workflow", result.stdout)
+
+
 class WorkflowTests(unittest.TestCase):
     def test_production_reconciles_and_previews_are_static(self):
         production = (ROOT / ".github/workflows/deploy.yaml").read_text()
@@ -420,7 +470,7 @@ class WorkflowTests(unittest.TestCase):
         holders = [step.split("\n", 1)[0] for step in steps if "secrets.CLOUDFLARE_API_TOKEN" in step]
         self.assertEqual(holders, ["name: Deploy state server", "name: Plan infrastructure", "name: Apply infrastructure"])
         self.assertIn("tools/infra-ci/cloudflare-token.sh deploy deploy_token", production)
-        self.assertIn("tools/infra-ci/cloudflare-token.sh prod preview_token", preview)
+        self.assertIn("tools/infra-ci/cloudflare-token.sh preview preview_token", preview)
         self.assertNotIn(" deploy ", preview)
         for text in (production, preview):
             self.assertIn("terraform-recovery/**/*.enc", text)

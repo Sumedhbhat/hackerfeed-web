@@ -22,21 +22,31 @@ variable "permissions" {
   type = list(string)
 }
 
+# The first apply after rotation_days replaces the token, and it expires after
+# expiry_days, so it only lapses if no apply runs in between.
+variable "rotation_days" {
+  type    = number
+  default = 30
+}
+
+variable "expiry_days" {
+  type    = number
+  default = 90
+}
+
 data "cloudflare_account_api_token_permission_groups_list" "account" {
   account_id = var.account_id
   scope      = "com.cloudflare.api.account"
 }
 
-# The first production run after 30 days replaces the token. It expires after
-# 90, so a token only lapses if production goes that long without a run.
 resource "time_rotating" "this" {
-  rotation_days = 30
+  rotation_days = var.rotation_days
 }
 
 resource "cloudflare_account_token" "this" {
   account_id = var.account_id
   name       = var.name
-  expires_on = timeadd(time_rotating.this.rfc3339, "2160h")
+  expires_on = timeadd(time_rotating.this.rfc3339, "${var.expiry_days * 24}h")
 
   policies = [{
     effect = "allow"
