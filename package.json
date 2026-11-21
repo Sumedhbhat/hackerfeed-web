@@ -27,7 +27,7 @@
     "dev:api": "bun run --cwd apps/api dev"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.15",
+    "@biomejs/biome": "2.6.6",
     "@types/node": "^26.6.3",
     "nx": "23.3.0",
     "typescript": "^7.0.2",
