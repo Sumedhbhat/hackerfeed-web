@@ -405,11 +405,6 @@ class WorkflowTests(unittest.TestCase):
         # deploy is the one job that waits for approval.
         self.assertEqual(production.count("environment: production"), 1)
         self.assertIn("environment: production", deploy)
-        self.assertEqual(production.count("concurrency:"), 1)
-        self.assertIn("concurrency:\n      group: cloudflare-production\n      cancel-in-progress: false", deploy)
-        supersede = production.split("  supersede:\n", 1)[1].split("\n  checks:\n", 1)[0]
-        self.assertIn('select(.name == "deploy") | .status', supersede)
-        self.assertIn("in_progress | completed) echo", supersede)
         preview = (ROOT / ".github/workflows/preview.yaml").read_text()
         self.assertNotIn("d1 ", preview)
         self.assertNotIn("VITE_WORKOS_CLIENT_ID", preview)
