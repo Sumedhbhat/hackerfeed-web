@@ -28,52 +28,26 @@ jobs:
         run: bun install --frozen-lockfile
 
       # Shadow mode: records what affected CI would select (base: master,
-      # head: the merge result). Every check below still runs on every project.
+      # head: the merge result). The Build suite still checks every project.
       - name: Record affected projects
         run: bunx nx show projects --affected --base=HEAD^1 --head=HEAD | tee -a "$GITHUB_STEP_SUMMARY"
 
-      - name: Audit dependencies
-        run: bun run security:audit
-
-      - name: Run lint
-        run: bun run check
-
-      - name: Typecheck
-        run: bun run typecheck
-
-      # Also runs shellcheck on every `run:` script (preinstalled on the runner).
-      - name: Lint GitHub workflows
+      - name: Install actionlint
         run: |
-          bash <(curl -sSfL https://raw.githubusercontent.com/rhysd/actionlint/v1.7.12/scripts/download-actionlint.bash) 1.7.12
-          ./actionlint -color
+          bash <(curl -sSfL https://raw.githubusercontent.com/rhysd/actionlint/v1.7.12/scripts/download-actionlint.bash) 1.7.12 "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
 
       - uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: 1.13.4
           terraform_wrapper: false
 
-      # Every project's tests, the infrastructure tooling's included (local only).
-      - name: Run tests
-        run: bun run test
-
-      - name: Build
-        run: bun run build
-
-      - name: Verify build has no demo data
-        run: |
-          if grep -rlF hackerfeed-demo-data apps/web/dist; then
-            echo "Production build includes fixtures; VITE_DEMO_DATA must not be set" >&2
-            exit 1
-          fi
-
-      # Builds the demo app (after the production build is verified above) and
-      # runs the user-flow and accessibility tests in apps/web-e2e.
-      - name: Install Playwright's Chromium
+      - name: Install Chromium system dependencies
         working-directory: apps/web-e2e
-        run: bunx playwright install --with-deps chromium
+        run: bun run playwright install-deps chromium
 
-      - name: End-to-end tests
-        run: bun run e2e
+      - name: Run Build checks
+        run: bash scripts/check-build.sh
 
       - name: Upload end-to-end results
         if: ${{ failure() }}
@@ -83,6 +57,3 @@ jobs:
           path: apps/web-e2e/test-results
           retention-days: 7
           if-no-files-found: ignore
-
-      - name: Check Terraform
-        run: bunx nx run-many -t fmt,validate
