@@ -57,8 +57,6 @@ export function ActivityCalendar({
 	label,
 	listing,
 	listingLabel,
-	lessLabel = "Less",
-	moreLabel = "More",
 }: {
 	weeks: ActivityWeek[];
 	label: string;
@@ -66,8 +64,6 @@ export function ActivityCalendar({
 	listing: ActivityListing[];
 	/** Names the listing, e.g. "Days with reads". */
 	listingLabel: string;
-	lessLabel?: string;
-	moreLabel?: string;
 }) {
 	const [listingOpen, setListingOpen] = useState(false);
 	const visibility = new Map(
@@ -124,14 +120,14 @@ export function ActivityCalendar({
 				aria-hidden="true"
 				className="flex items-center justify-end gap-[3px] text-meta text-ink-soft"
 			>
-				<span className="mr-1">{lessLabel}</span>
+				<span className="mr-1">Less</span>
 				{([0, 1, 2, 3, 4] as const).map((level) => (
 					<span
 						key={level}
 						className={`size-3 rounded-[3px] ${LEVEL[level]}`}
 					/>
 				))}
-				<span className="ml-1">{moreLabel}</span>
+				<span className="ml-1">More</span>
 			</div>
 			<Collapsible open={listingOpen} onOpenChange={setListingOpen}>
 				<CollapsibleTrigger variant="secondary">

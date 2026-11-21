@@ -27,11 +27,13 @@ export function useViewActivity() {
 				.then(async () => {
 					if (action !== "chat_opened") {
 						markFavoriteViewed(story.id, new Date());
-						await refreshReadingDays();
 					}
-					await queryClient.invalidateQueries({
-						queryKey: STORIES_LAST_VIEWED_KEY,
-					});
+					await Promise.all([
+						action !== "chat_opened" && refreshReadingDays(),
+						queryClient.invalidateQueries({
+							queryKey: STORIES_LAST_VIEWED_KEY,
+						}),
+					]);
 				})
 				.catch(() => undefined);
 		},

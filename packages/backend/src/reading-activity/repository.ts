@@ -8,6 +8,7 @@ import { and, inArray, sql } from "drizzle-orm";
 import { readerActivityEvents } from "../activity/events";
 import type { DatabaseContext } from "../database/client";
 import { storyViewedActions } from "../database/schema";
+import { parseActivityTimestamp } from "../view-activity/last-viewed";
 
 const readingActions = [...storyViewedActions, "paper.read"] as const;
 const pageSize = 1000;
@@ -49,9 +50,7 @@ export function createReadingActivityRepository(database: DatabaseContext) {
 					.all();
 
 				for (const { occurredAt, storyId, paperId } of rows) {
-					const date = formatDate(
-						Date.parse(`${occurredAt.replace(" ", "T")}Z`),
-					);
+					const date = formatDate(parseActivityTimestamp(occurredAt).getTime());
 					const day = days.get(date) ?? {
 						stories: new Set<string>(),
 						papers: new Set<string>(),

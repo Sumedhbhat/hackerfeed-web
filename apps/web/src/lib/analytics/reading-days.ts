@@ -13,7 +13,7 @@ export function addDays(dateKey: string, days: number): string {
 	return date.toISOString().slice(0, 10);
 }
 
-export function weekday(dateKey: string): number {
+function weekday(dateKey: string): number {
 	return new Date(`${dateKey}T00:00:00Z`).getUTCDay();
 }
 
@@ -70,7 +70,7 @@ export function readingSeries(
 }
 
 export const MIN_CALENDAR_WEEKS = 17;
-export const MAX_CALENDAR_WEEKS = 53;
+const MAX_CALENDAR_WEEKS = 53;
 
 export type CalendarDay = { date: string; reading: ReadingDay | null };
 
