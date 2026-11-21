@@ -13,6 +13,7 @@ jobs:
   # checks, queued, or waiting for approval). A deploy already running is never
   # cancelled; this run's deploy queues behind it.
   supersede:
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     permissions:
       actions: write
@@ -30,7 +31,7 @@ jobs:
             deploy=$(gh run view "$id" --json jobs --jq '.jobs[] | select(.name == "deploy") | .status')
             case "$deploy" in
               in_progress | completed) echo "Run $id is already deploying; leaving it" ;;
-              *) gh run cancel "$id" ;;
+              *) gh run cancel "$id" || echo "::warning::Run $id was not cancelled; it may have finished" ;;
             esac
           done
 
