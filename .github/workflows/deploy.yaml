@@ -8,11 +8,24 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: cloudflare-production
-  cancel-in-progress: false
-
 jobs:
+  supersede:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: .github/actions
+
+      - name: Cancel superseded runs
+        uses: ./.github/actions/cancel-superseded-runs
+        with:
+          workflow: deploy.yaml
+          job: deploy
+
   # Read-only work runs without approval, so the run is checked and its
   # infrastructure plan is in the summary before anyone approves.
   checks:
@@ -83,6 +96,9 @@ jobs:
     needs: [checks, plan]
     runs-on: ubuntu-latest
     environment: production
+    concurrency:
+      group: cloudflare-production
+      cancel-in-progress: false
     permissions:
       contents: read
       id-token: write

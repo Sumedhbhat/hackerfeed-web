@@ -1,0 +1,34 @@
+name: Cancel superseded runs
+description: Cancel older unfinished runs of a workflow whose given job has not started.
+inputs:
+  workflow:
+    description: Workflow file name, such as deploy.yaml
+    required: true
+  job:
+    description: Name of the job that must not be interrupted once it starts
+    required: true
+  token:
+    description: Token with actions write access
+    default: ${{ github.token }}
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        GH_REPO: ${{ github.repository }}
+        WORKFLOW: ${{ inputs.workflow }}
+        JOB: ${{ inputs.job }}
+        RUN_ID: ${{ github.run_id }}
+      run: |
+        older=$(for status in requested pending queued waiting in_progress; do
+          gh run list --workflow "$WORKFLOW" --status "$status" --limit 100 --json databaseId \
+            --jq ".[] | select(.databaseId < $RUN_ID) | .databaseId"
+        done)
+        for id in $older; do
+          status=$(gh run view "$id" --json jobs --jq ".jobs[] | select(.name == \"$JOB\") | .status")
+          case "$status" in
+            in_progress | completed) echo "Run $id has started $JOB; leaving it" ;;
+            *) gh run cancel "$id" || echo "::warning::Run $id was not cancelled; it may have finished" ;;
+          esac
+        done
