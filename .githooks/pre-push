@@ -1,0 +1,13 @@
+#!/bin/sh
+set -e
+
+has_updates=false
+while read -r local_ref _; do
+  if [ "$local_ref" != "(delete)" ]; then
+    has_updates=true
+  fi
+done
+"$has_updates" || exit 0
+
+bun install --frozen-lockfile </dev/null
+exec bun run check:push </dev/null
