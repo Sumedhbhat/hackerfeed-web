@@ -2,6 +2,11 @@ import { open } from "./support/checks";
 import { articleStory, discussionStory, newestStory } from "./support/data";
 import { expect, test } from "./support/fixtures";
 
+test("the feed has no site footer", async ({ page }) => {
+	await open(page, "/");
+	await expect(page.getByRole("contentinfo")).toHaveCount(0);
+});
+
 test("a click anywhere on an article's card opens the article in a new tab", async ({
 	page,
 	context,

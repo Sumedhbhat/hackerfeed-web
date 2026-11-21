@@ -60,7 +60,6 @@
 		"./molecules/ErrorDetails": "./src/molecules/ErrorDetails.tsx",
 		"./molecules/FatalErrorView": "./src/molecules/FatalErrorView.tsx",
 		"./molecules/FeedRow": "./src/molecules/FeedRow.tsx",
-		"./molecules/FooterBar": "./src/molecules/FooterBar.tsx",
 		"./molecules/HeaderBar": "./src/molecules/HeaderBar.tsx",
 		"./molecules/IconHeading": "./src/molecules/IconHeading.tsx",
 		"./molecules/IconText": "./src/molecules/IconText.tsx",

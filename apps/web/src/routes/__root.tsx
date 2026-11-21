@@ -19,7 +19,6 @@ import { type ReactNode, useEffect } from "react";
 import { env } from "#/env";
 import { ErrorNotifications } from "../components/organisms/layout/ErrorNotifications";
 import { RouteAnnouncer } from "../components/organisms/layout/RouteAnnouncer";
-import SiteFooter from "../components/organisms/layout/SiteFooter";
 import SiteHeader from "../components/organisms/layout/SiteHeader";
 import { useAccount, useAppearanceSync } from "../hooks/useAppearance";
 import { signIn, useAuthSession } from "../hooks/useAuthSession";
@@ -167,7 +166,7 @@ function AppLayout() {
 					{import.meta.env.VITE_DEMO_DATA !== "true" && (
 						<LocalFavoritesMigration />
 					)}
-					<AppShell header={<SiteHeader />} footer={<SiteFooter />}>
+					<AppShell header={<SiteHeader />}>
 						<SessionGate>
 							<Outlet />
 						</SessionGate>

@@ -1,14 +1,12 @@
 import type { ReactNode } from "react";
 import { NEW_TAB_NOTE_ID } from "../atoms/Link";
 
-/** Full-height page frame: header on top, footer at the bottom, content filling the rest. */
+/** Full-height page frame with the header above the content. */
 export function AppShell({
 	header,
-	footer,
 	children,
 }: {
 	header: ReactNode;
-	footer: ReactNode;
 	children: ReactNode;
 }) {
 	return (
@@ -26,7 +24,6 @@ export function AppShell({
 			<div id="content" tabIndex={-1} className="app-content outline-none">
 				{children}
 			</div>
-			{footer}
 		</div>
 	);
 }
