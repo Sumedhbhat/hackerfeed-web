@@ -1,9 +1,10 @@
 import "@tanstack/react-start/server-only";
 
 import type { ReadingDay } from "@hackerfeed/entities/analytics";
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { inArray, sql } from "drizzle-orm";
+import { readerActivityEvents } from "../activity/events";
 import type { DatabaseContext } from "../database/client";
-import { activityEvents, storyViewedActions } from "../database/schema";
+import { storyViewedActions } from "../database/schema";
 
 const paperReadActions = ["paper.read"] as const;
 
@@ -13,23 +14,19 @@ export function createReadingActivityRepository(database: DatabaseContext) {
 			appUserId: string,
 			utcOffsetMinutes: number,
 		): Promise<ReadingDay[]> {
-			const date = sql<string>`date(${activityEvents.occurredAt}, ${`${utcOffsetMinutes} minutes`})`;
+			const events = readerActivityEvents(database, appUserId);
+			const date = sql<string>`date(${events.occurredAt}, ${`${utcOffsetMinutes} minutes`})`;
 
 			return database
+				.with(events)
 				.select({
 					date,
-					stories: sql<number>`count(distinct case when ${inArray(activityEvents.action, storyViewedActions)} then ${activityEvents.storyId} end)`,
-					papers: sql<number>`count(distinct case when ${inArray(activityEvents.action, paperReadActions)} then ${activityEvents.paperId} end)`,
+					stories: sql<number>`count(distinct case when ${inArray(events.action, storyViewedActions)} then ${events.storyId} end)`,
+					papers: sql<number>`count(distinct case when ${inArray(events.action, paperReadActions)} then ${events.paperId} end)`,
 				})
-				.from(activityEvents)
+				.from(events)
 				.where(
-					and(
-						eq(activityEvents.appUserId, appUserId),
-						inArray(activityEvents.action, [
-							...storyViewedActions,
-							...paperReadActions,
-						]),
-					),
+					inArray(events.action, [...storyViewedActions, ...paperReadActions]),
 				)
 				.groupBy(date)
 				.orderBy(date)

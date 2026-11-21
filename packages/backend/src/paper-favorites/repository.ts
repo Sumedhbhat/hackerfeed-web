@@ -10,9 +10,12 @@ import {
 	or,
 	type SQL,
 } from "drizzle-orm";
-import { activityEventSelection } from "../activity/events";
+import {
+	activityEventSelection,
+	insertActivityEventsFrom,
+} from "../activity/events";
 import type { DatabaseContext } from "../database/client";
-import { activityEvents, hfPapers, paperFavorites } from "../database/schema";
+import { hfPapers, paperFavorites } from "../database/schema";
 import { loadPaperMetadata } from "../huggingface-papers/paper-metadata";
 
 export type PaperFavoriteCursor = {
@@ -56,7 +59,8 @@ async function getFavorite(
 export function createPaperFavoriteRepository(database: DatabaseContext) {
 	async function removeFavorites(appUserId: string, where: SQL | undefined) {
 		await database.batch([
-			database.insert(activityEvents).select(
+			insertActivityEventsFrom(
+				database,
 				database
 					.select(
 						activityEventSelection(appUserId, "paper.unfavorited", {
@@ -82,7 +86,8 @@ export function createPaperFavoriteRepository(database: DatabaseContext) {
 		},
 
 		async addFavorite(appUserId: string, paperId: string) {
-			const recordEvent = database.insert(activityEvents).select(
+			const recordEvent = insertActivityEventsFrom(
+				database,
 				database
 					.select(
 						activityEventSelection(appUserId, "paper.favorited", {

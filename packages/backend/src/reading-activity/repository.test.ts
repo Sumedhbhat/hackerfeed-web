@@ -37,12 +37,13 @@ describe("reading activity repository", () => {
 
 		const [query] = statements;
 		expect(query?.sql).toContain(
-			'count(distinct case when "activity_events"."action" in (?, ?) then "storyId" end)',
+			'where "activity_events"."appUserId" = ?) select date(',
 		);
+		expect(query?.sql).toContain('from "reader_activity_events" where');
 		expect(query?.sql).toContain(
-			'group by date("activity_events"."occurredAt", ?) order by date("activity_events"."occurredAt", ?)',
+			'count(distinct case when "reader_activity_events"."action" in (?, ?) then "storyId" end)',
 		);
-		expect(query?.values).toContain("user-1");
+		expect(query?.values[0]).toBe("user-1");
 		expect(query?.values).toContain("330 minutes");
 		expect(query?.values).toContain("paper.read");
 	});

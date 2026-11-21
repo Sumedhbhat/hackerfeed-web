@@ -70,6 +70,10 @@ A reader picks a mode (light, dark, auto) and a palette; both are saved to their
 
 `showAppearance` in `src/lib/appearance/appearance.ts` is the only place that changes the look: it sets `data-theme` and each role as `light-dark(<light>, <dark>)` on `<html>`, updates `theme-color`, and caches the result in localStorage for `src/lib/theme-init.js` to repaint before first paint. Read and change it with `useAppearance()` (`mode`, `palette`, `setMode`, `setPalette`): a change shows at once, saves, and goes back if the save fails. `SessionGate` waits for `account.me` like it waits for flags, and the account always wins over the device's cache. The UI is `/settings` (`components/organisms/settings/`).
 
+### Activity
+
+`activity_events` holds every reader's history, so only `packages/backend/src/activity/events.ts` touches the table. Read it through `readerActivityEvents(database, appUserId)`, a CTE already filtered to that reader (`database.with(events).select(...).from(events)`), and write with `insertActivityEvent` or `insertActivityEventsFrom` + `activityEventSelection`, which stamp the reader as owner. `appUserId` always comes from the verified session, never from input. `/analytics` (`analytics.readingDays`) shows a reader their own streak, trend and calendar from it.
+
 ### Feature flags
 
 Flags are code, not a service. `packages/backend/src/feature-flags/config.ts` defines them, the API's `GET /api/feature-flags` returns them for the signed-in session (only signed-in sessions ask), and `SessionGate` in `__root.tsx` holds the app until the auth state and that session's flags are both known. Read flags with `useFeatureFlag(name)` on the client, and enforce them with `isFeatureEnabled(name, user)` on the server. Follow `.claude/skills/feature-flags/SKILL.md` to add, target or remove a flag.

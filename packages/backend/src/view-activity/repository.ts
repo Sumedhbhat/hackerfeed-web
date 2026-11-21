@@ -6,8 +6,9 @@ import type {
 	StoryViewAction,
 } from "@hackerfeed/entities/view-activity";
 import { eq, inArray, sql } from "drizzle-orm";
+import { insertActivityEvent } from "../activity/events";
 import type { DatabaseContext } from "../database/client";
-import { activityEvents, hfPapers, stories } from "../database/schema";
+import { hfPapers, stories } from "../database/schema";
 import { mapHackerNewsStory } from "../stories/persistence";
 import { lastStoryViews, parseActivityTimestamp } from "./last-viewed";
 
@@ -26,11 +27,9 @@ export function createViewActivityRepository(database: DatabaseContext) {
 					target: stories.hnStoryId,
 					set: mappedStory,
 				});
-			const insertView = database.insert(activityEvents).values({
-				appUserId,
+			const insertView = insertActivityEvent(database, appUserId, {
 				action: `story.${action}`,
 				storyId: sql`(select ${stories.id} from ${stories} where ${stories.hnStoryId} = ${story.id})`,
-				lastUpdatedBy: appUserId,
 			});
 
 			await database.batch([upsertStory, insertView]);
@@ -39,11 +38,9 @@ export function createViewActivityRepository(database: DatabaseContext) {
 		async listStoriesLastViewed(appUserId: string, hnStoryIds: number[]) {
 			if (hnStoryIds.length === 0) return [];
 
-			const lastViews = lastStoryViews(
-				database,
-				appUserId,
+			const lastViews = lastStoryViews(database, appUserId, (events) =>
 				inArray(
-					activityEvents.storyId,
+					events.storyId,
 					database
 						.select({ id: stories.id })
 						.from(stories)
@@ -81,15 +78,10 @@ export function createViewActivityRepository(database: DatabaseContext) {
 			paperId: string,
 			action: PaperViewAction,
 		): Promise<void> {
-			await database
-				.insert(activityEvents)
-				.values({
-					appUserId,
-					action: `paper.${action}`,
-					paperId,
-					lastUpdatedBy: appUserId,
-				})
-				.run();
+			await insertActivityEvent(database, appUserId, {
+				action: `paper.${action}`,
+				paperId,
+			}).run();
 		},
 	};
 }
