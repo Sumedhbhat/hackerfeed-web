@@ -9,6 +9,7 @@ import {
 	type PaletteInput,
 	type PreferencesUpdateInput,
 } from "@hackerfeed/entities/appearance";
+import { DEFAULT_CHAT_PROVIDER } from "@hackerfeed/entities/chat-providers";
 import {
 	type AuthenticatedWorkosUser,
 	resolveCurrentWorkosUser,
@@ -80,6 +81,7 @@ export function createAppearanceService(
 			preferences: {
 				mode: row?.mode ?? "auto",
 				palette: palette ?? DEFAULT_PALETTE,
+				chatProvider: row?.chatProvider ?? DEFAULT_CHAT_PROVIDER,
 				saved: row !== null,
 			},
 		};

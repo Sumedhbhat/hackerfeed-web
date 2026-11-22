@@ -5,6 +5,7 @@
 	"exports": {
 		"./analytics": "./src/analytics.ts",
 		"./appearance": "./src/appearance.ts",
+		"./chat-providers": "./src/chat-providers.ts",
 		"./favorites": "./src/favorites.ts",
 		"./hacker-news": "./src/hacker-news.ts",
 		"./paper-favorites": "./src/paper-favorites.ts",

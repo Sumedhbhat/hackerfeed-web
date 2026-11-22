@@ -64,6 +64,13 @@
       "when": 1795239610710,
       "tag": "20261121054010_story_last_viewed",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1795368981554,
+      "tag": "20261122173621_chat_provider",
+      "breakpoints": true
     }
   ]
 }
