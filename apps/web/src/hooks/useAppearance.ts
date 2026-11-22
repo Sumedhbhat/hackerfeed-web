@@ -1,4 +1,5 @@
 import {
+	type Account,
 	BUILT_IN_PALETTES,
 	type Palette,
 	type PaletteInput,
@@ -45,11 +46,7 @@ export function useAccount() {
 
 const SAVE_MUTATION_KEY = ["preferences", "update"] as const;
 
-type SaveVariables = {
-	changes: PreferencesUpdateInput;
-	previous: Appearance;
-	previousChatProvider?: ChatProviderId;
-};
+type SaveVariables = { changes: PreferencesUpdateInput; previous: Appearance };
 
 export const chatProviderStore = new Store<ChatProviderId>(
 	DEFAULT_CHAT_PROVIDER,
@@ -68,10 +65,14 @@ function useSavePreferences() {
 		// An account fetch already on its way would bring back the old choice.
 		onMutate: () => queryClient.cancelQueries({ queryKey }),
 		onSuccess: (account) => queryClient.setQueryData(queryKey, account),
-		onError: (_error, { previous, previousChatProvider }) => {
+		onError: (_error, { previous }) => {
 			showAppearance(previous);
-			if (previousChatProvider)
-				chatProviderStore.setState(() => previousChatProvider);
+			// Later choices still saving decide what shows; the last failure falls back to the saved one.
+			if (queryClient.isMutating({ mutationKey: SAVE_MUTATION_KEY }) === 1) {
+				const saved = queryClient.getQueryData<Account>(queryKey);
+				if (saved)
+					chatProviderStore.setState(() => saved.preferences.chatProvider);
+			}
 			return queryClient.invalidateQueries({ queryKey });
 		},
 	});
@@ -111,13 +112,11 @@ export function useChatProvider() {
 	return {
 		chatProvider,
 		setChatProvider(next: ChatProviderId) {
-			const previousChatProvider = chatProviderStore.state;
 			chatProviderStore.setState(() => next);
 			if (user)
 				save.mutate({
 					changes: { chatProvider: next },
 					previous: appearanceStore.state,
-					previousChatProvider,
 				});
 		},
 	};

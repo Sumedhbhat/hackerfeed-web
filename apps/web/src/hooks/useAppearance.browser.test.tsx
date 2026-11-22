@@ -249,6 +249,23 @@ describe("useChatProvider", () => {
 		await waitFor(() => expect(result.current.chatProvider).toBe("chatgpt"));
 	});
 
+	it("keeps a later choice on screen when an earlier save fails", async () => {
+		const second = deferredAccount();
+		trpcMock.update
+			.mockRejectedValueOnce(new Error("offline"))
+			.mockReturnValueOnce(second.promise);
+		const { result } = renderChatProvider();
+		await waitFor(() => expect(trpcMock.me).toHaveBeenCalled());
+
+		act(() => result.current.setChatProvider("claude"));
+		act(() => result.current.setChatProvider("grok"));
+
+		await waitFor(() => expect(trpcMock.update).toHaveBeenCalledTimes(2));
+		expect(result.current.chatProvider).toBe("grok");
+		await act(async () => second.resolve(account({ chatProvider: "grok" })));
+		expect(result.current.chatProvider).toBe("grok");
+	});
+
 	it("keeps the latest of quick changes on screen while earlier saves finish", async () => {
 		const first = deferredAccount();
 		const second = deferredAccount();
