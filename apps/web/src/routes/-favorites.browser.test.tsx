@@ -371,7 +371,7 @@ describe("FavoritesPage paper collection", () => {
 		).toBe("https://huggingface.co/papers/2607.00001");
 		expect(
 			screen.getByRole("link", {
-				name: /open in chatgpt: saved reasoning paper/i,
+				name: /chat with ai: saved reasoning paper/i,
 			}),
 		).toBeTruthy();
 		expect(screen.getAllByRole("link", { name: /project/i })).toHaveLength(2);

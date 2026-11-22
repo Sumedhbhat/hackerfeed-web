@@ -1,3 +1,7 @@
+import {
+	buildChatUrl,
+	type ChatProviderId,
+} from "@hackerfeed/entities/chat-providers";
 import type { PaperFeedPaper } from "@hackerfeed/entities/papers";
 
 /** What a paper row needs to render; shared by the feed and saved papers. */
@@ -5,8 +9,6 @@ export type PaperPresentation = Omit<
 	PaperFeedPaper,
 	"entryPublishedAt" | "rank"
 >;
-
-const CHATGPT_URL = "https://chatgpt.com/";
 
 export function formatAuthors(authors: string[]): string {
 	if (authors.length === 0) return "Authors unavailable";
@@ -46,8 +48,9 @@ export function matchesFilters(
 	return searchable.includes(query.toLocaleLowerCase());
 }
 
-export function buildChatGptPaperDiscussionUrl(
+export function buildPaperChatUrl(
 	paper: PaperPresentation,
+	provider: ChatProviderId,
 ): string {
 	const prompt = [
 		"I want to discuss this research paper and understand it completely.",
@@ -60,8 +63,5 @@ export function buildChatGptPaperDiscussionUrl(
 		"I will be asking you a huge series of questions about this paper and want them answered.",
 	].filter(Boolean);
 
-	const url = new URL(CHATGPT_URL);
-	url.searchParams.set("q", prompt.join("\n"));
-
-	return url.toString();
+	return buildChatUrl(provider, prompt.join("\n"));
 }

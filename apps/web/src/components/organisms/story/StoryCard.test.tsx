@@ -20,6 +20,7 @@ const authMock = vi.hoisted(() => ({
 const trpcMock = vi.hoisted(() => ({
 	add: vi.fn(),
 	clear: vi.fn(),
+	me: vi.fn(),
 	list: vi.fn(),
 	remove: vi.fn(),
 	viewStory: vi.fn(),
@@ -34,6 +35,7 @@ vi.mock("#/hooks/useAuthSession", () => ({
 
 vi.mock("#/lib/trpc/client", () => ({
 	createTrpcClient: vi.fn(() => ({
+		account: { me: { query: trpcMock.me } },
 		favorites: {
 			add: { mutate: trpcMock.add },
 			clear: { mutate: trpcMock.clear },
@@ -100,6 +102,7 @@ beforeEach(() => {
 	trpcMock.add.mockResolvedValue(undefined);
 	trpcMock.clear.mockResolvedValue(undefined);
 	trpcMock.list.mockResolvedValue([]);
+	trpcMock.me.mockResolvedValue({ preferences: { chatProvider: "chatgpt" } });
 	trpcMock.remove.mockResolvedValue(undefined);
 	trpcMock.viewStory.mockResolvedValue(undefined);
 	localStorage.clear();
@@ -208,13 +211,30 @@ describe("StoryCard link actions", () => {
 		expect(link.getAttribute("href")).toContain("99999");
 	});
 
-	it("'Open in ChatGPT' opens a ChatGPT prompt about the story in a new tab", () => {
+	it("'Chat with AI' opens a ChatGPT prompt about the story in a new tab by default", () => {
 		renderWithQueryClient(<StoryCard story={makeStory({ id: 4242 })} />);
-		const link = screen.getByRole("link", { name: /^open in chatgpt: /i });
+		const link = screen.getByRole("link", { name: /^chat with ai: /i });
 		const href = new URL(link.getAttribute("href") ?? "");
 		expect(href.origin).toBe("https://chatgpt.com");
 		expect(href.searchParams.get("q")).toContain("item?id=4242");
 		expect(link.getAttribute("target")).toBe("_blank");
+		expect(link.getAttribute("title")).toBe("Opens ChatGPT in a new tab");
+	});
+
+	it("'Chat with AI' opens the reader's chosen chat", async () => {
+		authMock.user = { id: "workos-story-viewer" };
+		trpcMock.me.mockResolvedValue({
+			preferences: { chatProvider: "claude" },
+		});
+		renderWithQueryClient(<StoryCard story={makeStory({ id: 4242 })} />);
+		const link = screen.getByRole("link", { name: /^chat with ai: /i });
+
+		await waitFor(() =>
+			expect(link.getAttribute("title")).toBe("Opens Claude in a new tab"),
+		);
+		const href = new URL(link.getAttribute("href") ?? "");
+		expect(href.origin + href.pathname).toBe("https://claude.ai/new");
+		expect(href.searchParams.get("q")).toContain("item?id=4242");
 	});
 
 	it("records signed-in title clicks as reads", () => {
@@ -278,13 +298,13 @@ describe("StoryCard link actions", () => {
 		);
 	});
 
-	it("records signed-in discussion and ChatGPT opens", () => {
+	it("records signed-in discussion and AI chat opens", () => {
 		authMock.user = { id: "workos-story-viewer" };
 		const story = makeStory();
 		renderWithQueryClient(<StoryCard story={story} />);
 
 		fireEvent.click(screen.getByRole("link", { name: /^17 comments: / }));
-		fireEvent.click(screen.getByRole("link", { name: /^open in chatgpt: /i }));
+		fireEvent.click(screen.getByRole("link", { name: /^chat with ai: /i }));
 
 		expect(trpcMock.viewStory.mock.calls).toEqual([
 			[{ action: "discussion_opened", story }],

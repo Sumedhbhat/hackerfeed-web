@@ -1,3 +1,4 @@
+import { CHAT_PROVIDERS } from "@hackerfeed/entities/chat-providers";
 import type { ViewedStoryRecord } from "@hackerfeed/entities/hacker-news";
 import { ButtonLink } from "@hackerfeed/ui/atoms/Button";
 import { Heading } from "@hackerfeed/ui/atoms/Heading";
@@ -7,15 +8,16 @@ import { TitleTag } from "@hackerfeed/ui/atoms/TitleTag";
 import { ToggleButton } from "@hackerfeed/ui/atoms/Toggle";
 import { ToggleLabel } from "@hackerfeed/ui/atoms/ToggleLabel";
 import { WideText } from "@hackerfeed/ui/atoms/WideText";
-import { ChatGptLink } from "@hackerfeed/ui/molecules/ChatGptLink";
+import { ChatLink } from "@hackerfeed/ui/molecules/ChatLink";
 import { FeedRow } from "@hackerfeed/ui/molecules/FeedRow";
 import { StoryMeta } from "@hackerfeed/ui/molecules/StoryMeta";
 import { Bookmark, MessageSquare } from "lucide-react";
+import { useChatProvider } from "#/hooks/useAppearance";
 import { useFavorites } from "#/hooks/useFavorites";
 import { useViewActivity } from "#/hooks/useViewActivity";
 import { rememberReturnFocus } from "#/lib/a11y/return-focus";
 import {
-	buildChatGptStoryDiscussionUrl,
+	buildStoryChatUrl,
 	formatStoryAge,
 	getDiscussionUrl,
 	getStoryDomain,
@@ -32,6 +34,7 @@ type StoryCardProps = {
 export function StoryCard({ story, markSaved = true }: StoryCardProps) {
 	const { isFavorited, toggleFavorite } = useFavorites();
 	const { recordStoryView } = useViewActivity();
+	const { chatProvider } = useChatProvider();
 	const isFav = isFavorited(story.id);
 	const viewed = story.lastViewedAt != null;
 	const viewedAge = story.lastViewedAt
@@ -97,11 +100,12 @@ export function StoryCard({ story, markSaved = true }: StoryCardProps) {
 				/>
 			}
 			actions={[
-				<ChatGptLink
-					key="chatgpt"
+				<ChatLink
+					key="chat"
 					title={title}
-					discussUrl={buildChatGptStoryDiscussionUrl(story)}
-					onDiscuss={() => recordStoryView(story, "chat_opened")}
+					providerName={CHAT_PROVIDERS[chatProvider].name}
+					chatUrl={buildStoryChatUrl(story, chatProvider)}
+					onOpen={() => recordStoryView(story, "chat_opened")}
 				/>,
 				<ButtonLink
 					key="comments"

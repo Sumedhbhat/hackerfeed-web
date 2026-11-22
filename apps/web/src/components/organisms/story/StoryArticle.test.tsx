@@ -46,12 +46,12 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe("StoryArticle activity", () => {
-	it("records signed-in article and ChatGPT opens", () => {
+	it("records signed-in article and AI chat opens", () => {
 		authMock.user = { id: "workos-story-reader" };
 		renderWithQueryClient(<StoryArticle story={story} />);
 
 		fireEvent.click(screen.getByRole("link", { name: /read article/i }));
-		fireEvent.click(screen.getByRole("link", { name: /^open in chatgpt: /i }));
+		fireEvent.click(screen.getByRole("link", { name: /^chat with ai: /i }));
 
 		expect(viewStory.mock.calls).toEqual([
 			[{ action: "read", story }],

@@ -13,7 +13,11 @@ import {
 	LEGACY_MODE_KEY,
 	showAppearance,
 } from "#/lib/appearance/appearance";
-import { useAppearance, useAppearanceSync } from "./useAppearance";
+import {
+	useAppearance,
+	useAppearanceSync,
+	useChatProvider,
+} from "./useAppearance";
 
 const ember = BUILT_IN_PALETTES[1];
 const authMock = vi.hoisted(() => ({
@@ -34,29 +38,28 @@ const account = (preferences: Partial<Account["preferences"]>): Account => ({
 	preferences: {
 		mode: "auto",
 		palette: DEFAULT_PALETTE,
+		chatProvider: "chatgpt",
 		saved: true,
 		...preferences,
 	},
 });
 
-function renderAppearance() {
+function renderWithQueries<T>(hook: () => T) {
 	const queryClient = new QueryClient({
 		defaultOptions: { queries: { retry: false } },
 	});
-	return renderHook(
-		() => {
-			useAppearanceSync();
-			return useAppearance();
-		},
-		{
-			wrapper: ({ children }: { children: ReactNode }) => (
-				<QueryClientProvider client={queryClient}>
-					{children}
-				</QueryClientProvider>
-			),
-		},
-	);
+	return renderHook(hook, {
+		wrapper: ({ children }: { children: ReactNode }) => (
+			<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+		),
+	});
 }
+
+const renderAppearance = () =>
+	renderWithQueries(() => {
+		useAppearanceSync();
+		return useAppearance();
+	});
 
 function deferredAccount() {
 	let resolve: (account: Account) => void = () => {};
@@ -198,5 +201,40 @@ describe("useAppearance", () => {
 		expect(result.current.mode).toBe("dark");
 		expect(trpcMock.me).not.toHaveBeenCalled();
 		expect(trpcMock.update).not.toHaveBeenCalled();
+	});
+});
+
+describe("useChatProvider", () => {
+	it("is the account's provider, ChatGPT until it loads", async () => {
+		trpcMock.me.mockResolvedValue(account({ chatProvider: "perplexity" }));
+		const { result } = renderWithQueries(useChatProvider);
+
+		expect(result.current.chatProvider).toBe("chatgpt");
+		await waitFor(() => expect(result.current.chatProvider).toBe("perplexity"));
+	});
+
+	it("shows a change at once and saves it", async () => {
+		const saved = deferredAccount();
+		trpcMock.update.mockReturnValue(saved.promise);
+		const { result } = renderWithQueries(useChatProvider);
+		await waitFor(() => expect(trpcMock.me).toHaveBeenCalled());
+
+		act(() => result.current.setChatProvider("claude"));
+
+		await waitFor(() => expect(result.current.chatProvider).toBe("claude"));
+		expect(trpcMock.update).toHaveBeenCalledWith({ chatProvider: "claude" });
+		await act(async () => saved.resolve(account({ chatProvider: "claude" })));
+		expect(result.current.chatProvider).toBe("claude");
+	});
+
+	it("puts the old provider back when the save fails", async () => {
+		trpcMock.update.mockRejectedValue(new Error("offline"));
+		const { result } = renderWithQueries(useChatProvider);
+		await waitFor(() => expect(trpcMock.me).toHaveBeenCalled());
+
+		act(() => result.current.setChatProvider("grok"));
+
+		await waitFor(() => expect(trpcMock.update).toHaveBeenCalled());
+		await waitFor(() => expect(result.current.chatProvider).toBe("chatgpt"));
 	});
 });

@@ -3,6 +3,7 @@ import { PageContainer } from "@hackerfeed/ui/atoms/PageContainer";
 import { Panel } from "@hackerfeed/ui/atoms/Panel";
 import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { AppearanceSettings } from "#/components/organisms/settings/AppearanceSettings";
+import { ChatProviderSettings } from "#/components/organisms/settings/ChatProviderSettings";
 
 export function SettingsPage() {
 	return (
@@ -13,6 +14,7 @@ export function SettingsPage() {
 						Settings
 					</Heading>
 					<AppearanceSettings />
+					<ChatProviderSettings />
 				</Stack>
 			</Panel>
 		</PageContainer>

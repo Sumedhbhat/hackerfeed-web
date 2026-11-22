@@ -1,10 +1,15 @@
 import {
+	type Account,
 	BUILT_IN_PALETTES,
 	type Palette,
 	type PaletteInput,
 	type PreferencesUpdateInput,
 	type ThemeMode,
 } from "@hackerfeed/entities/appearance";
+import {
+	type ChatProviderId,
+	DEFAULT_CHAT_PROVIDER,
+} from "@hackerfeed/entities/chat-providers";
 import {
 	useIsMutating,
 	useMutation,
@@ -27,15 +32,19 @@ import { useAuthSession } from "./useAuthSession";
 const accountQueryKey = (userId: string | undefined) =>
 	["account", userId ?? null] as const;
 
-/** What HackerFeed stores about the signed-in reader. Refetched on window focus, so a change made on another device shows up here. */
-export function useAccount() {
+function useAccountQueryOptions() {
 	const { user } = useAuthSession();
-	return useQuery({
+	return {
 		queryKey: accountQueryKey(user?.id),
 		queryFn: () => createTrpcClient().account.me.query(),
 		enabled: Boolean(user),
 		retry: 1,
-	});
+	};
+}
+
+/** What HackerFeed stores about the signed-in reader. Refetched on window focus, so a change made on another device shows up here. */
+export function useAccount() {
+	return useQuery(useAccountQueryOptions());
 }
 
 const SAVE_MUTATION_KEY = ["preferences", "update"] as const;
@@ -53,7 +62,18 @@ function useSavePreferences() {
 		mutationFn: ({ changes }: SaveVariables) =>
 			createTrpcClient().preferences.update.mutate(changes),
 		// An account fetch already on its way would bring back the old choice.
-		onMutate: () => queryClient.cancelQueries({ queryKey }),
+		onMutate: async ({ changes: { chatProvider } }) => {
+			await queryClient.cancelQueries({ queryKey });
+			if (chatProvider)
+				queryClient.setQueryData<Account>(
+					queryKey,
+					(account) =>
+						account && {
+							...account,
+							preferences: { ...account.preferences, chatProvider },
+						},
+				);
+		},
 		onSuccess: (account) => queryClient.setQueryData(queryKey, account),
 		onError: (_error, { previous }) => {
 			showAppearance(previous);
@@ -84,6 +104,24 @@ export function useAppearance(): UseAppearanceReturn {
 		setMode: (mode) => change({ ...appearanceStore.state, mode }, { mode }),
 		setPalette: (palette) =>
 			change({ ...appearanceStore.state, palette }, { paletteId: palette.id }),
+	};
+}
+
+/** The AI chat that story and paper links open. A change shows at once and is saved to the account; a failed save puts the old one back. */
+export function useChatProvider() {
+	const { data: chatProvider = DEFAULT_CHAT_PROVIDER } = useQuery({
+		...useAccountQueryOptions(),
+		select: (account) => account.preferences.chatProvider,
+	});
+	const save = useSavePreferences();
+
+	return {
+		chatProvider,
+		setChatProvider: (next: ChatProviderId) =>
+			save.mutate({
+				changes: { chatProvider: next },
+				previous: appearanceStore.state,
+			}),
 	};
 }
 
