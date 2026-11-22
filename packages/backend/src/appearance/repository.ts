@@ -1,6 +1,9 @@
 import "@tanstack/react-start/server-only";
 
-import type { PaletteInput, ThemeMode } from "@hackerfeed/entities/appearance";
+import type {
+	PaletteInput,
+	PreferencesUpdateInput,
+} from "@hackerfeed/entities/appearance";
 import { and, asc, count, eq, sql } from "drizzle-orm";
 import type { DatabaseContext } from "../database/client";
 import { palettes, userPreferences } from "../database/schema";
@@ -24,16 +27,14 @@ export function createAppearanceRepository(database: DatabaseContext) {
 			return row ?? null;
 		},
 
-		async savePreferences(
-			appUserId: string,
-			changes: { mode?: ThemeMode; paletteId?: string },
-		) {
+		async savePreferences(appUserId: string, changes: PreferencesUpdateInput) {
 			await database
 				.insert(userPreferences)
 				.values({
 					appUserId,
 					mode: changes.mode ?? "auto",
 					paletteId: changes.paletteId ?? null,
+					chatProvider: changes.chatProvider,
 				})
 				.onConflictDoUpdate({
 					target: userPreferences.appUserId,

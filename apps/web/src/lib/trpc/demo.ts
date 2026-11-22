@@ -15,6 +15,10 @@ import {
 	type ThemeMode,
 } from "@hackerfeed/entities/appearance";
 import {
+	type ChatProviderId,
+	DEFAULT_CHAT_PROVIDER,
+} from "@hackerfeed/entities/chat-providers";
+import {
 	type FavoriteStoryInput,
 	favoriteStoryIdInputSchema,
 	hackerNewsStorySchema,
@@ -107,8 +111,11 @@ export function createDemoApi() {
 			{ id, name, baseRole, baseColor, accentColor, builtIn: false },
 		]),
 	);
-	let preferences: { mode: ThemeMode; paletteId: string | null } | null =
-		userPreferencesRows[0] ?? null;
+	let preferences: {
+		mode: ThemeMode;
+		paletteId: string | null;
+		chatProvider: ChatProviderId;
+	} | null = userPreferencesRows[0] ?? null;
 	const findPalette = (id: string) =>
 		BUILT_IN_PALETTES.find((palette) => palette.id === id) ?? palettes.get(id);
 	const account = () => ({
@@ -117,6 +124,7 @@ export function createDemoApi() {
 			palette:
 				(preferences?.paletteId && findPalette(preferences.paletteId)) ||
 				DEFAULT_PALETTE,
+			chatProvider: preferences?.chatProvider ?? DEFAULT_CHAT_PROVIDER,
 			saved: preferences !== null,
 		},
 	});
@@ -315,6 +323,10 @@ export function createDemoApi() {
 				preferences = {
 					mode: changes.mode ?? preferences?.mode ?? "auto",
 					paletteId: changes.paletteId ?? preferences?.paletteId ?? null,
+					chatProvider:
+						changes.chatProvider ??
+						preferences?.chatProvider ??
+						DEFAULT_CHAT_PROVIDER,
 				};
 				return account();
 			}

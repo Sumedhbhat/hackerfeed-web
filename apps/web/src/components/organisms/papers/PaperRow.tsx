@@ -1,17 +1,19 @@
+import { CHAT_PROVIDERS } from "@hackerfeed/entities/chat-providers";
 import type { PaperViewAction } from "@hackerfeed/entities/view-activity";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
 import { PaperCard } from "@hackerfeed/ui/atoms/PaperCard";
 import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { ToggleButton } from "@hackerfeed/ui/atoms/Toggle";
 import { ToggleLabel } from "@hackerfeed/ui/atoms/ToggleLabel";
-import { ChatGptLink } from "@hackerfeed/ui/molecules/ChatGptLink";
+import { ChatLink } from "@hackerfeed/ui/molecules/ChatLink";
 import { PaperCardFooter } from "@hackerfeed/ui/molecules/PaperCardFooter";
 import { PaperResourceLinks } from "@hackerfeed/ui/molecules/PaperResourceLinks";
 import { PaperSignals } from "@hackerfeed/ui/molecules/PaperSignals";
 import { PaperTitle } from "@hackerfeed/ui/molecules/PaperTitle";
 import { Bookmark } from "lucide-react";
+import { useChatProvider } from "#/hooks/useAppearance";
 import {
-	buildChatGptPaperDiscussionUrl,
+	buildPaperChatUrl,
 	formatAuthors,
 	formatPaperDate,
 	type PaperPresentation,
@@ -37,6 +39,7 @@ export function PaperRow({
 	onView,
 	paper,
 }: PaperRowProps) {
+	const { chatProvider } = useChatProvider();
 	return (
 		<PaperCard saved={markSaved && saved}>
 			<Stack gap="sm">
@@ -62,10 +65,11 @@ export function PaperRow({
 			/>
 			<PaperCardFooter
 				actions={
-					<ChatGptLink
+					<ChatLink
 						title={paper.title}
-						discussUrl={buildChatGptPaperDiscussionUrl(paper)}
-						onDiscuss={() => onView("chat_opened")}
+						providerName={CHAT_PROVIDERS[chatProvider].name}
+						chatUrl={buildPaperChatUrl(paper, chatProvider)}
+						onOpen={() => onView("chat_opened")}
 					/>
 				}
 				save={

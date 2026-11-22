@@ -214,14 +214,14 @@ describe("PapersFeed", () => {
 		});
 	});
 
-	it("records signed-in ChatGPT discussion opens", () => {
+	it("records signed-in AI chat opens", () => {
 		render(
 			<PapersFeed edition={edition} filters={{}} onFiltersChange={vi.fn()} />,
 		);
 
 		fireEvent.click(
 			screen.getByRole("link", {
-				name: "Open in ChatGPT: Reasoning Paper",
+				name: "Chat with AI: Reasoning Paper",
 			}),
 		);
 
@@ -279,7 +279,7 @@ describe("PapersFeed", () => {
 		expect(screen.getByRole("link", { name: "Reasoning Paper" })).toBeTruthy();
 		expect(
 			screen.getByRole("link", {
-				name: "Open in ChatGPT: Reasoning Paper",
+				name: "Chat with AI: Reasoning Paper",
 			}),
 		).toBeTruthy();
 	});
@@ -322,13 +322,13 @@ describe("PapersFeed", () => {
 		expect(trpcMock.add).toHaveBeenCalledTimes(1);
 	});
 
-	it("opens ChatGPT with paper discussion context", () => {
+	it("opens the AI chat with paper discussion context", () => {
 		render(
 			<PapersFeed edition={edition} filters={{}} onFiltersChange={vi.fn()} />,
 		);
 
 		const discussLink = screen.getByRole("link", {
-			name: "Open in ChatGPT: Reasoning Paper",
+			name: "Chat with AI: Reasoning Paper",
 		});
 		const chatUrl = new URL(discussLink.getAttribute("href") ?? "");
 		const prompt = chatUrl.searchParams.get("q") ?? "";

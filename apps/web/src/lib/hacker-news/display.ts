@@ -1,3 +1,7 @@
+import {
+	buildChatUrl,
+	type ChatProviderId,
+} from "@hackerfeed/entities/chat-providers";
 import type { HackerNewsStoryRecord } from "@hackerfeed/entities/hacker-news";
 
 const RELATIVE_TIME_FORMATTER = new Intl.RelativeTimeFormat("en", {
@@ -8,8 +12,9 @@ export function getDiscussionUrl(storyId: number): string {
 	return `https://news.ycombinator.com/item?id=${storyId}`;
 }
 
-export function buildChatGptStoryDiscussionUrl(
+export function buildStoryChatUrl(
 	story: HackerNewsStoryRecord,
+	provider: ChatProviderId,
 ): string {
 	const prompt = [
 		"I want to discuss this article and understand it completely.",
@@ -21,10 +26,7 @@ export function buildChatGptStoryDiscussionUrl(
 		"I will be asking you a series of questions about this article and want them answered.",
 	].filter((line) => line !== null);
 
-	const url = new URL("https://chatgpt.com/");
-	url.searchParams.set("q", prompt.join("\n"));
-
-	return url.toString();
+	return buildChatUrl(provider, prompt.join("\n"));
 }
 
 export function stripHtml(input: string | null): string {

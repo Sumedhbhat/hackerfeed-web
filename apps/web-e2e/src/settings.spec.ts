@@ -117,6 +117,26 @@ test("editing a palette saves the change and keeps it selected", async ({
 	expect(await accent(page)).not.toBe(before);
 });
 
+test("the chosen AI chat is where Chat with AI goes", async ({ page }) => {
+	await open(page, "/settings");
+	const chats = page.getByRole("toolbar", { name: "AI chat" });
+	await expect(chats.getByRole("button", { name: "ChatGPT" })).toHaveAttribute(
+		"aria-pressed",
+		"true",
+	);
+
+	await chats.getByRole("button", { name: "Claude" }).click();
+	await expect(chats.getByRole("button", { name: "Claude" })).toHaveAttribute(
+		"aria-pressed",
+		"true",
+	);
+
+	await page.getByRole("link", { name: "Stories" }).click();
+	const chat = page.getByRole("link", { name: /^Chat with AI: / }).first();
+	await expect(chat).toHaveAttribute("href", /^https:\/\/claude\.ai\/new\?q=/);
+	await expect(chat).toHaveAttribute("title", "Opens Claude in a new tab");
+});
+
 for (const palette of ["Ember", "Iris", "Midnight", "Sunset"]) {
 	for (const scheme of ["light", "dark"] as const) {
 		test(`${palette} passes axe in ${scheme} mode on the feed and in settings`, async ({

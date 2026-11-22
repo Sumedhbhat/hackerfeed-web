@@ -53,7 +53,13 @@ describe("appearance repository", () => {
 			'on conflict ("user_preferences"."appUserId") do update set "mode" = ?, "updatedAt" = CURRENT_TIMESTAMP',
 		);
 		expect(statement?.sql).not.toContain('"paletteId" = ?');
-		expect(statement?.values).toEqual(["user-1", "dark", null, "dark"]);
+		expect(statement?.values).toEqual([
+			"user-1",
+			"dark",
+			null,
+			"chatgpt",
+			"dark",
+		]);
 	});
 
 	it("scopes palette reads and writes to their owner", async () => {

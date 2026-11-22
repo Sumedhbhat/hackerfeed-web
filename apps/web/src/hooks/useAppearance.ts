@@ -1,4 +1,5 @@
 import {
+	type Account,
 	BUILT_IN_PALETTES,
 	type Palette,
 	type PaletteInput,
@@ -6,12 +7,17 @@ import {
 	type ThemeMode,
 } from "@hackerfeed/entities/appearance";
 import {
+	type ChatProviderId,
+	DEFAULT_CHAT_PROVIDER,
+} from "@hackerfeed/entities/chat-providers";
+import {
 	useIsMutating,
 	useMutation,
 	useQuery,
 	useQueryClient,
 } from "@tanstack/react-query";
 import { useStore } from "@tanstack/react-store";
+import { Store } from "@tanstack/store";
 import { useEffect, useLayoutEffect, useRef } from "react";
 import {
 	type Appearance,
@@ -42,6 +48,10 @@ const SAVE_MUTATION_KEY = ["preferences", "update"] as const;
 
 type SaveVariables = { changes: PreferencesUpdateInput; previous: Appearance };
 
+export const chatProviderStore = new Store<ChatProviderId>(
+	DEFAULT_CHAT_PROVIDER,
+);
+
 function useSavePreferences() {
 	const { user } = useAuthSession();
 	const queryClient = useQueryClient();
@@ -57,6 +67,12 @@ function useSavePreferences() {
 		onSuccess: (account) => queryClient.setQueryData(queryKey, account),
 		onError: (_error, { previous }) => {
 			showAppearance(previous);
+			// Later choices still saving decide what shows; the last failure falls back to the saved one.
+			if (queryClient.isMutating({ mutationKey: SAVE_MUTATION_KEY }) === 1) {
+				const saved = queryClient.getQueryData<Account>(queryKey);
+				if (saved)
+					chatProviderStore.setState(() => saved.preferences.chatProvider);
+			}
 			return queryClient.invalidateQueries({ queryKey });
 		},
 	});
@@ -87,6 +103,25 @@ export function useAppearance(): UseAppearanceReturn {
 	};
 }
 
+/** The AI chat that story and paper links open. A change shows at once and is saved to the account; a failed save puts the old one back. */
+export function useChatProvider() {
+	const chatProvider = useStore(chatProviderStore, (state) => state);
+	const { user } = useAuthSession();
+	const save = useSavePreferences();
+
+	return {
+		chatProvider,
+		setChatProvider(next: ChatProviderId) {
+			chatProviderStore.setState(() => next);
+			if (user)
+				save.mutate({
+					changes: { chatProvider: next },
+					previous: appearanceStore.state,
+				});
+		},
+	};
+}
+
 /** Mounted once at the root: shows this device's cached look, then the account's, which always wins. */
 export function useAppearanceSync() {
 	const { data: account } = useAccount();
@@ -101,7 +136,9 @@ export function useAppearanceSync() {
 	// An account fetched before a change was saved must not undo that change.
 	const saving = useIsMutating({ mutationKey: SAVE_MUTATION_KEY }) > 0;
 	useLayoutEffect(() => {
-		if (account && !saving) showAppearance(account.preferences);
+		if (!account || saving) return;
+		showAppearance(account.preferences);
+		chatProviderStore.setState(() => account.preferences.chatProvider);
 	}, [account, saving]);
 
 	// The mode used to live only in this browser. Move it to an account that

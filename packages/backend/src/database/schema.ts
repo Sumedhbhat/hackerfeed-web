@@ -160,12 +160,19 @@ export const userPreferences = sqliteTable(
 		mode: text({ enum: ["light", "dark", "auto"] }).notNull(),
 		/** A built-in palette's id or a `palettes.id`; null or unknown means the default. */
 		paletteId: text(),
+		chatProvider: text({ enum: ["chatgpt", "claude", "perplexity", "grok"] })
+			.notNull()
+			.default("chatgpt"),
 		updatedAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
 	},
 	(table) => [
 		check(
 			"user_preferences_mode_check",
 			sql`${table.mode} in ('light', 'dark', 'auto')`,
+		),
+		check(
+			"user_preferences_chat_provider_check",
+			sql`${table.chatProvider} in ('chatgpt', 'claude', 'perplexity', 'grok')`,
 		),
 	],
 );

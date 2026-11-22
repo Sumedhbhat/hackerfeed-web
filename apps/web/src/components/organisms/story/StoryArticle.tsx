@@ -1,3 +1,4 @@
+import { CHAT_PROVIDERS } from "@hackerfeed/entities/chat-providers";
 import type { HackerNewsStoryRecord } from "@hackerfeed/entities/hacker-news";
 import { ExternalButtonLink } from "@hackerfeed/ui/atoms/Button";
 import { Heading } from "@hackerfeed/ui/atoms/Heading";
@@ -8,13 +9,14 @@ import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { TitleTag } from "@hackerfeed/ui/atoms/TitleTag";
 import { ToggleButton } from "@hackerfeed/ui/atoms/Toggle";
 import { ToggleLabel } from "@hackerfeed/ui/atoms/ToggleLabel";
-import { ChatGptLink } from "@hackerfeed/ui/molecules/ChatGptLink";
+import { ChatLink } from "@hackerfeed/ui/molecules/ChatLink";
 import { StoryMeta } from "@hackerfeed/ui/molecules/StoryMeta";
 import { ArrowUpRight, Bookmark } from "lucide-react";
+import { useChatProvider } from "#/hooks/useAppearance";
 import { useFavorites } from "#/hooks/useFavorites";
 import { useViewActivity } from "#/hooks/useViewActivity";
 import {
-	buildChatGptStoryDiscussionUrl,
+	buildStoryChatUrl,
 	formatStoryAge,
 	getStoryDomain,
 	getStoryTitle,
@@ -25,6 +27,7 @@ export function StoryArticle({ story }: { story: HackerNewsStoryRecord }) {
 	const title = getStoryTitle(story);
 	const { kind: postKind, text: titleText } = splitPostKind(title);
 	const { recordStoryView } = useViewActivity();
+	const { chatProvider } = useChatProvider();
 	const { isFavorited, toggleFavorite } = useFavorites();
 	const isFav = isFavorited(story.id);
 
@@ -52,10 +55,11 @@ export function StoryArticle({ story }: { story: HackerNewsStoryRecord }) {
 						Read article <Icon icon={ArrowUpRight} size={14} />
 					</ExternalButtonLink>
 				)}
-				<ChatGptLink
+				<ChatLink
 					title={title}
-					discussUrl={buildChatGptStoryDiscussionUrl(story)}
-					onDiscuss={() => recordStoryView(story, "chat_opened")}
+					providerName={CHAT_PROVIDERS[chatProvider].name}
+					chatUrl={buildStoryChatUrl(story, chatProvider)}
+					onOpen={() => recordStoryView(story, "chat_opened")}
 				/>
 				<ToggleButton
 					aria-label={`${isFav ? "Saved" : "Save"} ${title}`}

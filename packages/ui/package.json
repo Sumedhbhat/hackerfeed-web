@@ -53,7 +53,7 @@
 		"./molecules/ConfirmButton": "./src/molecules/ConfirmButton.tsx",
 		"./molecules/DailyBarChart": "./src/molecules/DailyBarChart.tsx",
 		"./molecules/DropdownMenu": "./src/molecules/DropdownMenu.tsx",
-		"./molecules/ChatGptLink": "./src/molecules/ChatGptLink.tsx",
+		"./molecules/ChatLink": "./src/molecules/ChatLink.tsx",
 		"./molecules/EmptyState": "./src/molecules/EmptyState.tsx",
 		"./molecules/ErrorDetails": "./src/molecules/ErrorDetails.tsx",
 		"./molecules/FatalErrorView": "./src/molecules/FatalErrorView.tsx",

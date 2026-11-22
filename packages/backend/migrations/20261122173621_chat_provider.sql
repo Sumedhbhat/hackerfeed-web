@@ -1,0 +1,1 @@
+ALTER TABLE `user_preferences` ADD `chatProvider` text DEFAULT 'chatgpt' NOT NULL CONSTRAINT "user_preferences_chat_provider_check" CHECK("chatProvider" in ('chatgpt', 'claude', 'perplexity', 'grok'));

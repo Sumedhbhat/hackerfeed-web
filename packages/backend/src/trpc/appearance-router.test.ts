@@ -10,7 +10,12 @@ import { createTrpcContext } from "./context";
 import { createAppRouter } from "./router";
 
 const account = {
-	preferences: { mode: "auto", palette: DEFAULT_PALETTE, saved: false },
+	preferences: {
+		mode: "auto",
+		palette: DEFAULT_PALETTE,
+		chatProvider: "chatgpt",
+		saved: false,
+	},
 } as const;
 const paletteId = "3f0e7c0a-5b0e-4f43-9d0b-1c2d3e4f5a6b";
 const sunset = {

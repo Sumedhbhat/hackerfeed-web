@@ -41,6 +41,8 @@ function createHarness() {
 				appUserId,
 				mode: changes.mode ?? existing?.mode ?? ("auto" satisfies ThemeMode),
 				paletteId: changes.paletteId ?? existing?.paletteId ?? null,
+				chatProvider:
+					changes.chatProvider ?? existing?.chatProvider ?? "chatgpt",
 				updatedAt: "2026-11-10 00:00:00",
 			});
 		},
@@ -95,7 +97,12 @@ describe("appearance service", () => {
 		const { preferences, service } = createHarness();
 
 		expect(await service.getAccount(reader)).toEqual({
-			preferences: { mode: "auto", palette: DEFAULT_PALETTE, saved: false },
+			preferences: {
+				mode: "auto",
+				palette: DEFAULT_PALETTE,
+				chatProvider: "chatgpt",
+				saved: false,
+			},
 		});
 		expect(preferences.size).toBe(0);
 	});
@@ -109,6 +116,23 @@ describe("appearance service", () => {
 		expect(account.preferences).toMatchObject({
 			mode: "dark",
 			palette: { id: "ember", builtIn: true },
+			chatProvider: "chatgpt",
+			saved: true,
+		});
+	});
+
+	it("saves a chat provider without touching the look", async () => {
+		const { service } = createHarness();
+
+		await service.updatePreferences(reader, { mode: "dark" });
+		const account = await service.updatePreferences(reader, {
+			chatProvider: "claude",
+		});
+
+		expect(account.preferences).toEqual({
+			mode: "dark",
+			palette: DEFAULT_PALETTE,
+			chatProvider: "claude",
 			saved: true,
 		});
 	});
@@ -153,6 +177,7 @@ describe("appearance service", () => {
 		expect((await service.getAccount(reader)).preferences).toEqual({
 			mode: "light",
 			palette: DEFAULT_PALETTE,
+			chatProvider: "chatgpt",
 			saved: true,
 		});
 	});

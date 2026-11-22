@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { chatProviderIdSchema } from "./chat-providers";
 
 export const themeModeSchema = z.enum(["light", "dark", "auto"]);
 export type ThemeMode = z.infer<typeof themeModeSchema>;
@@ -80,6 +81,7 @@ export const accountOutputSchema = z.object({
 	preferences: z.object({
 		mode: themeModeSchema,
 		palette: paletteSchema,
+		chatProvider: chatProviderIdSchema,
 		/** False until the reader first chooses something; the defaults are not stored. */
 		saved: z.boolean(),
 	}),
@@ -91,6 +93,7 @@ export const preferencesUpdateInputSchema = z
 	.object({
 		mode: themeModeSchema.optional(),
 		paletteId: z.string().min(1).max(64).optional(),
+		chatProvider: chatProviderIdSchema.optional(),
 	})
 	.strict();
 export type PreferencesUpdateInput = z.infer<

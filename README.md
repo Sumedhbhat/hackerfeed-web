@@ -168,10 +168,10 @@ and when (`occurredAt`, UTC).
 | --- | --- |
 | `story.read` | opens a story: its article, or the HN post when it has no article (Ask HN) |
 | `story.discussion_opened` | opens the in-app comment thread from a story card |
-| `story.chat_opened` | opens a story's ChatGPT discussion |
+| `story.chat_opened` | opens a story in the reader's AI chat (Chat with AI) |
 | `story.favorited` / `story.unfavorited` | saves or removes a story (clearing logs one unfavorite per story) |
 | `paper.read` | opens a paper |
-| `paper.chat_opened` | opens a paper's ChatGPT discussion |
+| `paper.chat_opened` | opens a paper in the reader's AI chat (Chat with AI) |
 | `paper.favorited` / `paper.unfavorited` | saves or removes a paper |
 
 Favorite events are written in the same D1 batch as the favorite itself, and
@@ -450,3 +450,11 @@ fifteen for light and dark mode and keeps text readable (4.5:1) whatever was
 picked. Only the picked colours are stored, as `#RRGGBB`. The default palette
 is the stylesheet itself, and readers who never chose have no row, so changing
 the default reaches them.
+
+### AI chat
+
+"Chat with AI" on stories and papers opens a new chat with a prompt about the
+item already written. Readers pick the chat on `/settings` (ChatGPT, Claude,
+Perplexity or Grok); the choice is `user_preferences.chatProvider`, returned by
+`account.me`, so it follows them too. Providers and their prompt URLs live in
+`@hackerfeed/entities/chat-providers`.
