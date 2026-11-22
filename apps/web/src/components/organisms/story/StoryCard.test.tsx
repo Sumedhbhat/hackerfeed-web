@@ -9,6 +9,7 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { StoryCard } from "#/components/organisms/story/StoryCard";
+import { chatProviderStore } from "#/hooks/useAppearance";
 import { clearAllFavorites, isFavorited } from "#/lib/favorites-store";
 import { renderWithQueryClient } from "#/test/renderWithQueryClient";
 
@@ -20,7 +21,6 @@ const authMock = vi.hoisted(() => ({
 const trpcMock = vi.hoisted(() => ({
 	add: vi.fn(),
 	clear: vi.fn(),
-	me: vi.fn(),
 	list: vi.fn(),
 	remove: vi.fn(),
 	viewStory: vi.fn(),
@@ -35,7 +35,6 @@ vi.mock("#/hooks/useAuthSession", () => ({
 
 vi.mock("#/lib/trpc/client", () => ({
 	createTrpcClient: vi.fn(() => ({
-		account: { me: { query: trpcMock.me } },
 		favorites: {
 			add: { mutate: trpcMock.add },
 			clear: { mutate: trpcMock.clear },
@@ -102,9 +101,9 @@ beforeEach(() => {
 	trpcMock.add.mockResolvedValue(undefined);
 	trpcMock.clear.mockResolvedValue(undefined);
 	trpcMock.list.mockResolvedValue([]);
-	trpcMock.me.mockResolvedValue({ preferences: { chatProvider: "chatgpt" } });
 	trpcMock.remove.mockResolvedValue(undefined);
 	trpcMock.viewStory.mockResolvedValue(undefined);
+	chatProviderStore.setState(() => "chatgpt");
 	localStorage.clear();
 	clearAllFavorites();
 	vi.clearAllMocks();
@@ -221,17 +220,12 @@ describe("StoryCard link actions", () => {
 		expect(link.getAttribute("title")).toBe("Opens ChatGPT in a new tab");
 	});
 
-	it("'Chat with AI' opens the reader's chosen chat", async () => {
-		authMock.user = { id: "workos-story-viewer" };
-		trpcMock.me.mockResolvedValue({
-			preferences: { chatProvider: "claude" },
-		});
+	it("'Chat with AI' opens the reader's chosen chat", () => {
+		chatProviderStore.setState(() => "claude");
 		renderWithQueryClient(<StoryCard story={makeStory({ id: 4242 })} />);
 		const link = screen.getByRole("link", { name: /^chat with ai: /i });
 
-		await waitFor(() =>
-			expect(link.getAttribute("title")).toBe("Opens Claude in a new tab"),
-		);
+		expect(link.getAttribute("title")).toBe("Opens Claude in a new tab");
 		const href = new URL(link.getAttribute("href") ?? "");
 		expect(href.origin + href.pathname).toBe("https://claude.ai/new");
 		expect(href.searchParams.get("q")).toContain("item?id=4242");

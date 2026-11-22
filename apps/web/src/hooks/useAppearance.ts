@@ -1,5 +1,4 @@
 import {
-	type Account,
 	BUILT_IN_PALETTES,
 	type Palette,
 	type PaletteInput,
@@ -17,6 +16,7 @@ import {
 	useQueryClient,
 } from "@tanstack/react-query";
 import { useStore } from "@tanstack/react-store";
+import { Store } from "@tanstack/store";
 import { useEffect, useLayoutEffect, useRef } from "react";
 import {
 	type Appearance,
@@ -32,24 +32,28 @@ import { useAuthSession } from "./useAuthSession";
 const accountQueryKey = (userId: string | undefined) =>
 	["account", userId ?? null] as const;
 
-function useAccountQueryOptions() {
+/** What HackerFeed stores about the signed-in reader. Refetched on window focus, so a change made on another device shows up here. */
+export function useAccount() {
 	const { user } = useAuthSession();
-	return {
+	return useQuery({
 		queryKey: accountQueryKey(user?.id),
 		queryFn: () => createTrpcClient().account.me.query(),
 		enabled: Boolean(user),
 		retry: 1,
-	};
-}
-
-/** What HackerFeed stores about the signed-in reader. Refetched on window focus, so a change made on another device shows up here. */
-export function useAccount() {
-	return useQuery(useAccountQueryOptions());
+	});
 }
 
 const SAVE_MUTATION_KEY = ["preferences", "update"] as const;
 
-type SaveVariables = { changes: PreferencesUpdateInput; previous: Appearance };
+type SaveVariables = {
+	changes: PreferencesUpdateInput;
+	previous: Appearance;
+	previousChatProvider?: ChatProviderId;
+};
+
+export const chatProviderStore = new Store<ChatProviderId>(
+	DEFAULT_CHAT_PROVIDER,
+);
 
 function useSavePreferences() {
 	const { user } = useAuthSession();
@@ -62,21 +66,12 @@ function useSavePreferences() {
 		mutationFn: ({ changes }: SaveVariables) =>
 			createTrpcClient().preferences.update.mutate(changes),
 		// An account fetch already on its way would bring back the old choice.
-		onMutate: async ({ changes: { chatProvider } }) => {
-			await queryClient.cancelQueries({ queryKey });
-			if (chatProvider)
-				queryClient.setQueryData<Account>(
-					queryKey,
-					(account) =>
-						account && {
-							...account,
-							preferences: { ...account.preferences, chatProvider },
-						},
-				);
-		},
+		onMutate: () => queryClient.cancelQueries({ queryKey }),
 		onSuccess: (account) => queryClient.setQueryData(queryKey, account),
-		onError: (_error, { previous }) => {
+		onError: (_error, { previous, previousChatProvider }) => {
 			showAppearance(previous);
+			if (previousChatProvider)
+				chatProviderStore.setState(() => previousChatProvider);
 			return queryClient.invalidateQueries({ queryKey });
 		},
 	});
@@ -109,19 +104,22 @@ export function useAppearance(): UseAppearanceReturn {
 
 /** The AI chat that story and paper links open. A change shows at once and is saved to the account; a failed save puts the old one back. */
 export function useChatProvider() {
-	const { data: chatProvider = DEFAULT_CHAT_PROVIDER } = useQuery({
-		...useAccountQueryOptions(),
-		select: (account) => account.preferences.chatProvider,
-	});
+	const chatProvider = useStore(chatProviderStore, (state) => state);
+	const { user } = useAuthSession();
 	const save = useSavePreferences();
 
 	return {
 		chatProvider,
-		setChatProvider: (next: ChatProviderId) =>
-			save.mutate({
-				changes: { chatProvider: next },
-				previous: appearanceStore.state,
-			}),
+		setChatProvider(next: ChatProviderId) {
+			const previousChatProvider = chatProviderStore.state;
+			chatProviderStore.setState(() => next);
+			if (user)
+				save.mutate({
+					changes: { chatProvider: next },
+					previous: appearanceStore.state,
+					previousChatProvider,
+				});
+		},
 	};
 }
 
@@ -139,7 +137,9 @@ export function useAppearanceSync() {
 	// An account fetched before a change was saved must not undo that change.
 	const saving = useIsMutating({ mutationKey: SAVE_MUTATION_KEY }) > 0;
 	useLayoutEffect(() => {
-		if (account && !saving) showAppearance(account.preferences);
+		if (!account || saving) return;
+		showAppearance(account.preferences);
+		chatProviderStore.setState(() => account.preferences.chatProvider);
 	}, [account, saving]);
 
 	// The mode used to live only in this browser. Move it to an account that

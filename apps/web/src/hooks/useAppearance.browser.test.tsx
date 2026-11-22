@@ -14,6 +14,7 @@ import {
 	showAppearance,
 } from "#/lib/appearance/appearance";
 import {
+	chatProviderStore,
 	useAppearance,
 	useAppearanceSync,
 	useChatProvider,
@@ -76,6 +77,7 @@ beforeEach(() => {
 	trpcMock.me.mockReset().mockResolvedValue(account({}));
 	trpcMock.update.mockReset().mockResolvedValue(account({}));
 	showAppearance(DEFAULT_APPEARANCE);
+	chatProviderStore.setState(() => "chatgpt");
 	window.localStorage.clear();
 });
 afterEach(cleanup);
@@ -204,10 +206,16 @@ describe("useAppearance", () => {
 	});
 });
 
+const renderChatProvider = () =>
+	renderWithQueries(() => {
+		useAppearanceSync();
+		return useChatProvider();
+	});
+
 describe("useChatProvider", () => {
 	it("is the account's provider, ChatGPT until it loads", async () => {
 		trpcMock.me.mockResolvedValue(account({ chatProvider: "perplexity" }));
-		const { result } = renderWithQueries(useChatProvider);
+		const { result } = renderChatProvider();
 
 		expect(result.current.chatProvider).toBe("chatgpt");
 		await waitFor(() => expect(result.current.chatProvider).toBe("perplexity"));
@@ -216,25 +224,50 @@ describe("useChatProvider", () => {
 	it("shows a change at once and saves it", async () => {
 		const saved = deferredAccount();
 		trpcMock.update.mockReturnValue(saved.promise);
-		const { result } = renderWithQueries(useChatProvider);
+		const { result } = renderChatProvider();
 		await waitFor(() => expect(trpcMock.me).toHaveBeenCalled());
 
 		act(() => result.current.setChatProvider("claude"));
 
-		await waitFor(() => expect(result.current.chatProvider).toBe("claude"));
-		expect(trpcMock.update).toHaveBeenCalledWith({ chatProvider: "claude" });
+		expect(result.current.chatProvider).toBe("claude");
+		await waitFor(() =>
+			expect(trpcMock.update).toHaveBeenCalledWith({ chatProvider: "claude" }),
+		);
 		await act(async () => saved.resolve(account({ chatProvider: "claude" })));
 		expect(result.current.chatProvider).toBe("claude");
 	});
 
-	it("puts the old provider back when the save fails", async () => {
+	it("puts the old provider back when the save fails, even offline", async () => {
 		trpcMock.update.mockRejectedValue(new Error("offline"));
-		const { result } = renderWithQueries(useChatProvider);
+		const { result } = renderChatProvider();
 		await waitFor(() => expect(trpcMock.me).toHaveBeenCalled());
+		trpcMock.me.mockRejectedValue(new Error("offline"));
 
 		act(() => result.current.setChatProvider("grok"));
+		expect(result.current.chatProvider).toBe("grok");
 
-		await waitFor(() => expect(trpcMock.update).toHaveBeenCalled());
 		await waitFor(() => expect(result.current.chatProvider).toBe("chatgpt"));
+	});
+
+	it("keeps the latest of quick changes on screen while earlier saves finish", async () => {
+		const first = deferredAccount();
+		const second = deferredAccount();
+		trpcMock.update
+			.mockReturnValueOnce(first.promise)
+			.mockReturnValueOnce(second.promise);
+		const { result } = renderChatProvider();
+		await waitFor(() => expect(trpcMock.me).toHaveBeenCalled());
+
+		act(() => result.current.setChatProvider("claude"));
+		act(() => result.current.setChatProvider("grok"));
+		expect(result.current.chatProvider).toBe("grok");
+
+		await waitFor(() => expect(trpcMock.update).toHaveBeenCalledTimes(1));
+		await act(async () => first.resolve(account({ chatProvider: "claude" })));
+		expect(result.current.chatProvider).toBe("grok");
+
+		await waitFor(() => expect(trpcMock.update).toHaveBeenCalledTimes(2));
+		await act(async () => second.resolve(account({ chatProvider: "grok" })));
+		expect(result.current.chatProvider).toBe("grok");
 	});
 });
