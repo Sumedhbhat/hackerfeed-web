@@ -1,5 +1,5 @@
+import { Skeleton } from "@autoskeleton/react";
 import { Avatar } from "@hackerfeed/ui/atoms/Avatar";
-import { AvatarSkeleton } from "@hackerfeed/ui/atoms/AvatarSkeleton";
 import { ButtonLink } from "@hackerfeed/ui/atoms/Button";
 import { MenuItem, MenuLinkItem } from "@hackerfeed/ui/atoms/Menu";
 import { Stack } from "@hackerfeed/ui/atoms/Stack";
@@ -12,7 +12,11 @@ export default function UserMenu() {
 	const { user, isLoading, signOut, initials, displayName } = useUserMenu();
 
 	if (isLoading) {
-		return <AvatarSkeleton />;
+		return (
+			<Skeleton loading>
+				<Avatar name="" initials="AB" />
+			</Skeleton>
+		);
 	}
 
 	if (!user) {

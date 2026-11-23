@@ -1,7 +1,8 @@
+import { Skeleton, usePlaceholder } from "@autoskeleton/react";
+import type { ReadingDay } from "@hackerfeed/entities/analytics";
 import { Button, ButtonLink } from "@hackerfeed/ui/atoms/Button";
 import { PageContainer } from "@hackerfeed/ui/atoms/PageContainer";
 import { Panel } from "@hackerfeed/ui/atoms/Panel";
-import { Skeleton, SkeletonGroup } from "@hackerfeed/ui/atoms/Skeleton";
 import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { EmptyState } from "@hackerfeed/ui/molecules/EmptyState";
 import { PageHeader } from "@hackerfeed/ui/molecules/PageHeader";
@@ -33,6 +34,10 @@ export function AnalyticsPage() {
 		};
 	}, []);
 	const since = days?.[0]?.date;
+	const { data: shownDays, loading } = usePlaceholder(
+		days,
+		(): ReadingDay[] => [{ date: today, stories: 3, papers: 1 }],
+	);
 
 	return (
 		<PageContainer>
@@ -56,14 +61,7 @@ export function AnalyticsPage() {
 							</Button>
 						}
 					/>
-				) : !days ? (
-					<SkeletonGroup>
-						<Stack gap="section">
-							<Skeleton height="block" shape="block" />
-							<Skeleton height="avatar" shape="block" />
-						</Stack>
-					</SkeletonGroup>
-				) : days.length === 0 ? (
+				) : shownDays.length === 0 ? (
 					<EmptyState
 						title="No reading yet"
 						headingSize="section"
@@ -71,15 +69,15 @@ export function AnalyticsPage() {
 						action={<ButtonLink to="/">Browse stories</ButtonLink>}
 					/>
 				) : (
-					<>
-						<ReadingStreak days={days} today={today} />
+					<Skeleton loading={loading}>
+						<ReadingStreak days={shownDays} today={today} />
 						<Panel>
-							<ReadingTrend days={days} today={today} />
+							<ReadingTrend days={shownDays} today={today} />
 						</Panel>
 						<Panel>
-							<ReadingCalendar days={days} today={today} />
+							<ReadingCalendar days={shownDays} today={today} />
 						</Panel>
-					</>
+					</Skeleton>
 				)}
 			</Stack>
 		</PageContainer>

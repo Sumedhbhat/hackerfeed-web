@@ -1,5 +1,4 @@
 import type { HackerNewsStoryRecord } from "@hackerfeed/entities/hacker-news";
-import { StoryListSkeleton } from "@hackerfeed/ui/molecules/StoryListSkeleton";
 import {
 	cleanup,
 	fireEvent,
@@ -8,6 +7,7 @@ import {
 	within,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { StoryListLoading } from "#/components/organisms/feed/StoryListLoading";
 import { StoryCard } from "#/components/organisms/story/StoryCard";
 import { chatProviderStore } from "#/hooks/useAppearance";
 import { clearAllFavorites, isFavorited } from "#/lib/favorites-store";
@@ -117,9 +117,9 @@ afterEach(() => {
 	clearAllFavorites();
 });
 
-describe("StoryListSkeleton", () => {
+describe("StoryListLoading", () => {
 	it("tells assistive tech that stories are loading", () => {
-		renderWithQueryClient(<StoryListSkeleton count={3} />);
+		renderWithQueryClient(<StoryListLoading />);
 		expect(
 			screen.getByRole("status", { name: "Loading stories" }),
 		).toBeDefined();

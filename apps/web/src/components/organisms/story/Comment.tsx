@@ -1,3 +1,4 @@
+import { fake, Skeleton } from "@autoskeleton/react";
 import type { HackerNewsCommentRecord } from "@hackerfeed/entities/hacker-news";
 import {
 	Collapsible,
@@ -10,12 +11,27 @@ import { Row } from "@hackerfeed/ui/atoms/Row";
 import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { Text } from "@hackerfeed/ui/atoms/Text";
 import { ThreadItem, ThreadList } from "@hackerfeed/ui/atoms/ThreadItem";
-import { CommentSkeleton } from "@hackerfeed/ui/molecules/CommentSkeleton";
 import { useSuspenseQueries } from "@tanstack/react-query";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { Suspense } from "react";
 import { useComment } from "#/hooks/useComment";
 import { commentQueryOptions } from "#/lib/hacker-news/queries";
+
+const REPLY_LENGTHS = [8, 24, 14];
+
+function replyPlaceholder(parent: number, i: number): HackerNewsCommentRecord {
+	return {
+		id: fake.id(i, "number"),
+		by: fake.text(8, i),
+		text: fake.sentence(REPLY_LENGTHS[i % REPLY_LENGTHS.length], i),
+		time: null,
+		kids: [],
+		parent,
+		type: "comment",
+		deleted: false,
+		dead: false,
+	};
+}
 
 type CommentProps = {
 	comment: HackerNewsCommentRecord;
@@ -96,11 +112,17 @@ export function Comment({ comment, depth = 0 }: CommentProps) {
 										<CollapsiblePanel>
 											<Suspense
 												fallback={
-													<Stack gap="xs">
-														{comment.kids.map((id) => (
-															<CommentSkeleton key={id} />
-														))}
-													</Stack>
+													<Skeleton loading>
+														<ThreadList>
+															{comment.kids.map((id, i) => (
+																<Comment
+																	key={id}
+																	comment={replyPlaceholder(comment.id, i)}
+																	depth={depth + 1}
+																/>
+															))}
+														</ThreadList>
+													</Skeleton>
 												}
 											>
 												{repliesOpen ? (

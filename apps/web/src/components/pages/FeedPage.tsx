@@ -2,13 +2,13 @@ import { PageContainer } from "@hackerfeed/ui/atoms/PageContainer";
 import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { Tab, TabList, TabPanel, Tabs } from "@hackerfeed/ui/atoms/Tabs";
 import { PageHeader } from "@hackerfeed/ui/molecules/PageHeader";
-import { StoryListSkeleton } from "@hackerfeed/ui/molecules/StoryListSkeleton";
 import * as Sentry from "@sentry/react";
 import { Activity, Suspense, useEffect, useState } from "react";
 import { FeedError } from "#/components/organisms/feed/FeedError";
 import { FeedPane } from "#/components/organisms/feed/FeedPane";
 import { feedTabs } from "#/components/organisms/feed/feedTabs";
-import { HackerNewsFeedKey, PAGE_SIZE } from "#/lib/hacker-news/queries";
+import { StoryListLoading } from "#/components/organisms/feed/StoryListLoading";
+import { HackerNewsFeedKey } from "#/lib/hacker-news/queries";
 
 export function FeedPage() {
 	const [activeFeed, setActiveFeed] = useState<HackerNewsFeedKey>(
@@ -52,9 +52,7 @@ export function FeedPage() {
 											<FeedError feed={feed} onRetry={resetError} />
 										)}
 									>
-										<Suspense
-											fallback={<StoryListSkeleton count={PAGE_SIZE} />}
-										>
+										<Suspense fallback={<StoryListLoading />}>
 											<FeedPane
 												feed={feed.key}
 												prefetchNextBatch={activeFeed === feed.key}

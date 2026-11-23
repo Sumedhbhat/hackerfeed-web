@@ -1,13 +1,38 @@
+import { fake, Skeleton, usePlaceholder } from "@autoskeleton/react";
+import type { PaperEdition } from "@hackerfeed/entities/papers";
 import { Button } from "@hackerfeed/ui/atoms/Button";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
 import { PaperFeedMessage } from "@hackerfeed/ui/molecules/PaperFeedMessage";
-import { PaperFeedSkeleton } from "@hackerfeed/ui/molecules/PaperFeedSkeleton";
 import { RefreshCw } from "lucide-react";
 import {
 	type PaperFilters,
 	PapersFeed,
 } from "#/components/organisms/papers/PapersFeed";
 import { usePaperEdition } from "#/hooks/usePaperEdition";
+
+const EDITION_PLACEHOLDER: PaperEdition = {
+	editionDate: null,
+	papers: fake.list(3, (i) => ({
+		abstract: null,
+		arxivId: `0000.0000${i}`,
+		authors: [fake.name(i), fake.name(i + 1)],
+		githubRepo: null,
+		keywords: [],
+		paperPublishedAt: fake.date(),
+		paperUrl: "https://arxiv.org/",
+		projectPage: null,
+		summary: fake.sentence(40, i),
+		title: fake.sentence(9, i),
+		upvotes: 88,
+		entryPublishedAt: fake.date(),
+		rank: i + 1,
+	})),
+	popularKeywords: fake.list(6, (i) => ({
+		keyword: fake.text(8, i),
+		paperCount: 8,
+		totalUpvotes: 88,
+	})),
+};
 
 type PapersPageProps = {
 	filters: PaperFilters;
@@ -16,8 +41,7 @@ type PapersPageProps = {
 
 export function PapersPage({ filters, onFiltersChange }: PapersPageProps) {
 	const edition = usePaperEdition(filters.date);
-
-	if (edition.isPending) return <PaperFeedSkeleton />;
+	const { data, loading } = usePlaceholder(edition.data, EDITION_PLACEHOLDER);
 
 	if (edition.isError) {
 		return (
@@ -33,10 +57,12 @@ export function PapersPage({ filters, onFiltersChange }: PapersPageProps) {
 	}
 
 	return (
-		<PapersFeed
-			edition={edition.data}
-			filters={filters}
-			onFiltersChange={onFiltersChange}
-		/>
+		<Skeleton loading={loading} label="Loading papers">
+			<PapersFeed
+				edition={data}
+				filters={filters}
+				onFiltersChange={onFiltersChange}
+			/>
+		</Skeleton>
 	);
 }

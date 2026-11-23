@@ -1,3 +1,5 @@
+import { fake, Skeleton } from "@autoskeleton/react";
+import type { HackerNewsStoryRecord } from "@hackerfeed/entities/hacker-news";
 import { Button } from "@hackerfeed/ui/atoms/Button";
 import { Heading } from "@hackerfeed/ui/atoms/Heading";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
@@ -9,14 +11,13 @@ import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { Text } from "@hackerfeed/ui/atoms/Text";
 import { ThreadList } from "@hackerfeed/ui/atoms/ThreadItem";
 import { BackLink } from "@hackerfeed/ui/molecules/BackLink";
-import { StoryPageSkeleton } from "@hackerfeed/ui/molecules/StoryPageSkeleton";
 import {
 	ArrowLeft,
 	ArrowUpRight,
 	ChevronsDownUp,
 	ChevronsUpDown,
 } from "lucide-react";
-import { Suspense, useState } from "react";
+import { type ReactNode, Suspense, useState } from "react";
 import { Comment } from "#/components/organisms/story/Comment";
 import { StoryArticle } from "#/components/organisms/story/StoryArticle";
 import { useRestoreReturnFocus } from "#/hooks/useRestoreReturnFocus";
@@ -32,10 +33,29 @@ type StoryPageProps = {
 	storyId: number;
 };
 
+const STORY_PLACEHOLDER: HackerNewsStoryRecord = {
+	id: fake.id(0, "number"),
+	by: fake.text(8),
+	descendants: 88,
+	kids: [],
+	score: 888,
+	text: null,
+	time: null,
+	title: fake.sentence(9),
+	type: "story",
+	url: "https://example.com/",
+};
+
 /** Story detail screen: the story header card followed by its comment thread. */
 export function StoryPage({ storyId }: StoryPageProps) {
 	return (
-		<Suspense fallback={<StoryPageSkeleton />}>
+		<Suspense
+			fallback={
+				<Skeleton loading label="Loading story">
+					<StoryLayout story={STORY_PLACEHOLDER} />
+				</Skeleton>
+			}
+		>
 			<StoryContent storyId={storyId} />
 		</Suspense>
 	);
@@ -55,6 +75,69 @@ function StoryContent({ storyId }: StoryPageProps) {
 	if (!story) return null;
 
 	return (
+		<StoryLayout story={story}>
+			<Stack as="section" gap="lg">
+				<Row justify="between" align="center" wrap>
+					<Heading level={2} size="section">
+						{story.descendants != null
+							? `${story.descendants} comments`
+							: "Discussion"}
+					</Heading>
+					<Row gap="sm" align="center" wrap>
+						{hasReplies ? (
+							<Button
+								variant="ghost"
+								onClick={() =>
+									setExpansion((current) => ({
+										mode: current.mode === "expand" ? "collapse" : "expand",
+										revision: current.revision + 1,
+									}))
+								}
+							>
+								<Icon icon={allExpanded ? ChevronsDownUp : ChevronsUpDown} />
+								{allExpanded ? "Collapse all replies" : "Expand all replies"}
+							</Button>
+						) : null}
+						<ExternalLink href={getDiscussionUrl(story.id)} variant="accent">
+							View on HN <Icon icon={ArrowUpRight} size={14} />
+						</ExternalLink>
+					</Row>
+				</Row>
+				<LiveStatus
+					message={
+						expansion.mode === "expand"
+							? "All replies expanded."
+							: expansion.mode === "collapse"
+								? "All replies collapsed."
+								: ""
+					}
+				/>
+
+				{story.kids.length === 0 ? (
+					<Text tone="soft">No comments yet.</Text>
+				) : (
+					<ThreadExpansionProvider value={expansion}>
+						<ThreadList divided aria-label="Comments">
+							{commentQueries.map((q) => {
+								if (!q.data) return null;
+								return <Comment key={q.data.id} comment={q.data} depth={0} />;
+							})}
+						</ThreadList>
+					</ThreadExpansionProvider>
+				)}
+			</Stack>
+		</StoryLayout>
+	);
+}
+
+function StoryLayout({
+	story,
+	children,
+}: {
+	story: HackerNewsStoryRecord;
+	children?: ReactNode;
+}) {
+	return (
 		<PageContainer>
 			<BackLink
 				onClick={(event) => {
@@ -69,57 +152,7 @@ function StoryContent({ storyId }: StoryPageProps) {
 
 			<Stack gap="xl" measure>
 				<StoryArticle story={story} />
-
-				<Stack as="section" gap="lg">
-					<Row justify="between" align="center" wrap>
-						<Heading level={2} size="section">
-							{story.descendants != null
-								? `${story.descendants} comments`
-								: "Discussion"}
-						</Heading>
-						<Row gap="sm" align="center" wrap>
-							{hasReplies ? (
-								<Button
-									variant="ghost"
-									onClick={() =>
-										setExpansion((current) => ({
-											mode: current.mode === "expand" ? "collapse" : "expand",
-											revision: current.revision + 1,
-										}))
-									}
-								>
-									<Icon icon={allExpanded ? ChevronsDownUp : ChevronsUpDown} />
-									{allExpanded ? "Collapse all replies" : "Expand all replies"}
-								</Button>
-							) : null}
-							<ExternalLink href={getDiscussionUrl(story.id)} variant="accent">
-								View on HN <Icon icon={ArrowUpRight} size={14} />
-							</ExternalLink>
-						</Row>
-					</Row>
-					<LiveStatus
-						message={
-							expansion.mode === "expand"
-								? "All replies expanded."
-								: expansion.mode === "collapse"
-									? "All replies collapsed."
-									: ""
-						}
-					/>
-
-					{story.kids.length === 0 ? (
-						<Text tone="soft">No comments yet.</Text>
-					) : (
-						<ThreadExpansionProvider value={expansion}>
-							<ThreadList divided aria-label="Comments">
-								{commentQueries.map((q) => {
-									if (!q.data) return null;
-									return <Comment key={q.data.id} comment={q.data} depth={0} />;
-								})}
-							</ThreadList>
-						</ThreadExpansionProvider>
-					)}
-				</Stack>
+				{children}
 			</Stack>
 		</PageContainer>
 	);
