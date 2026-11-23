@@ -42,7 +42,8 @@ export function createFakeWorkos(key: SigningKey) {
 				.setExpirationTime(expiresAt)
 				.sign(signedWith.privateKey);
 		},
-		handle(url: URL): Response | undefined {
+		handle(request: Request): Response | undefined {
+			const url = new URL(request.url);
 			if (url.hostname !== "api.workos.com") return undefined;
 			if (url.pathname !== `/sso/jwks/${clientId}`) {
 				return Response.json({ message: "Not found" }, { status: 404 });
@@ -59,42 +60,44 @@ export function createFakeWorkos(key: SigningKey) {
  */
 export function createFakeHuggingFace() {
 	const editions = new Map<string, DailyPapersEntry[]>();
-	const failures: Array<{ status: number; retryAfter: string }> = [];
-	const requests: URL[] = [];
+	const overrides: Array<() => Response> = [];
+	const requests: Request[] = [];
+
+	function respondNext(respond: () => Response, { times = 1 } = {}) {
+		for (let index = 0; index < times; index++) overrides.push(respond);
+	}
 
 	return {
 		requests,
 		publish(editionDate: string, entries: DailyPapersEntry[]) {
 			editions.set(editionDate, entries);
 		},
+		/** The next `times` requests get `respond()` (which may throw) instead. */
+		respondNext,
 		/** The next `times` requests answer `status` before the API recovers. */
 		failNext(
 			status: number,
 			{
 				times = 1,
 				retryAfter = "0",
-			}: { times?: number; retryAfter?: string } = {},
+			}: { times?: number; retryAfter?: string | null } = {},
 		) {
-			for (let index = 0; index < times; index++) {
-				failures.push({ status, retryAfter });
-			}
+			const headers: HeadersInit =
+				retryAfter === null ? {} : { "Retry-After": retryAfter };
+			respondNext(
+				() => Response.json({ error: "Unavailable" }, { status, headers }),
+				{ times },
+			);
 		},
-		handle(url: URL): Response | undefined {
+		handle(request: Request): Response | undefined {
+			const url = new URL(request.url);
 			if (url.hostname !== "huggingface.co") return undefined;
 			if (url.pathname !== "/api/daily_papers") {
 				return Response.json({ error: "Not found" }, { status: 404 });
 			}
-			requests.push(url);
-			const failure = failures.shift();
-			if (failure) {
-				return Response.json(
-					{ error: "Unavailable" },
-					{
-						status: failure.status,
-						headers: { "Retry-After": failure.retryAfter },
-					},
-				);
-			}
+			requests.push(request);
+			const override = overrides.shift();
+			if (override) return override();
 			const editionDate = url.searchParams.get("date") ?? "";
 			return Response.json(editions.get(editionDate) ?? DEFAULT_EDITION);
 		},
@@ -108,7 +111,7 @@ export const DEFAULT_EDITION = [
 
 const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
 
-type ExternalService = { handle(url: URL): Response | undefined };
+type ExternalService = { handle(request: Request): Response | undefined };
 
 /** Routes `fetch` to the fakes until the returned function is called. */
 export function interceptExternalServices(services: ExternalService[]) {
@@ -120,7 +123,7 @@ export function interceptExternalServices(services: ExternalService[]) {
 			const url = new URL(request.url);
 			if (LOCAL_HOSTS.has(url.hostname)) return realFetch(input, init);
 			for (const service of services) {
-				const response = service.handle(url);
+				const response = service.handle(request);
 				if (response) return response;
 			}
 			throw new Error(

@@ -24,6 +24,11 @@ type DailyPaperOverrides = {
 	upvotes?: number;
 	keywords?: string[];
 	publishedAt?: string;
+	summary?: string;
+	aiSummary?: string | null;
+	authors?: string[];
+	projectPage?: string | null;
+	githubRepo?: string | null;
 };
 
 /** One entry of Hugging Face's `GET /api/daily_papers` response, as it is sent. */
@@ -33,28 +38,33 @@ export function dailyPapersEntry({
 	upvotes = 12,
 	keywords = ["Large Language Models", "Agents"],
 	publishedAt = "2026-06-19T00:00:00.000Z",
+	summary = "Abstract",
+	aiSummary = "Short summary",
+	authors = ["Ada Lovelace"],
+	projectPage = null,
+	githubRepo = null,
 }: DailyPaperOverrides = {}) {
 	return {
 		isAuthorParticipating: true,
 		paper: {
 			ai_keywords: keywords,
-			ai_summary: "Short summary",
+			ai_summary: aiSummary,
 			ai_summary_model: "example/model",
-			authors: [
-				{
-					_id: `author-${arxivId}`,
-					hidden: false,
-					name: "Ada Lovelace",
-					user: {
-						_id: "user-ada",
-						avatarUrl: "/avatar.png",
-						fullname: "Ada Lovelace",
-						name: "ada",
-						user: "ada",
-					},
+			authors: authors.map((name, index) => ({
+				_id: `author-${arxivId}-${index}`,
+				hidden: false,
+				name,
+				user: {
+					_id: `user-${name}`,
+					avatarUrl: "/avatar.png",
+					fullname: name,
+					name,
+					user: name,
 				},
-			],
+			})),
 			discussionId: `discussion-${arxivId}`,
+			githubRepo,
+			projectPage,
 			id: arxivId,
 			organization: {
 				_id: "org-1",
@@ -62,12 +72,12 @@ export function dailyPapersEntry({
 				name: "example-research",
 			},
 			publishedAt: "2026-06-18T00:00:00.000Z",
-			summary: "Abstract",
+			summary,
 			title,
 			upvotes,
 		},
 		publishedAt,
-		summary: "Abstract",
+		summary,
 		thumbnail: "https://example.com/thumbnail.png",
 		title,
 	};
