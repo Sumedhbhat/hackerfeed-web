@@ -89,6 +89,10 @@
   --shadow-popup: 0 12px 32px -12px var(--shadow-tone);
 }
 
+:root {
+  --autoskeleton-color: var(--muted-line);
+}
+
 :root[data-theme="light"] {
   color-scheme: light;
 }
