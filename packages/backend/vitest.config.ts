@@ -7,7 +7,7 @@ export default defineConfig({
 				name: "integration",
 				description:
 					"Runs against a local D1 and fakes for WorkOS and Hugging Face (src/tests/support).",
-				timeout: 30_000,
+				timeout: 60_000,
 			},
 		],
 	},

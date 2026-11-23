@@ -4,10 +4,9 @@ import {
 	MAX_PALETTES_PER_USER,
 	type PaletteInput,
 } from "@hackerfeed/entities/appearance";
-import { eq } from "drizzle-orm";
 import { describe, expect } from "vitest";
-import type { DatabaseContext } from "../database/client";
-import { appUsers, palettes, userPreferences } from "../database/schema";
+import { palettes, userPreferences } from "../database/schema";
+import { appUserIdOf } from "./support/seed";
 import { INTEGRATION, test } from "./support/test";
 
 const sunset: PaletteInput = {
@@ -17,16 +16,6 @@ const sunset: PaletteInput = {
 	accentColor: "#7C3AED",
 };
 const unknownPaletteId = "3f0e7c0a-5b0e-4f43-9d0b-1c2d3e4f5a6b";
-
-async function appUserId(database: DatabaseContext, workosUserId: string) {
-	const [user] = await database
-		.select({ id: appUsers.id })
-		.from(appUsers)
-		.where(eq(appUsers.workosUserId, workosUserId))
-		.all();
-	if (!user) throw new Error(`${workosUserId} has no app user`);
-	return user.id;
-}
 
 describe("appearance access", () => {
 	test(
@@ -244,7 +233,7 @@ describe("palettes", () => {
 		async ({ api, database }) => {
 			const reader = api.as("user_reader");
 			await reader.account.me.query();
-			const owner = await appUserId(database, "user_reader");
+			const owner = await appUserIdOf(database, "user_reader");
 			const [first, ...rest] = Array.from(
 				{ length: MAX_PALETTES_PER_USER },
 				() => database.insert(palettes).values({ ...sunset, appUserId: owner }),

@@ -32,7 +32,10 @@ function requireIntegrationTag(task: TestContext["task"]) {
  * - `workos`, `huggingFace`: fakes for those services, with defaults a test
  *   can change (`huggingFace.failNext(503)`, `huggingFace.publish(...)`).
  *
- * Asking for any of them starts all of them, so `fetch` never leaves the fakes.
+ * Asking for any of them turns the fakes on, so `fetch` never leaves them;
+ * the local D1 boots only for `database` or `api`.
+ * For a table of cases use `test.for(rows)(name, INTEGRATION, (row, ctx) => …)`;
+ * `test.each` doesn't pass fixtures.
  */
 export const test = base
 	// biome-ignore lint/correctness/noEmptyPattern: Vitest reads a fixture's dependencies from its destructured context

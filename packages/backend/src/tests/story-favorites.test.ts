@@ -290,15 +290,13 @@ describe("importing favorites saved on the device", () => {
 		"keeps the fresher story already in the database",
 		INTEGRATION,
 		async ({ api, database }) => {
-			await api
-				.as("user_bob")
-				.favorites.add.mutate(
-					hnStory({
-						score: 100,
-						title: "Fresh database title",
-						url: "https://example.com/fresh",
-					}),
-				);
+			await api.as("user_bob").favorites.add.mutate(
+				hnStory({
+					score: 100,
+					title: "Fresh database title",
+					url: "https://example.com/fresh",
+				}),
+			);
 
 			await api.as("user_alice").favorites.importLocal.mutate({
 				stories: [

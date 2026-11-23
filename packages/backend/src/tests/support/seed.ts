@@ -1,5 +1,6 @@
 import type { DatabaseContext } from "../../database/client";
 import { runHuggingFaceDailyPapersIngestion } from "../../huggingface-papers/ingestion";
+import { createUserRepository } from "../../users/repository";
 import type { DailyPapersEntry } from "./data";
 import type { createFakeHuggingFace } from "./external-services";
 
@@ -29,4 +30,16 @@ export function ingestEdition(
 	return runHuggingFaceDailyPapersIngestion(database, {
 		now: () => nightlyRunFor(editionDate),
 	});
+}
+
+/** The reader's `app_users.id`, creating the reader as their first request would. */
+export async function appUserIdOf(
+	database: DatabaseContext,
+	workosUserId: string,
+): Promise<string> {
+	const { id } =
+		await createUserRepository(database).getOrCreateByWorkosUserId(
+			workosUserId,
+		);
+	return id;
 }
