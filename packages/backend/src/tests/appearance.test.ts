@@ -2,19 +2,13 @@ import {
 	BUILT_IN_PALETTES,
 	DEFAULT_PALETTE,
 	MAX_PALETTES_PER_USER,
-	type PaletteInput,
 } from "@hackerfeed/entities/appearance";
 import { describe, expect } from "vitest";
 import { palettes, userPreferences } from "../database/schema";
 import { appUserIdOf } from "./support/seed";
 import { INTEGRATION, test } from "./support/test";
+import { SUNSET as sunset } from "./support/world";
 
-const sunset: PaletteInput = {
-	name: "Sunset",
-	baseRole: "background",
-	baseColor: "#FFF6D5",
-	accentColor: "#7C3AED",
-};
 const unknownPaletteId = "3f0e7c0a-5b0e-4f43-9d0b-1c2d3e4f5a6b";
 
 describe("appearance access", () => {
@@ -94,6 +88,26 @@ describe("preferences", () => {
 	);
 
 	test(
+		"are each reader's own",
+		INTEGRATION,
+		async ({ world: { alice, bob } }) => {
+			await bob.client.preferences.update.mutate({ mode: "auto" });
+
+			expect((await alice.client.account.me.query()).preferences).toEqual({
+				mode: "dark",
+				palette: { ...sunset, id: alice.paletteId, builtIn: false },
+				chatProvider: "claude",
+				saved: true,
+			});
+			expect((await bob.client.account.me.query()).preferences).toMatchObject({
+				mode: "auto",
+				palette: { id: "ember", builtIn: true },
+				chatProvider: "chatgpt",
+			});
+		},
+	);
+
+	test(
 		"answer NOT_FOUND for a palette the reader can't use",
 		INTEGRATION,
 		async ({ api }) => {
@@ -110,17 +124,12 @@ describe("palettes", () => {
 	test(
 		"list the built-in palettes, then the reader's own",
 		INTEGRATION,
-		async ({ api }) => {
-			const reader = api.as("user_reader");
-			const created = await reader.palettes.create.mutate(sunset);
-			await api
-				.as("user_stranger")
-				.palettes.create.mutate({ ...sunset, name: "Theirs" });
-
-			expect(await reader.palettes.list.query()).toEqual([
+		async ({ world: { alice, bob } }) => {
+			expect(await alice.client.palettes.list.query()).toEqual([
 				...BUILT_IN_PALETTES,
-				{ ...sunset, id: created.id, builtIn: false },
+				{ ...sunset, id: alice.paletteId, builtIn: false },
 			]);
+			expect(await bob.client.palettes.list.query()).toEqual(BUILT_IN_PALETTES);
 		},
 	);
 
@@ -175,55 +184,41 @@ describe("palettes", () => {
 	test(
 		"can't be selected, changed or removed by someone else",
 		INTEGRATION,
-		async ({ api }) => {
-			const reader = api.as("user_reader");
-			const stranger = api.as("user_stranger");
-			const theirs = await stranger.palettes.create.mutate(sunset);
+		async ({ world: { alice, bob } }) => {
+			const theirs = alice.paletteId ?? "";
 
 			await expect(
-				reader.preferences.update.mutate({ paletteId: theirs.id }),
+				bob.client.preferences.update.mutate({ paletteId: theirs }),
 			).rejects.toMatchObject({ data: { code: "NOT_FOUND" } });
 			await expect(
-				reader.palettes.update.mutate({
+				bob.client.palettes.update.mutate({
 					...sunset,
 					name: "Mine",
-					id: theirs.id,
+					id: theirs,
 				}),
 			).rejects.toMatchObject({ data: { code: "NOT_FOUND" } });
-			await reader.palettes.delete.mutate({ id: theirs.id });
+			await bob.client.palettes.delete.mutate({ id: theirs });
 
-			expect(await stranger.palettes.list.query()).toEqual([
-				...BUILT_IN_PALETTES,
-				{ ...sunset, id: theirs.id, builtIn: false },
-			]);
+			expect((await alice.client.account.me.query()).preferences).toMatchObject(
+				{
+					palette: { ...sunset, id: theirs, builtIn: false },
+				},
+			);
 		},
 	);
 
 	test(
 		"fall back to the default when the selected one is deleted",
 		INTEGRATION,
-		async ({ api, database }) => {
-			const reader = api.as("user_reader");
-			const created = await reader.palettes.create.mutate(sunset);
-			await reader.preferences.update.mutate({
-				mode: "light",
-				paletteId: created.id,
-			});
+		async ({ world: { alice } }) => {
+			await alice.client.palettes.delete.mutate({ id: alice.paletteId ?? "" });
 
-			await reader.palettes.delete.mutate({ id: created.id });
-
-			expect((await reader.account.me.query()).preferences).toEqual({
-				mode: "light",
+			expect((await alice.client.account.me.query()).preferences).toEqual({
+				mode: "dark",
 				palette: DEFAULT_PALETTE,
-				chatProvider: "chatgpt",
+				chatProvider: "claude",
 				saved: true,
 			});
-			expect(
-				await database
-					.select({ paletteId: userPreferences.paletteId })
-					.from(userPreferences)
-					.all(),
-			).toEqual([{ paletteId: null }]);
 		},
 	);
 

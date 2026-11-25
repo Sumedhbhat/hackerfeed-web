@@ -182,6 +182,18 @@ describe("listing saved stories", () => {
 	);
 
 	test(
+		"shows a story saved by several readers to each of them",
+		INTEGRATION,
+		async ({ world: { alice, bob } }) => {
+			const savedIds = async (reader: typeof alice) =>
+				(await reader.client.favorites.list.query()).map(({ id }) => id).sort();
+
+			expect(await savedIds(alice)).toEqual(alice.savedStories);
+			expect(await savedIds(bob)).toEqual(bob.savedStories);
+		},
+	);
+
+	test(
 		"orders favorites saved at the same time by descending ID",
 		INTEGRATION,
 		async ({ api, database }) => {
@@ -229,23 +241,18 @@ describe("removing saved stories", () => {
 	test(
 		"clearing removes only the reader's own and logs each",
 		INTEGRATION,
-		async ({ api, database }) => {
-			const alice = api.as("user_alice");
-			await alice.favorites.add.mutate(hnStory({ id: 123 }));
-			await alice.favorites.add.mutate(hnStory({ id: 789 }));
-			await api.as("user_bob").favorites.add.mutate(hnStory({ id: 456 }));
+		async ({ world: { alice, bob }, database }) => {
+			await alice.client.favorites.clear.mutate();
 
-			await alice.favorites.clear.mutate();
-
-			expect(await favoritesOf(database, "user_alice")).toEqual([]);
-			expect(await favoritesOf(database, "user_bob")).toMatchObject([
-				{ hnStoryId: 456 },
-			]);
+			expect(await favoritesOf(database, alice.workosUserId)).toEqual([]);
+			expect(await favoritesOf(database, bob.workosUserId)).toMatchObject(
+				bob.savedStories.map((hnStoryId) => ({ hnStoryId })),
+			);
 			const unfavorited = (await favoriteActivity(database))
 				.filter(({ action }) => action === "story.unfavorited")
 				.map(({ hnStoryId }) => hnStoryId)
 				.sort();
-			expect(unfavorited).toEqual([123, 789]);
+			expect(unfavorited).toEqual(alice.savedStories);
 		},
 	);
 });

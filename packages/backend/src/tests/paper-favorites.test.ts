@@ -10,6 +10,7 @@ import {
 import { dailyPapersEntry } from "./support/data";
 import { ingestEdition } from "./support/seed";
 import { INTEGRATION, test } from "./support/test";
+import { seedWorld } from "./support/world";
 
 const PAPERS = ["2607.00001", "2607.00002", "2607.00003"];
 
@@ -252,15 +253,27 @@ describe("listing saved papers", () => {
 	test(
 		"never shows another reader's saves",
 		INTEGRATION,
-		async ({ api, database, huggingFace }) => {
-			await ingestPapers({ database, huggingFace });
-			await api
-				.as("user_2")
-				.paperFavorites.add.mutate({ arxivId: "2607.00001" });
+		async ({ world: { alice } }) => {
+			const listed = await alice.client.paperFavorites.list.query({});
 
-			await expect(
-				api.as("user_1").paperFavorites.list.query({}),
-			).resolves.toEqual({ items: [], nextCursor: null });
+			expect(listed.items.map(({ arxivId }) => arxivId)).toEqual(
+				alice.savedPapers,
+			);
+		},
+	);
+
+	test(
+		"is empty for a reader who saved nothing while others did",
+		INTEGRATION,
+		async ({ api, database, huggingFace }) => {
+			const { carol } = await seedWorld(
+				{ api, database, huggingFace },
+				{ readers: { carol: { readPapers: ["2606.00001"] } } },
+			);
+
+			await expect(carol.client.paperFavorites.list.query({})).resolves.toEqual(
+				{ items: [], nextCursor: null },
+			);
 		},
 	);
 
