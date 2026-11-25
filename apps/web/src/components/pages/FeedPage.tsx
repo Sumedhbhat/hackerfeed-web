@@ -3,11 +3,12 @@ import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { Tab, TabList, TabPanel, Tabs } from "@hackerfeed/ui/atoms/Tabs";
 import { PageHeader } from "@hackerfeed/ui/molecules/PageHeader";
 import * as Sentry from "@sentry/react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Activity, useEffect, useState } from "react";
 import { FeedError } from "#/components/organisms/feed/FeedError";
 import { FeedPane } from "#/components/organisms/feed/FeedPane";
 import { feedTabs } from "#/components/organisms/feed/feedTabs";
-import { HackerNewsFeedKey } from "#/lib/hacker-news/queries";
+import { HackerNewsFeedKey, prefetchFeed } from "#/lib/hacker-news/queries";
 
 export function FeedPage() {
 	const [activeFeed, setActiveFeed] = useState<HackerNewsFeedKey>(
@@ -20,13 +21,20 @@ export function FeedPage() {
 		setOpenedFeeds((opened) => new Set(opened).add(feed));
 	}
 
-	useEffect(
-		() =>
-			whenPageIdle(() =>
-				setOpenedFeeds(new Set(feedTabs.map((feed) => feed.key))),
-			),
-		[],
-	);
+	const queryClient = useQueryClient();
+	useEffect(() => {
+		let cancelled = false;
+		const cancelIdle = whenPageIdle(async () => {
+			await Promise.allSettled(
+				feedTabs.map((feed) => prefetchFeed(queryClient, feed.key)),
+			);
+			if (!cancelled) setOpenedFeeds(new Set(feedTabs.map((feed) => feed.key)));
+		});
+		return () => {
+			cancelled = true;
+			cancelIdle();
+		};
+	}, [queryClient]);
 
 	return (
 		<PageContainer>

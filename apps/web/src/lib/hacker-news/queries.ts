@@ -4,7 +4,7 @@ import type {
 } from "@hackerfeed/entities/hacker-news";
 import { http } from "@hackerfeed/runtime/http";
 import { logger } from "@hackerfeed/runtime/logger";
-import { queryOptions } from "@tanstack/react-query";
+import { type QueryClient, queryOptions } from "@tanstack/react-query";
 
 const HACKER_NEWS_API_BASE_URL = "https://hacker-news.firebaseio.com/v0";
 const DEFAULT_FEED_STORY_LIMIT = 12;
@@ -229,6 +229,19 @@ export function feedStoryIdsQueryOptions(feed: HackerNewsFeedKey) {
 		queryFn: ({ signal }) => fetchFeedStoryIds(feed, signal),
 		staleTime: 60_000,
 	});
+}
+
+/** Caches a feed's story IDs and its first page of stories. */
+export async function prefetchFeed(
+	queryClient: QueryClient,
+	feed: HackerNewsFeedKey,
+) {
+	const ids = await queryClient.ensureQueryData(feedStoryIdsQueryOptions(feed));
+	await Promise.all(
+		ids
+			.slice(0, PAGE_SIZE)
+			.map((id) => queryClient.ensureQueryData(storyQueryOptions(id))),
+	);
 }
 
 export function storyQueryOptions(storyId: number) {

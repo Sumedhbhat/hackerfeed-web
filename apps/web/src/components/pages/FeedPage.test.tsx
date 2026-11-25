@@ -44,6 +44,11 @@ vi.mock("@tanstack/react-query", async (importOriginal) => {
 	};
 });
 
+vi.mock("#/lib/hacker-news/queries", async (importOriginal) => ({
+	...(await importOriginal<typeof import("#/lib/hacker-news/queries")>()),
+	prefetchFeed: () => Promise.resolve(),
+}));
+
 vi.mock("#/hooks/useAuthSession", () => ({
 	useAuthSession: () => ({
 		isLoading: false,
