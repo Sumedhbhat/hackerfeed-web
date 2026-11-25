@@ -1,4 +1,4 @@
-import { fake, Skeleton, usePlaceholder } from "@autoskeleton/react";
+import { fake, usePlaceholder } from "@autoskeleton/react";
 import type { PaperEdition } from "@hackerfeed/entities/papers";
 import { Button } from "@hackerfeed/ui/atoms/Button";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
@@ -57,12 +57,11 @@ export function PapersPage({ filters, onFiltersChange }: PapersPageProps) {
 	}
 
 	return (
-		<Skeleton loading={loading} label="Loading papers">
-			<PapersFeed
-				edition={data}
-				filters={filters}
-				onFiltersChange={onFiltersChange}
-			/>
-		</Skeleton>
+		<PapersFeed
+			edition={data}
+			loading={loading}
+			filters={filters}
+			onFiltersChange={onFiltersChange}
+		/>
 	);
 }
