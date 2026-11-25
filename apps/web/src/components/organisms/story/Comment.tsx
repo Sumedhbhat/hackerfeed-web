@@ -1,4 +1,4 @@
-import { fake, Skeleton } from "@autoskeleton/react";
+import { fake, Skeleton, usePlaceholder } from "@autoskeleton/react";
 import type { HackerNewsCommentRecord } from "@hackerfeed/entities/hacker-news";
 import {
 	Collapsible,
@@ -11,9 +11,8 @@ import { Row } from "@hackerfeed/ui/atoms/Row";
 import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { Text } from "@hackerfeed/ui/atoms/Text";
 import { ThreadItem, ThreadList } from "@hackerfeed/ui/atoms/ThreadItem";
-import { useSuspenseQueries } from "@tanstack/react-query";
+import { useQueries } from "@tanstack/react-query";
 import { ChevronDown, ChevronRight } from "lucide-react";
-import { Suspense } from "react";
 import { useComment } from "#/hooks/useComment";
 import { commentQueryOptions } from "#/lib/hacker-news/queries";
 
@@ -107,28 +106,14 @@ export function Comment({ comment, depth = 0 }: CommentProps) {
 											</CollapsibleTrigger>
 										</Row>
 
-										{/* Replies load inside this boundary, so the comment and its
-										    "Hide replies" trigger stay mounted (and focused) meanwhile. */}
 										<CollapsiblePanel>
-											<Suspense
-												fallback={
-													<Skeleton loading>
-														<ThreadList>
-															{comment.kids.map((id, i) => (
-																<Comment
-																	key={id}
-																	comment={replyPlaceholder(comment.id, i)}
-																	depth={depth + 1}
-																/>
-															))}
-														</ThreadList>
-													</Skeleton>
-												}
-											>
-												{repliesOpen ? (
-													<Replies ids={comment.kids} depth={depth + 1} />
-												) : null}
-											</Suspense>
+											{repliesOpen ? (
+												<Replies
+													parent={comment.id}
+													ids={comment.kids}
+													depth={depth + 1}
+												/>
+											) : null}
 										</CollapsiblePanel>
 									</Stack>
 								</Collapsible>
@@ -141,17 +126,35 @@ export function Comment({ comment, depth = 0 }: CommentProps) {
 	);
 }
 
-function Replies({ ids, depth }: { ids: number[]; depth: number }) {
-	const queries = useSuspenseQueries({
-		queries: ids.map((id) => commentQueryOptions(id)),
+function Replies({
+	parent,
+	ids,
+	depth,
+}: {
+	parent: number;
+	ids: number[];
+	depth: number;
+}) {
+	const replies = useQueries({
+		queries: ids.map((id) => ({
+			...commentQueryOptions(id),
+			throwOnError: true,
+		})),
+		combine: (results) =>
+			results.some((result) => result.isPending)
+				? undefined
+				: results.flatMap((result) => (result.data ? [result.data] : [])),
 	});
+	const { data, loading } = usePlaceholder(replies, () =>
+		ids.map((_, i) => replyPlaceholder(parent, i)),
+	);
 	return (
-		<ThreadList>
-			{queries.map((q) =>
-				q.data ? (
-					<Comment key={q.data.id} comment={q.data} depth={depth} />
-				) : null,
-			)}
-		</ThreadList>
+		<Skeleton loading={loading}>
+			<ThreadList>
+				{data.map((reply) => (
+					<Comment key={reply.id} comment={reply} depth={depth} />
+				))}
+			</ThreadList>
+		</Skeleton>
 	);
 }
