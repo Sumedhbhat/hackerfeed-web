@@ -34,9 +34,8 @@ Cloudflare PR previews and `bun run preview:private` build a static SPA with
 these rows into the same API shapes used by the app. Hacker News requests
 use `src/lib/hacker-news/demo-api.ts`.
 
-Every answer waits 800ms, like a network round trip, so previews show the
-loading skeletons. Set `VITE_DEMO_LATENCY_MS` at build time to change it; the
-unit and end-to-end tests set it to `0`.
+Every answer waits 300ms (`latency.ts`), like a network round trip, so
+previews show the loading skeletons.
 
 Every page starts as Demo Reader (`demo@example.com`) with seeded story and
 paper favorites. Changes live in browser memory, shared across client
