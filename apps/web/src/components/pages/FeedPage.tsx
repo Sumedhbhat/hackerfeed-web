@@ -3,11 +3,10 @@ import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { Tab, TabList, TabPanel, Tabs } from "@hackerfeed/ui/atoms/Tabs";
 import { PageHeader } from "@hackerfeed/ui/molecules/PageHeader";
 import * as Sentry from "@sentry/react";
-import { Activity, Suspense, useEffect, useState } from "react";
+import { Activity, useEffect, useState } from "react";
 import { FeedError } from "#/components/organisms/feed/FeedError";
 import { FeedPane } from "#/components/organisms/feed/FeedPane";
 import { feedTabs } from "#/components/organisms/feed/feedTabs";
-import { StoryListLoading } from "#/components/organisms/feed/StoryListLoading";
 import { HackerNewsFeedKey } from "#/lib/hacker-news/queries";
 
 export function FeedPage() {
@@ -52,12 +51,10 @@ export function FeedPage() {
 											<FeedError feed={feed} onRetry={resetError} />
 										)}
 									>
-										<Suspense fallback={<StoryListLoading />}>
-											<FeedPane
-												feed={feed.key}
-												prefetchNextBatch={activeFeed === feed.key}
-											/>
-										</Suspense>
+										<FeedPane
+											feed={feed.key}
+											prefetchNextBatch={activeFeed === feed.key}
+										/>
 									</Sentry.ErrorBoundary>
 								</Activity>
 							)}

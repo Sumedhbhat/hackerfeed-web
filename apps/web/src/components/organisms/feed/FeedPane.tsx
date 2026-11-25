@@ -1,12 +1,14 @@
+import { fake, Skeleton, usePlaceholder } from "@autoskeleton/react";
+import type { HackerNewsStoryRecord } from "@hackerfeed/entities/hacker-news";
 import { Button } from "@hackerfeed/ui/atoms/Button";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
 import { ReadingList } from "@hackerfeed/ui/atoms/ReadingList";
 import { Stack } from "@hackerfeed/ui/atoms/Stack";
 import { EmptyState } from "@hackerfeed/ui/molecules/EmptyState";
 import { LoadMoreButton } from "@hackerfeed/ui/molecules/LoadMoreButton";
-import { useSuspenseQueries } from "@tanstack/react-query";
+import { useQueries } from "@tanstack/react-query";
 import { ArrowRight } from "lucide-react";
-import { Activity, Suspense } from "react";
+import { Activity } from "react";
 import { feedTabs } from "#/components/organisms/feed/feedTabs";
 import { StoryCard } from "#/components/organisms/story/StoryCard";
 import { FeedStatus, useFeed } from "#/hooks/useFeed";
@@ -15,11 +17,28 @@ import { useRestoreReturnFocus } from "#/hooks/useRestoreReturnFocus";
 import { useStoriesLastViewed } from "#/hooks/useStoriesLastViewed";
 import {
 	type HackerNewsFeedKey,
+	PAGE_SIZE,
 	storyQueryOptions,
 } from "#/lib/hacker-news/queries";
 
+const STORIES_PLACEHOLDER: HackerNewsStoryRecord[] = fake.list(
+	PAGE_SIZE,
+	(i) => ({
+		id: fake.id(i, "number"),
+		by: fake.text(8, i),
+		descendants: 88,
+		kids: [],
+		score: 888,
+		text: null,
+		time: null,
+		title: fake.sentence(7 + (i % 5), i),
+		type: "story",
+		url: "https://example.com/",
+	}),
+);
+
 function NextBatchPrefetcher({ ids }: { ids: number[] }) {
-	useSuspenseQueries({ queries: ids.map((id) => storyQueryOptions(id)) });
+	useQueries({ queries: ids.map((id) => storyQueryOptions(id)) });
 	return null;
 }
 
@@ -31,9 +50,9 @@ type FeedPaneProps = {
 
 export function FeedPane({ feed, prefetchNextBatch }: FeedPaneProps) {
 	const {
+		stories: loadedStories,
 		displayedIds,
 		nextBatchIds,
-		storyQueries,
 		isPending,
 		hasMore,
 		nextBatchSize,
@@ -41,12 +60,14 @@ export function FeedPane({ feed, prefetchNextBatch }: FeedPaneProps) {
 		loadMore,
 		refetch,
 	} = useFeed(feed);
+	const { data: stories, loading } = usePlaceholder(
+		loadedStories,
+		STORIES_PLACEHOLDER,
+	);
 	const lastViewed = useStoriesLastViewed(displayedIds);
 
 	const listId = `feed-${feed}-stories`;
-	const renderedCount = storyQueries
-		.slice(0, displayedIds.length)
-		.filter((query) => query?.data).length;
+	const renderedCount = loadedStories?.length ?? 0;
 	const withFocus = useLoadMoreFocus(listId, renderedCount);
 	useRestoreReturnFocus(renderedCount > 0);
 
@@ -72,21 +93,19 @@ export function FeedPane({ feed, prefetchNextBatch }: FeedPaneProps) {
 
 	return (
 		<Stack gap="md">
-			<ReadingList ordered id={listId} aria-label={`${feedLabel} stories`}>
-				{displayedIds.map((storyId, i) => {
-					const story = storyQueries[i]?.data;
-					if (!story) return null;
-					return (
+			<Skeleton loading={loading} label="Loading stories">
+				<ReadingList ordered id={listId} aria-label={`${feedLabel} stories`}>
+					{stories.map((story) => (
 						<StoryCard
-							key={`${feed}-${storyId}`}
+							key={`${feed}-${story.id}`}
 							story={{
 								...story,
-								lastViewedAt: lastViewed.get(storyId) ?? null,
+								lastViewedAt: lastViewed.get(story.id) ?? null,
 							}}
 						/>
-					);
-				})}
-			</ReadingList>
+					))}
+				</ReadingList>
+			</Skeleton>
 
 			{hasMore && (
 				<LoadMoreButton
@@ -98,9 +117,7 @@ export function FeedPane({ feed, prefetchNextBatch }: FeedPaneProps) {
 
 			{prefetchNextBatch && hasMore && nextBatchIds.length > 0 && (
 				<Activity mode="hidden">
-					<Suspense fallback={null}>
-						<NextBatchPrefetcher ids={nextBatchIds} />
-					</Suspense>
+					<NextBatchPrefetcher ids={nextBatchIds} />
 				</Activity>
 			)}
 		</Stack>

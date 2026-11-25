@@ -7,7 +7,6 @@ import {
 	within,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { StoryListLoading } from "#/components/organisms/feed/StoryListLoading";
 import { StoryCard } from "#/components/organisms/story/StoryCard";
 import { chatProviderStore } from "#/hooks/useAppearance";
 import { clearAllFavorites, isFavorited } from "#/lib/favorites-store";
@@ -115,15 +114,6 @@ afterEach(() => {
 	authMock.user = null;
 	localStorage.clear();
 	clearAllFavorites();
-});
-
-describe("StoryListLoading", () => {
-	it("tells assistive tech that stories are loading", () => {
-		renderWithQueryClient(<StoryListLoading />);
-		expect(
-			screen.getByRole("status", { name: "Loading stories" }),
-		).toBeDefined();
-	});
 });
 
 describe("StoryCard rendering", () => {

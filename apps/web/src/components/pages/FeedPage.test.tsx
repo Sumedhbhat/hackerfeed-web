@@ -22,16 +22,25 @@ vi.mock("@tanstack/react-router", async () => ({
 	}) => React.createElement("a", { href: to, ...rest }, children),
 }));
 
-const mockUseSuspenseQuery = vi.fn();
-const mockUseSuspenseQueries = vi.fn();
+const mockUseQuery = vi.fn();
+const mockUseQueries = vi.fn();
+
+const isHackerNews = (queryKey: unknown[] | undefined) =>
+	queryKey?.[0] === "hacker-news";
 
 vi.mock("@tanstack/react-query", async (importOriginal) => {
 	const original =
 		await importOriginal<typeof import("@tanstack/react-query")>();
 	return {
 		...original,
-		useSuspenseQuery: (...args: unknown[]) => mockUseSuspenseQuery(...args),
-		useSuspenseQueries: (...args: unknown[]) => mockUseSuspenseQueries(...args),
+		useQuery: (options: { queryKey: unknown[] }) =>
+			(isHackerNews(options.queryKey) ? mockUseQuery : original.useQuery)(
+				options as never,
+			),
+		useQueries: (options: { queries: { queryKey: unknown[] }[] }) =>
+			(isHackerNews(options.queries[0]?.queryKey)
+				? mockUseQueries
+				: original.useQueries)(options as never),
 	};
 });
 
@@ -47,17 +56,20 @@ import { FeedPage } from "#/components/pages/FeedPage";
 function readyIdsQuery(ids: number[]) {
 	return {
 		data: ids,
+		isPending: false,
 		refetch: vi.fn(),
 	};
 }
 
 const emptyIdsQuery = {
 	data: [] as number[],
+	isPending: false,
 	refetch: vi.fn(),
 };
 
 function storyResult(id: number) {
 	return {
+		isPending: false,
 		data: {
 			by: "user",
 			descendants: 5,
@@ -96,8 +108,8 @@ afterEach(() => {
 describe("feed tabs", () => {
 	beforeEach(() => {
 		const ids = [1, 2];
-		mockUseSuspenseQuery.mockReturnValue(readyIdsQuery(ids));
-		mockUseSuspenseQueries.mockReturnValue(ids.map(storyResult));
+		mockUseQuery.mockReturnValue(readyIdsQuery(ids));
+		mockUseQueries.mockReturnValue(ids.map(storyResult));
 	});
 
 	it("renders all three feed tabs", () => {
@@ -128,8 +140,8 @@ describe("feed tabs", () => {
 describe("tab switching", () => {
 	beforeEach(() => {
 		const ids = [1, 2];
-		mockUseSuspenseQuery.mockReturnValue(readyIdsQuery(ids));
-		mockUseSuspenseQueries.mockReturnValue(ids.map(storyResult));
+		mockUseQuery.mockReturnValue(readyIdsQuery(ids));
+		mockUseQueries.mockReturnValue(ids.map(storyResult));
 	});
 
 	it("clicking 'New' makes it the active tab", () => {
@@ -155,9 +167,7 @@ describe("tab switching", () => {
 	});
 
 	const requestedFeeds = () =>
-		new Set(
-			mockUseSuspenseQuery.mock.calls.map(([options]) => options.queryKey[2]),
-		);
+		new Set(mockUseQuery.mock.calls.map(([options]) => options.queryKey[2]));
 
 	it("loads a feed straight away when its tab is opened", () => {
 		render(<FeedPage />, { wrapper: Wrapper });
@@ -227,10 +237,27 @@ describe("tab switching", () => {
 	});
 });
 
+describe("loading state", () => {
+	it("tells assistive tech that stories are loading", () => {
+		mockUseQuery.mockReturnValue({
+			data: undefined,
+			isPending: true,
+			refetch: vi.fn(),
+		});
+		mockUseQueries.mockReturnValue([]);
+
+		render(<FeedPage />, { wrapper: Wrapper });
+
+		expect(
+			screen.getAllByRole("status", { name: "Loading stories" }).length,
+		).toBeGreaterThan(0);
+	});
+});
+
 describe("empty state", () => {
 	it("renders the empty state panel when the feed returns no IDs", () => {
-		mockUseSuspenseQuery.mockReturnValue(emptyIdsQuery);
-		mockUseSuspenseQueries.mockReturnValue([]);
+		mockUseQuery.mockReturnValue(emptyIdsQuery);
+		mockUseQueries.mockReturnValue([]);
 
 		render(<FeedPage />, { wrapper: Wrapper });
 
@@ -248,7 +275,7 @@ describe("error state", () => {
 		const consoleError = vi
 			.spyOn(console, "error")
 			.mockImplementation(() => undefined);
-		mockUseSuspenseQuery.mockImplementation(() => {
+		mockUseQuery.mockImplementation(() => {
 			throw new Error("feed unavailable");
 		});
 
@@ -263,8 +290,8 @@ describe("error state", () => {
 describe("ready state", () => {
 	it("renders story titles when feed and items resolve successfully", () => {
 		const ids = [101, 102];
-		mockUseSuspenseQuery.mockReturnValue(readyIdsQuery(ids));
-		mockUseSuspenseQueries.mockReturnValue(ids.map(storyResult));
+		mockUseQuery.mockReturnValue(readyIdsQuery(ids));
+		mockUseQueries.mockReturnValue(ids.map(storyResult));
 
 		render(<FeedPage />, { wrapper: Wrapper });
 
@@ -276,10 +303,10 @@ describe("ready state", () => {
 	it("shows 'Load N more' button when there are more stories than the initial page", () => {
 		// Create more IDs than PAGE_SIZE (12) so "Load more" appears.
 		const ids = Array.from({ length: 20 }, (_, i) => i + 1);
-		mockUseSuspenseQuery.mockReturnValue(readyIdsQuery(ids));
+		mockUseQuery.mockReturnValue(readyIdsQuery(ids));
 		// Only the first 12 stories resolve (PAGE_SIZE).
 		const firstPage = ids.slice(0, 12).map(storyResult);
-		mockUseSuspenseQueries.mockReturnValue(firstPage);
+		mockUseQueries.mockReturnValue(firstPage);
 
 		render(<FeedPage />, { wrapper: Wrapper });
 
@@ -290,8 +317,8 @@ describe("ready state", () => {
 
 	it("does not show 'Load more' when all stories fit on the first page", () => {
 		const ids = [301, 302, 303];
-		mockUseSuspenseQuery.mockReturnValue(readyIdsQuery(ids));
-		mockUseSuspenseQueries.mockReturnValue(ids.map(storyResult));
+		mockUseQuery.mockReturnValue(readyIdsQuery(ids));
+		mockUseQueries.mockReturnValue(ids.map(storyResult));
 
 		render(<FeedPage />, { wrapper: Wrapper });
 
