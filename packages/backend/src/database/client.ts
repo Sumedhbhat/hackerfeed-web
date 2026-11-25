@@ -10,19 +10,3 @@ export function createDatabaseContext(binding: D1DatabaseBinding) {
 }
 
 export type DatabaseContext = ReturnType<typeof createDatabaseContext>;
-
-const globalForDatabase = globalThis as typeof globalThis & {
-	hackerfeedDatabase?: DatabaseContext;
-};
-
-export function setDatabaseContext(database: DatabaseContext): void {
-	globalForDatabase.hackerfeedDatabase = database;
-}
-
-export function getDatabaseContext(): DatabaseContext {
-	if (!globalForDatabase.hackerfeedDatabase) {
-		throw new Error("HackerFeed database context is not available");
-	}
-
-	return globalForDatabase.hackerfeedDatabase;
-}

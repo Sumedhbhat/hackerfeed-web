@@ -1,15 +1,23 @@
 import { createTRPCClient, httpLink } from "@trpc/client";
 import superjson from "superjson";
 import type { AppRouter } from "../../api-types";
+import type { DatabaseContext } from "../../database/client";
 import { createBackend } from "../../index";
 import type { createFakeWorkos } from "./external-services";
 
 const API_ORIGIN = "https://api.hackerfeed.test";
 
-/** The API as the browser reaches it: real auth, routing and tRPC over HTTP. */
-export function createTestApi(workos: ReturnType<typeof createFakeWorkos>) {
+/**
+ * The backend as the browser reaches it through apps/api: real auth, routing
+ * and tRPC over HTTP. apps/api's origin check is tested in apps/api.
+ */
+export function createTestApi(
+	workos: ReturnType<typeof createFakeWorkos>,
+	database: DatabaseContext,
+) {
 	const handle = createBackend({
 		workos: { apiHostname: workos.apiHostname, clientId: workos.clientId },
+		database,
 	});
 
 	function request(

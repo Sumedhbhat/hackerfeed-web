@@ -12,6 +12,10 @@ import { createFavoriteServiceFromDatabase } from "../favorites/service";
 import { hnStory } from "./support/data";
 import { INTEGRATION, test } from "./support/test";
 
+function byNumber(ids: number[]) {
+	return [...ids].sort((left, right) => left - right);
+}
+
 function storiesInDatabase(database: DatabaseContext) {
 	return database.select().from(stories).orderBy(asc(stories.hnStoryId)).all();
 }
@@ -186,10 +190,12 @@ describe("listing saved stories", () => {
 		INTEGRATION,
 		async ({ world: { alice, bob } }) => {
 			const savedIds = async (reader: typeof alice) =>
-				(await reader.client.favorites.list.query()).map(({ id }) => id).sort();
+				(await reader.client.favorites.list.query()).map(({ id }) => id);
 
-			expect(await savedIds(alice)).toEqual(alice.savedStories);
-			expect(await savedIds(bob)).toEqual(bob.savedStories);
+			expect(byNumber(await savedIds(alice))).toEqual(
+				byNumber(alice.savedStories),
+			);
+			expect(byNumber(await savedIds(bob))).toEqual(byNumber(bob.savedStories));
 		},
 	);
 
@@ -250,9 +256,8 @@ describe("removing saved stories", () => {
 			);
 			const unfavorited = (await favoriteActivity(database))
 				.filter(({ action }) => action === "story.unfavorited")
-				.map(({ hnStoryId }) => hnStoryId)
-				.sort();
-			expect(unfavorited).toEqual(alice.savedStories);
+				.map(({ hnStoryId }) => hnStoryId);
+			expect(byNumber(unfavorited)).toEqual(byNumber(alice.savedStories));
 		},
 	);
 });

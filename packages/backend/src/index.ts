@@ -4,11 +4,13 @@ import {
 	createRequestAuthenticator,
 	type WorkosConfig,
 } from "./auth/workos-access-token";
+import type { DatabaseContext } from "./database/client";
 import { evaluateFeatureFlags } from "./feature-flags/service";
 import { handleTrpcRequest } from "./trpc/handler";
 
 export type BackendConfig = {
 	workos: WorkosConfig;
+	database: DatabaseContext;
 };
 
 /**
@@ -32,7 +34,7 @@ export function createBackend(config: BackendConfig) {
 
 		const { pathname } = new URL(request.url);
 		if (pathname === "/api/trpc" || pathname.startsWith("/api/trpc/")) {
-			return handleTrpcRequest(request, user);
+			return handleTrpcRequest(request, user, config.database);
 		}
 		if (pathname === "/api/feature-flags" && request.method === "GET") {
 			return Response.json(

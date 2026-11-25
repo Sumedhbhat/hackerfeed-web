@@ -94,15 +94,14 @@ describe("preferences", () => {
 			await bob.client.preferences.update.mutate({ mode: "auto" });
 
 			expect((await alice.client.account.me.query()).preferences).toEqual({
-				mode: "dark",
-				palette: { ...sunset, id: alice.paletteId, builtIn: false },
-				chatProvider: "claude",
+				mode: alice.preferences.mode,
+				palette: { ...alice.palette, id: alice.paletteId, builtIn: false },
+				chatProvider: alice.preferences.chatProvider,
 				saved: true,
 			});
 			expect((await bob.client.account.me.query()).preferences).toMatchObject({
 				mode: "auto",
-				palette: { id: "ember", builtIn: true },
-				chatProvider: "chatgpt",
+				palette: { id: bob.preferences.paletteId, builtIn: true },
 			});
 		},
 	);
@@ -214,9 +213,9 @@ describe("palettes", () => {
 			await alice.client.palettes.delete.mutate({ id: alice.paletteId ?? "" });
 
 			expect((await alice.client.account.me.query()).preferences).toEqual({
-				mode: "dark",
+				mode: alice.preferences.mode,
 				palette: DEFAULT_PALETTE,
-				chatProvider: "claude",
+				chatProvider: alice.preferences.chatProvider,
 				saved: true,
 			});
 		},

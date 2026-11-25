@@ -2,7 +2,6 @@ import { createBackend } from "@hackerfeed/backend";
 import {
 	createDatabaseContext,
 	type D1DatabaseBinding,
-	setDatabaseContext,
 } from "@hackerfeed/backend/database/client";
 import { runHuggingFaceDailyPapersIngestion } from "@hackerfeed/backend/huggingface-papers/ingestion";
 import {
@@ -33,7 +32,6 @@ function getSentrySampleRate(value: string | undefined, fallback: number) {
 }
 
 async function handleApiFetch(request: Request, env: WorkerEnv) {
-	setDatabaseContext(createDatabaseContext(env.DB));
 	linkClientTrace(request);
 
 	const backend = createBackend({
@@ -41,6 +39,7 @@ async function handleApiFetch(request: Request, env: WorkerEnv) {
 			apiHostname: env.WORKOS_API_HOSTNAME,
 			clientId: env.WORKOS_CLIENT_ID,
 		},
+		database: createDatabaseContext(env.DB),
 	});
 	const handle = onlyFromOrigin(env.ALLOWED_ORIGIN, async (request) => {
 		try {

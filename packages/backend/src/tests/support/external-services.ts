@@ -21,12 +21,10 @@ export async function createSigningKey(kid = "test-key"): Promise<SigningKey> {
 /** WorkOS AuthKit: publishes the JWKS that signs readers' access tokens. */
 export function createFakeWorkos(key: SigningKey) {
 	const clientId = "client_test";
-	const jwksRequests: URL[] = [];
 
 	return {
 		clientId,
 		apiHostname: "api.workos.com",
-		jwksRequests,
 		/** An access token AuthKit would issue to this WorkOS user. */
 		accessToken(
 			workosUserId: string,
@@ -48,7 +46,6 @@ export function createFakeWorkos(key: SigningKey) {
 			if (url.pathname !== `/sso/jwks/${clientId}`) {
 				return Response.json({ message: "Not found" }, { status: 404 });
 			}
-			jwksRequests.push(url);
 			return Response.json({ keys: [key.jwk] });
 		},
 	};

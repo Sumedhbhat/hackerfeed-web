@@ -1,8 +1,5 @@
 import { test as base, type TestContext } from "vitest";
-import {
-	createDatabaseContext,
-	setDatabaseContext,
-} from "../../database/client";
+import { createDatabaseContext } from "../../database/client";
 import { createTestApi } from "./api";
 import {
 	createFakeHuggingFace,
@@ -13,7 +10,13 @@ import {
 import { startLocalD1 } from "./local-d1";
 import { seedWorld } from "./world";
 
-export const INTEGRATION = { tags: ["integration"] };
+declare module "vitest" {
+	interface TestTags {
+		integration: "integration";
+	}
+}
+
+export const INTEGRATION = { tags: ["integration" as const] };
 
 function requireIntegrationTag(task: TestContext["task"]) {
 	if (!task.tags?.includes("integration")) {
@@ -28,7 +31,8 @@ function requireIntegrationTag(task: TestContext["task"]) {
  * An integration test (tagged with `INTEGRATION`) asks for what it uses:
  *
  * - `database`: the real schema on a local D1, emptied before each test.
- * - `api`: the API's request handler with real WorkOS token checks;
+ * - `api`: the backend's request handler (`createBackend`) with real WorkOS
+ *   token checks;
  *   `api.as("user_1")` is a tRPC client signed in as that reader.
  * - `workos`, `huggingFace`: fakes for those services, with defaults a test
  *   can change (`huggingFace.failNext(503)`, `huggingFace.publish(...)`).
@@ -62,11 +66,9 @@ export const test = base
 	.extend("huggingFace", ({ externalServices }) => externalServices.huggingFace)
 	.extend("database", async ({ localD1, externalServices: _ }) => {
 		await localD1.wipe();
-		const database = createDatabaseContext(localD1.binding);
-		setDatabaseContext(database);
-		return database;
+		return createDatabaseContext(localD1.binding);
 	})
-	.extend("api", ({ database: _, workos }) => createTestApi(workos))
+	.extend("api", ({ database, workos }) => createTestApi(workos, database))
 	.extend("world", ({ api, database, huggingFace }) =>
 		seedWorld({ api, database, huggingFace }),
 	);
