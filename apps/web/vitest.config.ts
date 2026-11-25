@@ -5,6 +5,7 @@ export default defineConfig({
 		tsconfigPaths: true,
 	},
 	test: {
+		env: { VITE_DEMO_LATENCY_MS: "0" },
 		projects: [
 			{
 				extends: true,

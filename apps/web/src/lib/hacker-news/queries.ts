@@ -44,6 +44,8 @@ async function fetchJson<T>(path: string, signal?: AbortSignal): Promise<T> {
 	// Production builds drop this branch and the fixtures entirely.
 	if (import.meta.env.VITE_DEMO_DATA === "true") {
 		const { fetchDemoHackerNewsJson } = await import("./demo-api");
+		const { waitForDemoLatency } = await import("#/demo-data/latency");
+		await waitForDemoLatency(signal);
 		return fetchDemoHackerNewsJson(path) as T;
 	}
 
