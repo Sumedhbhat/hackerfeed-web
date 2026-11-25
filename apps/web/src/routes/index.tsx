@@ -11,7 +11,9 @@ import { titleHead } from "#/lib/page-title";
 
 export const Route = createFileRoute("/")({
 	head: () => titleHead("Stories"),
+	codeSplitGroupings: [["component", "pendingComponent"]],
 	component: FeedPage,
+	pendingComponent: FeedPage,
 	loader: async ({ context }) => {
 		try {
 			const ids = await context.queryClient.ensureQueryData(

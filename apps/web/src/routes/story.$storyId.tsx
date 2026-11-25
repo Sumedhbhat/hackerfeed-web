@@ -14,6 +14,7 @@ export const Route = createFileRoute("/story/$storyId")({
 		parse: (raw) => ({ storyId: Number(raw.storyId) }),
 		stringify: (params) => ({ storyId: String(params.storyId) }),
 	},
+	codeSplitGroupings: [["component", "pendingComponent"]],
 	loader: async ({ context, params }) => {
 		const { storyId } = params;
 
@@ -49,6 +50,7 @@ export const Route = createFileRoute("/story/$storyId")({
 	},
 	head: ({ loaderData }) => titleHead(loaderData?.title),
 	component: StoryRoute,
+	pendingComponent: StoryRoute,
 	errorComponent: StoryErrorPage,
 	notFoundComponent: StoryNotFoundPage,
 });
