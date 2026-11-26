@@ -1,4 +1,3 @@
-/** How long every demo answer takes, so previews show the loading states readers see. */
 export const DEMO_LATENCY_MS = 300;
 
 export function waitForDemoLatency(signal?: AbortSignal): Promise<void> {

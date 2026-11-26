@@ -14,7 +14,6 @@ export enum FeedStatus {
 }
 
 export type UseFeedReturn = {
-	/** The loaded stories, or `undefined` while the first page loads. */
 	stories: HackerNewsStoryRecord[] | undefined;
 	isPending: boolean;
 	displayedIds: number[];

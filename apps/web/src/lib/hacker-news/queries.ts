@@ -231,7 +231,6 @@ export function feedStoryIdsQueryOptions(feed: HackerNewsFeedKey) {
 	});
 }
 
-/** Caches a feed's story IDs and its first page of stories. */
 export async function prefetchFeed(
 	queryClient: QueryClient,
 	feed: HackerNewsFeedKey,
