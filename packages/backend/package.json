@@ -25,7 +25,9 @@
 		"zod": "^4.6.5"
 	},
 	"devDependencies": {
+		"@trpc/client": "^11.19.0",
 		"drizzle-kit": "^0.31.11",
-		"vitest": "^5.0.4"
+		"vitest": "^5.0.4",
+		"wrangler": "^4.151.0"
 	}
 }

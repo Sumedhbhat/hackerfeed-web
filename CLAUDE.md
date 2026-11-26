@@ -20,6 +20,7 @@ gh workflow run deploy.yaml  # Deploy with Terraform outputs in CI
 bun run test         # Every project's tests, through Nx
 bun run e2e          # End-to-end tests (apps/web-e2e): flows and accessibility
 bunx nx test backend # One project's tests
+bunx nx test backend -- --tags-filter='!integration'   # Backend unit tests only (--tags-filter=integration for the rest)
 cd apps/web && bunx vitest run src/lib/hacker-news/display.test.ts   # A single test file
 
 # Linting / formatting
@@ -146,9 +147,16 @@ Prefer props that describe intent (`tone="soft"`, `size="page"`, `variant="accen
 
 ### Testing
 
-Shared and server packages run Vitest with its defaults (`node`, no config file); `ui` and `api-client` have a `vitest.config.ts` for `happy-dom`. `apps/web/vitest.config.ts` has two projects:
+Shared packages run Vitest with its defaults (`node`, no config file); `ui` and `api-client` have a `vitest.config.ts` for `happy-dom`, and `backend` one that defines the `integration` tag. `apps/web/vitest.config.ts` has two projects:
 - **`node`** — pure utility and store tests (`src/**/*.test.{ts,tsx}`, excluding `src/components/**` and `*.browser.test.*`)
 - **`browser`** — component and browser-API tests using `happy-dom` (`src/components/**/*.test.*` and `src/**/*.browser.test.*`)
+
+Backend tests live in `packages/backend/src/tests/`, one file per scenario (`story-favorites`, `nightly-paper-ingestion`, `api-access`…), never one per layer or per test type. A scenario's unit and integration tests sit side by side; both import `test` from `./support/test`:
+- **Unit**: `test(name, fn)` asks for no fixtures and gets nothing: pure logic (date rules, parsing, validation, flag rules).
+- **Integration**: `test(name, INTEGRATION, async ({ api, database, workos, huggingFace }) => …)`. `database` is the real schema on a local D1 (wrangler's test harness applies `migrations/`), emptied before each test; `api` is the backend's handler (`createBackend`, given that database): `api.as("user_x")` is a tRPC client signed in through the real auth path, `api.request(path, { token })` a raw request. apps/api's origin check (tested in `apps/api/src/cors.test.ts`) and its 500 wrapper sit outside it. Asking for any fixture without the `INTEGRATION` tag fails the test.
+- Only services we don't run are faked (`support/external-services.ts`: WorkOS's JWKS, Hugging Face Daily Papers). While an integration test that asks for a fixture runs, `fetch` reaches only them and local hosts (the D1); anything else throws. A test changes a fake's default for its scenario (`huggingFace.failNext(503, { times: 2 })`, `huggingFace.publish(date, entries)`, `workos.accessToken(id, { expiresAt })`) and never stubs our own repositories, services or D1.
+- Shared builders and seeds go in `support/` (`data.ts`, `seed.ts`: `ingestEdition` puts papers in D1 by running the real nightly job against the fake), not in test files.
+- A test that needs data already there (who can see whose saves, a reader among others) asks for `world` instead of building it: readers `world.alice` and `world.bob` (each with `client`, `appUserId` and what they saved and read) with saves, reads, a palette and preferences over shared stories and the day's papers, all written through the API (`support/world.ts`). For a different starting point call `seedWorld({ api, database, huggingFace }, { readers: { bob: { savedStories: [] }, carol: {} } })`; a new reader starts with nothing.
 
 In `apps/web`, use the `.browser.test.ts` suffix for anything that touches `window`, `localStorage`, or DOM APIs. Inject collaborators into package code (as `createTrpcClient({ auth })` does) rather than mocking another package's internals.
 
