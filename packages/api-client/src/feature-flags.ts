@@ -1,4 +1,4 @@
-import type { FeatureFlags } from "@hackerfeed/backend/api-types";
+import type { FeatureFlags } from "@hackerfeed/entity-state";
 import { z } from "zod";
 import type { ApiAuth } from "./auth";
 

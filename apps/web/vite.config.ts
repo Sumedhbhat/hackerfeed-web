@@ -9,11 +9,11 @@ import viteReact from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
 const demo = process.env.VITE_DEMO_DATA === "true";
-// The backend runs in apps/api. The web app may import only its types; the
-// demo build also bundles its schema for the in-memory database.
+// The backend runs in apps/api. The web app may import only its types, through
+// entity-state; the demo build also bundles its schema for the in-memory database.
 const backendCode = demo
-	? /(^|\/)packages\/backend\/(?!src\/(api-types|database\/schema)\.ts$)/
-	: /(^|\/)packages\/backend\/(?!src\/api-types\.ts$)/;
+	? /(^|\/)packages\/backend\/(?!src\/database\/schema\.ts$)/
+	: /(^|\/)packages\/backend\//;
 const sentryAuthToken = process.env.SENTRY_AUTH_TOKEN;
 
 const config = defineConfig({

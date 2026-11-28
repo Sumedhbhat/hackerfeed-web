@@ -3,6 +3,7 @@
 	"name": "api",
 	"projectType": "application",
 	"sourceRoot": "apps/api/src",
+	"tags": ["scope:web"],
 	"targets": {
 		"typecheck": {},
 		"test": {},

@@ -1,0 +1,10 @@
+{
+	"$schema": "../../node_modules/nx/schemas/project-schema.json",
+	"name": "entity-state",
+	"projectType": "library",
+	"sourceRoot": "packages/entity-state/src",
+	"tags": ["type:entity-state"],
+	"targets": {
+		"typecheck": {}
+	}
+}

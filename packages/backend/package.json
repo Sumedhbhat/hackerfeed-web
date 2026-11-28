@@ -4,10 +4,12 @@
 	"type": "module",
 	"exports": {
 		".": "./src/index.ts",
-		"./api-types": "./src/api-types.ts",
 		"./database/client": "./src/database/client.ts",
 		"./database/schema": "./src/database/schema.ts",
-		"./huggingface-papers/ingestion": "./src/huggingface-papers/ingestion.ts"
+		"./feature-flags/config": "./src/feature-flags/config.ts",
+		"./feature-flags/service": "./src/feature-flags/service.ts",
+		"./huggingface-papers/ingestion": "./src/huggingface-papers/ingestion.ts",
+		"./trpc/router": "./src/trpc/router.ts"
 	},
 	"scripts": {
 		"db:generate": "drizzle-kit generate"

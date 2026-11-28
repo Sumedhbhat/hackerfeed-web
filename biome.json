@@ -73,6 +73,13 @@
 					"options": {
 						"patterns": [
 							{
+								"group": [
+									"@hackerfeed/entity-state",
+									"@hackerfeed/entity-state/**"
+								],
+								"message": "Only web, api, web-e2e and api-client may import @hackerfeed/entity-state."
+							},
+							{
 								"group": ["@base-ui/**"],
 								"message": "Base UI is wrapped by the atoms in @hackerfeed/ui/atoms (Tabs, Menu, Toggle...). Use or extend an atom instead of importing Base UI here."
 							}
@@ -175,12 +182,28 @@
 							"options": {
 								"patterns": [
 									{
-										"group": [
-											"@hackerfeed/backend",
-											"@hackerfeed/backend/**",
-											"!@hackerfeed/backend/api-types"
-										],
-										"message": "The browser may use only the backend's types: import type from @hackerfeed/backend/api-types."
+										"group": ["@hackerfeed/backend", "@hackerfeed/backend/**"],
+										"message": "The browser may use only the backend's types: import type from @hackerfeed/entity-state."
+									}
+								]
+							}
+						}
+					}
+				}
+			}
+		},
+		{
+			"includes": ["**/apps/web/**", "**/apps/api/**", "**/apps/web-e2e/**"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noRestrictedImports": {
+							"level": "error",
+							"options": {
+								"patterns": [
+									{
+										"group": ["@base-ui/**"],
+										"message": "Base UI is wrapped by the atoms in @hackerfeed/ui/atoms (Tabs, Menu, Toggle...). Use or extend an atom instead of importing Base UI here."
 									}
 								]
 							}
