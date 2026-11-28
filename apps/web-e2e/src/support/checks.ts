@@ -3,8 +3,17 @@ import { expect, type Locator, type Page } from "@playwright/test";
 
 export async function open(page: Page, path: string) {
 	await page.goto(path);
-	await page.waitForLoadState("networkidle");
-	await expect(page.getByRole("main")).toBeVisible();
+	await loaded(page);
+}
+
+/** Waits until the demo's delayed answers have arrived and no skeleton is left. */
+export async function loaded(page: Page) {
+	await expect(
+		page.getByRole("main").getByRole("heading", { level: 1 }),
+	).toBeVisible({ timeout: 15_000 });
+	await expect(
+		page.locator('[data-autoskeleton][aria-busy="true"]'),
+	).toHaveCount(0);
 }
 
 export async function axeViolations(page: Page) {

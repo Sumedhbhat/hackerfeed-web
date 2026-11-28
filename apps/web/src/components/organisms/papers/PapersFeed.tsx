@@ -1,3 +1,4 @@
+import { Skeleton } from "@autoskeleton/react";
 import type { PaperEdition } from "@hackerfeed/entities/papers";
 import { Button } from "@hackerfeed/ui/atoms/Button";
 import { Icon } from "@hackerfeed/ui/atoms/Icon";
@@ -29,6 +30,7 @@ export type PaperFilters = {
 
 type PapersFeedProps = {
 	edition: PaperEdition;
+	loading?: boolean;
 	filters: PaperFilters;
 	onFiltersChange: (filters: PaperFilters) => void;
 };
@@ -37,6 +39,7 @@ const INITIAL_PAPER_COUNT = 10;
 
 export function PapersFeed({
 	edition,
+	loading = false,
 	filters,
 	onFiltersChange,
 }: PapersFeedProps) {
@@ -102,72 +105,74 @@ export function PapersFeed({
 				}
 			/>
 
-			<PaperTopicNav
-				totalCount={edition.papers.length}
-				topics={edition.popularKeywords.slice(0, 8)}
-				selected={filters.topic}
-				onSelect={(topic) => onFiltersChange({ ...filters, topic })}
-			/>
-			{favorites.error ? (
-				<InlineNotice
-					message={favorites.error}
-					action={
-						<Button
-							variant="icon"
-							onClick={favorites.refresh}
-							aria-label="Refresh saved favorites"
-							title="Refresh saved favorites"
-						>
-							<Icon icon={RefreshCw} />
-						</Button>
-					}
+			<Skeleton loading={loading} label="Loading papers">
+				<PaperTopicNav
+					totalCount={edition.papers.length}
+					topics={edition.popularKeywords.slice(0, 8)}
+					selected={filters.topic}
+					onSelect={(topic) => onFiltersChange({ ...filters, topic })}
 				/>
-			) : null}
+				{favorites.error ? (
+					<InlineNotice
+						message={favorites.error}
+						action={
+							<Button
+								variant="icon"
+								onClick={favorites.refresh}
+								aria-label="Refresh saved favorites"
+								title="Refresh saved favorites"
+							>
+								<Icon icon={RefreshCw} />
+							</Button>
+						}
+					/>
+				) : null}
 
-			{visiblePapers.length > 0 ? (
-				<>
-					<PaperList id="papers-list" aria-label="Papers">
-						{visiblePapers.map((paper) => (
-							<PaperRow
-								canFavorite={favorites.canFavorite}
-								isFavorited={favorites.isFavorited(paper.arxivId)}
-								isPending={favorites.isPending(paper.arxivId)}
-								key={paper.arxivId}
-								onToggleFavorite={() => favorites.toggleFavorite(paper)}
-								onView={(action) => recordPaperView(paper.arxivId, action)}
-								paper={paper}
+				{visiblePapers.length > 0 ? (
+					<>
+						<PaperList id="papers-list" aria-label="Papers">
+							{visiblePapers.map((paper) => (
+								<PaperRow
+									canFavorite={favorites.canFavorite}
+									isFavorited={favorites.isFavorited(paper.arxivId)}
+									isPending={favorites.isPending(paper.arxivId)}
+									key={paper.arxivId}
+									onToggleFavorite={() => favorites.toggleFavorite(paper)}
+									onView={(action) => recordPaperView(paper.arxivId, action)}
+									paper={paper}
+								/>
+							))}
+						</PaperList>
+						{visibleCount < filteredPapers.length ? (
+							<LoadMoreButton
+								label="Load more papers"
+								onClick={withFocus(() =>
+									setVisibleCount((count) => count + INITIAL_PAPER_COUNT),
+								)}
 							/>
-						))}
-					</PaperList>
-					{visibleCount < filteredPapers.length ? (
-						<LoadMoreButton
-							label="Load more papers"
-							onClick={withFocus(() =>
-								setVisibleCount((count) => count + INITIAL_PAPER_COUNT),
-							)}
-						/>
-					) : null}
-				</>
-			) : (
-				<PaperFeedMessage message={emptyMessage}>
-					{hasPapers && hasActiveFilters ? (
-						<Button
-							variant="secondary"
-							onClick={() => onFiltersChange({ date: filters.date })}
-						>
-							Clear search and topic
-						</Button>
-					) : null}
-					{!hasPapers && filters.date ? (
-						<Button
-							variant="secondary"
-							onClick={() => onFiltersChange({ ...filters, date: undefined })}
-						>
-							View latest edition
-						</Button>
-					) : null}
-				</PaperFeedMessage>
-			)}
+						) : null}
+					</>
+				) : (
+					<PaperFeedMessage message={emptyMessage}>
+						{hasPapers && hasActiveFilters ? (
+							<Button
+								variant="secondary"
+								onClick={() => onFiltersChange({ date: filters.date })}
+							>
+								Clear search and topic
+							</Button>
+						) : null}
+						{!hasPapers && filters.date ? (
+							<Button
+								variant="secondary"
+								onClick={() => onFiltersChange({ ...filters, date: undefined })}
+							>
+								View latest edition
+							</Button>
+						) : null}
+					</PaperFeedMessage>
+				)}
+			</Skeleton>
 		</PaperPageShell>
 	);
 }

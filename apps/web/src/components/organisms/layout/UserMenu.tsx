@@ -1,5 +1,5 @@
+import { Skeleton } from "@autoskeleton/react";
 import { Avatar } from "@hackerfeed/ui/atoms/Avatar";
-import { AvatarSkeleton } from "@hackerfeed/ui/atoms/AvatarSkeleton";
 import { ButtonLink } from "@hackerfeed/ui/atoms/Button";
 import { MenuItem, MenuLinkItem } from "@hackerfeed/ui/atoms/Menu";
 import { Stack } from "@hackerfeed/ui/atoms/Stack";
@@ -11,11 +11,7 @@ import { useUserMenu } from "#/hooks/useUserMenu";
 export default function UserMenu() {
 	const { user, isLoading, signOut, initials, displayName } = useUserMenu();
 
-	if (isLoading) {
-		return <AvatarSkeleton />;
-	}
-
-	if (!user) {
+	if (!isLoading && !user) {
 		return (
 			<ButtonLink to="/profile" variant="icon" aria-label="Profile">
 				<User size={16} aria-hidden="true" />
@@ -24,50 +20,52 @@ export default function UserMenu() {
 	}
 
 	return (
-		<DropdownMenu
-			triggerLabel={`${initials}, user menu`}
-			trigger={
-				<Avatar
-					name={displayName}
-					initials={initials}
-					imageUrl={user.profilePictureUrl}
-				/>
-			}
-			header={
-				<>
+		<Skeleton loading={isLoading}>
+			<DropdownMenu
+				triggerLabel={`${initials}, user menu`}
+				trigger={
 					<Avatar
 						name={displayName}
 						initials={initials}
-						imageUrl={user.profilePictureUrl}
-						size="md"
+						imageUrl={user?.profilePictureUrl}
 					/>
-					<Stack gap="none" grow>
-						<Text as="div" weight="semibold" breakAnywhere>
-							{displayName}
-						</Text>
-						<Text as="div" size="xs" tone="soft" breakAnywhere>
-							{user.email}
-						</Text>
-					</Stack>
-				</>
-			}
-		>
-			<MenuLinkItem to="/profile">
-				<User size={15} aria-hidden="true" />
-				Profile
-			</MenuLinkItem>
-			<MenuLinkItem to="/analytics">
-				<ChartColumn size={15} aria-hidden="true" />
-				Analytics
-			</MenuLinkItem>
-			<MenuLinkItem to="/settings">
-				<Settings size={15} aria-hidden="true" />
-				Settings
-			</MenuLinkItem>
-			<MenuItem onClick={() => signOut()}>
-				<LogOut size={15} aria-hidden="true" />
-				{import.meta.env.VITE_DEMO_DATA === "true" ? "Reset demo" : "Log out"}
-			</MenuItem>
-		</DropdownMenu>
+				}
+				header={
+					<>
+						<Avatar
+							name={displayName}
+							initials={initials}
+							imageUrl={user?.profilePictureUrl}
+							size="md"
+						/>
+						<Stack gap="none" grow>
+							<Text as="div" weight="semibold" breakAnywhere>
+								{displayName}
+							</Text>
+							<Text as="div" size="xs" tone="soft" breakAnywhere>
+								{user?.email}
+							</Text>
+						</Stack>
+					</>
+				}
+			>
+				<MenuLinkItem to="/profile">
+					<User size={15} aria-hidden="true" />
+					Profile
+				</MenuLinkItem>
+				<MenuLinkItem to="/analytics">
+					<ChartColumn size={15} aria-hidden="true" />
+					Analytics
+				</MenuLinkItem>
+				<MenuLinkItem to="/settings">
+					<Settings size={15} aria-hidden="true" />
+					Settings
+				</MenuLinkItem>
+				<MenuItem onClick={() => signOut()}>
+					<LogOut size={15} aria-hidden="true" />
+					{import.meta.env.VITE_DEMO_DATA === "true" ? "Reset demo" : "Log out"}
+				</MenuItem>
+			</DropdownMenu>
+		</Skeleton>
 	);
 }

@@ -1,5 +1,6 @@
-import { useSuspenseQueries, useSuspenseQuery } from "@tanstack/react-query";
-import { useState, useTransition } from "react";
+import type { HackerNewsStoryRecord } from "@hackerfeed/entities/hacker-news";
+import { useQueries, useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import {
 	feedStoryIdsQueryOptions,
 	type HackerNewsFeedKey,
@@ -13,12 +14,10 @@ export enum FeedStatus {
 }
 
 export type UseFeedReturn = {
+	stories: HackerNewsStoryRecord[] | undefined;
 	isPending: boolean;
 	displayedIds: number[];
 	nextBatchIds: number[];
-	storyQueries: ReturnType<
-		typeof useSuspenseQueries<ReturnType<typeof storyQueryOptions>[]>
-	>;
 	hasMore: boolean;
 	nextBatchSize: number;
 	activeStatus: FeedStatus;
@@ -28,41 +27,42 @@ export type UseFeedReturn = {
 
 export function useFeed(feed: HackerNewsFeedKey): UseFeedReturn {
 	const [loadedCount, setLoadedCount] = useState(PAGE_SIZE);
-	const [isPending, startTransition] = useTransition();
 
-	const idsQuery = useSuspenseQuery(feedStoryIdsQueryOptions(feed));
+	const idsQuery = useQuery({
+		...feedStoryIdsQueryOptions(feed),
+		throwOnError: true,
+	});
 	const allIds = idsQuery.data ?? [];
 	const displayedIds = allIds.slice(0, loadedCount);
 	const hasMore = allIds.length > loadedCount;
 	const nextBatchSize = Math.min(allIds.length - loadedCount, PAGE_SIZE);
 	const nextBatchIds = allIds.slice(loadedCount, loadedCount + PAGE_SIZE);
 
-	const storyQueries = useSuspenseQueries({
-		queries: displayedIds.map((id) => storyQueryOptions(id)),
+	const storyQueries = useQueries({
+		queries: displayedIds.map((id) => ({
+			...storyQueryOptions(id),
+			throwOnError: true,
+		})),
 	});
 
-	const activeStatus: FeedStatus =
-		allIds.length === 0 ? FeedStatus.Empty : FeedStatus.Ready;
-
-	const loadMore = () => {
-		startTransition(() => {
-			setLoadedCount((prev) => prev + PAGE_SIZE);
-		});
-	};
-
-	const refetch = () => {
-		idsQuery.refetch();
-	};
+	const firstPageLoading =
+		idsQuery.isPending ||
+		storyQueries.slice(0, PAGE_SIZE).some((query) => query.isPending);
+	const stories = firstPageLoading
+		? undefined
+		: storyQueries.flatMap((query) => (query.data ? [query.data] : []));
 
 	return {
-		isPending,
+		stories,
+		isPending:
+			!firstPageLoading && storyQueries.some((query) => query.isPending),
 		displayedIds,
 		nextBatchIds,
-		storyQueries,
 		hasMore,
 		nextBatchSize,
-		activeStatus,
-		loadMore,
-		refetch,
+		activeStatus:
+			idsQuery.data?.length === 0 ? FeedStatus.Empty : FeedStatus.Ready,
+		loadMore: () => setLoadedCount((prev) => prev + PAGE_SIZE),
+		refetch: () => void idsQuery.refetch(),
 	};
 }

@@ -8,6 +8,11 @@ import { snapshotPapers } from "#/demo-data/snapshot";
 import { matchesFilters } from "#/lib/papers/presentation";
 import { createDemoApi } from "./demo";
 
+vi.mock("#/demo-data/latency", () => ({
+	DEMO_LATENCY_MS: 0,
+	waitForDemoLatency: () => Promise.resolve(),
+}));
+
 vi.mock("@workos-inc/authkit-react", () => ({
 	useAuth: () => {
 		throw new Error("Demo must not initialize WorkOS");

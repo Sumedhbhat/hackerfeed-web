@@ -1,4 +1,4 @@
-import { axeViolations, open, settled } from "./support/checks";
+import { axeViolations, loaded, open, settled } from "./support/checks";
 import { expect, test } from "./support/fixtures";
 
 const accent = (page: import("@playwright/test").Page) =>
@@ -150,6 +150,7 @@ for (const palette of ["Ember", "Iris", "Midnight", "Sunset"]) {
 
 			await page.getByRole("link", { name: "Stories" }).click();
 			await page.getByRole("list", { name: "Top stories" }).waitFor();
+			await loaded(page);
 			await settled(page);
 			expect(await axeViolations(page)).toEqual([]);
 		});

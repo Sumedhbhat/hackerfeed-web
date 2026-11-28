@@ -50,6 +50,7 @@ import { paperFavoriteRows } from "#/demo-data/database/paper-favorites";
 import { paperKeywordRows } from "#/demo-data/database/paper-keywords";
 import { paperRows } from "#/demo-data/database/papers";
 import { storyRows } from "#/demo-data/database/stories";
+import { DEMO_LATENCY_MS } from "#/demo-data/latency";
 
 const paperPresentations = paperRows.map((paper) => ({
 	arxivId: paper.arxivId,
@@ -399,17 +400,20 @@ export const demoLink: TRPCLink<AppRouter> =
 	() =>
 	({ op }) =>
 		observable((observer) => {
-			try {
-				if (typeof window === "undefined")
-					throw new Error("Demo state is browser-only");
-				browserApi ??= createDemoApi();
-				observer.next({ result: { data: browserApi(op.path, op.input) } });
-				observer.complete();
-			} catch (error) {
-				observer.error(
-					TRPCClientError.from(
-						error instanceof Error ? error : new Error(String(error)),
-					),
-				);
-			}
+			const timer = setTimeout(() => {
+				try {
+					if (typeof window === "undefined")
+						throw new Error("Demo state is browser-only");
+					browserApi ??= createDemoApi();
+					observer.next({ result: { data: browserApi(op.path, op.input) } });
+					observer.complete();
+				} catch (error) {
+					observer.error(
+						TRPCClientError.from(
+							error instanceof Error ? error : new Error(String(error)),
+						),
+					);
+				}
+			}, DEMO_LATENCY_MS);
+			return () => clearTimeout(timer);
 		});

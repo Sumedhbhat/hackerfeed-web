@@ -5,6 +5,11 @@ import { describe, expect, it, vi } from "vitest";
 import { databaseFixtures as fixtures } from "./database";
 import { type DemoItem, feeds, items } from "./hacker-news";
 
+vi.mock("#/demo-data/latency", () => ({
+	DEMO_LATENCY_MS: 0,
+	waitForDemoLatency: () => Promise.resolve(),
+}));
+
 const tables: SQLiteTable[] = Object.values(schema).filter((value) =>
 	is(value, SQLiteTable),
 );

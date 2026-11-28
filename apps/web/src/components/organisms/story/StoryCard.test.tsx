@@ -1,5 +1,4 @@
 import type { HackerNewsStoryRecord } from "@hackerfeed/entities/hacker-news";
-import { StoryListSkeleton } from "@hackerfeed/ui/molecules/StoryListSkeleton";
 import {
 	cleanup,
 	fireEvent,
@@ -115,15 +114,6 @@ afterEach(() => {
 	authMock.user = null;
 	localStorage.clear();
 	clearAllFavorites();
-});
-
-describe("StoryListSkeleton", () => {
-	it("tells assistive tech that stories are loading", () => {
-		renderWithQueryClient(<StoryListSkeleton count={3} />);
-		expect(
-			screen.getByRole("status", { name: "Loading stories" }),
-		).toBeDefined();
-	});
 });
 
 describe("StoryCard rendering", () => {
