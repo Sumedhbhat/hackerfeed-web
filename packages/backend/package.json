@@ -17,19 +17,19 @@
 	"dependencies": {
 		"@hackerfeed/entities": "workspace:*",
 		"@hackerfeed/runtime": "workspace:*",
-		"@sentry/cloudflare": "^11.7.0",
+		"@sentry/cloudflare": "^11.12.0",
 		"@sentry/core": "^11.7.0",
 		"@tanstack/react-start": "latest",
-		"@trpc/server": "^11.19.0",
+		"@trpc/server": "^11.28.1",
 		"drizzle-orm": "^0.45.3",
-		"jose": "^6.2.12",
+		"jose": "^6.2.17",
 		"superjson": "^2.2.2",
 		"zod": "^4.6.5"
 	},
 	"devDependencies": {
-		"@trpc/client": "^11.19.0",
+		"@trpc/client": "^11.28.1",
 		"drizzle-kit": "^0.31.11",
-		"vitest": "^5.0.4",
-		"wrangler": "^4.151.0"
+		"vitest": "^5.1.0",
+		"wrangler": "^4.162.0"
 	}
 }
