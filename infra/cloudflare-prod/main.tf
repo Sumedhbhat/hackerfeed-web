@@ -6,6 +6,8 @@ terraform {
       source  = "cloudflare/cloudflare"
       version = "5.27.0"
     }
+    # Forgets the old preview token's time_rotating. Remove with the removed
+    # block below after that apply.
     time = {
       source  = "hashicorp/time"
       version = "0.14.2"
@@ -39,11 +41,14 @@ resource "cloudflare_d1_database" "this" {
   read_replication = { mode = "disabled" }
 }
 
-# PR jobs read this state: the preview token uploads demo versions and plans
-# this root. Production-only tokens belong in ../deploy-access.
-module "preview_token" {
-  source      = "../modules/ci-token"
-  account_id  = var.cloudflare_account_id
-  name        = "hackerfeed-ci-preview"
-  permissions = ["Workers Scripts Write", "D1 Read", "Account API Tokens Read"]
+# The preview token moved to ../preview-access. Forgetting it, rather than
+# destroying it, needs no token-reading permission in the read-only plans,
+# which use the new preview token. Revoke the old token in Cloudflare by hand,
+# then remove this block.
+removed {
+  from = module.preview_token
+
+  lifecycle {
+    destroy = false
+  }
 }

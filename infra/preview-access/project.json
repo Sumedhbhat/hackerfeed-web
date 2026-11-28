@@ -1,0 +1,24 @@
+{
+	"$schema": "../../node_modules/nx/schemas/project-schema.json",
+	"name": "infra-preview",
+	"projectType": "application",
+	"sourceRoot": "infra/preview-access",
+	"implicitDependencies": [
+		"infra-ci",
+		"tf-ci-token"
+	],
+	"targets": {
+		"fmt": {
+			"command": "terraform fmt -check -diff",
+			"options": {
+				"cwd": "infra/preview-access"
+			}
+		},
+		"validate": {
+			"command": "terraform init -backend=false -input=false -lockfile=readonly && terraform validate",
+			"options": {
+				"cwd": "infra/preview-access"
+			}
+		}
+	}
+}

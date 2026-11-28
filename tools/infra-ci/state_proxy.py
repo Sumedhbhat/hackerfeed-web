@@ -23,7 +23,7 @@ from commands import Commands
 STATE_URL = "https://hackerfeed-terraform-state.kgqk4vdcfq.workers.dev"
 # Each stage is a Terraform root, keyed by its state name on the server.
 ROOT = Path(__file__).resolve().parents[2]
-STAGES = {"prod": "infra/cloudflare-prod", "deploy": "infra/deploy-access"}
+STAGES = {"prod": "infra/cloudflare-prod", "deploy": "infra/deploy-access", "preview": "infra/preview-access"}
 
 
 class RunnerError(Exception):

@@ -242,17 +242,20 @@ backend behavior. Run
 
 GitHub stores one Cloudflare token, `CLOUDFLARE_API_TOKEN` in the `production`
 environment. It runs Terraform and deploys the state server, which Terraform
-needs first. Terraform mints, scopes and rotates every other token:
+needs first. Terraform mints and scopes every other token:
 
-| Token | Root and state | Used by |
-|---|---|---|
-| `hackerfeed-ci-deploy` | `infra/deploy-access`, `deploy` | migrations and Worker deploys |
-| `hackerfeed-ci-preview` | `infra/cloudflare-prod`, `prod` | PR version uploads and PR plans |
+| Token | Root and state | Rotated by | Used by |
+|---|---|---|---|
+| `hackerfeed-ci-deploy` | `infra/deploy-access`, `deploy` | deploys, every 30 days | migrations and Worker deploys |
+| `hackerfeed-ci-preview` | `infra/preview-access`, `preview` | you, with **Rotate preview token** | PR version uploads and PR plans |
 
-Jobs read them from Terraform outputs with `tools/infra-ci/cloudflare-token.sh`, so the
-`preview` environment holds no Cloudflare token. Token values sit in plain text
-in state, and PR jobs can read `prod`; production-only tokens go in `deploy`,
-which only `production` can read. See
+Jobs read them from Terraform outputs with `tools/infra-ci/cloudflare-token.sh`,
+so the `preview` environment holds no Cloudflare token. The helper also checks
+the token with Cloudflare: a PR check that fails with "preview_token from
+preview is invalid" (or warns that it expires soon) means it is time to run
+**Rotate preview token** from the Actions tab. Deploys never touch the preview
+token. Token values sit in plain text in state; production-only tokens go in
+`deploy`, which only `production` can read. See
 [Cloudflare CI tokens](docs/cloudflare-ci-deploy-token.md).
 
 Old preview databases and their state are left untouched. Retiring those live
@@ -267,10 +270,10 @@ database. There is no stored password: each CI job requests a GitHub OIDC
 token, and the Worker verifies it against GitHub's keys and this repository's
 id. The job's GitHub environment decides what it may touch:
 
-| Environment | `prod` state | `deploy` state |
-|---|---|---|
-| `production` (master only) | read, write, lock | read, write, lock |
-| `preview` (pull requests) | read only, for PR plans | none |
+| Environment | `prod` state | `deploy` state | `preview` state |
+|---|---|---|---|
+| `production` (master only) | read, write, lock | read, write, lock | read, write, lock |
+| `preview` (pull requests) | read only, for PR plans | none | read only, for the preview token |
 
 Every Terraform command that touches state goes through
 `tools/infra-ci/terraform.sh`, which maps each state name to its root directory
