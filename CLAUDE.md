@@ -1,165 +1,59 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## Product
 
-## Agent behavior
+HackerFeed is my personal tech-news reader, built on Hacker News. I made it because Hacker News didn't look the way I wanted, so this is my own take on it, shaped to fit how I like to read. It should keep me informed about what's happening in tech each day, and show me statistics on how much I'm using it.
 
-Before writing, reviewing, or refactoring code, load and follow the `karpathy-guidelines` skill. If the skill is not available in the current agent runtime, follow its core principles: make surgical changes, prefer the simplest correct solution, surface assumptions, avoid speculative abstractions, and verify the result with the narrowest relevant check.
+I added papers later to keep up with the research side of tech too. I find research papers hard to understand, so the papers features should make them easier for me to digest, or let me consult AI to understand them.
+
+### The one goal
+
+Reading articles and papers is the most important thing the app does. Around that, I need to be able to:
+
+- find articles and save them for later
+- work with AI to sort through them
+- search for papers, open them on their own sites, and use AI to explain a paper when I don't understand it well enough
+- see stats on my own reading
+
+Every feature should serve this goal.
+
+### Priorities
+
+- **Security and privacy.** This is one of the most important things. A person's data is their own, and only they should be able to see or work with it. No one should ever get access to another user's data. Every feature you build must keep the user's data protected.
+- **Recoverable.** Every feature needs a way back if it goes wrong, and every merge should be revertable if I want to undo it. That is why the project uses database migrations and Terraform.
+- **Fast.** The app should feel snappy. If a feature adds 1% convenience but costs 30% more time or compute, leave it out.
+- **Easy to use.** Finding, saving and reading an article/paper should be quick and obvious.
+- **Works as well on mobile as on desktop.** Neither is secondary; check UI changes at both sizes.
+- **Customisable.** Other people should be able to make the app their own. Themes are the first way to do that, and more configuration options are planned, so build UI that the theme can restyle rather than hard-coding its look.
+
+## Architecture
+
+HackerFeed is a Bun + Nx monorepo deployed as two Cloudflare Workers.
+
+- **`apps/web`** is the frontend: TanStack Start (SSR React) with TanStack Router, Query and Store. It never holds backend code or API routes. It only imports the backend's API types, through `import type` from `@hackerfeed/entity-state`.
+- **`apps/api`** is the API. It hosts `packages/backend` and is the only Worker that talks to the database (Cloudflare D1, through Drizzle).
+- **`packages/`** holds shared code: `ui` (atoms and molecules), `entities` (every type or schema used by both frontend and backend), `runtime` (logger and similar), `backend`, `entity-state` (the backend's API types for the web side) and `api-client`. Only `apps/web`, `apps/api`, `apps/web-e2e` and `api-client` (Nx tag `scope:web`) may import `entity-state`, and `api-client` may not import `backend` at all. Packages import each other only through their `package.json` `exports`, never by relative path.
+
+### How the pieces fit
+
+- **Hacker News data** comes straight from the public HN API in the browser (`apps/web/src/lib/hacker-news/`). The app fetches the story ID list first, then fetches each story as needed.
+- **Auth** uses WorkOS. The browser sends a bearer token, and the API checks it before any route runs. A user's ID always comes from the verified session, never from request input.
+- **Per-user data** lives in D1: preferences, palettes and reading activity. Every query is scoped to the signed-in user, and each table is read and written only through its owning module in `packages/backend`.
+- **Feature flags** are code, in `packages/backend/src/feature-flags/config.ts`. Use the `feature-flags` skill to change them.
+- **Logging** goes through `logger` from `@hackerfeed/runtime/logger` (to Sentry and the console), never `console.*`.
+- **UI** follows atomic design. Tailwind classes go only in `packages/ui` atoms and molecules. Organisms and pages in `apps/web/src/components/` compose them without styling of their own.
+
+### Deploys and recovery
+
+- Database changes go in migrations under `packages/backend/migrations`, run as their own CI step.
+- Terraform in `infra/` manages Cloudflare resources only and runs only in CI. It doesn't deploy code or run migrations; Wrangler deploys the Workers.
 
 ## Commands
 
 ```bash
-# Development
-bun run dev          # Web app on port 3000 and API on port 8787
-
-# Build & deploy
-bun run build        # Production builds of both Workers
-gh workflow run deploy.yaml  # Deploy with Terraform outputs in CI
-
-# Testing
-bun run test         # Every project's tests, through Nx
-bun run e2e          # End-to-end tests (apps/web-e2e): flows and accessibility
-bunx nx test backend # One project's tests
-bunx nx test backend -- --tags-filter='!integration'   # Backend unit tests only (--tags-filter=integration for the rest)
-cd apps/web && bunx vitest run src/lib/hacker-news/display.test.ts   # A single test file
-
-# Linting / formatting
-bun run lint         # Biome lint and unused UI check
-bun run lint:ui      # Unused UI check
-bun run format       # Biome format
-bun run check        # Biome lint and format plus unused UI check
-bun run typecheck    # tsc --noEmit for every project (CI fails on any type error)
-
-# Workspace
-bunx nx graph        # Project graph
+bun run dev        # Web app on :3000 and API on :8787
+bun run test       # All tests
+bun run e2e        # End-to-end tests
+bun run check      # Lint and format check
+bun run typecheck  # Type check every project
 ```
-
-## Architecture
-
-**Framework stack:** TanStack Start (SSR React framework) + TanStack Router (file-based routing) + TanStack Query (data fetching) + TanStack Store (client state). Deployed to Cloudflare Workers via `@cloudflare/vite-plugin`; the API is a separate Worker deployed with Wrangler.
-
-**Workspace:** an Nx workspace of Bun workspace packages, deployed as two Workers at separate URLs. `apps/web` is the frontend (TanStack Start, `hackerfeed-web`); `apps/api` is the API (`hackerfeed-api`), the only host of `packages/backend` and the only Worker with the database. Shared code lives in `packages/` (`ui`, `entities`, `runtime`, `backend`, `entity-state`, `api-client`); every type or schema the frontend and the backend both use goes in `packages/entities`. Infrastructure is in `apps/state-backend`, `infra/` and `tools/infra-ci`. README > Workspace lists every project. Packages import each other only through their `package.json` `exports` (`@hackerfeed/ui/atoms/Button`); never reach into another project with a relative path. Add a package by copying a small one (`packages/entities`) and renaming it.
-
-**Boundaries:** installs are isolated (`bunfig.toml`), so a package can import only the npm and workspace packages its own `package.json` declares; those `dependencies` are the allowed edges, and adding one is a design change to raise with the user. No tool stops a relative import into another project or a root devDependency used from a package, so don't write either. The web app never contains backend code: it uses only `import type` from `@hackerfeed/entity-state` (a Biome rule keeps `api-client` off `@hackerfeed/backend`; only `apps/web`, `apps/api`, `apps/web-e2e` and `api-client`, Nx tag `scope:web`, may import `entity-state`) and the Drizzle schema's types for demo fixtures, and TanStack Start's import protection in `apps/web/vite.config.ts` fails its client and server builds on any other backend import. Never add API routes to `apps/web`; they go in the backend, served by `apps/api`. The API answers only the web app's origin (`ALLOWED_ORIGIN`, 403 otherwise) and `createBackend` rejects any request without a valid WorkOS bearer token (401) before routing. The web app's `Content-Security-Policy` (`src/server/content-security-policy.ts`) limits `connect-src` to itself, the API, WorkOS, Hacker News and Sentry: a new origin the browser calls must be added there. Packages don't read env; `apps/api/src/index.ts` passes config into `createBackend`, and the web app finds the API at `VITE_API_URL`. When a check blocks you, change the code, not the rule.
-
-**Path alias:** inside `apps/web`, `#/*` maps to `apps/web/src/*` (its `package.json` `imports` and `tsconfig.json`). Paths below are relative to `apps/web` unless they start with `apps/`, `packages/`, `infra/` or `tools/`.
-
-### Infrastructure
-
-The Terraform roots `infra/cloudflare-prod` (`prod` state) and `infra/deploy-access` (production-only `deploy` state), with the shared `infra/modules/ci-token` module, create Cloudflare resources (today, the production D1 database `hackerfeed` and CI's Cloudflare tokens) and nothing else. GitHub stores only the Terraform token; Terraform mints the deploy token in `deploy` and the preview token in `prod`, which PR jobs can read, and jobs read them with `tools/infra-ci/cloudflare-token.sh`. Terraform must not deploy code or run migrations: the Workers are deployed by wrangler from `apps/api/wrangler.jsonc` (API first) and `apps/web/wrangler.jsonc`, and migrations (`packages/backend/migrations`) run in their own CI step. CI reconciles production infrastructure and the state server on every production run, always through `tools/infra-ci/terraform.sh`, which maps the state names `prod` and `deploy` to their roots: state lives in the `apps/state-backend` Worker, which signs CI in with GitHub OIDC, so there is no state password and Terraform runs only in CI. Never rename a state or move resource addresses when moving files. CI reads its database identity from Terraform outputs and writes it into `apps/api/wrangler.production.json` before migrating and deploying the API. PR demos deploy static assets with browser-memory fixtures through `apps/web/wrangler.preview.jsonc`. See README > Infrastructure.
-
-### Data flow
-
-The feed page (`src/routes/index.tsx`) uses a two-layer query model:
-1. **Layer 1** — `feedStoryIdsQueryOptions(feed)` fetches the full list of story IDs for the active feed (top/new/best). Stale after 60s.
-2. **Layer 2** — `storyItemQueryOptions(storyId)` fetches each story individually and progressively. Stale after 5 min.
-
-The route loader (`loader` in `index.tsx`) SSR-prefetches the ID list and warms the cache for the first `PAGE_SIZE` items. On the client, switching tabs or loading more items fetches incrementally without resetting previously loaded tabs.
-
-All HN API calls go through `src/lib/hacker-news/queries.ts` (direct calls to `hacker-news.firebaseio.com`). Normalization (`normalizeStoryItem`, `normalizeStoryIds`) strips dead/deleted items and coerces types before anything touches React. The record types live in `@hackerfeed/entities/hacker-news`; the display helpers in `src/lib/hacker-news/display.ts`.
-
-### Favorites
-
-`src/lib/favorites-store.ts` is a `@tanstack/store` instance that persists to `localStorage` under `hackerfeed:favorites`. It stores the full `HackerNewsStoryRecord` (not just IDs) so favorites render without re-fetching. Actions: `toggleFavorite`, `isFavorited`, `getFavorites`, `clearAllFavorites`. Subscribe with `useStore(favoritesStore, selector)` in components.
-
-### Auth
-
-WorkOS AuthKit owns the session entirely in the browser (`src/integrations/workos/provider.tsx`, `devMode` keeps the refresh token in localStorage). There are no HackerFeed session cookies. `SessionGate` in `__root.tsx` sends signed-out users to WorkOS; only `/auth/callback` and `/auth/signed-out` are public. API calls (the `packages/api-client` transports, configured in `src/lib/trpc/client.ts` and `src/lib/feature-flags/client.ts`) send `Authorization: Bearer <access token>` via `getApiHeaders()` in `src/lib/auth/authkit.ts`; the API verifies it against WorkOS's JWKS with the authenticator from `createRequestAuthenticator()` in `packages/backend/src/auth/workos-access-token.ts`, once per request in `createBackend`, before any route runs.
-
-### Appearance
-
-A reader picks a mode (light, dark, auto) and a palette; both are saved to their account (`user_preferences`, `palettes`) and returned by `account.me`, so they follow the reader to every device. A palette is three inputs (`baseRole`: whether the reader picked the background or the text, `baseColor`, `accentColor`), always `#RRGGBB`. Nothing else is stored: `derivePalette` in `src/lib/appearance/derive-palette.ts` works out all 17 colour roles for light and dark and keeps every text pair at 4.5:1. Never store derived colours or accept any other CSS text. Built-in palettes are constants in `@hackerfeed/entities/appearance`; the default one, "Reading room", is the hand-tuned stylesheet itself (`DEFAULT_TOKENS` mirrors it, and a test compares them), so a reader with no row sees it and gets any later change to it.
-
-`showAppearance` in `src/lib/appearance/appearance.ts` is the only place that changes the look: it sets `data-theme` and each role as `light-dark(<light>, <dark>)` on `<html>`, updates `theme-color`, and caches the result in localStorage for `src/lib/theme-init.js` to repaint before first paint. Read and change it with `useAppearance()` (`mode`, `palette`, `setMode`, `setPalette`): a change shows at once, saves, and goes back if the save fails. `SessionGate` waits for `account.me` like it waits for flags, and the account always wins over the device's cache. The UI is `/settings` (`components/organisms/settings/`).
-
-### Activity
-
-`activity_events` holds every reader's history, so only `packages/backend/src/activity/events.ts` touches the table. Read it through `readerActivityEvents(database, appUserId)`, a CTE already filtered to that reader (`database.with(events).select(...).from(events)`), and write with `insertActivityEvent` or `insertActivityEventsFrom` + `activityEventSelection`, which stamp the reader as owner. `appUserId` always comes from the verified session, never from input. `/analytics` (`analytics.readingDays`) shows a reader their own streak, trend and calendar from it.
-
-### Feature flags
-
-Flags are code, not a service. `packages/backend/src/feature-flags/config.ts` defines them, the API's `GET /api/feature-flags` returns them for the signed-in session (only signed-in sessions ask), and `SessionGate` in `__root.tsx` holds the app until the auth state and that session's flags are both known. Read flags with `useFeatureFlag(name)` on the client, and enforce them with `isFeatureEnabled(name, user)` on the server. Follow `.claude/skills/feature-flags/SKILL.md` to add, target or remove a flag.
-
-### Logging and debugging
-
-Use `logger` from `@hackerfeed/runtime/logger` everywhere (browser and Worker), never `console.*` (CLI scripts in `tools/` print to the console). Each call goes to Sentry Logs (structured, linked to the trace) and the console. Pass the caught value as `error`: `logger.error(msg, { error })` also creates a Sentry issue. Use `warn` where you log and rethrow, so only the code that handles the error reports it. Error screens show the trace ID (`useErrorReport` + `TraceIdNote`). A handled failure the user should hear about goes through `reportError(msg, error, { action: "load" | "save" | "remove", message? })` from `#/lib/errors/report-error` instead of `logger.error`: it logs once, picks a human message, and shows a toast whose Details hold the error ID. TanStack Query mutations already go through it; queries only when a refetch fails behind data on screen. Pass `meta: { notifyOnError: false }` (or `notify: false`) when the component shows the error itself. To debug a report, search `trace:<id>` in Sentry for the issue, logs and spans. Browser and Worker traces are separate: the Worker never continues incoming trace headers, links the browser's `x-client-trace` instead, and returns its own ID in `x-sentry-trace-id` (README > Observability).
-
-### Routing
-
-Routes live in `src/routes/`. `routeTree.gen.ts` is auto-generated by the TanStack Router Vite plugin — do not edit it manually. Add new routes by creating files in `src/routes/`; the plugin regenerates the tree on the next dev-server restart or build.
-
-The root layout (`src/routes/__root.tsx`) wraps every page in `TanStackQueryProvider` and `AppShell`, which renders `SiteHeader` above the page content. It injects a blocking inline script to resolve the dark/light/auto theme before first paint to avoid flash-of-wrong-theme.
-
-### UI components (atomic design)
-
-Every component lives in one of four layers: atoms and molecules in `packages/ui/src/`, organisms and pages in `apps/web/src/components/`. Read a file top-down and it should say *what* is on screen; *how it looks* lives only in the bottom two layers.
-
-| Layer | What goes here | Styling (`className`/`style`) | Data / hooks |
-|---|---|---|---|
-| `packages/ui/src/atoms/` | One styled element: `Button`, `ButtonLink`, `TextLink`, `Text`, `Heading`, `Kicker`, `Stack`, `Row`, `Card`, `Panel`, `PageContainer`, `Skeleton`, `Icon`, `Avatar`, `TextInput`… | Yes, the only place Tailwind classes are written | No |
-| `packages/ui/src/molecules/` | A few atoms composed into a reusable piece: `TabList`, `EmptyState`, `StatusPanel`, `BackLink`, `StoryMeta`, `FeedRow`, `LoadingScreen`… | Yes, layout glue only | No, props in, callbacks out |
-| `components/organisms/<feature>/` | A feature section with behavior: `StoryCard`, `SiteHeader`, `Comment`, `PapersFeed`… | **No** | Yes |
-| `components/pages/` | The full body of one screen, rendered by a route: `FeedPage`, `StoryPage`, `PapersPage`… | **No** | Yes |
-
-Routes in `src/routes/` stay thin: route config, loader, search params, then render a page. They follow the same rule as pages.
-
-Interactive atoms are built on [Base UI](https://base-ui.com) (`@base-ui/react`), which supplies the keyboard, focus and ARIA behavior; the atom adds the Tailwind look. Its docs ship in `node_modules/@base-ui/react/docs/`.
-
-| Need | Atom (Base UI part) |
-|---|---|
-| Button | `Button` (`Button`). Links that look like buttons stay `<a>`: `ButtonLink`, `ExternalButtonLink` |
-| On/off button | `ToggleButton` (`Toggle`) |
-| Pick one of a few (chips, segments) | `ToggleGroup` + `ToggleGroupItem` (`Toolbar` around `ToggleGroup`, items are `Toolbar.Button` rendering `Toggle`) |
-| Tabs | `Tabs`, `TabList`, `Tab`, `TabPanel` (`Tabs`) |
-| Drop-down menu | `Menu`, `MenuTrigger`, `MenuPopup`, `MenuGroup`, `MenuItem`, `MenuLinkItem` (`Menu`) |
-| Show/hide | `Collapsible`, `CollapsibleTrigger`, `CollapsiblePanel` (`Collapsible`) |
-| "Are you sure?" | `AlertDialog*` atoms, composed by the `ConfirmButton` molecule (`AlertDialog`) |
-| Picture or initials | `Avatar` (`Avatar`) |
-| Text input | `TextInput` (`Input`) |
-| Colour | `ColorField` molecule: the browser's picker (`ColorInput`) plus a typed `#RRGGBB` |
-| Label and error for a control | `Field`, `FieldLabel`, `FieldError` (`Field`): ids, `aria-describedby` and `aria-invalid` are wired for you |
-| Something happened (removed, disconnected), optionally with Undo | `useShowToast` (`Toast`); pass `action` for Undo. For silent status (counts, "replying…") use `LiveStatus` |
-
-These atoms manage their own ARIA state: pass `value`, `pressed` or `open`, never `aria-selected`/`aria-pressed`/`aria-expanded` by hand. A toggle's accessible name starts with the word it shows (WCAG 2.5.3 Label in Name): `aria-label={`${saved ? "Saved" : "Save"} ${title}`}` + `pressed`. Never use `window.confirm`; use `ConfirmButton`. For a new interactive pattern, check whether Base UI has the component and wrap it in a new atom.
-
-Accessibility rules (WCAG 2.2 AA; `apps/web-e2e` checks most of them). Code follows these without comments repeating them:
-- **Names match what's on screen.** An accessible name contains the visible text, first (2.5.3). axe ignores text in brackets, so `"DR, user menu"`, not `"User menu (DR)"`.
-- **Focus never drops to the page.** When an action removes the focused control (unsave, Stop, Disconnect, Load more), move focus to its replacement: the next row, the composer, the new button, or the empty state's link (2.4.3).
-- **Busy or unavailable controls stay focusable.** Use `Button busy`, `focusableWhenDisabled`, or `ToggleButton disabled` (all `aria-disabled`), never the native `disabled` on a control that might have focus.
-- **Say what happened, once.** Events (removed, cleared) get a toast; silent status (result counts, "saving…") a `LiveStatus` that stays mounted. Announce outcomes, not every change.
-- **Fields don't act while you type.** Date and filter fields commit on blur or Enter (3.2.2).
-- **Every route has its own title** through `titleHead` (2.4.2).
-- **Text wraps, never clips.** Long user text (emails, domains, usernames) wraps (`breakAnywhere`), rows wrap instead of squeezing at 200% text or 320px, and nothing is cut off with an ellipsis (1.4.4, 1.4.10).
-- **Cards open from anywhere.** A row card's title uses the `card` link variant, whose hit area covers the card; controls inside sit above it with `relative z-10`. Card sections are spaced like the card's padding (16px, 20px from `sm`), so every visible gap is equal.
-- **Colour has one meaning each.** Brass is only for saved things; the sparkle icon only for in-app AI.
-
-Before building UI, list `packages/ui/src/atoms/` and `packages/ui/src/molecules/` and reuse what is there. Import them as `@hackerfeed/ui/atoms/<Name>`; a new one also needs an entry in `packages/ui/package.json` `exports`. Add a variant to an existing atom before adding a new atom.
-
-Rules, enforced by Biome (`bun run check`) and guarded by `tools/workspace/src/lint-rules.test.ts`:
-- `lint/no-styling-outside-atoms.grit` rejects `className`, `class`, `style` and spreads that carry them in every `.tsx` file outside `packages/ui`, including new folders and packages. If no component fits, add an atom/molecule (or a variant) instead of styling inline.
-- `noRestrictedElements` rejects raw `<button>`, `<a>`, `<input>`, `<textarea>`, `<select>`, `<h1>`–`<h6>`, `<p>`, `<img>` and `<style>` everywhere outside `packages/ui`. Each diagnostic names the atom to use.
-- `noRestrictedImports` stops atoms and molecules from importing app code (`#/*`) or any workspace package but `@hackerfeed/ui`, so they stay presentational, and stops atoms from importing molecules. It also stops everything outside `packages/ui/src/atoms/` from importing `@base-ui/*`.
-- Exempt (in `biome.json` overrides, never inline): tests, and the stylesheet-free error UI in `apps/web/src/client-entry.tsx`, `router.tsx` and `src/server/errors/`.
-
-When a rule blocks you, change the component, not the rule. Do not edit `biome.json` or `lint/`, add `biome-ignore` for these rules (the test fails on it), restyle elements from `packages/ui/src/styles.css`, or move files to dodge a rule. If the request can't be met within the layers, stop and say so. Colors come from the CSS variables in `packages/ui/src/styles.css` (`--accent`, `--ink`…), each defined once as `light-dark(<light>, <dark>)` and registered as a Tailwind colour (`text-ink`, `bg-accent`); add a role there rather than using hex values. Tailwind's own palette (`bg-red-500`, `text-white`) is switched off, so only the roles compile. Text sizes that repeat (`text-meta`, `text-read`, `text-row`…) are `@theme` tokens in the same file. Brass (`--bookmark*`) means "saved" and nothing else. A colour role must not share its name with a text size (`text-page` is a size, so the background is `paper`); a test in `packages/ui` checks it. A new role also goes in `PALETTE_ROLES`, `DEFAULT_TOKENS` and `derivePalette`, so readers' own palettes define it too.
-
-Prefer props that describe intent (`tone="soft"`, `size="page"`, `variant="accent"`) over props that leak CSS. Tests that mock `@tanstack/react-router` must provide `createLink` (see `src/test/createLinkMock.tsx`), because the link atoms are built with it.
-
-### Testing
-
-Shared packages run Vitest with its defaults (`node`, no config file); `ui` and `api-client` have a `vitest.config.ts` for `happy-dom`, and `backend` one that defines the `integration` tag. `apps/web/vitest.config.ts` has two projects:
-- **`node`** — pure utility and store tests (`src/**/*.test.{ts,tsx}`, excluding `src/components/**` and `*.browser.test.*`)
-- **`browser`** — component and browser-API tests using `happy-dom` (`src/components/**/*.test.*` and `src/**/*.browser.test.*`)
-
-Backend tests live in `packages/backend/src/tests/`, one file per scenario (`story-favorites`, `nightly-paper-ingestion`, `api-access`…), never one per layer or per test type. A scenario's unit and integration tests sit side by side; both import `test` from `./support/test`:
-- **Unit**: `test(name, fn)` asks for no fixtures and gets nothing: pure logic (date rules, parsing, validation, flag rules).
-- **Integration**: `test(name, INTEGRATION, async ({ api, database, workos, huggingFace }) => …)`. `database` is the real schema on a local D1 (wrangler's test harness applies `migrations/`), emptied before each test; `api` is the backend's handler (`createBackend`, given that database): `api.as("user_x")` is a tRPC client signed in through the real auth path, `api.request(path, { token })` a raw request. apps/api's origin check (tested in `apps/api/src/cors.test.ts`) and its 500 wrapper sit outside it. Asking for any fixture without the `INTEGRATION` tag fails the test.
-- Only services we don't run are faked (`support/external-services.ts`: WorkOS's JWKS, Hugging Face Daily Papers). While an integration test that asks for a fixture runs, `fetch` reaches only them and local hosts (the D1); anything else throws. A test changes a fake's default for its scenario (`huggingFace.failNext(503, { times: 2 })`, `huggingFace.publish(date, entries)`, `workos.accessToken(id, { expiresAt })`) and never stubs our own repositories, services or D1.
-- Shared builders and seeds go in `support/` (`data.ts`, `seed.ts`: `ingestEdition` puts papers in D1 by running the real nightly job against the fake), not in test files.
-- A test that needs data already there (who can see whose saves, a reader among others) asks for `world` instead of building it: readers `world.alice` and `world.bob` (each with `client`, `appUserId` and what they saved and read) with saves, reads, a palette and preferences over shared stories and the day's papers, all written through the API (`support/world.ts`). For a different starting point call `seedWorld({ api, database, huggingFace }, { readers: { bob: { savedStories: [] }, carol: {} } })`; a new reader starts with nothing.
-
-In `apps/web`, use the `.browser.test.ts` suffix for anything that touches `window`, `localStorage`, or DOM APIs. Inject collaborators into package code (as `createTrpcClient({ auth })` does) rather than mocking another package's internals.
-
-End-to-end tests live in `apps/web-e2e` (Playwright). They build the static demo (`VITE_DEMO_DATA=true`), serve it with `wrangler.preview.jsonc` like PR previews, and block every request that leaves that server (`src/support/fixtures.ts`). Each test runs at desktop (1440px) and phone (390px) widths. `accessibility.spec.ts` checks every page for axe (WCAG 2.2 AA, light and dark), no sideways scroll or overlapping tap targets, reflow at 320px, WCAG text spacing, 200% text, a focus ring on each tab stop, and evenly spaced card sections; add new pages to its `SCREENS` list. Flow specs are grouped by area (`feed`, `story`, `saved`, `papers`, `settings`; the last also runs axe on the feed under every palette but the default, which `accessibility.spec.ts` covers) and read their stories from the demo snapshot (`src/support/data.ts`), so they keep working after `demo-data:refresh`. CI runs them in the build job. Locally, `PLAYWRIGHT_CHROMIUM_PATH=/usr/bin/google-chrome bun run e2e` uses an installed Chrome.
-
-Base UI in tests: keyboard focus moves a tick after the key press, so wrap focus assertions in `waitFor`. A select option only takes a mouse click that started on it: `fireEvent.pointerDown(option, { pointerType: "mouse" })`, then `fireEvent.click(option)`. Popups render in a portal, so query them from `screen`.
