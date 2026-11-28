@@ -14,7 +14,7 @@ HackerFeed stays one deployed Worker, but its code is split into Bun workspace p
 
 ## Consequences
 
-- The browser depends on the backend in exactly one place: `api-client` imports types from `@hackerfeed/backend/api-types`, so tRPC can infer its client. A backend change therefore rechecks `api-client` and `web`. Removing that edge would take a generated API-types package or OpenAPI, not a folder move.
+- The browser depends on the backend in exactly one place: `api-client` imports types from `@hackerfeed/entity-state`, which re-exports them from the backend, so tRPC can infer its client. A backend change therefore rechecks `entity-state`, `api-client` and `web`. Removing that edge would take a generated API-types package or OpenAPI, not a folder move.
 - Packages don't read env. `apps/web/src/backend.ts` passes config into `createBackend`.
 - Production still reconciles the state server, then Terraform, then migrations, then the deploy on every run. Affected selection only chooses PR checks, and runs in shadow mode until its recorded selections have been compared with full runs.
 - Terraform state names (`prod`, `deploy`) and resource addresses are stable identities. Moving a root's directory changes only the stage map in `tools/infra-ci/state_proxy.py`.

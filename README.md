@@ -42,6 +42,7 @@ checks.
 | `entities` | `packages/entities` | Every type and Zod schema the frontend and the backend both use, Hacker News records included |
 | `runtime` | `packages/runtime` | Logger, trace headers and client-trace linking, Sentry data policy, HTTP client |
 | `backend` | `packages/backend` | Services, repositories, the Drizzle schema, migrations and the tRPC router |
+| `entity-state` | `packages/entity-state` | The backend's API types (`AppRouter`, feature flags), type-only |
 | `api-client` | `packages/api-client` | Browser transports for tRPC and feature flags |
 | `state-backend` | `apps/state-backend` | The Terraform state Worker |
 | `infra-prod` | `infra/cloudflare-prod` | Terraform root for the `prod` state |
@@ -347,17 +348,19 @@ backend's code is in `packages/backend`; `apps/api` is its only host.
   send any `Origin`, so the token is what protects the data.
 - `apps/web` is the frontend Worker. It has no API routes, no database and no
   backend code: TanStack Start's import protection (`apps/web/vite.config.ts`)
-  fails both its client and server builds on any backend import but
-  `@hackerfeed/backend/api-types` (and, for the demo build, the Drizzle
-  schema's types). Its responses carry a `Content-Security-Policy` whose
+  fails both its client and server builds on any backend import (except,
+  for the demo build, the Drizzle schema's types). Its responses carry a `Content-Security-Policy` whose
   `connect-src` lists only the web app, the API, WorkOS, Hacker News and
   Sentry (`apps/web/src/server/content-security-policy.ts`).
 - The browser reaches backend behavior only over HTTP, through the clients in
-  `packages/api-client`, at `VITE_API_URL`. `api-client` imports only the
-  types in `@hackerfeed/backend/api-types` (tRPC infers its client from the
-  router's type). `api-types` exports only types, so `verbatimModuleSyntax`
-  makes every import of it `import type`, and a Biome rule stops `api-client`
-  importing any other backend path.
+  `packages/api-client`, at `VITE_API_URL`. `api-client` sees the backend
+  only as types, through `packages/entity-state` (tRPC infers its client from
+  the router's type). `entity-state` exports only types, so
+  `verbatimModuleSyntax` makes every import of it `import type`, and a Biome
+  rule stops `api-client` importing `backend` directly.
+- Only `apps/web`, `apps/api`, `apps/web-e2e` and `api-client` (tagged
+  `scope:web` in Nx) may import `entity-state`: a Biome `noRestrictedImports`
+  rule rejects it everywhere else.
 - Every type or schema used on both sides lives in `packages/entities`, never
   next to the Drizzle tables. The backend maps rows to these DTOs.
 - `packages/ui` is presentational: no app code, workspace packages, API clients
