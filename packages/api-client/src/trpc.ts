@@ -1,4 +1,4 @@
-import type { AppRouter } from "@hackerfeed/backend/api-types";
+import type { AppRouter } from "@hackerfeed/entity-state";
 import { createTRPCClient, httpBatchLink, type TRPCLink } from "@trpc/client";
 import superjson from "superjson";
 import type { ApiAuth } from "./auth";

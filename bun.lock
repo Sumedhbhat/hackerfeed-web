@@ -103,6 +103,7 @@
     "packages/api-client": {
       "name": "@hackerfeed/api-client",
       "dependencies": {
+        "@hackerfeed/entity-state": "workspace:*",
         "@hackerfeed/runtime": "workspace:*",
         "@sentry/core": "^11.7.0",
         "@trpc/client": "^11.19.0",
@@ -110,7 +111,6 @@
         "zod": "^4.6.5",
       },
       "devDependencies": {
-        "@hackerfeed/backend": "workspace:*",
         "happy-dom": "^21.0.4",
         "vitest": "^5.0.4",
       },
@@ -143,6 +143,12 @@
       },
       "devDependencies": {
         "vitest": "^5.0.4",
+      },
+    },
+    "packages/entity-state": {
+      "name": "@hackerfeed/entity-state",
+      "devDependencies": {
+        "@hackerfeed/backend": "workspace:*",
       },
     },
     "packages/runtime": {
@@ -352,6 +358,8 @@
     "@hackerfeed/backend": ["@hackerfeed/backend@workspace:packages/backend"],
 
     "@hackerfeed/entities": ["@hackerfeed/entities@workspace:packages/entities"],
+
+    "@hackerfeed/entity-state": ["@hackerfeed/entity-state@workspace:packages/entity-state"],
 
     "@hackerfeed/runtime": ["@hackerfeed/runtime@workspace:packages/runtime"],
 

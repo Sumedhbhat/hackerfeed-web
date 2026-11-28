@@ -3,6 +3,7 @@
 	"name": "web",
 	"projectType": "application",
 	"sourceRoot": "apps/web/src",
+	"tags": ["scope:web"],
 	"targets": {
 		"typecheck": {},
 		"test": {},

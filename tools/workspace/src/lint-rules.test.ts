@@ -47,7 +47,15 @@ const fixtures: Record<string, string> = {
 	[`${UI}/molecules/BaseUi.tsx`]: `import { Toggle } from "@base-ui/react/toggle";\nexport const A = () => <Toggle />;`,
 	[`${WEB}/components/organisms/x/BaseUi.tsx`]: `import { Toggle } from "@base-ui/react/toggle";\nexport const A = () => <Toggle />;`,
 	[`${API}/BackendCode.ts`]: `import { createDb } from "@hackerfeed/backend/database/client";\nexport const a = createDb;`,
-	[`${API}/BackendTypesOk.ts`]: `import type { AppRouter } from "@hackerfeed/backend/api-types";\nexport type A = AppRouter;`,
+	[`${API}/BackendTypes.ts`]: `import type { AppRouter } from "@hackerfeed/backend/trpc/router";\nexport type A = AppRouter;`,
+	[`${API}/EntityStateOk.ts`]: `import type { AppRouter } from "@hackerfeed/entity-state";\nexport type A = AppRouter;`,
+	[`${WEB}/lib/EntityStateOk.ts`]: `import type { AppRouter } from "@hackerfeed/entity-state";\nexport type A = AppRouter;`,
+	"apps/api/src/EntityStateOk.ts": `import type { AppRouter } from "@hackerfeed/entity-state";\nexport type A = AppRouter;`,
+	"apps/web-e2e/src/EntityStateOk.ts": `import type { AppRouter } from "@hackerfeed/entity-state";\nexport type A = AppRouter;`,
+	"packages/backend/src/EntityState.ts": `import type { AppRouter } from "@hackerfeed/entity-state";\nexport type A = AppRouter;`,
+	"packages/entities/src/EntityState.ts": `import type { AppRouter } from "@hackerfeed/entity-state";\nexport type A = AppRouter;`,
+	"apps/state-backend/src/EntityState.ts": `import type { AppRouter } from "@hackerfeed/entity-state";\nexport type A = AppRouter;`,
+	[`${UI}/molecules/EntityState.tsx`]: `import type { AppRouter } from "@hackerfeed/entity-state";\nexport type A = AppRouter;`,
 };
 
 const expected: Record<string, string[]> = {
@@ -74,7 +82,15 @@ const expected: Record<string, string[]> = {
 	[`${UI}/molecules/BaseUi.tsx`]: [LAYER_IMPORT],
 	[`${WEB}/components/organisms/x/BaseUi.tsx`]: [LAYER_IMPORT],
 	[`${API}/BackendCode.ts`]: [LAYER_IMPORT],
-	[`${API}/BackendTypesOk.ts`]: [],
+	[`${API}/BackendTypes.ts`]: [LAYER_IMPORT],
+	[`${API}/EntityStateOk.ts`]: [],
+	[`${WEB}/lib/EntityStateOk.ts`]: [],
+	"apps/api/src/EntityStateOk.ts": [],
+	"apps/web-e2e/src/EntityStateOk.ts": [],
+	"packages/backend/src/EntityState.ts": [LAYER_IMPORT],
+	"packages/entities/src/EntityState.ts": [LAYER_IMPORT],
+	"apps/state-backend/src/EntityState.ts": [LAYER_IMPORT],
+	[`${UI}/molecules/EntityState.tsx`]: [LAYER_IMPORT],
 };
 
 type Diagnostic = {

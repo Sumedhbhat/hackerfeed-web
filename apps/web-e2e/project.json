@@ -3,6 +3,7 @@
 	"name": "web-e2e",
 	"projectType": "application",
 	"sourceRoot": "apps/web-e2e/src",
+	"tags": ["scope:web"],
 	"implicitDependencies": ["web"],
 	"targets": {
 		"typecheck": {},

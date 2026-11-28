@@ -1,8 +1,8 @@
 import { createTRPCClient, httpLink } from "@trpc/client";
 import superjson from "superjson";
-import type { AppRouter } from "../../api-types";
 import type { DatabaseContext } from "../../database/client";
 import { createBackend } from "../../index";
+import type { AppRouter } from "../../trpc/router";
 import type { createFakeWorkos } from "./external-services";
 
 const API_ORIGIN = "https://api.hackerfeed.test";

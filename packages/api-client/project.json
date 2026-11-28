@@ -3,6 +3,7 @@
 	"name": "api-client",
 	"projectType": "library",
 	"sourceRoot": "packages/api-client/src",
+	"tags": ["scope:web"],
 	"targets": {
 		"typecheck": {},
 		"test": {}
